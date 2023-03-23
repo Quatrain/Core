@@ -35,7 +35,7 @@ export class DataObject {
     * @param properties array of properties instances
     */
    protected constructor(
-      objClass: AbstractObject,
+      objClass: typeof AbstractObject.prototype,
       properties: any[] | undefined
    ) {
       this._class = objClass
@@ -219,7 +219,7 @@ export class DataObject {
     * @returns DataObject
     */
    static async factory(
-      className: any,
+      className: typeof AbstractObject.prototype,
       param: any[] | undefined = undefined
    ): Promise<DataObject> {
       if (className === undefined) {
@@ -229,7 +229,6 @@ export class DataObject {
       try {
          return new this(className, param)
       } catch (err) {
-         console.log(err)
          throw new Error(
             `Unable to build data object: ${(err as Error).message}`
          )

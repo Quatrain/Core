@@ -40,16 +40,16 @@ export interface BackendParameters {
 export interface BackendInterface<T extends BaseObject> {
    create(
       dataObject: DataObject,
-      desiredUid: string | undefined
+      desiredUid?: string | undefined
    ): Promise<DataObject>
 
-   read(param: string | DataObject): Promise<DataObject>
+   read(param: DataObject): Promise<DataObject>
 
    update(dataObject: DataObject): Promise<DataObject>
 
    delete(dataObject: DataObject): Promise<DataObject>
 
-   query(query: Query<T>): Promise<DataObject[] | T[]>
+   query(query: Query<T>): Promise<DataObject[]>
 
    find(
       dataObject: DataObject,

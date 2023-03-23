@@ -3,14 +3,11 @@ import { DataObjectProperties } from '../properties'
 import * as statuses from '../statuses'
 import { User } from './User'
 import { ObjectUri } from './ObjectUri'
+import { Status } from '../common/statuses'
 
 export interface BaseObjectType {
    name: string
-   status:
-      | typeof statuses.CREATED
-      | typeof statuses.PENDING
-      | typeof statuses.ACTIVE
-      | typeof statuses.DELETED
+   status: Status
    createdBy?: User | ObjectUri
    createdAt?: number
    updatedBy?: User | ObjectUri

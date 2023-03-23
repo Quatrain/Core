@@ -36,40 +36,47 @@ export class MockAdapter<T extends BaseObject>
       return MockAdapter._fixtures[key]
    }
 
-   create(
+   async create(
       dataObject: DataObject,
       desiredUid: string | undefined = undefined
    ): Promise<DataObject> {
       const uri =
          desiredUid ||
          `${dataObject.class.constructor.name.toLowerCase()}/${Date.now()}`
+
       MockAdapter.inject({
          ...dataObject.toJSON(),
          uid: uri,
       })
+
       dataObject.uri = uri
-      return new Promise(() => dataObject)
+
+      return dataObject
    }
 
    async read(dataObject: DataObject): Promise<DataObject> {
       const path = dataObject.path
-
       const data = MockAdapter._fixtures[path]
 
       if (data === undefined) {
          throw new Error(`[Mock] No data for ${path}`)
       }
 
-      this.log(`[DAO] Populating ${dataObject.path}`)
+      console.log(`[DAO] Populating ${path}`)
 
       return await dataObject.populate(data)
    }
 
-   update(dataObject: DataObject): Promise<DataObject> {
-      return new Promise(() => dataObject)
+   async update(dataObject: DataObject): Promise<DataObject> {
+      MockAdapter.inject({
+         ...dataObject.toJSON(),
+         uid: dataObject.uri.path,
+      })
+
+      return dataObject
    }
 
-   delete(dataObject: DataObject): Promise<DataObject> {
+   async delete(dataObject: DataObject): Promise<DataObject> {
       if (this.getParam('softDelete') === true) {
          dataObject.set('status', DELETED)
          MockAdapter.inject({
@@ -77,11 +84,11 @@ export class MockAdapter<T extends BaseObject>
             uid: dataObject.uid,
          })
       } else if (dataObject.uid !== undefined) {
-         delete MockAdapter._fixtures[dataObject.uid]
+         delete MockAdapter._fixtures[dataObject.uri.path]
          dataObject.uri = undefined
       }
 
-      return new Promise(() => dataObject)
+      return dataObject
    }
 
    async query(query: Query<T>): Promise<DataObject[]> {

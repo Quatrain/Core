@@ -1,13 +1,14 @@
 {
-  "extends": "@tsconfig/recommended/tsconfig.json",
-  "compileOnSave": true,
-  "compilerOptions": {
-     "rootDir": "src",
-     "outDir": "lib",
-     "declaration": true,
-     "target": "es6",
-     "resolveJsonModule": true
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "**/__test__", "**/*.spec.ts"]
+   "extends": "@tsconfig/recommended/tsconfig.json",
+   "compileOnSave": true,
+   "compilerOptions": {
+      "rootDir": "src",
+      "outDir": "lib",
+      "declaration": true,
+      "target": "es6",
+      "moduleResolution": "node",
+      "resolveJsonModule": true
+   },
+   "include": ["src"],
+   "exclude": ["node_modules", "**/__test__", "**/*.spec.ts"]
 }

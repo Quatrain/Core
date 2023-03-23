@@ -1,5 +1,5 @@
 import { Core } from './Core'
-import * as statuses from './common/statuses'
+import statuses, { Status } from './common/statuses'
 import { Property } from './properties/Property'
 import { BaseProperty, BasePropertyType } from './properties/BaseProperty'
 import { StringProperty, StringPropertyType } from './properties/StringProperty'
@@ -18,12 +18,16 @@ import { AbstractObject } from './components/AbstractObject'
 import { ObjectUri } from './components/ObjectUri'
 import { DataObject } from './components/DataObject'
 import { BaseObject } from './components/BaseObject'
-import { BaseObjectProperties } from './components/BaseObjectProperties'
+import {
+   BaseObjectProperties,
+   BaseObjectType,
+} from './components/BaseObjectProperties'
 
 import {
    AbstractAdapter,
    MockAdapter,
    BackendError,
+   BackendInterface,
    BackendParameters,
    Query,
    Filter,
@@ -35,6 +39,7 @@ import {
 
 export {
    statuses,
+   Status,
    Core,
    Property,
    BaseProperty,
@@ -52,11 +57,13 @@ export {
    StringProperty,
    StringPropertyType,
    AbstractAdapter,
+   BackendInterface,
    MockAdapter,
    ObjectUri,
    DataObject,
    AbstractObject,
    BaseObject,
+   BaseObjectType,
    BaseObjectProperties,
    BackendParameters,
    BackendError,

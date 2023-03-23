@@ -6,6 +6,7 @@ export interface EnumPropertyType extends BasePropertyType {
 
 export class EnumProperty extends BaseProperty {
    protected _values: string[] = []
+   protected _value: unknown
 
    constructor(config: EnumPropertyType) {
       super(config)
@@ -18,5 +19,9 @@ export class EnumProperty extends BaseProperty {
       }
 
       return super.set(value)
+   }
+
+   get() {
+      return this._value
    }
 }

@@ -7,7 +7,7 @@ MockAdapter.inject(fData)
 
 describe('Data object', () => {
    test('has properties that are instances', () =>
-      DataObject.factory(fClass, properties).then((dao) => {
+      DataObject.factory(fClass.prototype, properties).then((dao) => {
          expect(dao.get('string').constructor.name).toBe('StringProperty')
          expect(dao.get('boolean').constructor.name).toBe('BooleanProperty')
          expect(dao.get('enum').constructor.name).toBe('EnumProperty')

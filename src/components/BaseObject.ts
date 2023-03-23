@@ -1,24 +1,33 @@
 import { DataObject } from './DataObject'
 import { ObjectUri } from './ObjectUri'
 import { AbstractObject } from './AbstractObject'
-import { BaseObjectProperties } from './BaseObjectProperties'
+import { BaseObjectProperties, BaseObjectType } from './BaseObjectProperties'
 import { DataObjectProperties } from '../properties'
 import { Query } from '../backends'
+import { Status } from '../common/statuses'
 
-export class BaseObject extends AbstractObject {
+export class BaseObject extends AbstractObject implements BaseObjectType {
    static PROPS_DEFINITION: DataObjectProperties = BaseObjectProperties
 
-   get status(): string {
+   get name() {
+      return this._dataObject.val('name')
+   }
+
+   set name(name: string) {
+      this._dataObject.set('name', name)
+   }
+
+   get status(): Status {
       return this._dataObject.val('status')
    }
 
-   set status(status: string) {
+   set status(status: Status) {
       this._dataObject.set('status', status)
    }
 
    static async factory<T extends BaseObject>(
       src: string | ObjectUri | object | undefined = undefined
-   ): Promise<T | BaseObject> {
+   ): Promise<T> {
       try {
          // merge base properties with additional or redefined ones
          const base = BaseObjectProperties
@@ -53,7 +62,8 @@ export class BaseObject extends AbstractObject {
             dao.uri.collection = this.COLLECTION
             await dao.populate(src)
          }
-         return new this(dao)
+
+         return new this(dao) as T
       } catch (err) {
          console.log((err as Error).message)
          throw new Error(

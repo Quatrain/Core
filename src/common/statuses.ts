@@ -1,11 +1,15 @@
-export const CREATED = 'created'
-export const PENDING = 'pending'
-export const ACTIVE = 'active'
-export const ERROR = 'error'
-export const TEST = 'test'
-export const SUSPENDED = 'suspended'
-export const DELETABLE = 'deletable'
-export const DELETED = 'deleted'
-export const DONE = 'done'
-export const MAINTENANCE = 'maintenance'
-export const UNKNOWN = 'unknown'
+export enum Status {
+   CREATED = 'created',
+   PENDING = 'pending',
+   ACTIVE = 'active',
+   ERROR = 'error',
+   TEST = 'test',
+   SUSPENDED = 'suspended',
+   DELETABLE = 'deletable',
+   DELETED = 'deleted',
+   DONE = 'done',
+   MAINTENANCE = 'maintenance',
+   UNKNOWN = 'unknown',
+}
+
+export default { ...Status }

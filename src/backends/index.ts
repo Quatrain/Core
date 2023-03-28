@@ -1,6 +1,7 @@
 import {
    AbstractAdapter,
    BackendInterface,
+   BackendRecordType,
    BackendParameters,
 } from './AbstractAdapter'
 import { MockAdapter } from './MockAdapter'
@@ -15,6 +16,7 @@ import { SortAndLimit } from './SortAndLimit'
 export {
    AbstractAdapter,
    BackendInterface,
+   BackendRecordType,
    BackendParameters,
    BackendError,
    MockAdapter,

@@ -5,6 +5,8 @@ import { BaseObject } from './BaseObject'
 import { BaseObjectProperties, BaseObjectType } from './BaseObjectProperties'
 import { User, UserProperties } from './User'
 
+import {} from '../backends/AbstractAdapter'
+
 export {
    DataObject,
    ObjectUri,

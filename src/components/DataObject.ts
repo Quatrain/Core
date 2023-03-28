@@ -79,6 +79,18 @@ export class DataObject {
       return this
    }
 
+   /**
+    * Returns a deep copy of the instance of DataObject
+    * @returns
+    */
+   clone() {
+      const serializedDataObject = JSON.stringify(this)
+
+      const deserializedDataObject = JSON.parse(serializedDataObject)
+
+      return deserializedDataObject
+   }
+
    isPopulated() {
       return this._populated
    }

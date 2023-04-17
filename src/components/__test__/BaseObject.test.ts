@@ -1,5 +1,5 @@
 import { BaseObject } from '../BaseObject'
-import { statuses, Core } from '../..'
+import { Core, statuses } from '../..'
 import { MockAdapter } from '../../backends'
 import {
    BaseObjectData,
@@ -18,38 +18,41 @@ describe('Base object', () => {
          expect(obj.get('name').constructor.name).toBe('StringProperty')
          expect(obj.get('status').constructor.name).toBe('EnumProperty')
          expect(obj.get('createdBy').constructor.name).toBe('ObjectProperty')
+         expect(obj.get('createdAt').constructor.name).toBe('DateTimeProperty')
       }))
+})
 
-   test('can be persisted in backend', () => {
-      BaseObject.factory()
-         .then((obj) => {
-            User.factory(UserUri).then((user: User) => {
-               //expect(obj.uid).not.toBeUndefined()
-               obj.set('name', 'a name')
-               obj.set('createdBy', user)
-               obj.save().then(() => {
-                  //expect(obj.uid).not.toBeUndefined()
-                  expect(obj.val('name')).toEqual('a name')
-                  expect(obj.val('status')).toEqual(statuses.CREATED)
-                  expect(obj.val('createdBy')).toBe(user)
-               })
-            })
+describe('User object', () => {
+   test('can be loaded from backend', () => {
+      User.factory(UserUri)
+         .then((user: User) => {
+            expect(user.val('name')).toEqual('John Doe')
+            expect(user.val('status')).toEqual(statuses.ACTIVE)
+            expect(user.val('createdBy')).toEqual(user.toJSON())
+            expect(user.val('createdAt')).toEqual(1)
          })
          .catch((e) => console.log(e))
    })
 
-   test('can be populated with data', () => {
-      BaseObject.factory(baseObjectUri)
-         .then((obj) => {
-            User.factory(UserUri)
+   test('can be persisted in backend', () => {
+      User.factory(UserUri)
+         .then((existingUser: User) => {
+            Core.getBackend('@mock').setParam('injectMeta', true)
+            Core.currentUser = existingUser
+            User.factory()
                .then((user: User) => {
-                  obj.set('createdBy', user)
-                  expect(obj.val('name')).toEqual('a simple object')
-                  expect(obj.val('status')).toEqual(statuses.PENDING)
-                  expect(obj.val('createdBy')).toEqual(user)
+                  expect(user.uid).toBeUndefined()
+                  user.set('name', 'Jane Doe')
+                  user.save().then(() => {
+                     expect(user.uid).not.toBeUndefined()
+                     expect(user.val('name')).toEqual('Jane Doe')
+                     expect(user.val('status')).toEqual(statuses.CREATED)
+                     expect(user.val('createdBy')).toBe(existingUser)
+                  })
                })
                .catch((e) => console.log(e))
          })
+         .catch((e) => console.log(e))
          .catch((e) => console.log(e))
    })
 })

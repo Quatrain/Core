@@ -12,6 +12,7 @@ export interface HashPropertyType extends StringPropertyType {
 }
 
 export class HashProperty extends StringProperty {
+   static TYPE = 'hash'
    static ALGORITHM_MD5 = 'md5'
    static ALGORITHM_SHA1 = 'sha1'
    static ALGORITHM_SHA256 = 'sha256'

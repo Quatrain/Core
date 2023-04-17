@@ -5,6 +5,7 @@ export interface DateTimePropertyType extends BasePropertyType {
 }
 
 export class DateTimeProperty extends BaseProperty {
+   static TYPE = 'datetime'
    protected _timezone: string
 
    constructor(config: DateTimePropertyType) {

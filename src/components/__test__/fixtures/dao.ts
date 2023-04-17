@@ -44,7 +44,7 @@ export const fData = {
    string: 'a string',
    boolean: true,
    enum: 'Miss',
-   object: new ObjectUri('c/d') //fClass.factory(),
+   object: new ObjectUri('c/d'),
 }
 
 export const baseObjectUri = 'baseobject/xyz'
@@ -58,10 +58,12 @@ export const BaseObjectData = {
 
 export const UserData = {
    uid: UserUri,
-   name: ' ',
+   name: 'John Doe',
    status: statuses.ACTIVE,
    firstname: 'John',
    lastname: 'Doe',
    email: 'john@doe.com',
    password: 'f2d81a260dea8a100dd517984e53c56a7523d96942a834b9cdc249bd4e8c7aa9',
+   createdBy: { label: 'John Doe', ref: UserUri, backend: '@mock' },
+   createdAt: 1,
 }

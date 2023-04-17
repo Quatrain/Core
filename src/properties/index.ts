@@ -8,6 +8,7 @@ import { EnumProperty, EnumPropertyType } from './EnumProperty'
 import { BooleanProperty, BooleanPropertyType } from './BooleanProperty'
 import { DateTimeProperty, DateTimePropertyType } from './DateTimeProperty'
 import { ObjectProperty, ObjectPropertyType } from './ObjectProperty'
+import { MapProperty, MapPropertyType } from './MapProperty'
 import { PropertyTypes } from './types/PropertyTypes'
 
 export {
@@ -30,6 +31,8 @@ export {
    StringPropertyType,
    HashProperty,
    HashPropertyType,
+   MapProperty,
+   MapPropertyType,
 }
 
 type BaseType = { type: PropertyTypes }
@@ -42,4 +45,6 @@ export type DataObjectProperties = (
    | (StringPropertyType & BaseType)
    | (HashPropertyType & BaseType)
    | (DateTimeProperty & BaseType)
+   | (ArrayProperty & BaseType)
+   | (MapProperty & BaseType)
 )[]

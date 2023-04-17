@@ -12,6 +12,7 @@ export class ObjectUri {
    protected _uid: string | undefined = undefined
    protected _collection: string | undefined = undefined
    protected _label: string | undefined
+   protected _objClass: any
 
    /**
     * create object uri from string:
@@ -52,6 +53,14 @@ export class ObjectUri {
       }
    }
 
+   set class(objClass: any) {
+      this._objClass = objClass
+   }
+
+   get class() {
+      return this._objClass
+   }
+
    get backend() {
       return this._backend
    }
@@ -69,9 +78,6 @@ export class ObjectUri {
    }
 
    get literal() {
-      // return `${this._backend}:${
-      //    this._collection || ObjectUri.MISSING_COLLECTION
-      // }${ObjectUri.DEFAULT}${this._uid}`
       return `${this._backend}:${this._pairs.join(ObjectUri.DEFAULT)}`
    }
 
@@ -115,7 +121,7 @@ export class ObjectUri {
 
    toJSON() {
       return {
-         literal: this._literal,
+         backend: this._backend,
          ref: this._path,
          label: this._label,
       }

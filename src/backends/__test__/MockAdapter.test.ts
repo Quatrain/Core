@@ -4,7 +4,6 @@ import {
    fClassProperties,
 } from '../../components/__test__/fixtures/dao'
 import { Core } from '../../Core'
-import { Property } from '../../properties'
 import { MockAdapter } from '../MockAdapter'
 
 // inject() makes @mock default backend

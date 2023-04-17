@@ -19,6 +19,7 @@ export interface NumberPropertyType extends BasePropertyType {
 }
 
 export class NumberProperty extends BaseProperty {
+   static type = 'number'
    static TYPE_SIGNED = 'signed'
    static TYPE_UNSIGNED = 'unsigned'
 

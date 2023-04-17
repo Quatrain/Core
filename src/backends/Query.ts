@@ -3,18 +3,28 @@ import { Limits } from './Limits'
 import { Sorting } from './Sorting'
 import { SortAndLimit } from './SortAndLimit'
 import { BackendInterface } from './AbstractAdapter'
-import { BaseObject } from '../components'
+import { BaseObject } from '../components/BaseObject'
+import { Core } from '../Core'
 
-export class Query<T extends BaseObject> {
+export const AS_OBJECTURIS = 'objectUris'
+export const AS_DATAOBJECTS = 'dataObjects'
+export const AS_INSTANCES = 'classInstances'
+
+export enum returnAs {
+   AS_OBJECTURIS = 'objectUris',
+   AS_DATAOBJECTS = 'dataObjects',
+   AS_INSTANCES = 'classInstances',
+}
+
+export class Query<T extends typeof BaseObject> {
    protected _obj: T
    protected _params: any
    filters: Filter[]
    sortings: Sorting[]
    limits: Limits
 
-   constructor(obj: T, params: { [x: string]: any } = {}) {
+   constructor(obj: any, params: { [x: string]: any } = {}) {
       this._obj = obj
-      //Object.keys(params).forEach((key: string) => (obj[key] = params[key]))
       this._params = params // just in case
       this.filters = []
       this.sortings = []
@@ -68,11 +78,32 @@ export class Query<T extends BaseObject> {
       return new SortAndLimit(this.sortings, this.limits)
    }
 
-   async execute(backend: BackendInterface<T>) {
-      return await backend.find(
-         this._obj.dataObject,
-         this.filters,
-         this.sortAndLimit
-      )
+   async execute(
+      as: returnAs = returnAs.AS_DATAOBJECTS,
+      backend: BackendInterface<any> = Core.getBackend()
+   ): Promise<any> { //</any><Array<T2> | Array<DataObject> | Array<ObjectUri>> {
+      try {
+         const result = await backend.query(this)
+
+         switch (as) {
+            case AS_DATAOBJECTS:
+               return result
+
+            case AS_OBJECTURIS:
+               return await Promise.all(result.map((dao) => dao.uri))
+
+            case AS_INSTANCES:
+               //console.log(this._obj)
+               return await Promise.all(
+                  result.map((dao) => Reflect.construct(this._obj, [dao]))
+               )
+
+            default:
+               throw new Error(`Unknown output mode`)
+         }
+      } catch (err) {
+         console.log(err)
+         throw err
+      }
    }
 }

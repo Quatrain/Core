@@ -8,6 +8,7 @@ export interface ObjectPropertyType extends BasePropertyType {
 }
 
 export class ObjectProperty extends BaseProperty {
+   static TYPE = 'object'
    _value: BaseObject | undefined = undefined
    _instanceOf: Function | string | Object
 
@@ -33,6 +34,8 @@ export class ObjectProperty extends BaseProperty {
    }
 
    toJSON() {
-      return this._value &&  this._value.dataObject ? this._value.dataObject.toReference() : undefined
+      return this._value && this._value.dataObject
+         ? this._value.dataObject.toReference()
+         : undefined
    }
 }

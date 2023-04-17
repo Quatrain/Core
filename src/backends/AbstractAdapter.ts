@@ -1,4 +1,4 @@
-import { BaseObject, DataObject } from '../components'
+import { BaseObject, DataObjectClass, DataObjectType } from '../components'
 import { Filter } from './Filter'
 import { Filters } from './Filters'
 import { Query } from './Query'
@@ -39,23 +39,23 @@ export interface BackendParameters {
 
 export interface BackendInterface<T extends BaseObject> {
    create(
-      dataObject: DataObject,
-      desiredUid?: string | undefined
-   ): Promise<DataObject>
+      dataObject: DataObjectClass,
+      desiredUid: string | undefined
+   ): Promise<DataObjectClass>
 
-   read(param: DataObject): Promise<DataObject>
+   read(param: string | DataObjectClass): Promise<DataObjectClass>
 
-   update(dataObject: DataObject): Promise<DataObject>
+   update(dataObject: DataObjectClass): Promise<DataObjectClass>
 
-   delete(dataObject: DataObject): Promise<DataObject>
+   delete(dataObject: DataObjectClass): Promise<DataObjectClass>
 
-   query(query: Query<T>): Promise<DataObject[]>
+   query(query: Query<any>): Promise<DataObjectClass[]>
 
    find(
-      dataObject: DataObject,
+      dataObject: DataObjectClass,
       filters: Filters | Filter[] | undefined,
       pagination: SortAndLimit | undefined
-   ): Promise<DataObject[] | T[]>
+   ): Promise<DataObjectClass[] | T[]>
 }
 
 export abstract class AbstractAdapter {

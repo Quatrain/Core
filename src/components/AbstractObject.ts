@@ -1,4 +1,4 @@
-import { DataObject } from './DataObject'
+import { DataObjectClass } from './types/DataObjectClass'
 import { DataObjectProperties } from '../properties/'
 
 export abstract class AbstractObject {
@@ -10,9 +10,9 @@ export abstract class AbstractObject {
    // Which property's value to use in backend as label for object reference
    static LABEL_KEY = 'name'
 
-   protected _dataObject: DataObject
+   protected _dataObject: DataObjectClass
 
-   constructor(dao: DataObject) {
+   constructor(dao: DataObjectClass) {
       this._dataObject = dao
    }
 
@@ -57,7 +57,7 @@ export abstract class AbstractObject {
       return typeof this.uri === 'string' ? this.uri : this.uri?.toJSON()
    }
 
-   async save(uid: string | undefined = undefined) {
-      return await this._dataObject.save(uid)
+   async save() {
+      return await this._dataObject.save()
    }
 }

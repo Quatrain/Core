@@ -1,4 +1,4 @@
-import { Property } from './Property'
+//import { Property } from './Property'
 import { BaseProperty, BasePropertyType } from './BaseProperty'
 
 export interface StringPropertyType extends BasePropertyType {
@@ -11,8 +11,17 @@ export interface StringPropertyType extends BasePropertyType {
 }
 
 export class StringProperty extends BaseProperty {
+   static TYPE = 'string'
+
    static TRANSFORM_UCASE = 'upper'
    static TRANSFORM_LCASE = 'lower'
+
+   static ALLOW_SPACES = 'spaces'
+   static ALLOW_LETTERS = 'letters'
+   static ALLOW_DIGITS = 'digits'
+   static ALLOW_STRINGS = 'strings'
+   static ALLOW_NUMBERS = 'numbers'
+
 
    protected _minLength: number = 0
    protected _maxLength: number = 0
@@ -30,33 +39,33 @@ export class StringProperty extends BaseProperty {
       this.minLength = config.minLength || 0
       this.maxLength = config.maxLength || 0
       if (this._enable(config.allowSpaces)) {
-         this._allows.push(Property.ALLOW_SPACES)
+         this._allows.push(StringProperty.ALLOW_SPACES)
       }
       if (this._enable(config.allowDigits)) {
-         this._allows.push(Property.ALLOW_DIGITS)
+         this._allows.push(StringProperty.ALLOW_DIGITS)
       }
       if (this._enable(config.allowLetters)) {
-         this._allows.push(Property.ALLOW_LETTERS)
+         this._allows.push(StringProperty.ALLOW_LETTERS)
       }
    }
 
    set(value: any) {
       if (
-         this._allows.includes(Property.ALLOW_DIGITS) === false &&
+         this._allows.includes(StringProperty.ALLOW_DIGITS) === false &&
          /\d/.test(value)
       ) {
          throw new Error(`Digits are not allowed in value`)
       }
 
       if (
-         this._allows.includes(Property.ALLOW_SPACES) === false &&
+         this._allows.includes(StringProperty.ALLOW_SPACES) === false &&
          /\s/g.test(value)
       ) {
          throw new Error(`Spaces are not allowed in value`)
       }
 
       if (
-         this._allows.includes(Property.ALLOW_LETTERS) === false &&
+         this._allows.includes(StringProperty.ALLOW_LETTERS) === false &&
          /[a-zA-Z]/.test(value)
       ) {
          throw new Error(`Letters are not allowed in value`)

@@ -9,6 +9,7 @@ export interface ArrayPropertyType extends BasePropertyType {
 }
 
 export class ArrayProperty extends BaseProperty {
+   static TYPE = 'array'
    protected _value: Array<any> | undefined = undefined
 
    protected _minLength: number = 0

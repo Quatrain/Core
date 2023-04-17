@@ -1,4 +1,7 @@
+import { AbstractPropertyType } from "./AbstractPropertyType"
+
 export interface PropertyClassType {
-   set(value: any): void
-   val(transform: any): void
+   set(value: any): AbstractPropertyType
+   val(transform: any): any
+   toJSON(): any
 }

@@ -1,12 +1,15 @@
 import { AbstractAdapter, BackendInterface } from './'
 import { DELETED } from '../statuses'
-import { BaseObject, DataObject } from '../components'
+import { ObjectUri } from '../components/ObjectUri'
+import { DataObject } from '../components/DataObject'
 import { Core } from '../Core'
 import { BackendRecordType } from './AbstractAdapter'
 import { Query } from './Query'
 import { Filter } from './Filter'
 import { Filters } from './Filters'
 import { SortAndLimit } from './SortAndLimit'
+import { DataObjectClass } from '../components/types/DataObjectClass'
+import { BaseObject } from '../components/BaseObject'
 
 export class MockAdapter<T extends BaseObject>
    extends AbstractAdapter
@@ -36,25 +39,26 @@ export class MockAdapter<T extends BaseObject>
       return MockAdapter._fixtures[key]
    }
 
-   async create(
-      dataObject: DataObject,
+   create(
+      dataObject: DataObjectClass,
       desiredUid: string | undefined = undefined
-   ): Promise<DataObject> {
+   ): Promise<DataObjectClass> {
       const uri =
          desiredUid ||
-         `${dataObject.class.constructor.name.toLowerCase()}/${Date.now()}`
-
+         `${dataObject.uri.class.constructor.name.toLowerCase()}/${Date.now()}`
       MockAdapter.inject({
          ...dataObject.toJSON(),
          uid: uri,
       })
-
-      dataObject.uri = uri
-
-      return dataObject
+      if (this._params.injectMeta) {
+         dataObject.set('createdBy', Core.currentUser)
+         dataObject.set('createdAt', Date.now())
+      }
+      dataObject.uri = new ObjectUri(uri)
+      return new Promise(() => dataObject)
    }
 
-   async read(dataObject: DataObject): Promise<DataObject> {
+   async read(dataObject: DataObjectClass): Promise<DataObjectClass> {
       const path = dataObject.path
       const data = MockAdapter._fixtures[path]
 
@@ -67,16 +71,11 @@ export class MockAdapter<T extends BaseObject>
       return await dataObject.populate(data)
    }
 
-   async update(dataObject: DataObject): Promise<DataObject> {
-      MockAdapter.inject({
-         ...dataObject.toJSON(),
-         uid: dataObject.uri.path,
-      })
-
-      return dataObject
+   update(dataObject: DataObjectClass): Promise<DataObjectClass> {
+      return new Promise(() => dataObject)
    }
 
-   async delete(dataObject: DataObject): Promise<DataObject> {
+   async delete(dataObject: DataObjectClass): Promise<DataObjectClass> {
       if (this.getParam('softDelete') === true) {
          dataObject.set('status', DELETED)
          MockAdapter.inject({
@@ -84,26 +83,33 @@ export class MockAdapter<T extends BaseObject>
             uid: dataObject.uid,
          })
       } else if (dataObject.uid !== undefined) {
-         delete MockAdapter._fixtures[dataObject.uri.path]
-         dataObject.uri = undefined
+         delete MockAdapter._fixtures[dataObject.uid]
+         dataObject.uri = new ObjectUri()
       }
 
       return dataObject
    }
 
-   async query(query: Query<T>): Promise<DataObject[]> {
-      return await this.find(
-         query.obj.dataObject,
+   async query(query: Query<any>): Promise<DataObjectClass[]> {
+      return this.find(
+         await DataObject.factory(query.obj),
          query.filters,
          query.sortAndLimit
       )
    }
 
    async find(
-      dataObject: DataObject,
+      dataObject: DataObjectClass,
       filters: Filters | Filter[] | undefined = undefined,
       pagination: SortAndLimit | undefined = undefined
-   ): Promise<DataObject[]> {
-      return [dataObject, dataObject]
+   ): Promise<DataObjectClass[]> {
+      console.log('mock', dataObject)
+      const result: DataObjectClass[] = []
+      for (let key in MockAdapter.getFixtures()) {
+         const dao = await dataObject.clone(MockAdapter.getFixture(key))
+         result.push(dao)
+      }
+
+      return result
    }
 }

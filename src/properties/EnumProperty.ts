@@ -5,6 +5,7 @@ export interface EnumPropertyType extends BasePropertyType {
 }
 
 export class EnumProperty extends BaseProperty {
+   static TYPE = 'enum'
    protected _values: string[] = []
    protected _value: unknown
 

@@ -1,9 +1,11 @@
 import { MockAdapter, AbstractAdapter } from './backends'
+import { UserClass } from './components/types/UserClass'
 
 export type BackendRegistry<T extends AbstractAdapter> = { [x: string]: T }
 
 export class Core {
    static defaultBackend = '@default'
+   static currentUser: UserClass
 
    protected static _backends: BackendRegistry<any> = {
       '@mock': new MockAdapter({ alias: '@mock' }),

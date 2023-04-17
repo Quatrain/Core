@@ -1,26 +1,33 @@
 import { Core } from '../Core'
+import { DataObjectProperties } from '../properties'
 import { Property } from '../properties/Property'
+import { PropertyClassType } from '../properties/types/PropertyClassType'
 import { AbstractObject } from './AbstractObject'
 import { ObjectUri } from './ObjectUri'
+import { DataObjectClass } from './types/DataObjectClass'
+
+export type CoreObject<T extends AbstractObject> = T
+export type Properties = { [x: string]: PropertyClassType }
 
 export interface DataObjectFactoryType {
    path: string
    [x: string]: any
 }
 
-export type CoreObject<T extends AbstractObject> = T
+export interface DataObjectType {
+   uri?: string
+   properties: DataObjectProperties
+}
 
 /**
  * Data objects constitute the agnostic glue between objects and backends.
  * They handle data and identifiers in a protected registry
  * This is what backends and objects manipulate, oblivious of the other.
  */
-export class DataObject {
-   protected _class: CoreObject<any>
+export class DataObject implements DataObjectClass {
    protected _objectUri: ObjectUri
-   protected _obj: any
    protected _uid: string | undefined = undefined
-   protected _properties: { [x: string]: any } = {}
+   protected _properties: Properties = {}
    protected _persisted: boolean = false
    protected _populated: boolean = false
 
@@ -34,24 +41,26 @@ export class DataObject {
     * @param objClass AbstractObject
     * @param properties array of properties instances
     */
-   protected constructor(
-      objClass: typeof AbstractObject.prototype,
-      properties: any[] | undefined
-   ) {
-      this._class = objClass
-      this._objectUri = new ObjectUri()
-      if (Array.isArray(properties)) {
-         this._init(properties)
+   protected constructor(params: DataObjectType | undefined) {
+      if (params) {
+         if (Array.isArray(params.properties)) {
+            this._init(params.properties)
+         }
+         this._objectUri = new ObjectUri(params.uri)
+      } else {
+         this._objectUri = new ObjectUri()
       }
    }
 
    protected _init(properties: any[]) {
-      // console.log(
-      //    `Preparing properties for instance of ${this._class.constructor.name}`
-      // )
       properties.forEach((prop) => {
          this._properties[prop.name] = Property.factory(prop, this)
       })
+   }
+
+   public setProperties(properties: Properties) {
+      // TODO check if doable
+      this._properties = properties
    }
 
    /**
@@ -79,18 +88,6 @@ export class DataObject {
       return this
    }
 
-   /**
-    * Returns a deep copy of the instance of DataObject
-    * @returns
-    */
-   clone() {
-      const serializedDataObject = JSON.stringify(this)
-
-      const deserializedDataObject = JSON.parse(serializedDataObject)
-
-      return deserializedDataObject
-   }
-
    isPopulated() {
       return this._populated
    }
@@ -105,10 +102,6 @@ export class DataObject {
 
    get backend() {
       return this._objectUri ? this._objectUri.backend : undefined
-   }
-
-   get class() {
-      return this._class
    }
 
    get path() {
@@ -136,6 +129,11 @@ export class DataObject {
 
    get uri(): ObjectUri {
       return this._objectUri
+   }
+
+   get class(): any {
+      // TODO get class type
+      return this.uri.class
    }
 
    /**
@@ -231,19 +229,24 @@ export class DataObject {
     * @returns DataObject
     */
    static async factory(
-      className: typeof AbstractObject.prototype,
-      param: any[] | undefined = undefined
-   ): Promise<DataObject> {
-      if (className === undefined) {
-         throw new Error(`className is a require value`)
-      }
-
+      param: DataObjectType | undefined = undefined
+   ): Promise<DataObjectClass> {
       try {
-         return new this(className, param)
+         return new this(param)
       } catch (err) {
          throw new Error(
             `Unable to build data object: ${(err as Error).message}`
          )
       }
+   }
+
+   async clone(data: any = {}): Promise<DataObjectClass> {
+      const cloned = await DataObject.factory()
+      cloned.setProperties(this._properties)
+      if (data) {
+         await cloned.populate(data)
+      }
+
+      return cloned
    }
 }

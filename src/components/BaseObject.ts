@@ -1,13 +1,19 @@
 import { DataObject } from './DataObject'
+import { DataObjectClass } from './types/DataObjectClass'
 import { ObjectUri } from './ObjectUri'
 import { AbstractObject } from './AbstractObject'
-import { BaseObjectProperties, BaseObjectType } from './BaseObjectProperties'
-import { DataObjectProperties } from '../properties'
-import { Query } from '../backends'
+import { BaseObjectProperties } from './BaseObjectProperties'
+//import { DataObjectProperties } from '../properties'
+import { Query } from '../backends/Query'
+import { BaseObjectClass } from './types/BaseObjectClass'
 import { Status } from '../common/statuses'
 
-export class BaseObject extends AbstractObject implements BaseObjectType {
-   static PROPS_DEFINITION: DataObjectProperties = BaseObjectProperties
+export class BaseObject extends AbstractObject implements BaseObjectClass {
+   static PROPS_DEFINITION: any = BaseObjectProperties
+
+   static getProperty(key: string) {
+      return BaseObject.PROPS_DEFINITION.find((prop: any) => prop.name === key)
+   }
 
    get name() {
       return this._dataObject.val('name')
@@ -26,16 +32,17 @@ export class BaseObject extends AbstractObject implements BaseObjectType {
    }
 
    static async factory<T extends BaseObject>(
-      src: string | ObjectUri | object | undefined = undefined
-   ): Promise<T> {
+      src: string | ObjectUri | DataObjectClass | undefined = undefined,
+      child: any = this
+   ): Promise<T | BaseObject> {
       try {
          // merge base properties with additional or redefined ones
          const base = BaseObjectProperties
 
          // this.PROPS_DEFINITION &&
-         this.PROPS_DEFINITION.forEach((property) => {
+         this.PROPS_DEFINITION.forEach((property: any) => {
             // manage parent properties potential redeclaration
-            const found = base.findIndex((el) => el.name === property.name)
+            const found = base.findIndex((el: any) => el.name === property.name)
             if (found !== -1) {
                base[found] = Object.assign(base[found], property)
             } else {
@@ -43,17 +50,16 @@ export class BaseObject extends AbstractObject implements BaseObjectType {
             }
          })
 
-         //console.log('props to add', JSON.stringify(base))
-
          // create data object
-         const dao = await DataObject.factory(this.prototype, base)
+         const dao = await DataObject.factory({ properties: base })
+         dao.uri.class = child
 
          if (src instanceof ObjectUri) {
             dao.uri = src
-            await dao.populate()
+            await dao.read()
          } else if (typeof src === 'string') {
             dao.uri.path = src
-            await dao.populate()
+            await dao.read()
          } else if (src instanceof Object) {
             dao.uri = new ObjectUri(
                `${this.COLLECTION}${ObjectUri.DEFAULT}`,
@@ -63,7 +69,7 @@ export class BaseObject extends AbstractObject implements BaseObjectType {
             await dao.populate(src)
          }
 
-         return new this(dao) as T
+         return Reflect.construct(this, [dao])
       } catch (err) {
          console.log((err as Error).message)
          throw new Error(

@@ -66,7 +66,7 @@ export class MockAdapter<T extends BaseObject>
          throw new Error(`[Mock] No data for ${path}`)
       }
 
-      console.log(`[DAO] Populating ${path}`)
+      this.log(`[DAO] Populating ${path}`)
 
       return await dataObject.populate(data)
    }

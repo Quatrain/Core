@@ -8,6 +8,39 @@ import { DataObject } from './DataObject'
 import { Persisted } from './types/Persisted'
 import { ProxyConstructor, Proxy } from './types/ProxyConstructor'
 import { DataObjectProperties } from '../properties'
+import { $defMacro } from 'shulk'
+
+type Properties = { name: string; type: string }[]
+
+type Model<T extends Properties> = { [K in T[number]['name']]: unknown }
+
+const userProps: Properties = [
+   { name: 'username', type: 'string' },
+   { name: 'age', type: 'number' },
+]
+
+type vroum = Model<typeof userProps>
+
+export const $model = (collection: string, properties: Properties) =>
+   $defMacro({
+      props: { collection, properties },
+      methods: {
+         fromObject: (self, obj: Model<typeof properties>) => {},
+      },
+   })
+
+const $proxy = <T extends Properties>(
+   properties: Properties,
+   obj: Model<T>
+) => {
+   const dataObject = DataObject.factory({ properties })
+   dataObject.populate(obj)
+
+   return $defMacro({
+      props: { core: { dataObject } },
+      methods: {},
+   })
+}
 
 export class BaseObjectCore extends AbstractObject implements BaseObjectClass {
    static PROPS_DEFINITION: DataObjectProperties = BaseObjectProperties

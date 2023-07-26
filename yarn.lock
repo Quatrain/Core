@@ -2301,6 +2301,11 @@ shebang-regex@^3.0.0:
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
 
+shulk@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/shulk/-/shulk-0.4.0.tgz#beeb89792a1d74f3afe0152f473803af16d5a65e"
+  integrity sha512-ibrIvq9kwHN52y30alS8Bq7C/jMteElVEFEvMMAxW+qzgYk90WSi4nsRYoXMv9eNIWk9Uhg4n/3jFxn4BGLRZw==
+
 signal-exit@^3.0.2, signal-exit@^3.0.3:
   version "3.0.7"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.7.tgz#a9a1767f8af84155114eaabd73f99273c8f59ad9"

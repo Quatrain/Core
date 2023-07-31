@@ -21,8 +21,7 @@
       "typescript": "^5.1.5"
    },
    "dependencies": {
-      "@faker-js/faker": "^7.6.0",
-      "shulk": "^0.4.0"
+      "@faker-js/faker": "^7.6.0"
    },
    "scripts": {
       "test": "tsc && jest --verbose",

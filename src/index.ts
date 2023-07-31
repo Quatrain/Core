@@ -58,6 +58,8 @@ import {
    GoneError,
 } from './common/ResourcesErrors'
 
+import { $model } from './macros/$model'
+
 export {
    statuses,
    utils,
@@ -88,6 +90,7 @@ export {
    BaseObject,
    BaseObjectCore,
    BaseObjectProperties,
+   $model,
    BackendParameters,
    BackendError,
    Query,

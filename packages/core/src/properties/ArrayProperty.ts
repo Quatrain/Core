@@ -43,7 +43,7 @@ export class ArrayProperty extends BaseProperty {
    }
 
    set(value: Array<any>, setChanged = true) {
-      if (value === null) {
+      if (!value) {
          value = []
       }
       if (!Array.isArray(value)) {

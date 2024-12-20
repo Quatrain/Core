@@ -246,7 +246,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
 
       const queryString = `${query
          .join(' ')
-         .replace('*', fields.join(', '))} WHERE id = '${parts[1]}'`
+         .replace('*', fields.join(', '))} WHERE coll.id = '${parts[1]}'`
 
       Backend.log(`[PGA] SQL ${queryString}`)
 
@@ -388,7 +388,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
       dataObject: DataObjectClass<any>,
       filters: Filters | Filter[] | undefined = undefined,
       pagination: SortAndLimit | undefined = undefined,
-      parent: any = undefined
+      parent: DataObjectClass<any> | undefined = undefined
    ): Promise<QueryResultType<DataObjectClass<any>>> {
       try {
          //  use parent path to start fullPath, if available
@@ -446,12 +446,16 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             }
          })
 
+         if (parent) {
+            query.push(`WHERE coll.${dataObject.parentProp}='${parent.uid}'`)
+         }
+
          if (filters instanceof Filters) {
             hasFilters = true
          } else if (Array.isArray(filters)) {
             // list of filters objects
             filters.forEach((filter, i) => {
-               query.push(i > 0 ? 'AND' : 'WHERE')
+               query.push(parent && i === 0 ? 'AND' : i > 0 ? 'AND' : 'WHERE')
                let realProp: any = filter.prop
                let realOperator: string
                let realValue = filter.value

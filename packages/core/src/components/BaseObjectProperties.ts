@@ -41,6 +41,7 @@ export const BaseObjectProperties: any = [
       type: DateTimeProperty.TYPE,
       mandatory: true,
       protected: true,
+      instanceOf: 'User',
    },
    {
       name: 'updatedBy',
@@ -61,5 +62,6 @@ export const BaseObjectProperties: any = [
       name: 'deletedAt',
       type: DateTimeProperty.TYPE,
       protected: true,
+      instanceOf: 'User',
    },
 ]

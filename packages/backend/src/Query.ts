@@ -31,6 +31,7 @@ export type QueryResultType<T> = {
 export class Query<T extends typeof PersistedBaseObject> {
    protected _obj: T
    protected _parent: T | undefined
+
    filters: Filter[]
    sortings: Sorting[]
    limits: Limits
@@ -61,6 +62,14 @@ export class Query<T extends typeof PersistedBaseObject> {
       this._parent = parent
    }
 
+   /**
+    * Updates the parent property of the current object.
+    * This method is useful for SQL backends where a model may have two parent records
+    * and requires dynamically setting the name of one of them.
+    */
+   setParentName(parent: string) {
+      this._obj.PARENT_PROP = parent
+   }
    where(
       param: Filter | string | any,
       value: any = null,

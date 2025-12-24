@@ -1,4 +1,4 @@
-import { NumberProperty } from '../NumberProperty'
+import { NumberProperty } from './NumberProperty'
 
 describe('Number Property accept all numbers', () => {
    const prop = new NumberProperty({ name: 'toto' })

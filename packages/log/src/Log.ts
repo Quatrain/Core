@@ -1,14 +1,5 @@
-import { AbstractLoggerAdapter } from './AbstractLoggerAdapter'
+import { AbstractLoggerAdapter, LogLevel } from './AbstractLoggerAdapter'
 import { DefaultLoggerAdapter } from './DefaultLoggerAdapter'
-
-export enum LogLevel {
-   TRACE = 0,
-   DEBUG = 1,
-   INFO = 2,
-   WARN = 3,
-   ERROR = 4,
-   SILENT = 5,
-}
 
 export type LoggerRegistry<T extends AbstractLoggerAdapter> = {
    [x: string]: T
@@ -16,9 +7,7 @@ export type LoggerRegistry<T extends AbstractLoggerAdapter> = {
 export class Log {
    static defaultLogger = '@default'
 
-   protected static _loggers: LoggerRegistry<any> = {
-      '@default': new DefaultLoggerAdapter(),
-   }
+   protected static _loggers: LoggerRegistry<any> = {}
 
    // How timestamp are formatted
    static timestamp() {
@@ -41,6 +30,10 @@ export class Log {
    static getLogger<T extends AbstractLoggerAdapter>(
       alias: string = this.defaultLogger
    ): T {
+      if (alias === '@default' && !this._loggers['@default']) {
+         this._loggers['@default'] = new DefaultLoggerAdapter()
+      }
+
       if (this._loggers[alias]) {
          return this._loggers[alias]
       } else {
@@ -52,27 +45,29 @@ export class Log {
     * Log message using defined logger
     * @param message string | object
     */
-   static log(message: any): void {
-      return Log.getLogger().log(message)
+   static log(...messages: any[]): void {
+      return Log.getLogger().log(...messages)
    }
 
-   static debug(message: any): void {
-      return Log.getLogger().debug(message)
+   static debug(...messages: any[]): void {
+      return Log.getLogger().debug(...messages)
    }
 
-   static warn(message: any): void {
-      return Log.getLogger().warn(message)
+   static warn(...messages: any[]): void {
+      return Log.getLogger().warn(...messages)
    }
 
-   static info(message: any): void {
-      return Log.getLogger().info(message)
+   static info(...messages: any[]): void {
+      return Log.getLogger().info(...messages)
    }
 
-   static error(message: any): void {
-      return Log.getLogger().error(message)
+   static error(...messages: any[]): void {
+      return Log.getLogger().error(...messages)
    }
 
-   static trace(message: any): void {
-      return Log.getLogger().trace(message)
+   static trace(...messages: any[]): void {
+      return Log.getLogger().trace(...messages)
    }
 }
+
+export { LogLevel }

@@ -1,5 +1,5 @@
 import { DataObjectClass } from '../components/types/DataObjectClass'
-import { BaseProperty, BasePropertyType } from './BaseProperty'
+import { BaseProperty } from './BaseProperty'
 import { BooleanProperty, BooleanPropertyType } from './BooleanProperty'
 import { DateTimeProperty, DateTimePropertyType } from './DateTimeProperty'
 import { EnumProperty, EnumPropertyType } from './EnumProperty'

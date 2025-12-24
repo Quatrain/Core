@@ -1,6 +1,7 @@
 .yarnrc.yml
 node_modules
 lib
+dist
 .pnp.*
 .yarn/*
 !.yarn/patches

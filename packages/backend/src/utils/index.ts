@@ -1,3 +1,3 @@
-import { DataGenerator} from './DataGenerator'
+import { DataGenerator } from '@quatrain/core/src/common/DataGenerator'
 
-export { DataGenerator}
+export { DataGenerator }

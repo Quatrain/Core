@@ -1,6 +1,6 @@
-import { AbstractLoggerAdapter } from './AbstractLoggerAdapter'
+import { AbstractLoggerAdapter, LogLevel } from './AbstractLoggerAdapter'
 import logger from 'loglevel'
-import { LogLevel } from './Log'
+import chalk from 'chalk'
 
 export class DefaultLoggerAdapter extends AbstractLoggerAdapter {
    constructor(prefix = '', level: LogLevel = LogLevel.DEBUG) {
@@ -19,19 +19,19 @@ export class DefaultLoggerAdapter extends AbstractLoggerAdapter {
 
       switch (level) {
          case LogLevel.TRACE:
-            this._logger.trace(message)
+            this._logger.trace(chalk.grey(message))
             break
          case LogLevel.DEBUG:
-            this._logger.debug(message)
+            this._logger.debug(chalk.yellow(message))
             break
          case LogLevel.INFO:
-            this._logger.info(message)
+            this._logger.info(chalk.green(message))
             break
          case LogLevel.WARN:
-            this._logger.warn(message)
+            this._logger.warn(chalk.red(message))
             break
          case LogLevel.ERROR:
-            this._logger.error(message)
+            this._logger.error(chalk.bgRedBright(message))
             break
          default:
             this._logger.log(message)
@@ -45,22 +45,22 @@ export class DefaultLoggerAdapter extends AbstractLoggerAdapter {
    }
 
    debug(...messages: any): void {
-      this.log(messages[0], LogLevel.DEBUG)
+      this.log(messages, LogLevel.DEBUG)
    }
 
    warn(...messages: any): void {
-      this.log(messages[0], LogLevel.WARN)
+      this.log(messages, LogLevel.WARN)
    }
 
    info(...messages: any): void {
-      this.log(messages[0], LogLevel.INFO)
+      this.log(messages, LogLevel.INFO)
    }
 
    error(...messages: any): void {
-      this.log(messages[0], LogLevel.ERROR)
+      this.log(messages, LogLevel.ERROR)
    }
 
    trace(...messages: any): void {
-      this.log(messages[0], LogLevel.TRACE)
+      this.log(messages, LogLevel.TRACE)
    }
 }

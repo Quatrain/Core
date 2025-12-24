@@ -22,7 +22,7 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
          Authorization: `Bearer ${params.config.secret}`,
       })
 
-      Storage.log(`[SSA] Supabase Storage Adapter initialized`)
+      Storage.info(`[SSA] Supabase Storage Adapter initialized`)
    }
 
    getDriver() {
@@ -79,12 +79,11 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
          const { error } = await this._client
             .from(file.bucket)
             .upload(file.ref, new Blob([fs.readFileSync(stream)]), {
-               //   cacheControl: '3600',
-               upsert: false,
+               upsert: true,
                contentType: file.contentType,
             })
          if (error !== null) {
-            console.log(error)
+            Storage.error(error)
             Storage.error(`Unable to upload ${file.ref} to ${file.bucket}`)
             throw new Error(`Unable to upload ${file.ref} to ${file.bucket}`)
          }
@@ -116,7 +115,6 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
             .copy(file.ref, destFile.ref, {
                destinationBucket: destFile.bucket,
             })
-         console.log(response)
       } catch (err) {
          console.error(err)
       }
@@ -126,7 +124,7 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
       Storage.info(
          `Moving file ${file.ref} to ${destFile.ref} in same bucket ${file.bucket}`
       )
-      const { data, error } = await this._client
+      const { error } = await this._client
          .from(file.bucket)
          .move(file.ref, destFile.ref)
 
@@ -141,7 +139,7 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
    }
 
    async getUrl(file: FileType, expiresIn = 3600) {
-      Storage.info(
+      Storage.debug(
          `Getting signed url for file ${file.ref} in bucket ${file.bucket}`
       )
       const { data, error } = await this._client
@@ -169,9 +167,8 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
    }
 
    async getReadable(file: FileType): Promise<Readable> {
-      Storage.log(`GET Readable : ${file.ref}`)
+      Storage.debug(`GET Readable : ${file.ref}`)
 
-      console.log(file)
       const path = join(tmpdir(), String(Date.now()))
       const item = await this.download(file, { path, onlyContent: true })
       const buffer = Buffer.from(item.toString(), 'base64')
@@ -183,7 +180,7 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
    }
 
    async stream(file: FileType, res: any) {
-      Storage.log(`GET Stream : ${file.ref}`)
+      Storage.debug(`GET Stream : ${file.ref}`)
 
       const path = join(tmpdir(), String(Date.now()))
       const item = await this.download(file, { path, onlyContent: true })

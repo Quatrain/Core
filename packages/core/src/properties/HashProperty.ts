@@ -1,9 +1,11 @@
+import { createHash } from 'node:crypto'
 import { StringProperty, StringPropertyType } from './StringProperty'
 
 export type HashPropertyAlgos =
    | typeof HashProperty.ALGORITHM_MD5
    | typeof HashProperty.ALGORITHM_SHA1
    | typeof HashProperty.ALGORITHM_SHA256
+   | typeof HashProperty.ALGORITHM_BCRYPT
 
 export interface HashPropertyType extends StringPropertyType {
    algorithm?: HashPropertyAlgos
@@ -30,26 +32,24 @@ export class HashProperty extends StringProperty {
    }
 
    _hash(value: string): string {
-      const crypto = require('crypto')
       let algo
       switch (this._algorithm) {
          case HashProperty.ALGORITHM_MD5:
-            algo = crypto.createHash('md5')
+            algo = createHash('md5')
             break
 
          case HashProperty.ALGORITHM_SHA1:
-            algo = crypto.createHash('sha1')
+            algo = createHash('sha1')
             break
 
          case HashProperty.ALGORITHM_SHA256:
-            algo = crypto.createHash('sha256')
-            break
-
-         case HashProperty.ALGORITHM_BCRYPT:
+            algo = createHash('sha256')
             break
 
          default:
-            throw new Error(`Insupported or missing hash algorithm`)
+            throw new Error(
+               `Unsupported or missing hash algorithm: ${this._algorithm}`
+            )
       }
 
       let hash = this._prefixed ? `${this._algorithm}-` : ''
@@ -58,15 +58,6 @@ export class HashProperty extends StringProperty {
       this._rawValue = false // don't test some constraints after hashing
 
       return hash
-   }
-
-   /**
-    * Never return the value which is hashed anyway
-    * @param transform
-    * @returns
-    */
-   get(transform?: string | undefined): string | undefined {
-      return
    }
 
    set(value: string, setChanged = true) {

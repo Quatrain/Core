@@ -6,13 +6,12 @@
    "version": "1.1.11",
    "devDependencies": {
       "@tsconfig/recommended": "^1.0.1",
-      "@types/jest": "^27.0.3",
+      "@types/jest": "^30.0.0",
       "@types/node": "^22.10.1",
       "folder-hash": "^4.1.0",
-      "jest": "^27.4.7",
-      "jest-node-exports-resolver": "^1.1.6",
+      "jest": "^30.2.0",
       "trace-unhandled": "^2.0.1",
-      "ts-jest": "^27.1.2",
+      "ts-jest": "^29.4.1",
       "ts-node": "^10.9.1",
       "typescript": "^5.2.2"
    },
@@ -31,5 +30,8 @@
    "packageManager": "yarn@4.5.3",
    "dependencies": {
       "node-gyp": "^11.4.2"
+   },
+   "engines": {
+      "node": ">=20.0.0"
    }
 }

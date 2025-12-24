@@ -1,4 +1,11 @@
-import { Log, LogLevel } from './Log'
+export enum LogLevel {
+   TRACE = 0,
+   DEBUG = 1,
+   INFO = 2,
+   WARN = 3,
+   ERROR = 4,
+   SILENT = 5,
+}
 
 export interface LoggerType {
    log(message: string): void
@@ -31,13 +38,21 @@ export abstract class AbstractLoggerAdapter implements LoggerType {
       this._logLevel = level
    }
 
-   formatLogMessage = (messages: any[], loglevel: LogLevel = 3): string => {
-      if (!Array.isArray(messages)) {
-         messages = [messages]
-      }
-      messages.unshift(`${Log.timestamp()} - [${this._me}]`)
-      const strs = messages.map((message: number | string | object) => {
-         return typeof message !== 'object' ? message : JSON.stringify(message)
+   formatLogMessage = (
+      messages: any[],
+      loglevel: LogLevel = LogLevel.INFO
+   ): string => {
+      const msgs = Array.isArray(messages) ? [...messages] : [messages]
+
+      msgs.unshift(`${new Date().toISOString()} - [${this._me}]`)
+      const strs = msgs.map((message: any) => {
+         if (message instanceof Error) {
+            return message.stack || message.message
+         }
+         if (typeof message === 'object' && message !== null) {
+            return JSON.stringify(message)
+         }
+         return String(message)
       })
 
       return strs.join(' ')
@@ -48,27 +63,27 @@ export abstract class AbstractLoggerAdapter implements LoggerType {
     * @param message string | object
     * @param level string
     */
-   log(...messages: any): void {
+   log(...messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 
-   debug(message: any): void {
+   debug(...messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 
-   warn(message: any): void {
+   warn(...messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 
-   info(message: any): void {
+   info(...messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 
-   error(message: any): void {
+   error(...messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 
-   trace(message: any): void {
+   trace(...messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 }

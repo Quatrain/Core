@@ -1,44 +1,44 @@
 {
-    "name": "@quatrain/backend-sqlite",
-    "version": "1.0.2",
-    "license": "MIT",
-    "description": "Backend adapter for SQLite",
-    "main": "lib/index.js",
-    "types": "lib/index.d.ts",
-    "files": [
-        "lib/",
-        "README.md"
-    ],
-    "author": "Quatrain Développement SAS <developers@quatrain.com>",
-    "dependencies": {
-        "@quatrain/backend": "^1.1.23",
-        "@quatrain/core": "workspace:^",
-        "sqlite": "^5.1.1",
-        "sqlite3": "^5.1.7"
-    },
-    "devDependencies": {
-        "@faker-js/faker": "^7.6.0",
-        "@tsconfig/recommended": "^1.0.1",
-        "@types/jest": "^27.0.3",
-        "@types/node": "^22.10.1",
-        "@types/sqlite3": "^3.1.11",
-        "jest": "^27.4.7",
-        "jest-node-exports-resolver": "^1.1.6",
-        "jest-serial-runner": "^1.2.1",
-        "trace-unhandled": "^2.0.1",
-        "ts-jest": "^27.1.2",
-        "ts-node": "^10.9.1",
-        "typescript": "^5.1.5"
-    },
-    "scripts": {
-        "test-ci": "jest --runInBand",
-        "build": "tsc",
-        "wbuild": "tsc --watch",
-        "bump-to": "yarn version",
-        "hash": "node ../../bin/hashFolder.js",
-        "hash:persist": "yarn hash  > .hash_latest.txt",
-        "hash:compare": "yarn hash > .hash_newest.txt && cmp -s .hash_latest.txt .hash_newest.txt",
-        "publish": "yarn hash:compare || yarn publish:process",
-        "publish:process": "yarn version patch && yarn build && yarn npm publish --access public && yarn hash:persist"
-    }
+   "name": "@quatrain/backend-sqlite",
+   "version": "1.0.2",
+   "license": "MIT",
+   "description": "Backend adapter for SQLite",
+   "main": "dist/index.js",
+   "types": "dist/index.d.ts",
+   "files": [
+      "dist/",
+      "src/",
+      "README.md"
+   ],
+   "author": "Quatrain Développement SAS <developers@quatrain.com>",
+   "dependencies": {
+      "@quatrain/backend": "^1.1.23",
+      "@quatrain/core": "workspace:^",
+      "sqlite": "^5.1.1",
+      "sqlite3": "^5.1.7"
+   },
+   "devDependencies": {
+      "@faker-js/faker": "^7.6.0",
+      "@jest/expect": "^30.0.0",
+      "@tsconfig/recommended": "^1.0.1",
+      "@types/jest": "^30.0.0",
+      "@types/node": "^22.10.1",
+      "@types/sqlite3": "^3.1.11",
+      "jest": "^30.2.0",
+      "trace-unhandled": "^2.0.1",
+      "ts-jest": "^29.4.1",
+      "ts-node": "^10.9.1",
+      "typescript": "^5.2.2"
+   },
+   "scripts": {
+      "test-ci": "jest --runInBand",
+      "build": "tsc",
+      "wbuild": "tsc --watch",
+      "bump-to": "yarn version",
+      "hash": "node ../../bin/hashFolder.js",
+      "hash:persist": "yarn hash  > .hash_latest.txt",
+      "hash:compare": "yarn hash > .hash_newest.txt && cmp -s .hash_latest.txt .hash_newest.txt",
+      "publish": "yarn hash:compare || yarn publish:process",
+      "publish:process": "yarn version patch && yarn build && yarn npm publish --access public && yarn hash:persist"
+   }
 }

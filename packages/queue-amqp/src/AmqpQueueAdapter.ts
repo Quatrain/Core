@@ -42,6 +42,13 @@ export class AmqpQueueAdapter extends AbstractQueueAdapter {
       return String(id)
    }
 
+   /**
+    * Listen to given queue and process messages with messageHandler function
+    * @param topic
+    * @param messageHandler
+    * @param params
+    * @returns
+    */
    async listen(
       topic: string | undefined = this._params.topic,
       messageHandler: Function,
@@ -80,7 +87,16 @@ export class AmqpQueueAdapter extends AbstractQueueAdapter {
 
             try {
                // 1. Process the message synchronously (wait for it to finish)
-               await messageHandler(msg.content.toString(), params)
+               const result = await messageHandler(
+                  msg.content.toString(),
+                  params
+               )
+
+               if (result === false) {
+                  throw new Error(
+                     'messageHandler function failed, see status log in jobExecution for more information'
+                  )
+               }
 
                // 2. Acknowledge the message only after successful processing
                channel.ack(msg)

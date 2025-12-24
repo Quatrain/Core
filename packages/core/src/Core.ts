@@ -1,6 +1,3 @@
-import { DataObject } from './components/DataObject'
-import { User } from './components/User'
-import { DataObjectClass } from './components/types/DataObjectClass'
 import {
    AbstractLoggerAdapter,
    DefaultLoggerAdapter,
@@ -17,8 +14,6 @@ export class Core {
    static readonly classRegistry: { [key: string]: any } = {}
    static readonly logLevel = LogLevel.DEBUG
    static readonly logger: AbstractLoggerAdapter = this.addLogger()
-
-   static userClass = User
 
    static addLogger(alias: string = this.name) {
       return Log.addLogger(
@@ -116,13 +111,12 @@ export class Core {
       return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
    }
 
-   /**
-    * Returns the class to use for a data object
-    * This is currently just a stub that will be implemented from config in the future
-    * @returns DataObjectClass
-    */
-   static getDataObjectClass(): DataObjectClass<any> {
-      return DataObject.prototype
+   static get userClass() {
+      return this.getClass('User')
+   }
+
+   static set userClass(cls: any) {
+      this.addClass('User', cls)
    }
 
    static log(...message: any): void {

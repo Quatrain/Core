@@ -204,6 +204,7 @@ export abstract class AbstractStorageAdapter
                {
                   ...file,
                   ref: thumbnailRef,
+                  contentType: 'image/png',
                },
                createReadStream(localThmbFilePath)
             )

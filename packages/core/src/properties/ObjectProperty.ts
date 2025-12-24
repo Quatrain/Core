@@ -63,7 +63,6 @@ export class ObjectProperty extends BaseProperty {
                   Core.debug(`Converting dataObject -> instance`)
                   return Reflect.construct(this._instanceOf, [this._value])
                } else if (this._value instanceof ObjectUri) {
-
                   Core.debug(`Converting objectUri -> dataObject -> instance`)
                   const dao = DataObject.factory({
                      properties: Reflect.get(

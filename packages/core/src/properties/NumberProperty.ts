@@ -38,7 +38,7 @@ export class NumberProperty extends BaseProperty {
    protected _suffix: string = ''
    protected _precision: number = 0
 
-   protected _value: number | undefined
+   declare protected _value: number | undefined
 
    constructor(config: NumberPropertyType) {
       super(config)

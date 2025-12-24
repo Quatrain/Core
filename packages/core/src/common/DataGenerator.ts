@@ -1,7 +1,7 @@
-import { Backend } from '../Backend'
-import { AbstractObject } from '@quatrain/core'
-import * as htmlType from '@quatrain/core/lib/properties/types/PropertyHTMLType'
+import { AbstractObject } from '../components/AbstractObject'
+import * as htmlType from '../properties/types/PropertyHTMLType'
 import { faker } from '@faker-js/faker'
+import { Core } from '..'
 
 /**
  * Generate data from model of object and save it in default backend
@@ -16,12 +16,12 @@ export const DataGenerator = async <T extends AbstractObject>(
    forcedValues: any = {}
 ): Promise<any> => {
    const promises: any = []
-   Backend.log(`Starting to create ${qty} ${model.constructor.name} records`)
+   Core.info(`Starting to create ${qty} ${model.constructor.name} records`)
    for (let i = 0; i < qty; i++) {
       const dao = await model.dataObject.clone()
 
       Object.keys(dao.properties).forEach((key) => {
-         Backend.log(`Getting property for '${key}'`)
+         Core.debug(`Getting property for '${key}'`)
          const property = dao.get(key)
 
          if (forcedValues[key]) {
@@ -74,7 +74,6 @@ export const DataGenerator = async <T extends AbstractObject>(
          }
       })
 
-      await dao.save()
       promises.push(dao)
    }
 

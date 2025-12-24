@@ -8,8 +8,6 @@ import { Entity } from './Entity'
 
 export {
    DataObject,
-   DataObjectParams,
-   DataObjectClass,
    ObjectUri,
    AbstractObject,
    User,
@@ -17,3 +15,4 @@ export {
    BaseObjectProperties,
    UserProperties,
 }
+export type { DataObjectParams, DataObjectClass }

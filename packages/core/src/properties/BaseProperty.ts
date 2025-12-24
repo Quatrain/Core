@@ -27,7 +27,7 @@ export class BaseProperty implements PropertyClassType {
    protected _value: any = undefined
    protected _mandatory: boolean = false
    protected _protected: boolean = false
-   protected _allows: String[] = []
+   protected _allows: string[] = []
    protected _htmlType: PropertyHTMLType = 'off'
    protected _defaultValue: any
    protected _hasChanged: boolean
@@ -116,7 +116,9 @@ export class BaseProperty implements PropertyClassType {
       // console.log(transform && transform(this._value), typeof transform);
       return typeof transform === 'function'
          ? transform(this._value)
-         : this._value || this._defaultValue
+         : this._value !== undefined
+         ? this._value
+         : this._defaultValue
    }
 
    protected _enable(value: boolean | undefined) {

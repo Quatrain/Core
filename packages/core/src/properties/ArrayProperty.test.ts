@@ -1,5 +1,5 @@
-import { ArrayProperty } from '../ArrayProperty'
-import { StringProperty } from '../StringProperty'
+import { ArrayProperty } from './ArrayProperty'
+import { StringProperty } from './StringProperty'
 
 const arrayValue = ['ab', 'cd', 'ef']
 const transformer = (array: Array<string>) => array.join()

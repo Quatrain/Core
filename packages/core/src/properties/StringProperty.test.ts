@@ -1,4 +1,4 @@
-import { StringProperty } from '../StringProperty'
+import { StringProperty } from './StringProperty'
 
 describe('String Property without digits', () => {
    const prop = new StringProperty({ name: 'toto', allowDigits: false })

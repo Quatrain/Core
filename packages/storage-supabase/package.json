@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/storage-supabase",
-   "version": "1.1.15",
+   "version": "1.1.18",
    "description": "Storage adapter for Supabase Storage",
    "main": "lib/index.js",
    "types": "lib/index.d.ts",
@@ -14,7 +14,7 @@
       "@tsconfig/recommended": "^1.0.1",
       "@types/jest": "^27.0.3",
       "@types/node": "^22.10.1",
-      "jest": "^27.4.7",
+      "jest": "^30.2.0",
       "jest-node-exports-resolver": "^1.1.6",
       "trace-unhandled": "^2.0.1",
       "ts-jest": "^27.1.2",
@@ -22,10 +22,10 @@
       "typescript": "^5.1.5"
    },
    "dependencies": {
-      "@quatrain/core": "^1.1.23",
-      "@quatrain/storage": "^1.1.21",
+      "@quatrain/core": "^1.1.24",
+      "@quatrain/storage": "^1.1.23",
       "@supabase/storage-js": "^2.7.2",
-      "@supabase/supabase-js": "^2.57.2"
+      "@supabase/supabase-js": "^2.87.3"
    },
    "scripts": {
       "test-ci": "jest --runInBand",

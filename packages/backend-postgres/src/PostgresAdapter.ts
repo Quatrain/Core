@@ -218,7 +218,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          )
       }
 
-      Backend.info(`[PGA] Getting document ${path}`)
+      Backend.debug(`[PGA] Getting document ${path}`)
 
       if (!collection) {
          throw new BackendError(
@@ -295,7 +295,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          throw new Error('DataObject has no uid')
       }
 
-      Backend.info(`[PGA] Updating document ${dataObject.path}`)
+      Backend.debug(`[PGA] Updating document ${dataObject.path}`)
 
       // execute middlewares
       await this.executeMiddlewares(dataObject, BackendAction.UPDATE)
@@ -375,7 +375,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
    }
 
    async deleteCollection(collection: string, batchSize = 500): Promise<void> {
-      Backend.log(`Deleting all records from collection '${collection}'`)
+      Backend.debug(`Deleting all records from collection '${collection}'`)
       await this._query(`TRUNCATE TABLE ${collection}`)
    }
 

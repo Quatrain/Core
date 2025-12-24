@@ -19,28 +19,30 @@ import { PropertyTypes } from './types/PropertyTypes'
 export {
    Property,
    BaseProperty,
-   BasePropertyType,
    ArrayProperty,
-   ArrayPropertyType,
    NumberProperty,
-   NumberPropertyType,
    BooleanProperty,
-   BooleanPropertyType,
    DateTimeProperty,
-   DateTimePropertyType,
    EnumProperty,
-   EnumPropertyType,
    ObjectProperty,
-   ObjectPropertyType,
    StringProperty,
-   StringPropertyType,
    HashProperty,
-   HashPropertyType,
    MapProperty,
-   MapPropertyType,
    FileProperty,
-   FilePropertyType,
    CollectionProperty,
+}
+export type {
+   BasePropertyType,
+   ArrayPropertyType,
+   NumberPropertyType,
+   BooleanPropertyType,
+   DateTimePropertyType,
+   EnumPropertyType,
+   ObjectPropertyType,
+   StringPropertyType,
+   HashPropertyType,
+   MapPropertyType,
+   FilePropertyType,
    CollectionPropertyType,
 }
 
@@ -53,7 +55,7 @@ export type DataObjectProperties = (
    | (ObjectPropertyType & BaseType)
    | (StringPropertyType & BaseType)
    | (HashPropertyType & BaseType)
-   | (DateTimeProperty & BaseType)
+   | (DateTimePropertyType & BaseType)
    | (ArrayPropertyType & BaseType)
    | (MapPropertyType & BaseType)
    | (CollectionPropertyType & BaseType)

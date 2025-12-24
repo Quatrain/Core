@@ -1,4 +1,6 @@
-import { ObjectUri, DataObjectClass, DataObject } from '..'
+import { ObjectUri } from './ObjectUri'
+import { DataObjectClass } from './types/DataObjectClass'
+import { DataObject } from './DataObject'
 import { BaseObjectType } from './types/BaseObjectType'
 import { BaseObjectProperties } from './BaseObjectProperties'
 import { AbstractObject } from './AbstractObject'

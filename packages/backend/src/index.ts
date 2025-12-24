@@ -18,6 +18,7 @@ import { PersistedDataObject } from './PersistedDataObject'
 import { CollectionProperty } from './CollectionProperty'
 import { User } from './User'
 import { UserRepository } from './UserRepository'
+import { Repository } from './Repository'
 
 import {
    InjectKeywordsMiddleware,
@@ -56,4 +57,5 @@ export {
    InjectKeywordsMiddlewareParams,
    InjectMetaMiddleware,
    InjectMetaMiddlewareParams,
+   Repository,
 }

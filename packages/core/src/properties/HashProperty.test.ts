@@ -1,4 +1,4 @@
-import { HashProperty } from '../HashProperty'
+import { HashProperty } from './HashProperty'
 
 describe('Hash Property supports MD5 algorithm', () => {
    test('value is hashed with MD5', () => {

@@ -2,12 +2,12 @@
 import { BaseProperty, BasePropertyType } from './BaseProperty'
 
 export interface StringPropertyType extends BasePropertyType {
-   minLength: number
+   minLength?: number
    maxLength?: number
    allowSpaces?: boolean
    allowDigits?: boolean
    allowLetters?: boolean
-   allowPattern?: String
+   allowPattern?: string
    fullSearch?: boolean
 }
 
@@ -27,7 +27,7 @@ export class StringProperty extends BaseProperty {
    protected _maxLength: number = 0
    protected _fullSearch: boolean = false
 
-   protected _value: string | undefined
+   protected declare _value: string | undefined
 
    /**
     * Set to false to bypass some rules
@@ -39,7 +39,6 @@ export class StringProperty extends BaseProperty {
       this.minLength = config.minLength || 0
       this.maxLength = config.maxLength || 0
       this.fullSearch = config.fullSearch || false
-      this._htmlType = config.htmlType || 'off'
       if (this._enable(config.allowSpaces)) {
          this._allows.push(StringProperty.ALLOW_SPACES)
       }
@@ -52,41 +51,33 @@ export class StringProperty extends BaseProperty {
    }
 
    set(value: any, setChanged = true) {
-      if (value !== null && value !== undefined) {
+      if (this._rawValue && value !== null && value !== undefined) {
          if (
-            this._allows.includes(StringProperty.ALLOW_DIGITS) === false &&
+            !this._allows.includes(StringProperty.ALLOW_DIGITS) &&
             /\d/.test(value)
          ) {
             throw new Error(`Digits are not allowed in value`)
          }
 
          if (
-            this._allows.includes(StringProperty.ALLOW_SPACES) === false &&
-            /\s/g.test(value)
+            !this._allows.includes(StringProperty.ALLOW_SPACES) &&
+            /\s/.test(value)
          ) {
             throw new Error(`Spaces are not allowed in value`)
          }
 
          if (
-            this._allows.includes(StringProperty.ALLOW_LETTERS) === false &&
+            !this._allows.includes(StringProperty.ALLOW_LETTERS) &&
             /[a-zA-Z]/.test(value)
          ) {
             throw new Error(`Letters are not allowed in value`)
          }
 
-         if (
-            this._rawValue &&
-            this._minLength > 0 &&
-            value.length < this._minLength
-         ) {
+         if (this._minLength > 0 && value.length < this._minLength) {
             throw new Error(`Value is too short`)
          }
 
-         if (
-            this._rawValue &&
-            this._maxLength > 0 &&
-            value.length > this._maxLength
-         ) {
+         if (this._maxLength > 0 && value.length > this._maxLength) {
             throw new Error(`${this._name}: value '${value}' is too long`)
          }
       }

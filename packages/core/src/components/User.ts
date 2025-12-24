@@ -1,4 +1,4 @@
-import { BaseObject} from './BaseObject'
+import { BaseObject } from './BaseObject'
 import { DataObjectClass } from './types/DataObjectClass'
 import { DateTimeProperty, EnumProperty, ObjectProperty } from '../properties'
 import { HashProperty } from '../properties/HashProperty'
@@ -14,7 +14,7 @@ export interface UserType extends BaseObjectType {
    birthday?: Date
    password: string
    email: string
-   [x:string]: any
+   [x: string]: any
 }
 
 /**

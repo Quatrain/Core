@@ -44,6 +44,7 @@ import {
    NotFoundError,
    GoneError,
 } from './common/ResourcesErrors'
+import { DataObjectParams } from './components/types/DataObjectParams'
 
 export {
    statuses,
@@ -78,6 +79,7 @@ export {
 export type {
    BasePropertyType,
    BooleanPropertyType,
+   DataObjectParams,
    DateTimePropertyType,
    EnumPropertyType,
    HashPropertyType,

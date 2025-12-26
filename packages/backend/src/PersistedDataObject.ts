@@ -2,7 +2,7 @@ import { DataObject as CoreDO, ObjectUri } from '@quatrain/core'
 import { PersistedBaseObject } from './PersistedBaseObject'
 import { Backend } from './Backend'
 import { DataObjectClass } from './types/DataObjectClass'
-import { DataObjectParams } from '@quatrain/core/lib/components/DataObject'
+import { DataObjectParams } from '@quatrain/core'
 import { Persisted } from './types/Persisted'
 
 /**

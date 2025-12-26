@@ -1,4 +1,3 @@
-import { DataObjectProperties } from '../properties'
 import { Property } from '../properties/Property'
 import { PropertyClassType } from '../properties/types/PropertyClassType'
 import { AbstractObject } from './AbstractObject'
@@ -7,6 +6,7 @@ import { NotFoundError } from '../common/ResourcesErrors'
 import { toJSONParams } from './types/toJSONParams'
 import { BaseObject } from './BaseObject'
 import { DataObjectType } from './types/DataObjectType'
+import { DataObjectParams } from './types/DataObjectParams'
 
 export type CoreObject<T extends AbstractObject> = T
 
@@ -15,12 +15,6 @@ export type Properties = { [x: string]: PropertyClassType }
 export interface DataObjectFactoryType {
    path: string
    [x: string]: any
-}
-
-export interface DataObjectParams {
-   uri?: string | ObjectUri
-   properties: DataObjectProperties
-   parentProp?: string
 }
 
 /**

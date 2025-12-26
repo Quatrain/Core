@@ -16,7 +16,6 @@
       "typescript": "^5.2.2"
    },
    "scripts": {
-      "test": "tsc && jest --verbose",
       "build": "yarn workspaces foreach -A run build",
       "push": "yarn version patch && yarn npm publish --access public",
       "bump": "yarn version ${0} && yarn bump:workspaces",

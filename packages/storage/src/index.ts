@@ -7,6 +7,7 @@ import { DownloadFileMetaType } from './types/DownloadFileMetaType'
 import { StorageAdapterInterface } from './StorageAdapterInterface'
 import { AbstractStorageAdapter } from './AbstractStorageAdapter'
 import { Storage, StorageParameters, StorageParametersKeys } from './Storage'
+import { MockAdapter } from './MockAdapter'
 
 export {
    FileType,
@@ -19,5 +20,6 @@ export {
    AbstractStorageAdapter,
    Storage,
    StorageParameters,
-   StorageParametersKeys
+   StorageParametersKeys,
+   MockAdapter,
 }

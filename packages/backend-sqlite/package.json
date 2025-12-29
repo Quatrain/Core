@@ -1,7 +1,7 @@
 {
    "name": "@quatrain/backend-sqlite",
    "version": "1.0.2",
-   "license": "MIT",
+   "license": "AGPL-3.0-only",
    "description": "Backend adapter for SQLite",
    "main": "dist/index.js",
    "types": "dist/index.d.ts",

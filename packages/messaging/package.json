@@ -1,7 +1,7 @@
 {
    "name": "@quatrain/messaging",
    "version": "1.0.3",
-   "license": "MIT",
+   "license": "AGPL-3.0-only",
    "description": "Messaging adapters commons",
    "main": "lib/index.js",
    "types": "lib/index.d.ts",

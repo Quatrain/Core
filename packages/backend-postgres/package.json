@@ -1,7 +1,7 @@
 {
    "name": "@quatrain/backend-postgres",
    "version": "1.1.28",
-   "license": "MIT",
+   "license": "AGPL-3.0-only",
    "description": "Backend adapter for Postgres",
    "main": "lib/index.js",
    "types": "lib/index.d.ts",

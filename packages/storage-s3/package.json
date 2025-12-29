@@ -9,7 +9,7 @@
       "README.md"
    ],
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
-   "license": "MIT",
+   "license": "AGPL-3.0-only",
    "devDependencies": {
       "@tsconfig/recommended": "^1.0.1",
       "@types/jest": "^27.0.3",

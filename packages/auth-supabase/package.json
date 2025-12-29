@@ -1,7 +1,7 @@
 {
    "name": "@quatrain/auth-supabase",
    "version": "1.1.17",
-   "license": "MIT",
+   "license": "AGPL-3.0-only",
    "main": "lib/index.js",
    "types": "lib/index.d.ts",
    "files": [

@@ -1,7 +1,7 @@
 {
    "name": "@quatrain/cloudwrapper",
    "version": "1.1.14",
-   "license": "MIT",
+   "license": "AGPL-3.0-only",
    "description": "Cloud wrappers commons",
    "main": "lib/index.js",
    "types": "lib/index.d.ts",

@@ -1,7 +1,6 @@
 import { Core } from '@quatrain/core'
 import Middleware from './middlewares/Middleware'
 import { AbstractBackendAdapter } from './AbstractBackendAdapter'
-import { User } from './User'
 
 export enum BackendAction {
    CREATE = 'create',
@@ -55,7 +54,7 @@ export type BackendRegistry<T extends AbstractBackendAdapter> = {
 
 export class Backend extends Core {
    static defaultBackend = 'default'
-   static userClass = User
+   static userClass: any
    static logger = this.addLogger('Backend')
 
    protected static _backends: BackendRegistry<any> = {}

@@ -1,5 +1,5 @@
 import { DataObject as CoreDO, ObjectUri } from '@quatrain/core'
-import { PersistedBaseObject } from './PersistedBaseObject'
+import type { PersistedBaseObject } from './PersistedBaseObject'
 import { Backend } from './Backend'
 import { DataObjectClass } from './types/DataObjectClass'
 import { DataObjectParams } from '@quatrain/core'
@@ -92,14 +92,14 @@ export class PersistedDataObject extends CoreDO implements Persisted {
                // ignore
                break
             case 'ObjectProperty':
-               const value: PersistedBaseObject | ObjectUri | undefined =
-                  prop.val()
+               const value: any = prop.val()
                Reflect.set(
                   data,
                   key,
                   value
-                     ? objectsAsReferences && !(value instanceof ObjectUri)
-                        ? value.asReference()
+                     ? objectsAsReferences &&
+                       typeof value.asReference === 'function'
+                        ? (value as PersistedBaseObject).asReference()
                         : value.toJSON
                         ? value.toJSON()
                         : value

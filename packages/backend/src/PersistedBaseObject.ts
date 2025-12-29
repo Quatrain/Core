@@ -3,6 +3,7 @@ import {
    BaseObjectProperties,
    BaseObject,
    BaseObjectType,
+   statuses,
 } from '@quatrain/core'
 import { Query } from './Query'
 import { DataObjectClass } from './types/DataObjectClass'
@@ -82,6 +83,10 @@ export class PersistedBaseObject extends BaseObject {
 
       dao.populateFromData(src as any)
 
+      if (dao.has('status') && dao.val('status') === undefined) {
+         dao.set('status', statuses.CREATED)
+      }
+
       const obj = new this(dao)
 
       return obj
@@ -97,6 +102,10 @@ export class PersistedBaseObject extends BaseObject {
          }
 
          const dao = await this.daoFactory(src, child)
+
+         if (!src && dao.has('status') && dao.val('status') === undefined) {
+            dao.set('status', statuses.CREATED)
+         }
 
          const constructedObject = Reflect.construct(this, [dao])
 

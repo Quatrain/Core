@@ -1,6 +1,6 @@
 export interface BaseObjectType {
    name: string
-   status: string
+   status?: string
    createdBy?: any
    createdAt?: number | string
    updatedBy?: any

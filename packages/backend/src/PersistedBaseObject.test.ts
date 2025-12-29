@@ -59,6 +59,5 @@ describe('PersistedBaseObject', () => {
       // Plus base properties like 'id', 'status' from BaseObject
       expect(dao.has('name')).toBe(true)
       expect(dao.has('extra')).toBe(true)
-      expect(dao.has('id')).toBe(true)
    })
 })

@@ -68,7 +68,10 @@ describe('PersistedDataObject', () => {
    it('should handle deletion', async () => {
       const path = 'items/to-delete'
       MockAdapter.inject({ path, name: 'Delete Me' } as any)
-      const dao = PersistedDataObject.factory({ uri: path })
+      const dao = PersistedDataObject.factory({
+         uri: path,
+         properties: [{ name: 'name', type: StringProperty.TYPE }],
+      })
 
       await dao.delete()
       expect(MockAdapter.getFixture(path)).toBeUndefined()

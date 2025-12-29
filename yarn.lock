@@ -2869,16 +2869,16 @@ __metadata:
     "@faker-js/faker": "npm:^7.6.0"
     "@quatrain/auth": "npm:^1.1.17"
     "@tsconfig/recommended": "npm:^1.0.1"
-    "@types/jest": "npm:^27.0.3"
+    "@types/jest": "npm:^30.0.0"
     "@types/node": "npm:^22.10.1"
     firebase-admin: "npm:^13.0.1"
     jest: "npm:^30.2.0"
     jest-node-exports-resolver: "npm:^1.1.6"
     jest-serial-runner: "npm:^1.2.1"
     trace-unhandled: "npm:^2.0.1"
-    ts-jest: "npm:^27.1.2"
+    ts-jest: "npm:^29.4.1"
     ts-node: "npm:^10.9.1"
-    typescript: "npm:^5.1.5"
+    typescript: "npm:^5.2.2"
   peerDependencies:
     "@quatrain/core": ^1.1.24
   languageName: unknown

@@ -182,15 +182,12 @@ export class SupabaseCloudWrapper extends AbstractCloudWrapper {
                            }
                            break
                         case 'timeout':
-                           CloudWrapper.warn(
-                              `⚠️ Supabase Realtime connection timed out`
-                           )
-                           break
+                        case 'error':
                         case 'disconnected':
                            // Reconnect only if exitOnDisconnect is explicitly set to false.
                            if (this._params.exitOnDisconnect === false) {
                               CloudWrapper.warn(
-                                 `❌ Supabase connection lost. Attempting to reconnect...`
+                                 `❌ Supabase connection lost (status: ${status}). Attempting to reconnect...`
                               )
                               this._isInitialized = false
                               this._heartbeatOkReceived = false
@@ -198,7 +195,7 @@ export class SupabaseCloudWrapper extends AbstractCloudWrapper {
                            } else {
                               // Default behavior: exit to allow for a clean restart by the orchestrator.
                               CloudWrapper.error(
-                                 `❌ Supabase connection lost. Exiting to allow for a clean restart.`
+                                 `❌ Supabase connection lost (status: ${status}). Exiting to allow for a clean restart.`
                               )
                               process.exit(1)
                            }

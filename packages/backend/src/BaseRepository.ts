@@ -66,18 +66,32 @@ export class BaseRepository<T extends BaseObjectType> {
             ? new Date().toISOString()
             : Date.now()
          switch (action) {
-            // add properties existence validation
             case BackendAction.CREATE:
-               dataObject.set('createdBy', BaseRepository.currentUser)
-               dataObject.set('createdAt', date)
+               // Only set if not already populated
+               if (!dataObject.val('createdBy')) {
+                  dataObject.set('createdBy', BaseRepository.currentUser)
+               }
+               if (!dataObject.val('createdAt')) {
+                  dataObject.set('createdAt', date)
+               }
                break
             case BackendAction.UPDATE:
-               dataObject.set('updatedBy', BaseRepository.currentUser)
-               dataObject.set('updatedAt', date)
+               // Only set if not already populated
+               if (!dataObject.val('updatedBy')) {
+                  dataObject.set('updatedBy', BaseRepository.currentUser)
+               }
+               if (!dataObject.val('updatedAt')) {
+                  dataObject.set('updatedAt', date)
+               }
                break
             case BackendAction.DELETE:
-               dataObject.set('deletedBy', BaseRepository.currentUser)
-               dataObject.set('deletedAt', date)
+               // Only set if not already populated
+               if (!dataObject.val('deletedBy')) {
+                  dataObject.set('deletedBy', BaseRepository.currentUser)
+               }
+               if (!dataObject.val('deletedAt')) {
+                  dataObject.set('deletedAt', date)
+               }
                break
             default:
                Backend.warn(`Unrecognized action: '${action}'`)

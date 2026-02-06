@@ -2908,7 +2908,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/auth@workspace:packages/auth"
   dependencies:
-    "@quatrain/backend": "npm:^1.1.23"
+    "@quatrain/backend": "npm:^1.1.25"
     "@quatrain/core": "npm:^1.1.39"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^27.0.3"
@@ -2949,7 +2949,7 @@ __metadata:
   resolution: "@quatrain/backend-postgres@workspace:packages/backend-postgres"
   dependencies:
     "@faker-js/faker": "npm:^7.6.0"
-    "@quatrain/backend": "npm:^1.1.23"
+    "@quatrain/backend": "npm:^1.1.25"
     "@quatrain/core": "workspace:^"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^27.0.3"
@@ -2973,7 +2973,7 @@ __metadata:
   dependencies:
     "@faker-js/faker": "npm:^7.6.0"
     "@jest/expect": "npm:^30.0.0"
-    "@quatrain/backend": "npm:^1.1.23"
+    "@quatrain/backend": "npm:^1.1.25"
     "@quatrain/core": "workspace:^"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^30.0.0"
@@ -2989,7 +2989,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/backend@npm:^1.1.23, @quatrain/backend@workspace:packages/backend":
+"@quatrain/backend@npm:^1.1.25, @quatrain/backend@workspace:packages/backend":
   version: 0.0.0-use.local
   resolution: "@quatrain/backend@workspace:packages/backend"
   dependencies:
@@ -3035,7 +3035,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/cloudwrapper-supabase@workspace:packages/cloudwrapper-supabase"
   dependencies:
-    "@quatrain/backend": "npm:^1.1.23"
+    "@quatrain/backend": "npm:^1.1.25"
     "@quatrain/cloudwrapper": "npm:^1.1.14"
     "@supabase/supabase-js": "npm:^2.87.3"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -3071,7 +3071,7 @@ __metadata:
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.2.2"
   peerDependencies:
-    "@quatrain/backend": ^1.1.23
+    "@quatrain/backend": ^1.1.25
     "@quatrain/core": ^1.1.39
   languageName: unknown
   linkType: soft

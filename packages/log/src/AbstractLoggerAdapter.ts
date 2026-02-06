@@ -42,10 +42,11 @@ export abstract class AbstractLoggerAdapter implements LoggerType {
       messages: any[],
       loglevel: LogLevel = LogLevel.INFO
    ): string => {
-      const msgs = Array.isArray(messages) ? [...messages] : [messages]
+      // Flatten nested arrays (from rest parameter spreading)
+      const flatMessages = messages.flat()
 
-      msgs.unshift(`${new Date().toISOString()} - [${this._me}]`)
-      const strs = msgs.map((message: any) => {
+      const prefix = `${new Date().toISOString()} - [${this._me}]`
+      const strs = flatMessages.map((message: any) => {
          if (message instanceof Error) {
             return message.stack || message.message
          }
@@ -55,7 +56,7 @@ export abstract class AbstractLoggerAdapter implements LoggerType {
          return String(message)
       })
 
-      return strs.join(' ')
+      return `${prefix} ${strs.join(' ')}`
    }
 
    /**

@@ -20,7 +20,22 @@ import {
    CollectionHierarchy,
 } from '@quatrain/backend'
 import { randomUUID } from 'crypto'
-import { Pool, PoolClient, PoolConfig } from 'pg'
+import { Pool, PoolClient, PoolConfig, types } from 'pg'
+
+// PostgreSQL type OIDs for timestamp types
+const TIMESTAMP_OID = 1114 // timestamp without time zone
+const TIMESTAMPTZ_OID = 1184 // timestamp with time zone
+
+// Configure pg to return timestamps as UTC strings instead of Date objects
+// This prevents the driver from interpreting timestamps in the server's local timezone
+types.setTypeParser(TIMESTAMP_OID, (val: string) => {
+   // Treat TIMESTAMP WITHOUT TIME ZONE as UTC by appending 'Z'
+   return val ? val.replace(' ', 'T') + 'Z' : val
+})
+types.setTypeParser(TIMESTAMPTZ_OID, (val: string) => {
+   // TIMESTAMPTZ already has timezone info, just normalize format
+   return val ? val.replace(' ', 'T') : val
+})
 
 const operatorsMap: { [x: string]: string } = {
    equals: '=',

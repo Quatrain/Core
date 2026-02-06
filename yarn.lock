@@ -2880,7 +2880,7 @@ __metadata:
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.2.2"
   peerDependencies:
-    "@quatrain/core": ^1.1.24
+    "@quatrain/core": ^1.1.39
   languageName: unknown
   linkType: soft
 
@@ -2909,7 +2909,7 @@ __metadata:
   resolution: "@quatrain/auth@workspace:packages/auth"
   dependencies:
     "@quatrain/backend": "npm:^1.1.23"
-    "@quatrain/core": "npm:^1.1.24"
+    "@quatrain/core": "npm:^1.1.39"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^27.0.3"
     "@types/node": "npm:^22.10.1"
@@ -2940,7 +2940,7 @@ __metadata:
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.1.5"
   peerDependencies:
-    "@quatrain/core": ^1.1.24
+    "@quatrain/core": ^1.1.39
   languageName: unknown
   linkType: soft
 
@@ -2994,7 +2994,7 @@ __metadata:
   resolution: "@quatrain/backend@workspace:packages/backend"
   dependencies:
     "@faker-js/faker": "npm:^7.6.0"
-    "@quatrain/core": "npm:^1.1.24"
+    "@quatrain/core": "npm:^1.1.39"
     "@quatrain/log": "npm:^1.0.3"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^30.0.0"
@@ -3027,7 +3027,7 @@ __metadata:
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.1.5"
   peerDependencies:
-    "@quatrain/core": ^1.1.24
+    "@quatrain/core": ^1.1.39
   languageName: unknown
   linkType: soft
 
@@ -3051,7 +3051,7 @@ __metadata:
     typescript: "npm:^5.2.2"
     ws: "npm:^8.18.3"
   peerDependencies:
-    "@quatrain/core": ^1.1.24
+    "@quatrain/core": ^1.1.39
   languageName: unknown
   linkType: soft
 
@@ -3072,11 +3072,11 @@ __metadata:
     typescript: "npm:^5.2.2"
   peerDependencies:
     "@quatrain/backend": ^1.1.23
-    "@quatrain/core": ^1.1.24
+    "@quatrain/core": ^1.1.39
   languageName: unknown
   linkType: soft
 
-"@quatrain/core@npm:^1.1.24, @quatrain/core@workspace:^, @quatrain/core@workspace:packages/core":
+"@quatrain/core@npm:^1.1.39, @quatrain/core@workspace:^, @quatrain/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@quatrain/core@workspace:packages/core"
   dependencies:
@@ -3132,7 +3132,7 @@ __metadata:
     ts-jest: "npm:^27.1.2"
     typescript: "npm:^5.1.5"
   peerDependencies:
-    "@quatrain/core": ^1.1.24
+    "@quatrain/core": ^1.1.39
   languageName: unknown
   linkType: soft
 
@@ -3140,7 +3140,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/messaging@workspace:packages/messaging"
   dependencies:
-    "@quatrain/core": "npm:^1.1.24"
+    "@quatrain/core": "npm:^1.1.39"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^27.0.3"
     "@types/mustache": "npm:^4"
@@ -3161,7 +3161,7 @@ __metadata:
   resolution: "@quatrain/queue-amqp@workspace:packages/queue-amqp"
   dependencies:
     "@cloudamqp/amqp-client": "npm:^3.4.1"
-    "@quatrain/core": "npm:^1.1.24"
+    "@quatrain/core": "npm:^1.1.39"
     "@quatrain/queue": "npm:^1.1.19"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/amqplib": "npm:^0.10.8"
@@ -3204,7 +3204,7 @@ __metadata:
   resolution: "@quatrain/queue-gcp@workspace:packages/queue-gcp"
   dependencies:
     "@google-cloud/pubsub": "npm:^4.7.0"
-    "@quatrain/core": "npm:^1.1.24"
+    "@quatrain/core": "npm:^1.1.39"
     "@quatrain/queue": "npm:^1.1.19"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/fs-extra": "npm:^11.0.4"
@@ -3224,7 +3224,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/queue@workspace:packages/queue"
   dependencies:
-    "@quatrain/core": "npm:^1.1.24"
+    "@quatrain/core": "npm:^1.1.39"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/fs-extra": "npm:^11.0.4"
     "@types/jest": "npm:^27.0.3"
@@ -3244,7 +3244,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/storage-firebase@workspace:packages/storage-firebase"
   dependencies:
-    "@quatrain/core": "npm:^1.1.24"
+    "@quatrain/core": "npm:^1.1.39"
     "@quatrain/storage": "npm:^1.1.23"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/fs-extra": "npm:^11.0.4"
@@ -3286,7 +3286,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/storage-supabase@workspace:packages/storage-supabase"
   dependencies:
-    "@quatrain/core": "npm:^1.1.24"
+    "@quatrain/core": "npm:^1.1.39"
     "@quatrain/storage": "npm:^1.1.23"
     "@supabase/storage-js": "npm:^2.7.2"
     "@supabase/supabase-js": "npm:^2.87.3"
@@ -3306,7 +3306,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/storage@workspace:packages/storage"
   dependencies:
-    "@quatrain/core": "npm:^1.1.24"
+    "@quatrain/core": "npm:^1.1.39"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/child-process-promise": "npm:^2"
     "@types/fs-extra": "npm:^11.0.4"
@@ -3326,7 +3326,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/worker@workspace:packages/worker"
   dependencies:
-    "@quatrain/core": "npm:^1.1.24"
+    "@quatrain/core": "npm:^1.1.39"
     "@quatrain/queue": "npm:^1.1.19"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/fluent-ffmpeg": "npm:^2"

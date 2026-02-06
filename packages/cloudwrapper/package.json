@@ -12,7 +12,7 @@
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "peerDependencies": {
       "@quatrain/backend": "^1.1.23",
-      "@quatrain/core": "^1.1.24"
+      "@quatrain/core": "^1.1.39"
    },
    "devDependencies": {
       "@tsconfig/recommended": "^1.0.1",
@@ -34,8 +34,8 @@
       "hash": "node ../../bin/hashFolder.js",
       "hash:persist": "yarn hash  > .hash_latest.txt",
       "hash:compare": "yarn hash > .hash_newest.txt && cmp -s .hash_latest.txt .hash_newest.txt",
-      "publish": "yarn hash:compare || yarn publish:process",
-      "publish:process": "yarn version patch && yarn build && yarn npm publish --access public && yarn hash:persist"
+      "release": "yarn hash:compare || yarn release:process",
+      "release:process": "yarn version patch && yarn build && npm publish --access public && yarn hash:persist"
    },
    "dependencies": {
       "@quatrain/storage": "^1.1"

@@ -22,7 +22,18 @@ export class DateTimeProperty extends BaseProperty {
    set(value: string | Date | number, setChanged = true) {
       if (value && DateTimeProperty.RETURN_AS === 'unix_timestamp') {
          if (typeof value === 'string') {
-            value = Date.parse(value)
+            // Parse date strings as UTC
+            // If the string already has timezone info (ends with Z or +/-offset), use as-is
+            // Otherwise, treat as UTC by appending 'Z'
+            let utcString = value.trim()
+            if (
+               !utcString.endsWith('Z') &&
+               !/[+-]\d{2}:\d{2}$/.test(utcString)
+            ) {
+               // Replace space with T for ISO format and append Z for UTC
+               utcString = utcString.replace(' ', 'T') + 'Z'
+            }
+            value = Date.parse(utcString)
          } else if (typeof value === 'object') {
             value = (value as Date).getTime()
          }

@@ -130,7 +130,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
     */
    protected _prepareData(data: any, filterNulls = true) {
       if (filterNulls) {
-         data = Object.values(data).filter((v) => v !== null && v !== '')
+         data = Object.values(data).filter((v) => v !== null)
       } else {
          data = Object.values(data)
       }
@@ -327,32 +327,53 @@ export class PostgresAdapter extends AbstractBackendAdapter {
       }
 
       Backend.debug(`[PGA] Data to update ${JSON.stringify(data)}`)
-      const pgData = this._prepareData(data, true)
-      Backend.debug(`[PGA] Filtered data to update ${JSON.stringify(pgData)}`)
 
-      if (pgData.length > 0) {
-         let query = `UPDATE ${dataObject.uri.collection?.toLowerCase()} SET `
-         let i = 1
-         Object.keys(dataObject.properties).forEach((key) => {
-            const prop = dataObject.get(key)
-            if (prop.hasChanged === true || Reflect.has(data, key)) {
-               // TODO Fix hasChanged erratic value
-               query += `${i > 1 ? ', ' : ''}${key.toLowerCase()} = `
-               if (prop.constructor.name === 'DateTimeProperty') {
-                  query += `to_timestamp($${i})`
-               } else {
-                  query += `$${i}`
-               }
-               i++
+      const updates: string[] = []
+      const values: any[] = []
+      let i = 1
+
+      Object.entries(data).forEach(([key, value]: [string, any]) => {
+         const prop = dataObject.get(key)
+
+         // Handle foreign key references
+         if (
+            this._params['useNativeForeignKeys'] &&
+            this._params['useNativeForeignKeys'] === true &&
+            typeof value === 'object' &&
+            value !== null &&
+            Reflect.has(value, 'ref')
+         ) {
+            const resourcePart = value.ref.split('/').pop()
+            if (resourcePart.indexOf('.') === -1) {
+               value = resourcePart
             }
-         })
+         }
 
-         query += ` WHERE id = '${dataObject.uid}'`
+         // Serialize objects and arrays to JSON strings
+         if (
+            Array.isArray(value) ||
+            (typeof value === 'object' && value !== null)
+         ) {
+            value = JSON.stringify(value)
+         }
+
+         if (prop && prop.constructor.name === 'DateTimeProperty') {
+            updates.push(`${key.toLowerCase()} = to_timestamp($${i})`)
+         } else {
+            updates.push(`${key.toLowerCase()} = $${i}`)
+         }
+
+         values.push(value)
+         i++
+      })
+
+      if (updates.length > 0) {
+         const query = `UPDATE ${dataObject.uri.collection?.toLowerCase()} SET ${updates.join(', ')} WHERE id = '${dataObject.uid}'`
 
          Backend.debug(`[PGA] ${query}`)
-         Backend.debug(`[PGA] Values ${JSON.stringify(pgData)}`)
+         Backend.debug(`[PGA] Values ${JSON.stringify(values)}`)
 
-         await this._query(query, pgData)
+         await this._query(query, values)
       } else {
          Backend.warn(`[PGA] No data to update`)
       }

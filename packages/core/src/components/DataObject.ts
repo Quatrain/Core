@@ -352,12 +352,12 @@ export class DataObject implements DataObjectType {
                Reflect.set(
                   data,
                   key,
-                  prop.val(Reflect.get(converters, 'datetime')) || null
+                  prop.val(Reflect.get(converters, 'datetime')) ?? null
                )
                break
 
             default:
-               Reflect.set(data, key, prop.val() || null)
+               Reflect.set(data, key, prop.val() ?? null)
                break
          }
       })

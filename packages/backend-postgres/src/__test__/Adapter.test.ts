@@ -67,7 +67,7 @@ describe('PostgresAdapter Tests', () => {
             count: 42
          }
          const result = (adapter as any)._prepareData(data, true)
-         expect(result).toEqual(['Test', 42])
+         expect(result).toEqual(['Test', '', 42])
       })
 
       test('should include null values when filterNulls is false', () => {

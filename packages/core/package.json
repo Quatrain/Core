@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/core",
-   "version": "1.1.39",
+   "version": "1.1.42",
    "description": "Core objects for business apps",
    "main": "dist/index.js",
    "types": "dist/index.d.ts",
@@ -40,7 +40,7 @@
       "hash:persist": "yarn hash  > .hash_latest.txt",
       "hash:compare": "yarn hash > .hash_newest.txt && cmp -s .hash_latest.txt .hash_newest.txt",
       "release": "yarn hash:compare || yarn release:process",
-      "release:process": "yarn version patch && yarn build && npm publish --access public && yarn hash:persist"
+      "release:process": "yarn version patch && yarn build && yarn pack --out package.tgz && npm publish package.tgz --access public && rm package.tgz && yarn hash:persist"
    },
    "_moduleAliases": {
       "@core": "."

@@ -11,7 +11,7 @@
    ],
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "peerDependencies": {
-      "@quatrain/core": "^1.1.39"
+      "@quatrain/core": "^1.1.42"
    },
    "dependencies": {
       "firebase-admin": "^13.4.0"
@@ -38,6 +38,6 @@
       "hash:persist": "yarn hash  > .hash_latest.txt",
       "hash:compare": "yarn hash > .hash_newest.txt && cmp -s .hash_latest.txt .hash_newest.txt",
       "release": "yarn hash:compare || yarn release:process",
-      "release:process": "yarn version patch && yarn build && npm publish --access public && yarn hash:persist"
+      "release:process": "yarn version patch && yarn build && yarn pack --out package.tgz && npm publish package.tgz --access public && rm package.tgz && yarn hash:persist"
    }
 }

@@ -97,10 +97,10 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             host = 'localhost',
             port = 6543,
             database = 'postgres',
-            max = 100,
+            max = 20, // Lower per-process default
          }: PoolConfig = this._params.config
          Backend.info(
-            `Creating Postgres Pool on postgresql://${host}:${port}/${database}`
+            `Creating Postgres Pool on postgresql://${host}:${port}/${database} (max: ${max})`
          )
          this._pool = new Pool({
             host,
@@ -109,8 +109,8 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             user,
             password,
             max,
-            //connectionTimeoutMillis: 5000,
-            //idleTimeoutMillis: 5000,
+            connectionTimeoutMillis: 10000,
+            idleTimeoutMillis: 3000,
          })
       }
 
@@ -119,7 +119,23 @@ export class PostgresAdapter extends AbstractBackendAdapter {
 
    protected async _query(sql: string, params: any[] = []) {
       const connection = await this._connect()
-      return connection.query(sql, params).finally(() => connection.release())
+      try {
+         return await connection.query(sql, params)
+      } finally {
+         connection.release()
+      }
+   }
+
+   /**
+    * Disconnect the pool and close all idle connections.
+    */
+   async disconnect() {
+      if (this._pool) {
+         Backend.info('[PGA] Shutting down Postgres connection pool...')
+         await this._pool.end()
+         this._pool = undefined
+         Backend.info('[PGA] Connection pool has been shut down.')
+      }
    }
 
    /**

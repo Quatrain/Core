@@ -12,11 +12,66 @@ const options = {
     files: { include: ['*.js', '*.ts', '*.json', '*.md'] }
 };
 
+// Explicit build order respecting dependency graph.
+// 'yarn workspaces foreach -ptA' only orders by dependencies/devDependencies,
+// NOT peerDependencies — so packages that declare internal deps as peerDeps
+// (e.g. backend-firestore → @quatrain/backend) end up built out of order.
+const BUILD_ORDER = [
+    // Layer 0: no internal deps
+    'log',
+    // Layer 1: depends on log only
+    'core',
+    // Layer 2: depends on core
+    'backend',
+    'messaging',
+    'queue',
+    'storage',
+    // Layer 3: depends on backend / queue / storage
+    'auth',
+    'cloudwrapper',         // depends on backend + storage
+    'backend-firestore',    // depends on backend (peerDep)
+    'backend-postgres',     // depends on backend
+    'backend-sqlite',       // depends on backend
+    'queue-amqp',           // depends on queue
+    'queue-aws',            // depends on queue
+    'queue-gcp',            // depends on queue
+    'storage-firebase',     // depends on storage
+    'storage-s3',           // depends on storage
+    'storage-supabase',     // depends on storage
+    // Layer 4: depends on cloudwrapper / auth
+    'cloudwrapper-firebase',  // depends on cloudwrapper (peerDep) + backend (peerDep)
+    'cloudwrapper-supabase',  // depends on cloudwrapper + backend
+    'auth-firebase',          // depends on auth
+    'auth-supabase',          // depends on auth
+    'messaging-firebase',     // depends on messaging
+    // Layer 5: depends on queue
+    'worker',
+];
+
 async function publishAll() {
     let changed = false;
-    
-    console.log('[PREPARE] Building all workspaces topologically...');
-    execSync('yarn build', { cwd: path.join(__dirname, '..'), stdio: 'inherit' });
+
+    console.log('[PREPARE] Building all workspaces in explicit dependency order...');
+    for (const pkg of BUILD_ORDER) {
+        const pkgDir = path.join(packagesDir, pkg);
+        if (!fs.existsSync(pkgDir)) {
+            console.log(`[BUILD] Skipping unknown package '${pkg}'`);
+            continue;
+        }
+        console.log(`[BUILD] Building ${pkg}...`);
+        execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
+    }
+    // Build anything not listed in BUILD_ORDER last (no guaranteed order)
+    const allPkgs = fs.readdirSync(packagesDir).filter(p =>
+        fs.statSync(path.join(packagesDir, p)).isDirectory() &&
+        !BUILD_ORDER.includes(p)
+    );
+    for (const pkg of allPkgs) {
+        const pkgDir = path.join(packagesDir, pkg);
+        if (!fs.existsSync(path.join(pkgDir, 'package.json'))) continue;
+        console.log(`[BUILD] Building ${pkg} (unlisted)...`);
+        execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
+    }
 
     const packages = fs.readdirSync(packagesDir);
     

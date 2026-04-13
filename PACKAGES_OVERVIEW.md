@@ -621,7 +621,7 @@ The framework follows a consistent pattern across all packages:
 
 ## 📄 License
 
-MIT License - See individual package.json files for details.
+AGPL v3 License - See individual package.json files for details.
 
 ---
 

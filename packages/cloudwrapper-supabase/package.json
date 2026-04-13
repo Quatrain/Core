@@ -10,7 +10,9 @@
    },
    "main": "lib/index.js",
    "types": "lib/index.d.ts",
+   "bun": "src/index.ts",
    "files": [
+      "LICENSE.md",
       "src/",
       "lib/",
       "README.md"
@@ -47,6 +49,6 @@
       "hash:persist": "yarn hash  > .hash_latest.txt",
       "hash:compare": "yarn hash > .hash_newest.txt && cmp -s .hash_latest.txt .hash_newest.txt",
       "release": "yarn hash:compare || yarn release:process",
-      "release:process": "yarn version patch && yarn build && yarn pack --out package.tgz && npm publish package.tgz --access public && rm package.tgz && yarn hash:persist"
+      "release:process": "yarn version patch && yarn build && cp ../../LICENSE.md . && yarn pack --out package.tgz && npm publish package.tgz --access public && rm package.tgz && yarn hash:persist"
    }
 }

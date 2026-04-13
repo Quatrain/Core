@@ -5,7 +5,7 @@ import { PubSub } from '@google-cloud/pubsub'
 export class PubSubQueueAdapter extends AbstractQueueAdapter {
    constructor(params: QueueParameters) {
       super(params)
-      const { projectId, keyFilename } = params.config || {}
+      const { projectId, keyFilename } = (params.config as any) || {}
 
       this._client = new PubSub({
          projectId,

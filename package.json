@@ -2,7 +2,7 @@
    "name": "core-monorepo",
    "description": "Core objects for business apps monorepo",
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
-   "license": "MIT",
+   "license": "AGPL-3.0-only",
    "version": "1.1.11",
    "devDependencies": {
       "@tsconfig/recommended": "^1.0.1",
@@ -17,7 +17,7 @@
       "typescript": "^5.2.2"
    },
    "scripts": {
-      "build": "yarn workspaces foreach -A run build",
+      "build": "yarn workspaces foreach -ptA --exclude core-monorepo run build",
       "publish:all": "node bin/publish_all.js"
    },
    "private": true,

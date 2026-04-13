@@ -23,7 +23,7 @@ import {
 import { randomUUID } from 'crypto'
 import sqlite3, { Statement } from 'sqlite3'
 import { open, Database } from 'sqlite'
-import { AbstractPropertyType } from '@quatrain/core/lib/properties/types/AbstractPropertyType'
+import { AbstractPropertyType } from '@quatrain/core/dist/properties/types/AbstractPropertyType'
 
 const operatorsMap: { [x: string]: string } = {
    equals: '=',

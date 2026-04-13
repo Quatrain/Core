@@ -14,6 +14,10 @@ const options = {
 
 async function publishAll() {
     let changed = false;
+    
+    console.log('[PREPARE] Building all workspaces topologically...');
+    execSync('yarn build', { cwd: path.join(__dirname, '..'), stdio: 'inherit' });
+
     const packages = fs.readdirSync(packagesDir);
     
     for (const pkg of packages) {
@@ -40,7 +44,6 @@ async function publishAll() {
                 const updatedPkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
                 const newVersion = updatedPkgJson.version;
                 
-                execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
                 execSync('cp ../../LICENSE.md .', { cwd: pkgDir, stdio: 'inherit' });
                 execSync('yarn pack --out package.tgz', { cwd: pkgDir, stdio: 'inherit' });
                 

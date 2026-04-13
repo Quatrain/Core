@@ -370,7 +370,10 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             Array.isArray(value) ||
             (typeof value === 'object' && value !== null)
          ) {
-            value = JSON.stringify(value)
+            value =
+               Array.isArray(value) && value.length > 0
+                  ? value
+                  : JSON.stringify(value)
          }
 
          if (prop && prop.constructor.name === 'DateTimeProperty') {

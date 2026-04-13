@@ -18,10 +18,7 @@
    },
    "scripts": {
       "build": "yarn workspaces foreach -A run build",
-      "push": "yarn version patch && yarn npm publish --access public",
-      "bump": "yarn version ${0} && yarn bump:workspaces",
-      "bump:workspaces": "yarn workspaces foreach -A run bump-to $npm_package_version",
-      "publish": "yarn workspaces foreach -A run publish"
+      "publish:all": "node bin/publish_all.js"
    },
    "private": true,
    "workspaces": [

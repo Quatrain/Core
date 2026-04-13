@@ -33,12 +33,7 @@
       "test-ci": "jest --runInBand",
       "build": "tsc",
       "wbuild": "tsc --watch",
-      "bump-to": "yarn version",
-      "hash": "node ../../bin/hashFolder.js",
-      "hash:persist": "yarn hash  > .hash_latest.txt",
-      "hash:compare": "yarn hash > .hash_newest.txt && cmp -s .hash_latest.txt .hash_newest.txt",
-      "release": "yarn hash:compare || yarn release:process",
-      "release:process": "yarn version patch && yarn build && cp ../../LICENSE.md . && yarn pack --out package.tgz && npm publish package.tgz --access public && rm package.tgz && yarn hash:persist"
+      "bump-to": "yarn version"
    },
    "dependencies": {
       "@quatrain/storage": "^1.1"

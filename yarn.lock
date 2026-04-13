@@ -2866,7 +2866,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/auth-firebase@workspace:packages/auth-firebase"
   dependencies:
-    "@quatrain/auth": "npm:^1.1.17"
+    "@quatrain/auth": "npm:^1.1.18"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^30.0.0"
     "@types/node": "npm:^22.10.1"
@@ -2888,7 +2888,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/auth-supabase@workspace:packages/auth-supabase"
   dependencies:
-    "@quatrain/auth": "npm:^1.1.17"
+    "@quatrain/auth": "npm:^1.1.18"
     "@supabase/supabase-js": "npm:^2.87.3"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^30.0.0"
@@ -2904,7 +2904,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/auth@npm:^1.1.17, @quatrain/auth@workspace:packages/auth":
+"@quatrain/auth@npm:^1.1.18, @quatrain/auth@workspace:packages/auth":
   version: 0.0.0-use.local
   resolution: "@quatrain/auth@workspace:packages/auth"
   dependencies:

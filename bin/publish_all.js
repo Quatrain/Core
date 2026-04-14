@@ -62,30 +62,11 @@ async function publishAll() {
         // Non-fatal: proceed even if find/delete fails
     }
 
-    console.log('[PREPARE] Building all workspaces in explicit dependency order...');
-    for (const pkg of BUILD_ORDER) {
-        const pkgDir = path.join(packagesDir, pkg);
-        if (!fs.existsSync(pkgDir)) {
-            console.log(`[BUILD] Skipping unknown package '${pkg}'`);
-            continue;
-        }
-        console.log(`[BUILD] Building ${pkg}...`);
-        // execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
-    }
-    // Build anything not listed in BUILD_ORDER last (no guaranteed order)
-    const allPkgs = fs.readdirSync(packagesDir).filter(p =>
-        fs.statSync(path.join(packagesDir, p)).isDirectory() &&
-        !BUILD_ORDER.includes(p)
-    );
-    for (const pkg of allPkgs) {
-        const pkgDir = path.join(packagesDir, pkg);
-        if (!fs.existsSync(path.join(pkgDir, 'package.json'))) continue;
-        console.log(`[BUILD] Building ${pkg} (unlisted)...`);
-        // execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
-    }
-
     const packages = fs.readdirSync(packagesDir);
+    const computedHashes = {};
+    const previousDataMap = {};
     
+    console.log('[PREPARE] Computing stable hashes prior to build...');
     for (const pkg of packages) {
         const pkgDir = path.join(packagesDir, pkg);
         if (!fs.statSync(pkgDir).isDirectory()) continue;
@@ -111,9 +92,45 @@ async function publishAll() {
             scripts: pkgJson.scripts || {},
             bin: pkgJson.bin || {}
         })).digest('hex');
-        const hash = `${rawHash}-${depsHash}`;
         
-        const previousData = registry[pkgName] || {};
+        computedHashes[pkgName] = `${rawHash}-${depsHash}`;
+        previousDataMap[pkgName] = registry[pkgName] || {};
+    }
+
+    console.log('[PREPARE] Building all workspaces in explicit dependency order...');
+    for (const pkg of BUILD_ORDER) {
+        const pkgDir = path.join(packagesDir, pkg);
+        if (!fs.existsSync(pkgDir)) {
+            console.log(`[BUILD] Skipping unknown package '${pkg}'`);
+            continue;
+        }
+        console.log(`[BUILD] Building ${pkg}...`);
+        execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
+    }
+    // Build anything not listed in BUILD_ORDER last (no guaranteed order)
+    const allPkgs = fs.readdirSync(packagesDir).filter(p =>
+        fs.statSync(path.join(packagesDir, p)).isDirectory() &&
+        !BUILD_ORDER.includes(p)
+    );
+    for (const pkg of allPkgs) {
+        const pkgDir = path.join(packagesDir, pkg);
+        if (!fs.existsSync(path.join(pkgDir, 'package.json'))) continue;
+        console.log(`[BUILD] Building ${pkg} (unlisted)...`);
+        execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
+    }
+
+    for (const pkg of packages) {
+        const pkgDir = path.join(packagesDir, pkg);
+        if (!fs.statSync(pkgDir).isDirectory()) continue;
+        
+        const pkgJsonPath = path.join(pkgDir, 'package.json');
+        if (!fs.existsSync(pkgJsonPath)) continue;
+        
+        const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+        const pkgName = pkgJson.name;
+        
+        const hash = computedHashes[pkgName];
+        const previousData = previousDataMap[pkgName];
         
         if (previousData.hash !== hash) {
             console.log(`[PUBLISH] Changes detected in ${pkgName}. Releasing...`);

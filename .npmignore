@@ -1,0 +1,10 @@
+node_modules
+.git
+.github
+*.log
+tests/
+__test__/
+*.spec.ts
+*.test.ts
+coverage/
+.yarn/

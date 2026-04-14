@@ -7,9 +7,10 @@ import {
 } from '@quatrain/cloudwrapper'
 import { BackendAction } from '@quatrain/backend'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import { HeartbeatStatus } from '@supabase/realtime-js/dist/module/RealtimeClient'
 import ws from 'ws'
 import { FileType } from '@quatrain/storage'
+
+type HeartbeatStatus = 'sent' | 'ok' | 'error' | 'timeout' | 'disconnected'
 
 export type SupabaseParams = {
    useEmulator?: boolean

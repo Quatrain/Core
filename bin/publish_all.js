@@ -166,6 +166,9 @@ async function publishAll() {
                     fs.writeFileSync(pkgJsonPath, JSON.stringify(updatedPkgJson, null, 2), 'utf8');
                     
                     execSync('cp ../../LICENSE.md .', { cwd: pkgDir, stdio: 'inherit' });
+                    // Provide explicit .npmignore so yarn pack doesn't use .gitignore (which ignores lib and dist)
+                    fs.writeFileSync(path.join(pkgDir, '.npmignore'), 'node_modules\ncoverage\n.git\n', 'utf8');
+                    
                     execSync('yarn pack --out package.tgz', { cwd: pkgDir, stdio: 'inherit' });
                     
                     // Publish
@@ -175,6 +178,7 @@ async function publishAll() {
                     // Restore the package.json to retain workspace: protocols but keep the version bump
                     fs.writeFileSync(pkgJsonPath, originalPkgContent, 'utf8');
                     execSync('rm -f package.tgz', { cwd: pkgDir, stdio: 'inherit' });
+                    execSync('rm -f .npmignore', { cwd: pkgDir, stdio: 'inherit' });
                 }
                 
                 // Keep registry updated with the stable hash

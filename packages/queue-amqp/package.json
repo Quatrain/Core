@@ -2,13 +2,13 @@
    "name": "@quatrain/queue-amqp",
    "version": "1.2.15",
    "description": "Queue adapter for AMQP compatible queue",
-   "main": "lib/index.js",
-   "types": "lib/index.d.ts",
+   "main": "dist/index.js",
+   "types": "dist/index.d.ts",
    "bun": "src/index.ts",
    "files": [
       "LICENSE.md",
       "src/",
-      "lib/",
+      "dist/",
       "README.md"
    ],
    "author": "Quatrain Développement SAS <developers@quatrain.com>",

@@ -51,22 +51,22 @@
   },
   "@quatrain/core": {
     "version": "1.1.43",
-    "hash": "LZgPQ8VGKrDnZteK6GG5AiSGacI=",
+    "hash": "SnSpZbj/JtujOFObAC+T0pWdKYI=-fa6c6c785bb16ea83ebe15398b91543bc9a6f90789b6124e3968649809ad0d91",
     "last_published": "2026-04-14T07:10:46.143Z"
   },
   "@quatrain/log": {
     "version": "1.1.2",
-    "hash": "N4Qquupdu5kh8OmnGpM+aXoA/ik=",
+    "hash": "h7CCfUUkdCRU9AmdAmSDZ4gfVcQ=-2d94728b5a99fadc180378ad1800d2128f59fc6af884078a93d5bbcb550113dd",
     "last_published": "2026-04-14T07:10:53.235Z"
   },
   "@quatrain/messaging": {
     "version": "1.0.4",
-    "hash": "NGmcZ5hozJ6kol/uaDKnhhzjl5Y=",
+    "hash": "BjHQ3plNjeu6EUFuhORUAgkvCaY=-09a6e7bdec154c02b95942ad908a16965702b4716632420fcbd92539358a4ca6",
     "last_published": "2026-04-14T07:11:00.468Z"
   },
   "@quatrain/messaging-firebase": {
     "version": "1.0.3",
-    "hash": "pntjpaPBIEP09VWEpsxWaSVco24=",
+    "hash": "vwcSjn1Mrxm7/+zcYh3c5CZ2M60=-c8f4625e080cff04e36817a652bb32f97f5d6daeabda1a447522d8c1c67b620a",
     "last_published": "2026-04-14T07:11:07.896Z"
   },
   "@quatrain/queue": {
@@ -91,22 +91,22 @@
   },
   "@quatrain/storage": {
     "version": "1.1.24",
-    "hash": "vPgiGwiyCC++IX4pchFulp+HYB0=",
+    "hash": "hMJFHXxd80SVkvb9rC0tsERKxE8=-0be3968c832e7b169cb53c779dbebdf419849f7c206ccb91de2456cb5f9e8455",
     "last_published": "2026-04-14T07:11:42.718Z"
   },
   "@quatrain/storage-firebase": {
     "version": "1.1.13",
-    "hash": "2NU1pWq7Yr5DBzpkirEvf0xOiOE=",
+    "hash": "A02+oRSNy3OZJek3kMJOyFQNA10=-79710aab03ae6b62919372f72083ad5ecdcac90b91b2ee47e14c59b8a4406ea9",
     "last_published": "2026-04-14T07:11:49.897Z"
   },
   "@quatrain/storage-s3": {
     "version": "1.1.15",
-    "hash": "/t8+Y7hgO2/7xbWkXSDJFcvOnHk=",
+    "hash": "DmK8hITczeVqC14QkBQC/2nCPeM=-4ac41d2fa5a99e321c3cc713219f8f178da65e3f50d18563e4837eb6efe8c191",
     "last_published": "2026-04-14T07:11:58.163Z"
   },
   "@quatrain/storage-supabase": {
     "version": "1.1.19",
-    "hash": "SpNMjHO2bJmioAYiHcq0lgFg7aU=",
+    "hash": "1DIRmtevA9CShEhgPBvn+1uiQaA=-a8d3a2871b380922961179adac1fe3bf1c306edce7373bd40db98a95e96e20ec",
     "last_published": "2026-04-14T07:12:06.708Z"
   },
   "@quatrain/worker": {

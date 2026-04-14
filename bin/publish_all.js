@@ -70,7 +70,7 @@ async function publishAll() {
             continue;
         }
         console.log(`[BUILD] Building ${pkg}...`);
-        execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
+        // execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
     }
     // Build anything not listed in BUILD_ORDER last (no guaranteed order)
     const allPkgs = fs.readdirSync(packagesDir).filter(p =>
@@ -81,7 +81,7 @@ async function publishAll() {
         const pkgDir = path.join(packagesDir, pkg);
         if (!fs.existsSync(path.join(pkgDir, 'package.json'))) continue;
         console.log(`[BUILD] Building ${pkg} (unlisted)...`);
-        execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
+        // execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
     }
 
     const packages = fs.readdirSync(packagesDir);
@@ -95,7 +95,23 @@ async function publishAll() {
         
         const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
         const pkgName = pkgJson.name;
-        const { hash } = await hashElement(pkgDir, options);
+        
+        // Exclude package.json from raw file hash to avoid formatting/version bump mismatches
+        const hashOptions = {
+            folders: { exclude: ['.*', 'node_modules', 'dist', 'lib'] },
+            files: { include: ['*.js', '*.ts', '*.json', '*.md'], exclude: ['package.json', 'tsconfig.tsbuildinfo'] }
+        };
+        const { hash: rawHash } = await hashElement(pkgDir, hashOptions);
+        
+        // Include relevant package.json fields deterministically
+        const depsHash = require('crypto').createHash('sha256').update(JSON.stringify({
+            dependencies: pkgJson.dependencies || {},
+            devDependencies: pkgJson.devDependencies || {},
+            peerDependencies: pkgJson.peerDependencies || {},
+            scripts: pkgJson.scripts || {},
+            bin: pkgJson.bin || {}
+        })).digest('hex');
+        const hash = `${rawHash}-${depsHash}`;
         
         const previousData = registry[pkgName] || {};
         
@@ -120,16 +136,10 @@ async function publishAll() {
                 // Cleanup
                 execSync('rm package.tgz', { cwd: pkgDir, stdio: 'inherit' });
                 
-                // Recompute hash after all these writes just in case package.json changes affect it.
-                // Actually the hash is on src/ and excludes dist/, so the source hash won't change
-                // but the package.json HAS changed due to yarn version patch. So we must recompute
-                // the hash including the new package.json version so that next run it matches!
-                const newHashResult = await hashElement(pkgDir, options);
-                
-                // Keep registry updated
+                // Keep registry updated with the stable hash
                 registry[pkgName] = {
                     version: newVersion,
-                    hash: newHashResult.hash,
+                    hash: hash,
                     last_published: new Date().toISOString()
                 };
                 

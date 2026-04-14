@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/auth",
-   "version": "1.1.18",
+   "version": "1.1.19",
    "license": "AGPL-3.0-only",
    "description": "Auth adapters commons",
    "main": "lib/index.js",
@@ -14,8 +14,8 @@
    ],
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "dependencies": {
-      "@quatrain/backend": "^1.1.25",
-      "@quatrain/core": "^1.1.42"
+      "@quatrain/backend": "^1.1.26",
+      "@quatrain/core": "^1.1.43"
    },
    "devDependencies": {
       "@tsconfig/recommended": "^1.0.1",

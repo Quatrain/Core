@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/messaging-firebase",
-   "version": "1.0.2",
+   "version": "1.0.3",
    "license": "AGPL-3.0-only",
    "main": "lib/index.js",
    "types": "lib/index.d.ts",
@@ -13,11 +13,11 @@
    ],
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "peerDependencies": {
-      "@quatrain/core": "^1.1.42"
+      "@quatrain/core": "^1.1.43"
    },
    "dependencies": {
-      "@quatrain/core": "^1.1.42",
-      "@quatrain/messaging": "^1.0.3",
+      "@quatrain/core": "^1.1.43",
+      "@quatrain/messaging": "^1.0.4",
       "firebase-admin": "^13.0.1"
    },
    "devDependencies": {

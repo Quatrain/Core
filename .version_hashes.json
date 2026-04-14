@@ -25,14 +25,14 @@
     "last_published": "2026-04-14T15:32:33.976Z"
   },
   "@quatrain/backend-postgres": {
-    "version": "1.1.42",
-    "hash": "FORCE_PUBLISH",
-    "last_published": "2026-04-14T15:32:41.096Z"
+    "version": "1.1.43",
+    "hash": "V6jA2oekQAIvs9vMRYIndhZsJMw=-818d4ba041828e7ac19e8a87b941492771c9f2816e0ba8bb9a59d98375bc53de",
+    "last_published": "2026-04-14T19:34:09.254Z"
   },
   "@quatrain/backend-sqlite": {
-    "version": "1.0.5",
-    "hash": "FORCE_PUBLISH",
-    "last_published": "2026-04-14T15:32:49.255Z"
+    "version": "1.0.6",
+    "hash": "v9OryjZ/Au9OQjW/MpjfdtiIqY4=-07f4492514788bab896bca2e50c89192340b9e7b4166abecda4be425c5598c14",
+    "last_published": "2026-04-14T19:34:14.990Z"
   },
   "@quatrain/cloudwrapper": {
     "version": "1.1.17",
@@ -50,9 +50,9 @@
     "last_published": "2026-04-14T15:33:11.257Z"
   },
   "@quatrain/core": {
-    "version": "1.1.43",
-    "hash": "FORCE_PUBLISH",
-    "last_published": "2026-04-14T07:10:46.143Z"
+    "version": "1.1.44",
+    "hash": "SnSpZbj/JtujOFObAC+T0pWdKYI=-fa6c6c785bb16ea83ebe15398b91543bc9a6f90789b6124e3968649809ad0d91",
+    "last_published": "2026-04-14T19:34:22.653Z"
   },
   "@quatrain/log": {
     "version": "1.1.2",

@@ -28,7 +28,7 @@
    },
    "dependencies": {
       "@google-cloud/pubsub": "^4.7.0",
-      "@quatrain/core": "^1.1.43",
+      "@quatrain/core": "^1.1.44",
       "@quatrain/queue": "^1.1.22"
    },
    "scripts": {

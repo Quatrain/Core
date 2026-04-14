@@ -36,6 +36,8 @@
       "bump-to": "yarn version"
    },
    "dependencies": {
+      "@quatrain/backend": "^1.1.25",
+      "@quatrain/core": "^1.1.42",
       "@quatrain/storage": "^1.1"
    }
 }

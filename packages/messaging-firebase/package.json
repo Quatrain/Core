@@ -16,6 +16,7 @@
       "@quatrain/core": "^1.1.42"
    },
    "dependencies": {
+      "@quatrain/core": "^1.1.42",
       "@quatrain/messaging": "^1.0.3",
       "firebase-admin": "^13.0.1"
    },

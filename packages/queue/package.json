@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/queue",
-   "version": "1.1.21",
+   "version": "1.1.22",
    "description": "Message Queue management base",
    "main": "lib/index.js",
    "types": "lib/index.d.ts",

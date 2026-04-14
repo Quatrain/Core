@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/queue-aws",
-   "version": "1.1.14",
+   "version": "1.1.15",
    "description": "Queue adapter for AWS SQS",
    "main": "lib/index.js",
    "types": "lib/index.d.ts",
@@ -28,7 +28,7 @@
    },
    "dependencies": {
       "@aws-sdk/client-sqs": "3.721.0",
-      "@quatrain/queue": "^1.1.21"
+      "@quatrain/queue": "^1.1.22"
    },
    "scripts": {
       "test-ci": "jest --runInBand",

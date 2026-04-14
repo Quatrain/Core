@@ -9,11 +9,12 @@ export class SqsAdapter extends AbstractQueueAdapter {
          secret = '',
          region = 'eu-central-1',
          accountid = '',
+         endpoint = '',
       } = params.config || {}
 
-      if (!accesskey || !secret || !region || !accountid) {
+      if (!accesskey || !secret || !region || (!accountid && !endpoint)) {
          throw new Error(
-            `Missing required parameters for SQS: accesskey, secret, region, accountid`
+            `Missing required parameters for SQS: accesskey, secret, region, and either accountid or endpoint`
          )
       }
 
@@ -23,6 +24,7 @@ export class SqsAdapter extends AbstractQueueAdapter {
             accessKeyId: accesskey,
             secretAccessKey: secret,
          },
+         ...(endpoint && { endpoint }),
       })
    }
 
@@ -30,9 +32,11 @@ export class SqsAdapter extends AbstractQueueAdapter {
       const params = {
          DelaySeconds: 10,
          MessageBody: JSON.stringify(data),
-         QueueUrl: `https://sqs.${
-            this._params.config.region || ''
-         }.amazonaws.com/${this._params.config.accountid || ''}/${topic}`,
+         QueueUrl: this._params.config.endpoint
+            ? `${this._params.config.endpoint}/${topic}`
+            : `https://sqs.${
+                 this._params.config.region || ''
+              }.amazonaws.com/${this._params.config.accountid || ''}/${topic}`,
       }
 
       Queue.debug(`[SQS] Sending message to ${params.QueueUrl}`)

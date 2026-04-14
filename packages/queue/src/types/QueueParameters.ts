@@ -9,6 +9,7 @@ export interface ConfigParameters {
    secret?: string
    region?: string
    accountid?: string
+   endpoint?: string
 }
 export interface QueueParameters {
    topic?: string

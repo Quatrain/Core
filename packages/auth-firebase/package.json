@@ -17,6 +17,7 @@
    },
    "dependencies": {
       "@quatrain/auth": "^1.1.18",
+      "@quatrain/backend": "^1.1.25",
       "firebase-admin": "^13.0.1",
       "node-fetch-native": "^1.6.4"
    },

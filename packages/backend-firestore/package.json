@@ -17,6 +17,7 @@
       "@quatrain/core": "^1.1.42"
    },
    "dependencies": {
+      "@quatrain/backend": "^1.1.25",
       "firebase-admin": "^13.4.0"
    },
    "devDependencies": {

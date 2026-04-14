@@ -51,6 +51,17 @@ const BUILD_ORDER = [
 async function publishAll() {
     let changed = false;
 
+    // Clean stale tsconfig.tsbuildinfo files. These can contain paths from a
+    // previous Yarn Berry PnP setup (.yarn/berry/cache/...) that are invalid
+    // under nodeLinker: node-modules, causing TS2307 errors on incremental builds.
+    console.log('[PREPARE] Cleaning stale tsconfig.tsbuildinfo files...');
+    const { execSync: execSyncClean } = require('child_process');
+    try {
+        execSyncClean(`find ${packagesDir} -name "tsconfig.tsbuildinfo" -delete`, { stdio: 'inherit' });
+    } catch (e) {
+        // Non-fatal: proceed even if find/delete fails
+    }
+
     console.log('[PREPARE] Building all workspaces in explicit dependency order...');
     for (const pkg of BUILD_ORDER) {
         const pkgDir = path.join(packagesDir, pkg);

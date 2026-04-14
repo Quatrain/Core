@@ -139,19 +139,43 @@ async function publishAll() {
                 // Execute standard release pipeline
                 execSync('yarn version patch', { cwd: pkgDir, stdio: 'inherit' });
                 
-                // Read new version
-                const updatedPkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+                // Read new version and keep original content
+                const originalPkgContent = fs.readFileSync(pkgJsonPath, 'utf8');
+                const updatedPkgJson = JSON.parse(originalPkgContent);
                 const newVersion = updatedPkgJson.version;
                 
-                execSync('cp ../../LICENSE.md .', { cwd: pkgDir, stdio: 'inherit' });
-                execSync('yarn pack --out package.tgz', { cwd: pkgDir, stdio: 'inherit' });
-                
-                // Publish
-                execSync('npm publish package.tgz --registry https://registry.npmjs.org/ --access public', { cwd: pkgDir, stdio: 'inherit' });
-                execSync('npm publish package.tgz --registry https://npm.pkg.github.com/', { cwd: pkgDir, stdio: 'inherit' });
-                
-                // Cleanup
-                execSync('rm package.tgz', { cwd: pkgDir, stdio: 'inherit' });
+                // Strip workspace: protocol before packing
+                ['dependencies', 'devDependencies', 'peerDependencies'].forEach(deptype => {
+                    if (updatedPkgJson[deptype]) {
+                        for (const [dep, ver] of Object.entries(updatedPkgJson[deptype])) {
+                            if (ver.startsWith('workspace:')) {
+                                const cleanName = dep.replace('@quatrain/', '');
+                                try {
+                                    const otherPkgJson = JSON.parse(fs.readFileSync(path.join(packagesDir, cleanName, 'package.json'), 'utf8'));
+                                    updatedPkgJson[deptype][dep] = `^${otherPkgJson.version}`;
+                                } catch(e) {
+                                    console.warn(`[WARNING] Could not resolve workspace version for ${dep}`);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                try {
+                    // Temporarily write the versioned + stripped file
+                    fs.writeFileSync(pkgJsonPath, JSON.stringify(updatedPkgJson, null, 2), 'utf8');
+                    
+                    execSync('cp ../../LICENSE.md .', { cwd: pkgDir, stdio: 'inherit' });
+                    execSync('yarn pack --out package.tgz', { cwd: pkgDir, stdio: 'inherit' });
+                    
+                    // Publish
+                    execSync('npm publish package.tgz --registry https://registry.npmjs.org/ --access public', { cwd: pkgDir, stdio: 'inherit' });
+                    execSync('npm publish package.tgz --registry https://npm.pkg.github.com/', { cwd: pkgDir, stdio: 'inherit' });
+                } finally {
+                    // Restore the package.json to retain workspace: protocols but keep the version bump
+                    fs.writeFileSync(pkgJsonPath, originalPkgContent, 'utf8');
+                    execSync('rm -f package.tgz', { cwd: pkgDir, stdio: 'inherit' });
+                }
                 
                 // Keep registry updated with the stable hash
                 registry[pkgName] = {

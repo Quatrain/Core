@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/cloudwrapper-firebase",
-   "version": "1.1.17",
+   "version": "1.1.18",
    "license": "AGPL-3.0-only",
    "description": "Cloud Wrapper adapter for Firebase",
    "main": "dist/index.js",
@@ -14,12 +14,12 @@
    ],
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "peerDependencies": {
-      "@quatrain/core": "^1.1.46"
+      "@quatrain/core": "^1.1.47"
    },
    "dependencies": {
-      "@quatrain/backend": "^1.1.30",
-      "@quatrain/cloudwrapper": "^1.1.19",
-      "@quatrain/core": "^1.1.46",
+      "@quatrain/backend": "^1.1.31",
+      "@quatrain/cloudwrapper": "^1.1.20",
+      "@quatrain/core": "^1.1.47",
       "firebase-admin": "^13.4.0",
       "firebase-functions": "^6.4.0"
    },

@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/storage-firebase",
-   "version": "1.1.16",
+   "version": "1.1.17",
    "description": "Storage adapter for Firebase Storage",
    "main": "dist/index.js",
    "types": "dist/index.d.ts",
@@ -28,7 +28,7 @@
    },
    "dependencies": {
       "@quatrain/core": "^1.1.47",
-      "@quatrain/storage": "^1.1.27",
+      "@quatrain/storage": "^1.1.28",
       "firebase-admin": "^12.4.0",
       "fs-extra": "^11.2.0"
    },

@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/auth-firebase",
-   "version": "1.1.19",
+   "version": "1.1.20",
    "license": "AGPL-3.0-only",
    "main": "dist/index.js",
    "types": "dist/index.d.ts",
@@ -16,8 +16,8 @@
       "@quatrain/core": "^1.1.47"
    },
    "dependencies": {
-      "@quatrain/auth": "^1.1.24",
-      "@quatrain/backend": "^1.1.31",
+      "@quatrain/auth": "^1.1.25",
+      "@quatrain/backend": "^1.1.32",
       "@quatrain/core": "^1.1.47",
       "firebase-admin": "^13.0.1",
       "node-fetch-native": "^1.6.4"

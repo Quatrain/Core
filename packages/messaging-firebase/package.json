@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/messaging-firebase",
-   "version": "1.0.6",
+   "version": "1.0.7",
    "license": "AGPL-3.0-only",
    "main": "dist/index.js",
    "types": "dist/index.d.ts",
@@ -17,7 +17,7 @@
    },
    "dependencies": {
       "@quatrain/core": "^1.1.47",
-      "@quatrain/messaging": "^1.0.7",
+      "@quatrain/messaging": "^1.0.8",
       "firebase-admin": "^13.0.1"
    },
    "devDependencies": {

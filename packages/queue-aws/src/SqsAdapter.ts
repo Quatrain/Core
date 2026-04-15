@@ -29,17 +29,19 @@ export class SqsAdapter extends AbstractQueueAdapter {
    }
 
    async send(data: any, topic: string): Promise<string> {
+      let QueueUrl =
+         this._params.config.endpoint ||
+         `https://sqs.${this._params.config.region || ''}.amazonaws.com`
+
+      QueueUrl += `/${this._params.config.accountid || ''}/${topic}`
+
       const params = {
          DelaySeconds: 10,
          MessageBody: JSON.stringify(data),
-         QueueUrl: this._params.config.endpoint
-            ? `${this._params.config.endpoint}/${topic}`
-            : `https://sqs.${
-                 this._params.config.region || ''
-              }.amazonaws.com/${this._params.config.accountid || ''}/${topic}`,
+         QueueUrl,
       }
 
-      Queue.debug(`[SQS] Sending message to ${params.QueueUrl}`)
+      Queue.debug(`[SQS] Sending message to ${QueueUrl}`)
       const command = new SendMessageCommand(params)
       const response = await this._client.send(command)
 

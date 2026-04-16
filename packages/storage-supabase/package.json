@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/storage-supabase",
-   "version": "1.1.23",
+   "version": "1.1.24",
    "description": "Storage adapter for Supabase Storage",
    "main": "dist/index.js",
    "types": "dist/index.d.ts",
@@ -25,8 +25,8 @@
       "typescript": "^5.1.5"
    },
    "dependencies": {
-      "@quatrain/core": "^1.1.47",
-      "@quatrain/storage": "^1.1.28",
+      "@quatrain/core": "^1.1.48",
+      "@quatrain/storage": "^1.1.29",
       "@supabase/storage-js": "^2.7.2",
       "@supabase/supabase-js": "^2.87.3"
    },

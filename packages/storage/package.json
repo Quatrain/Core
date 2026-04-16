@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/storage",
-   "version": "1.1.28",
+   "version": "1.1.29",
    "description": "Common types and utils for Storages Adapters",
    "main": "dist/index.js",
    "types": "dist/index.d.ts",
@@ -27,7 +27,7 @@
       "typescript": "^5.1.5"
    },
    "dependencies": {
-      "@quatrain/core": "^1.1.47",
+      "@quatrain/core": "^1.1.48",
       "fs-extra": "^11.2.0",
       "object-hash": "^3.0.0",
       "sharp": "^0.33.5"

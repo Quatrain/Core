@@ -10,9 +10,10 @@ import { PersistedDataObject } from './PersistedDataObject'
 import { PersistedBaseObject } from './PersistedBaseObject'
 import { Query, QueryResultType } from './Query'
 import { BackendInterface } from './types/BackendInterface'
-import { Backend, BackendAction } from './Backend'
+import { Backend } from './Backend'
 import { ReferenceType } from './types/ReferenceType'
 import { User } from './User'
+import { BackendContext } from './BackendContext'
 
 const RESOURCE_GONE_ERROR = `The resource you are trying to access has been deleted.`
 
@@ -21,7 +22,19 @@ const RESOURCE_GONE_ERROR = `The resource you are trying to access has been dele
  * Extend this by passing the typeof of the desired class to the constructor
  */
 export class BaseRepository<T extends BaseObjectType> {
-   static currentUser: User | undefined
+   static get currentUser(): User | undefined {
+      return BackendContext.getStore()?.user
+   }
+
+   static set currentUser(user: User | undefined) {
+      const store = BackendContext.getStore()
+      if (store) {
+         store.user = user
+      } else {
+         Backend.warn("BaseRepository.currentUser setter called outside of BackendContext")
+      }
+   }
+
    static useDateFormat: boolean = true
 
    //implements RepositoryClass<T>
@@ -56,51 +69,7 @@ export class BaseRepository<T extends BaseObjectType> {
       return dataObject
    }
 
-   protected _addMetaData(
-      dataObject: DataObjectClass<any>,
-      action: BackendAction
-   ) {
-      if (BaseRepository.currentUser) {
-         Backend.info(`Adding meta data on record`)
-         const date = BaseRepository.useDateFormat
-            ? new Date().toISOString()
-            : Date.now()
-         switch (action) {
-            case BackendAction.CREATE:
-               // Only set if not already populated
-               if (!dataObject.val('createdBy')) {
-                  dataObject.set('createdBy', BaseRepository.currentUser)
-               }
-               if (!dataObject.val('createdAt')) {
-                  dataObject.set('createdAt', date)
-               }
-               break
-            case BackendAction.UPDATE:
-               // Only set if not already populated
-               if (!dataObject.val('updatedBy')) {
-                  dataObject.set('updatedBy', BaseRepository.currentUser)
-               }
-               if (!dataObject.val('updatedAt')) {
-                  dataObject.set('updatedAt', date)
-               }
-               break
-            case BackendAction.DELETE:
-               // Only set if not already populated
-               if (!dataObject.val('deletedBy')) {
-                  dataObject.set('deletedBy', BaseRepository.currentUser)
-               }
-               if (!dataObject.val('deletedAt')) {
-                  dataObject.set('deletedAt', date)
-               }
-               break
-            default:
-               Backend.warn(`Unrecognized action: '${action}'`)
-               break
-         }
-      }
 
-      return dataObject
-   }
 
    protected async getDataObjectFromPath(
       path: string
@@ -116,8 +85,7 @@ export class BaseRepository<T extends BaseObjectType> {
    }
 
    async create<B extends PersistedBaseObject>(obj: B, uid?: string) {
-      const dataObject = this._addMetaData(obj.dataObject, BackendAction.CREATE)
-      const savedObj = await this.backendAdapter.create(dataObject, uid)
+      const savedObj = await this.backendAdapter.create(obj.dataObject, uid)
       return this._model.fromDataObject(savedObj)
    }
 
@@ -197,11 +165,7 @@ export class BaseRepository<T extends BaseObjectType> {
    }
 
    async update<B extends PersistedBaseObject>(obj: B) {
-      const dataObject = this._addMetaData(
-         obj.dataObject || obj,
-         BackendAction.UPDATE
-      )
-
+      const dataObject = obj.dataObject || obj
       const savedObj = await this.backendAdapter.update(dataObject)
 
       return this._model.fromDataObject(savedObj)
@@ -212,11 +176,7 @@ export class BaseRepository<T extends BaseObjectType> {
     * @param uid string
     */
    async delete(uid: string, hardDelete = false) {
-      const dataObject = this._addMetaData(
-         await this.getDataObject(uid),
-         BackendAction.DELETE
-      )
-
+      const dataObject = await this.getDataObject(uid)
       return await this.backendAdapter.delete(dataObject, hardDelete)
    }
 

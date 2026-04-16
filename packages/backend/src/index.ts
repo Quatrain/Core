@@ -19,6 +19,7 @@ import { CollectionProperty } from './CollectionProperty'
 import { User } from './User'
 import { UserRepository } from './UserRepository'
 import { Repository } from './Repository'
+import { BackendContext, asyncContextMiddleware } from './BackendContext'
 
 import {
    InjectKeywordsMiddleware,
@@ -58,4 +59,6 @@ export {
    InjectMetaMiddleware,
    InjectMetaMiddlewareParams,
    Repository,
+   BackendContext,
+   asyncContextMiddleware,
 }

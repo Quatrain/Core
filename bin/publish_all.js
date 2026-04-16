@@ -87,7 +87,6 @@ async function publishAll() {
         // Include relevant package.json fields deterministically
         const depsHash = require('crypto').createHash('sha256').update(JSON.stringify({
             dependencies: pkgJson.dependencies || {},
-            devDependencies: pkgJson.devDependencies || {},
             peerDependencies: pkgJson.peerDependencies || {},
             scripts: pkgJson.scripts || {},
             bin: pkgJson.bin || {}

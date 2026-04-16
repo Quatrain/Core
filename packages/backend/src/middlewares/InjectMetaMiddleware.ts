@@ -2,16 +2,17 @@ import { DataObjectClass, User } from '@quatrain/core'
 import { Backend, BackendAction } from '../Backend'
 import BackendMiddleware from './Middleware'
 import { MiddlewareParams } from './types/MiddlewareParams'
+import { BaseRepository } from '../BaseRepository'
 
 export interface InjectMetaMiddlewareParams {
-   user: User
+   user?: User
 }
 
 export class InjectMetaMiddleware implements BackendMiddleware {
-   protected _user: User
+   protected _user: User | undefined
 
-   constructor(params: InjectMetaMiddlewareParams) {
-      this._user = params.user
+   constructor(params?: InjectMetaMiddlewareParams) {
+      this._user = params?.user
    }
 
    execute(
@@ -22,20 +23,23 @@ export class InjectMetaMiddleware implements BackendMiddleware {
       Backend.log(
          `[MDW] Executing Middleware ${this.constructor.name} for ${action} event`
       )
+      
+      const userToInject = this._user || BaseRepository.currentUser
       const date = params?.useDateFormat ? new Date().toISOString() : Date.now()
+      
       switch (action) {
          // add properties existence validation
          case BackendAction.CREATE:
-            dataObject.set('createdBy', this._user)
-            dataObject.set('createdAt', date)
+            if (userToInject && !dataObject.val('createdBy')) dataObject.set('createdBy', userToInject)
+            if (!dataObject.val('createdAt')) dataObject.set('createdAt', date)
             break
          case BackendAction.UPDATE:
-            dataObject.set('updatedBy', this._user)
-            dataObject.set('updatedAt', date)
+            if (userToInject && !dataObject.val('updatedBy')) dataObject.set('updatedBy', userToInject)
+            if (!dataObject.val('updatedAt')) dataObject.set('updatedAt', date)
             break
          case BackendAction.DELETE:
-            dataObject.set('deletedBy', this._user)
-            dataObject.set('deletedAt', date)
+            if (userToInject && !dataObject.val('deletedBy')) dataObject.set('deletedBy', userToInject)
+            if (!dataObject.val('deletedAt')) dataObject.set('deletedAt', date)
             break
          default:
             break

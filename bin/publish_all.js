@@ -200,6 +200,29 @@ async function publishAll() {
     }
     
     if (changed) {
+        console.log('[POST-PUBLISH] Recomputing stable hashes to account for automatic workspace version bumps...');
+        for (const pkg of packages) {
+            const pkgDir = path.join(packagesDir, pkg);
+            if (!fs.statSync(pkgDir).isDirectory()) continue;
+            const pkgJsonPath = path.join(pkgDir, 'package.json');
+            if (!fs.existsSync(pkgJsonPath)) continue;
+            
+            const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+            const pkgName = pkgJson.name;
+            
+            if (registry[pkgName] && registry[pkgName].hash) {
+                const depsHash = require('crypto').createHash('sha256').update(JSON.stringify({
+                    dependencies: pkgJson.dependencies || {},
+                    peerDependencies: pkgJson.peerDependencies || {},
+                    scripts: pkgJson.scripts || {},
+                    bin: pkgJson.bin || {}
+                })).digest('hex');
+                
+                const oldRawHash = registry[pkgName].hash.split('-')[0];
+                registry[pkgName].hash = `${oldRawHash}-${depsHash}`;
+            }
+        }
+        
         fs.writeFileSync(registryFile, JSON.stringify(registry, null, 2), 'utf8');
         console.log(`Updated ${registryFile}`);
     } else {

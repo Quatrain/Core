@@ -3193,7 +3193,7 @@ __metadata:
   dependencies:
     "@faker-js/faker": "npm:^7.6.0"
     "@quatrain/core": "npm:^1.1.48"
-    "@quatrain/log": "npm:^1.1.6"
+    "@quatrain/log": "npm:^1.1.7"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
     "@types/module-alias": "npm:^2"
@@ -3304,7 +3304,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/log@npm:^1.1.6, @quatrain/log@workspace:^, @quatrain/log@workspace:packages/log":
+"@quatrain/log@npm:^1.1.7, @quatrain/log@workspace:^, @quatrain/log@workspace:packages/log":
   version: 0.0.0-use.local
   resolution: "@quatrain/log@workspace:packages/log"
   dependencies:

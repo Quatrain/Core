@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/queue-amqp",
-   "version": "1.2.21",
+   "version": "1.2.22",
    "description": "Queue adapter for AMQP compatible queue",
    "main": "dist/index.js",
    "types": "dist/index.d.ts",

@@ -16,7 +16,7 @@
    "dependencies": {
       "@faker-js/faker": "^7.6.0",
       "@quatrain/core": "^1.1.48",
-      "@quatrain/log": "^1.1.6"
+      "@quatrain/log": "^1.1.7"
    },
    "devDependencies": {
       "@tsconfig/recommended": "^1.0.1",

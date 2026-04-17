@@ -7,8 +7,10 @@ import {
 import { Queue, AbstractQueueAdapter, QueueParameters } from '@quatrain/queue'
 
 export class SqsAdapter extends AbstractQueueAdapter {
+   protected _logger: any
    constructor(params: QueueParameters) {
       super(params)
+      this._logger = (Queue as any).logger.clone('SQS')
       const {
          accesskey = '',
          secret = '',
@@ -46,7 +48,7 @@ export class SqsAdapter extends AbstractQueueAdapter {
          QueueUrl,
       }
 
-      Queue.debug(`[SQS] Sending message to ${QueueUrl}`)
+      this._logger.debug(`Sending message to ${QueueUrl}`)
       const command = new SendMessageCommand(params)
       const response = await this._client.send(command)
 
@@ -64,7 +66,7 @@ export class SqsAdapter extends AbstractQueueAdapter {
 
       QueueUrl += `/${this._params.config.accountid || ''}/${topic}`
 
-      Queue.info(`[SQS] Start listening on ${QueueUrl}`)
+      this._logger.info(`Start listening on ${QueueUrl}`)
 
       while (true) {
          try {
@@ -77,10 +79,10 @@ export class SqsAdapter extends AbstractQueueAdapter {
             const response = await this._client.send(receiveCommand)
 
             if (response.Messages && response.Messages.length > 0) {
-               Queue.debug(response.Messages)
+               this._logger.debug(response.Messages)
 
                for (const message of response.Messages) {
-                  Queue.debug(`[SQS] Received message ${message.MessageId}`)
+                  this._logger.debug(`Received message ${message.MessageId}`)
 
                   try {
                      await handler(message)
@@ -91,17 +93,17 @@ export class SqsAdapter extends AbstractQueueAdapter {
                         ReceiptHandle: message.ReceiptHandle!,
                      })
                      await this._client.send(deleteCommand)
-                     Queue.debug(`[SQS] Deleted message ${message.MessageId}`)
+                     this._logger.debug(`Deleted message ${message.MessageId}`)
                   } catch (err: any) {
-                     Queue.error(
-                        `[SQS] Error processing message ${message.MessageId}: ${err.message}`
+                     this._logger.error(
+                        `Error processing message ${message.MessageId}: ${err.message}`
                      )
                   }
                }
             }
          } catch (err: any) {
-            Queue.error(
-               `[SQS] Error receiving from ${QueueUrl}: ${err.message}`
+            this._logger.error(
+               `Error receiving from ${QueueUrl}: ${err.message}`
             )
             // Wait a bit before retrying on error
             await new Promise((resolve) => setTimeout(resolve, 5000))

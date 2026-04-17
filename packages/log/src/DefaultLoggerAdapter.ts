@@ -15,7 +15,21 @@ export class DefaultLoggerAdapter extends AbstractLoggerAdapter {
     * @param level LogLevel
     */
    log(messages: any[], level: LogLevel = this._logLevel): void {
-      const message = this.formatLogMessage(messages)
+      let tag = ''
+      if (chalk.level === 0) {
+         // Terminal sans support couleur (fallback)
+         const levelNames: Record<number, string> = {
+            [LogLevel.TRACE]: '[TRC]',
+            [LogLevel.DEBUG]: '[DBG]',
+            [LogLevel.INFO]: '[INF]',
+            [LogLevel.WARN]: '[WRN]',
+            [LogLevel.ERROR]: '[ERR]',
+            [LogLevel.SILENT]: ''
+         }
+         tag = ` ${levelNames[level] || '[...]'} `
+      }
+
+      const message = this.formatLogMessage(messages, level, tag)
 
       switch (level) {
          case LogLevel.TRACE:
@@ -31,7 +45,7 @@ export class DefaultLoggerAdapter extends AbstractLoggerAdapter {
             this._logger.warn(chalk.red(message))
             break
          case LogLevel.ERROR:
-            this._logger.error(chalk.bgRedBright(message))
+            this._logger.error(chalk.bgRed.white.bold(message))
             break
          default:
             this._logger.log(message)

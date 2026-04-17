@@ -23,4 +23,8 @@ import { ConsoleLoggerAdapter } from '@quatrain/log' // Example adapter
 
 const logger = Log.addLogger('api', new ConsoleLoggerAdapter(), true)
 logger.info('Server has started.', { port: 3000 })
+
+// Instantiating a sub-logger using clone()
+const subLogger = logger.clone('db') // Inherits configuration, suffixing prefix with ][db
+subLogger.debug('Connection pool initialized.') // Output prefix: [api][db]
 ```

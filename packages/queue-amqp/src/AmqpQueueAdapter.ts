@@ -3,6 +3,12 @@ import amqplib, { ChannelModel, ConsumeMessage, Message } from 'amqplib'
 
 export class AmqpQueueAdapter extends AbstractQueueAdapter {
    protected _client: ChannelModel | undefined
+   protected _logger: any
+
+   constructor(params: any) {
+      super(params)
+      this._logger = (Queue as any).logger.clone('AMQP')
+   }
 
    protected async _connect(): Promise<ChannelModel> {
       if (!this._client) {
@@ -31,13 +37,13 @@ export class AmqpQueueAdapter extends AbstractQueueAdapter {
       const channel = await this._client?.createChannel()
 
       const dataBuffer = Buffer.from(JSON.stringify(data))
-      Queue.info(`[AMQP] Sending message to ${topic}`)
+      this._logger.info(`Sending message to ${topic}`)
 
       channel?.sendToQueue(topic, dataBuffer)
       channel?.close()
 
       const id = Date.now() // fake
-      Queue.info(`[AMQP] Message send with id ${id}`)
+      this._logger.info(`Message send with id ${id}`)
 
       return String(id)
    }
@@ -60,7 +66,7 @@ export class AmqpQueueAdapter extends AbstractQueueAdapter {
 
       const concurrency = params?.concurrency || 0
 
-      Queue.info(
+      this._logger.info(
          `Starting to listen to topic ${topic} with max concurrency set to ${concurrency}`
       )
 
@@ -79,7 +85,7 @@ export class AmqpQueueAdapter extends AbstractQueueAdapter {
             }
 
             concurrents++
-            Queue.info(
+            this._logger.info(
                `Job #${concurrents} of ${
                   concurrency > 0 ? concurrency : 'unlimited'
                } started`
@@ -103,7 +109,7 @@ export class AmqpQueueAdapter extends AbstractQueueAdapter {
 
                // 3. Check if we reached the limit of messages to process
                if (concurrency > 0 && concurrents >= concurrency) {
-                  Queue.info(
+                  this._logger.info(
                      `Reached max concurrency of ${concurrency}, disconnecting from queue`
                   )
                   await channel.close()
@@ -111,7 +117,7 @@ export class AmqpQueueAdapter extends AbstractQueueAdapter {
                   process.exit(0)
                }
             } catch (err) {
-               Queue.error(
+               this._logger.error(
                   `messageHandler function failed with message: ${
                      (err as Error).message
                   }`

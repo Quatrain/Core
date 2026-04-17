@@ -38,14 +38,24 @@ export abstract class AbstractLoggerAdapter implements LoggerType {
       this._logLevel = level
    }
 
+   /**
+    * Renvoie un clone de l'adaptateur avec un préfixe concatené
+    * Ex: new Logger("Queue").clone("MyQueue") => Logger("Queue][MyQueue") -> qui s'affichera [Queue][MyQueue]
+    */
+   clone(suffix: string): this {
+      const newPrefix = this._me ? `${this._me}][${suffix}` : suffix
+      return new (this.constructor as any)(newPrefix, this._logLevel)
+   }
+
    formatLogMessage = (
       messages: any[],
-      loglevel: LogLevel = LogLevel.INFO
+      loglevel: LogLevel = LogLevel.INFO,
+      tag: string = ''
    ): string => {
       // Flatten nested arrays (from rest parameter spreading)
       const flatMessages = messages.flat()
 
-      const prefix = `${new Date().toISOString()} - [${this._me}]`
+      const prefix = `${new Date().toISOString()}${tag} - [${this._me}]`
       const strs = flatMessages.map((message: any) => {
          if (message instanceof Error) {
             return message.stack || message.message

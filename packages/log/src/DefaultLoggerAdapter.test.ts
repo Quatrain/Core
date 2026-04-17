@@ -13,12 +13,17 @@ jest.mock('loglevel', () => ({
    log: jest.fn(),
 }))
 
+const mockBold = jest.fn((s) => s)
+const mockWhite = { bold: mockBold }
+const mockBgRed = { white: mockWhite }
+
 jest.mock('chalk', () => ({
+   level: 1,
    grey: jest.fn((s) => s),
    yellow: jest.fn((s) => s),
    green: jest.fn((s) => s),
    red: jest.fn((s) => s),
-   bgRedBright: jest.fn((s) => s),
+   bgRed: mockBgRed,
 }))
 
 describe('DefaultLoggerAdapter', () => {
@@ -85,12 +90,12 @@ describe('DefaultLoggerAdapter', () => {
       expect(chalk.red).toHaveBeenCalled()
    })
 
-   it('should log error messages with bgRedBright color', () => {
+   it('should log error messages with bgRed.white.bold color', () => {
       adapter.error('error message')
       expect(logger.error).toHaveBeenCalledWith(
          '2023-01-01T00:00:00.000Z - [TEST] error message'
       )
-      expect(chalk.bgRedBright).toHaveBeenCalled()
+      expect((chalk as any).bgRed.white.bold).toHaveBeenCalled()
    })
 
    it('should log trace messages with grey color', () => {

@@ -32,7 +32,7 @@ jobs:
           echo "## Quatrain Core Documentation" > wiki/_Sidebar.md
           echo "" >> wiki/_Sidebar.md
           
-          # Define Categories
+          # Define Categories and Descriptions
           declare -A categories
           categories=(
             ["Foundations"]="core log worker"
@@ -41,38 +41,78 @@ jobs:
             ["Auth & Cloud"]="auth auth-firebase auth-supabase cloudwrapper cloudwrapper-firebase cloudwrapper-supabase"
           )
           
-          # Ordered categories for Sidebar
+          # Category descriptions
+          declare -A family_desc
+          family_desc["Foundations"]="Base packages handling memory objects, logging, and background worker structures."
+          family_desc["Storage & Data"]="Tools to interact with databases and blob storage seamlessly."
+          family_desc["Queue & Messaging"]="Asynchronous communication packages to dispatch jobs and notifications."
+          family_desc["Auth & Cloud"]="Authentication and wrappers to initialize entire ecosystems easily."
+
+          # Package descriptions
+          declare -A pkg_desc
+          pkg_desc["core"]="The foundation of the framework providing in-memory business objects."
+          pkg_desc["log"]="Centralized, flexible logging system with custom adapters."
+          pkg_desc["worker"]="Toolkit for building daemon processes and reporting progress."
+          pkg_desc["backend"]="Persistence layer abstracting database operations."
+          pkg_desc["backend-firestore"]="Google Cloud Firestore database adapter."
+          pkg_desc["backend-postgres"]="PostgreSQL database adapter (Supabase & RDS)."
+          pkg_desc["backend-sqlite"]="Local SQLite database adapter for testing."
+          pkg_desc["storage"]="Unified file and blob storage abstraction."
+          pkg_desc["storage-firebase"]="Firebase Cloud Storage adapter."
+          pkg_desc["storage-s3"]="AWS S3 and S3-compatible storage adapter."
+          pkg_desc["storage-supabase"]="Supabase Storage adapter."
+          pkg_desc["queue"]="Central queue and message broker abstraction."
+          pkg_desc["queue-amqp"]="AMQP 0-9-1 adapter for RabbitMQ integration."
+          pkg_desc["queue-aws"]="Amazon SQS adapter for serverless queueing."
+          pkg_desc["queue-gcp"]="Google Cloud Pub/Sub adapter for global messaging."
+          pkg_desc["messaging"]="Unified abstraction for sending emails, SMS, and pushes."
+          pkg_desc["messaging-firebase"]="Firebase Cloud Messaging adapter."
+          pkg_desc["auth"]="Centralized identity and authentication abstraction."
+          pkg_desc["auth-firebase"]="Firebase Authentication adapter."
+          pkg_desc["auth-supabase"]="Supabase Authentication adapter."
+          pkg_desc["cloudwrapper"]="Unified entry point to initialize multiple cloud adapters."
+          pkg_desc["cloudwrapper-firebase"]="Firebase ecosystem wrapper."
+          pkg_desc["cloudwrapper-supabase"]="Supabase ecosystem wrapper."
+          
           category_order=("Foundations" "Storage & Data" "Queue & Messaging" "Auth & Cloud")
           
+          # Initialize Home.md
+          echo "# Quatrain Core Documentation" > wiki/Home.md
+          echo "" >> wiki/Home.md
+          echo "Welcome to the Quatrain Core documentation. Below is the directory of all available packages grouped by their ecosystem family." >> wiki/Home.md
+          echo "" >> wiki/Home.md
+          
           for category in "${category_order[@]}"; do
+            # Build Sidebar
             echo "### $category" >> wiki/_Sidebar.md
+            
+            # Build Home section
+            echo "## $category" >> wiki/Home.md
+            echo "_${family_desc[$category]}_" >> wiki/Home.md
+            echo "" >> wiki/Home.md
+            echo "| Package | Description | Links |" >> wiki/Home.md
+            echo "|---------|-------------|-------|" >> wiki/Home.md
             
             packages=${categories[$category]}
             for pkg in $packages; do
               if [ -d "packages/$pkg" ]; then
-                # Define Wiki file names
-                readme_wiki="$pkg-Overview.md"
-                howto_wiki="$pkg-HowTo.md"
-                
-                # Copy and optionally transform README.md
+                # Copy files
                 if [ -f "packages/$pkg/README.md" ]; then
-                  cp "packages/$pkg/README.md" "wiki/$readme_wiki"
-                  echo "* [$pkg Overview]($pkg-Overview)" >> wiki/_Sidebar.md
+                  cp "packages/$pkg/README.md" "wiki/$pkg-Overview.md"
+                  echo "* [$pkg]($pkg-Overview)" >> wiki/_Sidebar.md
+                fi
+                if [ -f "packages/$pkg/HOWTO.md" ]; then
+                  cp "packages/$pkg/HOWTO.md" "wiki/$pkg-HowTo.md"
                 fi
                 
-                # Copy and optionally transform HOWTO.md
-                if [ -f "packages/$pkg/HOWTO.md" ]; then
-                  cp "packages/$pkg/HOWTO.md" "wiki/$howto_wiki"
-                  echo "  * [How To]($pkg-HowTo)" >> wiki/_Sidebar.md
-                fi
+                # Append to Home Table
+                echo "| **\`$pkg\`** | ${pkg_desc[$pkg]} | [Overview]($pkg-Overview) <br> [How-To]($pkg-HowTo) |" >> wiki/Home.md
               fi
             done
+            
             echo "" >> wiki/_Sidebar.md
+            echo "" >> wiki/Home.md
           done
-          
-          # Also generate a Home.md if you want it to be the default landing page
-          cp wiki/_Sidebar.md wiki/Home.md
-          sed -i 's/###/##/g' wiki/Home.md # Make headers slightly bigger for Home page
 
       - name: Commit and Push to Wiki
         run: |

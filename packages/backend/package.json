@@ -15,8 +15,8 @@
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "dependencies": {
       "@faker-js/faker": "^7.6.0",
-      "@quatrain/core": "^1.1.48",
-      "@quatrain/log": "^1.1.7"
+      "@quatrain/core": "^1.1.49",
+      "@quatrain/log": "^1.1.8"
    },
    "devDependencies": {
       "@tsconfig/recommended": "^1.0.1",

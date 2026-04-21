@@ -31,17 +31,59 @@ The framework is organized as a monorepo with a foundation package and a suite o
 
 ## How to use
 
-### Create a model
+### 1. In-memory models
+
+The `@quatrain/core` package provides `BaseObject`, which is ideal for in-memory data modeling, validation, and serialization. It does not contain any database-related methods.
 
 ```ts
 import { BaseObject, Property } from '@quatrain/core'
 
-export type Cat = {
+export type CatData = {
    name: string
    color: `#${string}`
 }
 
-export class CatCore extends BaseObject {
+export class Cat extends BaseObject {
+   static COLLECTION = 'cats'
+
+   static PROPERTIES = [
+      {
+         name: 'name',
+         type: Property.STRING,
+         minLength: 1,
+         maxLength: 32,
+      },
+      {
+         name: 'color',
+         type: Property.STRING,
+         minLength: 4,
+         maxLength: 7,
+      },
+   ]
+}
+
+const catData: CatData = {
+   name: 'Garfield',
+   color: '#ffa502',
+}
+
+// Instantiate an in-memory object
+const garfield = Cat.fromObject(catData)
+
+console.log(garfield._.name)
+// > "Garfield"
+```
+
+### 2. Persistent models
+
+To interact with a database, your models must inherit from `PersistedBaseObject` provided by the `@quatrain/backend` package. This adds methods like `.save()`, `.delete()`, and `.fromBackend()`.
+
+```ts
+import { Property } from '@quatrain/core'
+import { PersistedBaseObject } from '@quatrain/backend'
+
+// Notice we now extend PersistedBaseObject
+export class PersistedCat extends PersistedBaseObject {
    static COLLECTION = 'cats'
 
    static PROPERTIES = [
@@ -61,23 +103,7 @@ export class CatCore extends BaseObject {
 }
 ```
 
-### Instantiate a model
-
-```ts
-const catData: Cat = {
-   name: 'Garfield',
-   color: '#ffa502',
-}
-
-const garfield = Cat.fromObject(catData)
-
-console.log(garfield._.name)
-// > "Garfield"
-console.log(garfield._.color)
-// > "#ffa502"
-```
-
-### Interact with backend
+#### Interact with backend
 
 ```ts
 import { Backend } from '@quatrain/backend'
@@ -86,28 +112,31 @@ import { SqliteAdapter } from '@quatrain/backend-sqlite'
 // Set up a default backend
 Backend.addBackend(new SqliteAdapter(), 'sqlite', true)
 
-// Let's save Garfield in our database
-const savedCat = await garfield.save()
+const catData = { name: 'Garfield', color: '#ffa502' }
 
-// Now, let's retrieve Garfield in the database
-const persistedGarfield = await Cat.fromBackend(savedCat.path)
-// cats/xyz
+// Instantiate a persistent object
+const garfield = PersistedCat.fromObject(catData)
+
+// Let's save Garfield in our database
+await garfield.save()
+
+// Now, let's retrieve Garfield from the database using its path
+const retrievedGarfield = await PersistedCat.fromBackend(garfield.asReference().path)
+
+console.log(retrievedGarfield._.name)
+// > "Garfield"
 ```
 
-### Using repositories
+### 3. Using repositories
 
-You can use repositories as an alternative way to persist and retrieve models in your backend.
-
-This module provides a BaseRepository class that you can extend and override to apply your business logic when doing backend operations.
-
-Let's create a repository for our Cat model, that prevents us from deleting a cat.
+You can use repositories to encapsulate your business logic and backend operations.
 
 ```ts
 import { BackendInterface, BaseRepository } from '@quatrain/backend'
 
-export default class CatRepository extends BaseRepository<Cat> {
+export default class CatRepository extends BaseRepository<PersistedCat> {
    constructor(backendAdapter: BackendInterface = Backend.getBackend()) {
-      super(Cat, backendAdapter)
+      super(PersistedCat, backendAdapter)
    }
 
    async delete(uid: string) {
@@ -116,13 +145,21 @@ export default class CatRepository extends BaseRepository<Cat> {
 }
 ```
 
-Now, let's use our new CatRepository.
+Now, let's use our new `CatRepository`.
 
 ```ts
 const repository = new CatRepository()
 
-repository.create(garfield)
-repository.read('garfield')
-repository.update(persistedGarfield)
-repository.delete('garfield') // Will throw "Don't delete the cats!"
+// Create a new cat in the database
+const createdCat = await repository.create(garfield)
+
+// Read from database using its UID
+const persistedGarfield = await repository.read(createdCat.uid)
+
+// Update
+persistedGarfield._.color = '#ff0000'
+await repository.update(persistedGarfield)
+
+// Delete
+await repository.delete(persistedGarfield.uid) // Will throw "Don't delete the cats!"
 ```

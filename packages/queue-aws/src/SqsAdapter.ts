@@ -59,7 +59,7 @@ export class SqsAdapter extends AbstractQueueAdapter {
     * Listen to a topic
     * @param topic
     */
-   async listen(topic: string, handler: (message: any) => Promise<void>) {
+   async listen(topic: string, handler: Function, params?: any) {
       let QueueUrl =
          this._params.config.endpoint ||
          `https://sqs.${this._params.config.region || ''}.amazonaws.com`
@@ -85,7 +85,13 @@ export class SqsAdapter extends AbstractQueueAdapter {
                   this._logger.debug(`Received message ${message.MessageId}`)
 
                   try {
-                     await handler(message)
+                     const result = await handler(message.Body, params)
+
+                     if (result === false) {
+                        throw new Error(
+                           'messageHandler function failed, see status log in jobExecution for more information'
+                        )
+                     }
 
                      // Delete message after successful processing
                      const deleteCommand = new DeleteMessageCommand({

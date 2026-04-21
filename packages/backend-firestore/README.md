@@ -24,3 +24,7 @@ import { FirestoreAdapter } from '@quatrain/backend-firestore'
 const adapter = new FirestoreAdapter({ config: { projectId: 'my-project' } })
 Backend.addAdapter(adapter, 'default', true)
 ```
+
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).

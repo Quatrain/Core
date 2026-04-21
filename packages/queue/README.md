@@ -23,6 +23,10 @@ npm install @quatrain/queue-amqp
 
 You register your chosen adapter to the `Queue` registry at startup. From anywhere in your application, you can then retrieve the queue adapter and dispatch messages to specific topics. The `@quatrain/worker` package uses this abstraction heavily to listen for incoming jobs.
 
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).
+
 ## License
 
 AGPL-3.0-only

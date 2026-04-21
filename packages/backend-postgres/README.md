@@ -35,6 +35,10 @@ This means:
 - The adapter returns them as `2026-02-06T08:24:06.034Z` for proper parsing
 - Frontend applications can then convert to the user's local timezone for display
 
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).
+
 ## License
 
 AGPL-3.0-only

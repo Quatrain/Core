@@ -27,6 +27,10 @@ yarn add @quatrain/worker
 - **Process Spawning**: Safely wrap `child_process.spawn` into Promises with structured logging.
 - **Event Reporting**: Push HTTP patch events to a backend orchestrator using `axios` to update job statuses in real-time.
 
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).
+
 ## License
 
 AGPL-3.0-only

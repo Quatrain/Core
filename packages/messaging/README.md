@@ -23,6 +23,10 @@ npm install @quatrain/messaging-firebase
 
 Just like other Quatrain abstractions, you register adapters for different messaging channels (e.g., 'email', 'push', 'sms') to the central registry.
 
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).
+
 ## License
 
 AGPL-3.0-only

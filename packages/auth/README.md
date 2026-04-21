@@ -23,6 +23,10 @@ npm install @quatrain/auth-firebase
 
 At startup, register an adapter with `Auth.addAdapter()`. In your middleware or API routes, use `Auth.getAdapter().verifyToken(token)` to validate incoming requests and extract the normalized user profile.
 
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).
+
 ## License
 
 AGPL-3.0-only

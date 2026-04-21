@@ -80,6 +80,10 @@ This package is designed to be the base layer with no external dependencies exce
 - `@quatrain/backend-firestore` - Firebase Firestore
 - `@quatrain/backend-sqlite` - SQLite
 
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).
+
 ## License
 
 AGPL-3.0-only

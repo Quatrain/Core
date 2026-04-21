@@ -37,6 +37,10 @@ import { Log, LogLevel } from '@quatrain/log'
 Log.getLogger().setLevel(LogLevel.DEBUG)
 ```
 
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).
+
 ## License
 
 AGPL-3.0-only

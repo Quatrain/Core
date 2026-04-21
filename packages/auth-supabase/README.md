@@ -32,6 +32,10 @@ const supabaseAuth = new SupabaseAuthAdapter({
 Auth.addAdapter('supabase', supabaseAuth, true)
 ```
 
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).
+
 ## License
 
 AGPL-3.0-only

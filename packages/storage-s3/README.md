@@ -35,6 +35,10 @@ const s3Adapter = new S3Adapter({
 Storage.addAdapter('s3', s3Adapter, true)
 ```
 
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).
+
 ## License
 
 AGPL-3.0-only

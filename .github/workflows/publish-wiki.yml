@@ -79,11 +79,104 @@ jobs:
           
           category_order=("Foundations" "Storage & Data" "Queue & Messaging" "Auth & Cloud")
           
+          # Copy assets if they exist
+          if [ -d "assets" ]; then
+            cp -r assets wiki/
+          fi
+          
           # Initialize Home.md
           echo "# Quatrain Core Documentation" > wiki/Home.md
           echo "" >> wiki/Home.md
+          if [ -f "assets/logo.png" ]; then
+            echo "![Quatrain Core Logo](assets/logo.png)" >> wiki/Home.md
+            echo "" >> wiki/Home.md
+          fi
           echo "Welcome to the Quatrain Core documentation. Below is the directory of all available packages grouped by their ecosystem family." >> wiki/Home.md
           echo "" >> wiki/Home.md
+          
+          # Append Mermaid Diagram
+          cat << 'EOF' >> wiki/Home.md
+## Architecture Overview
+
+```mermaid
+flowchart TD
+    classDef data fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px,color:#000
+    classDef queue fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef cloud fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef abstraction fill:#fff,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5,color:#000
+
+    subgraph Cloud ["☁️ Auth & Cloud"]
+        cloudwrapper([🧩 cloudwrapper]):::abstraction
+        auth([🧩 auth]):::abstraction
+        cloudwrapper_fb[🔥 cloudwrapper-firebase]:::cloud
+        cloudwrapper_sb[⚡ cloudwrapper-supabase]:::cloud
+        auth_fb[🔥 auth-firebase]:::cloud
+        auth_sb[⚡ auth-supabase]:::cloud
+        
+        cloudwrapper --- cloudwrapper_fb
+        cloudwrapper --- cloudwrapper_sb
+        cloudwrapper_fb ~~~ cloudwrapper_sb
+        
+        auth --- auth_fb
+        auth --- auth_sb
+        auth_fb ~~~ auth_sb
+    end
+
+    subgraph Messaging ["📨 Queue & Messaging"]
+        queue([🧩 queue]):::abstraction
+        messaging([🧩 messaging]):::abstraction
+        queue_amqp[🐇 queue-amqp]:::queue
+        queue_aws[☁️ queue-aws]:::queue
+        queue_gcp[🌐 queue-gcp]:::queue
+        messaging_fb[🔥 messaging-firebase]:::queue
+        
+        queue --- queue_amqp
+        queue --- queue_aws
+        queue --- queue_gcp
+        queue_amqp ~~~ queue_aws
+        queue_aws ~~~ queue_gcp
+        
+        messaging --- messaging_fb
+    end
+
+    subgraph Data ["🗄️ Storage & Data"]
+        backend([🧩 backend]):::abstraction
+        storage([🧩 storage]):::abstraction
+        backend_fs[🔥 backend-firestore]:::data
+        backend_pg[🐘 backend-postgres]:::data
+        backend_sq[🗃️ backend-sqlite]:::data
+        storage_fb[🔥 storage-firebase]:::data
+        storage_s3[☁️ storage-s3]:::data
+        storage_sb[⚡ storage-supabase]:::data
+        
+        backend --- backend_fs
+        backend --- backend_pg
+        backend --- backend_sq
+        backend_fs ~~~ backend_pg
+        backend_pg ~~~ backend_sq
+        
+        storage --- storage_fb
+        storage --- storage_s3
+        storage --- storage_sb
+        storage_fb ~~~ storage_s3
+        storage_s3 ~~~ storage_sb
+    end
+
+    subgraph Foundations ["🏗️ Foundations"]
+        core([⚙️ core]):::abstraction
+        log([⚙️ log]):::abstraction
+        worker([⚙️ worker]):::abstraction
+        
+        core ~~~ log
+        log ~~~ worker
+    end
+
+    worker -. "listens to" .-> queue
+    backend -. "persists" .-> core
+    cloudwrapper -. "initializes" .-> backend & storage & auth
+```
+
+EOF
           
           for category in "${category_order[@]}"; do
             # Build Sidebar

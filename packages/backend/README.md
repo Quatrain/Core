@@ -28,3 +28,7 @@ const users = await Backend.find(User.factory(), [
    new Filter('status', 'active', OperatorKeys.equals),
 ])
 ```
+
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).

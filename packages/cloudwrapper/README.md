@@ -23,6 +23,10 @@ npm install @quatrain/cloudwrapper-firebase
 
 The wrapper acts as a macro. When you configure and register it, it automatically creates and registers the underlying `@quatrain/backend`, `@quatrain/storage`, and `@quatrain/auth` adapters with the respective registries.
 
+## Documentation
+
+For concrete examples and usage guides, please refer to the [How-To Guide](HOWTO.md).
+
 ## License
 
 AGPL-3.0-only

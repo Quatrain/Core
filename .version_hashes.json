@@ -80,9 +80,9 @@
     "last_published": "2026-04-17T16:03:32.550Z"
   },
   "@quatrain/queue-aws": {
-    "version": "1.1.23",
-    "hash": "mFixAewhKTUIlH0Ad3qeD/FfWMQ=-00c112fccf0cd41487f1057e162c493b56cdd9a25a571348fa3a31295fa24389",
-    "last_published": "2026-04-17T16:03:40.826Z"
+    "version": "1.1.24",
+    "hash": "Va4uqTpP/CpvxC4P1Vg/nKPDjnE=-00c112fccf0cd41487f1057e162c493b56cdd9a25a571348fa3a31295fa24389",
+    "last_published": "2026-04-21T12:27:24.556Z"
   },
   "@quatrain/queue-gcp": {
     "version": "1.1.21",

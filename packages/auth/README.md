@@ -1,32 +1,28 @@
 # @quatrain/auth
 
-This package provides authentication and authorization abstractions for Quatrain applications. It defines a consistent interface for managing users, sessions, and tokens across different authentication providers.
+The central authentication and identity abstraction for the Quatrain ecosystem. It provides a standard way to manage users, roles, and sessions across various Identity Providers (IdP).
 
-## Features
+## Introduction
 
--  **Abstract Adapter**: A common interface for authentication providers.
--  **User Management**: Handles user registration, login, and profile updates.
--  **Token Handling**: Manages JWT verification and refresh logic.
--  **Middleware Integration**: Provides hooks for protecting backend routes.
+Authentication often ties an application tightly to a specific vendor. By using `@quatrain/auth`, your application code interacts with a generic API for checking logins, retrieving user metadata, and enforcing permissions, while the actual implementation is delegated to adapters (Firebase Auth, Supabase Auth, etc.).
+
+## Key Concepts
+
+- **`Auth`**: The static registry where authentication adapters are configured.
+- **`AbstractAuthAdapter`**: The base class for handling token verification, user fetching, and session management.
 
 ## Installation
 
 ```bash
 npm install @quatrain/auth
+# You will also need an adapter, e.g.:
+npm install @quatrain/auth-firebase
 ```
 
-## Usage
+## Architecture
 
-This package is meant to be used with a concrete authentication adapter, such as `@quatrain/auth-firebase` or `@quatrain/auth-supabase`.
+At startup, register an adapter with `Auth.addAdapter()`. In your middleware or API routes, use `Auth.getAdapter().verifyToken(token)` to validate incoming requests and extract the normalized user profile.
 
-```typescript
-import { Auth } from '@quatrain/auth'
-import { SupabaseAuthAdapter } from '@quatrain/auth-supabase'
+## License
 
-// Assuming an adapter has been added
-const user = await Auth.register({
-   email: 'user@example.com',
-   password: 'password123',
-})
-const token = await Auth.login('user@example.com', 'password123')
-```
+AGPL-3.0-only

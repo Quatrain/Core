@@ -1,26 +1,36 @@
 # @quatrain/backend-sqlite
 
-A backend adapter for SQLite. This package is perfect for local development, testing, and small-scale applications that require a simple, file-based database.
+The SQLite adapter for `@quatrain/backend`. This package allows Quatrain business objects to be persisted locally in a lightweight, file-based SQL database.
 
-## Features
+## Introduction
 
--  Implements the `@quatrain/backend` abstract adapter.
--  Zero-configuration setup for rapid development.
--  Stores the entire database in a single file.
--  Uses the `better-sqlite3` library for performance.
+SQLite is perfect for local development, testing, CLI tools, or mobile/desktop applications built with Node.js/Electron. This adapter translates Quatrain models into local SQLite tables and queries.
 
 ## Installation
 
 ```bash
-npm install @quatrain/backend-sqlite better-sqlite3
+npm install @quatrain/backend-sqlite sqlite3
+# or
+yarn add @quatrain/backend-sqlite sqlite3
 ```
 
-## Usage
+## Configuration
+
+Register the adapter with the path to your `.sqlite` file. If the file does not exist, it will be created automatically.
 
 ```typescript
 import { Backend } from '@quatrain/backend'
 import { SqliteAdapter } from '@quatrain/backend-sqlite'
 
-const adapter = new SqliteAdapter({ config: { filename: './dev.db' } })
-Backend.addAdapter(adapter, 'default', true)
+const sqliteAdapter = new SqliteAdapter({
+    config: {
+        filename: './data/database.sqlite'
+    }
+})
+
+Backend.addAdapter('sqlite', sqliteAdapter, true)
 ```
+
+## License
+
+AGPL-3.0-only

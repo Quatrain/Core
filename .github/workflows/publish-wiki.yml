@@ -1,0 +1,90 @@
+name: Publish Documentation to Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/**/README.md'
+      - 'packages/**/HOWTO.md'
+
+jobs:
+  publish-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Wiki Repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # If the wiki repository is empty or hasn't been initialized, this might fail.
+          # The wiki must have at least one initial page created manually via the GitHub UI.
+          
+      - name: Compile and Format Documentation
+        run: |
+          echo "Compiling documentation for Wiki..."
+          
+          # Initialize _Sidebar.md
+          echo "## Quatrain Core Documentation" > wiki/_Sidebar.md
+          echo "" >> wiki/_Sidebar.md
+          
+          # Define Categories
+          declare -A categories
+          categories=(
+            ["Foundations"]="core log worker"
+            ["Storage & Data"]="backend backend-firestore backend-postgres backend-sqlite storage storage-firebase storage-s3 storage-supabase"
+            ["Queue & Messaging"]="queue queue-amqp queue-aws queue-gcp messaging messaging-firebase"
+            ["Auth & Cloud"]="auth auth-firebase auth-supabase cloudwrapper cloudwrapper-firebase cloudwrapper-supabase"
+          )
+          
+          # Ordered categories for Sidebar
+          category_order=("Foundations" "Storage & Data" "Queue & Messaging" "Auth & Cloud")
+          
+          for category in "${category_order[@]}"; do
+            echo "### $category" >> wiki/_Sidebar.md
+            
+            packages=${categories[$category]}
+            for pkg in $packages; do
+              if [ -d "packages/$pkg" ]; then
+                # Define Wiki file names
+                readme_wiki="$pkg-Overview.md"
+                howto_wiki="$pkg-HowTo.md"
+                
+                # Copy and optionally transform README.md
+                if [ -f "packages/$pkg/README.md" ]; then
+                  cp "packages/$pkg/README.md" "wiki/$readme_wiki"
+                  echo "* [$pkg Overview]($pkg-Overview)" >> wiki/_Sidebar.md
+                fi
+                
+                # Copy and optionally transform HOWTO.md
+                if [ -f "packages/$pkg/HOWTO.md" ]; then
+                  cp "packages/$pkg/HOWTO.md" "wiki/$howto_wiki"
+                  echo "  * [How To]($pkg-HowTo)" >> wiki/_Sidebar.md
+                fi
+              fi
+            done
+            echo "" >> wiki/_Sidebar.md
+          done
+          
+          # Also generate a Home.md if you want it to be the default landing page
+          cp wiki/_Sidebar.md wiki/Home.md
+          sed -i 's/###/##/g' wiki/Home.md # Make headers slightly bigger for Home page
+
+      - name: Commit and Push to Wiki
+        run: |
+          cd wiki
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          
+          # Only commit if there are changes
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: auto-publish updated package docs to wiki"
+            git push origin HEAD:master
+          fi

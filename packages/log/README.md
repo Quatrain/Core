@@ -1,30 +1,42 @@
 # @quatrain/log
 
-A structured logging package for Quatrain applications. It uses an adapter pattern to allow for different logging backends, such as the console, file, or a cloud logging service.
+A centralized logging system for Quatrain applications, providing flexible log levels, adapter-based outputs, and structured logging capabilities.
 
-## Features
+## Introduction
 
--  **Multiple Log Levels**: Supports `DEBUG`, `INFO`, `WARN`, `ERROR`, and `CRITICAL`.
--  **Adapter Pattern**: Pluggable adapters for various logging outputs.
--  **Domain-specific Loggers**: Create separate logger instances for different parts of your application.
--  **Structured JSON Output**: Logs can be formatted as JSON for easy parsing by log management systems.
+The `@quatrain/log` package acts as the unified logging interface for all components within the Quatrain ecosystem. Rather than scattering `console.log` statements throughout your code, this package offers a structured approach to debugging, warning, and tracing errors, with the ability to route logs to different destinations via custom adapters.
+
+## Key Concepts
+
+- **`Log`**: The static registry and main interface for logging messages.
+- **`LogLevel`**: Enum defining severity (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `SILENT`).
+- **`AbstractLoggerAdapter`**: The base class for creating custom log outputs.
+- **`DefaultLoggerAdapter`**: The built-in adapter that outputs colorized logs to the console using `chalk`.
 
 ## Installation
 
 ```bash
 npm install @quatrain/log
+# or
+yarn add @quatrain/log
+# or
+bun add @quatrain/log
 ```
 
-## Usage
+## Configuration
+
+By default, `@quatrain/log` initializes a `DefaultLoggerAdapter` with the `INFO` level. 
+No configuration is required for basic usage.
+
+If you need to change the log level globally or register custom loggers, you can do so early in your application lifecycle:
 
 ```typescript
 import { Log, LogLevel } from '@quatrain/log'
-import { ConsoleLoggerAdapter } from '@quatrain/log' // Example adapter
 
-const logger = Log.addLogger('api', new ConsoleLoggerAdapter(), true)
-logger.info('Server has started.', { port: 3000 })
-
-// Instantiating a sub-logger using clone()
-const subLogger = logger.clone('db') // Inherits configuration, suffixing prefix with ][db
-subLogger.debug('Connection pool initialized.') // Output prefix: [api][db]
+// Set the default logger level to DEBUG
+Log.getLogger().setLevel(LogLevel.DEBUG)
 ```
+
+## License
+
+AGPL-3.0-only

@@ -1,33 +1,28 @@
 # @quatrain/queue
 
-This package provides message queue abstractions for building scalable, asynchronous applications. It allows you to decouple services and process background jobs efficiently.
+The central queue and message broker abstraction for the Quatrain framework. This package provides a unified API for sending and listening to asynchronous messages across different queueing systems.
 
-## Features
+## Introduction
 
--  **Abstract Adapter**: A consistent interface for different message brokers (RabbitMQ, AWS SQS, etc.).
--  **Publish/Subscribe**: Send messages to queues or topics.
--  **Worker Pattern**: Easily create consumers to process messages from a queue.
+Asynchronous communication is vital for distributed systems. Whether you are dispatching jobs to workers or broadcasting events, `@quatrain/queue` ensures your code remains clean and independent of the underlying message broker technology (RabbitMQ, AWS SQS, GCP PubSub, etc.).
+
+## Key Concepts
+
+- **`Queue`**: The static registry used to configure and retrieve queue adapters.
+- **`AbstractQueueAdapter`**: The base class that all specific queue implementations must extend. Defines methods like `send()` and `listen()`.
 
 ## Installation
 
 ```bash
 npm install @quatrain/queue
+# You will also need an adapter, e.g.:
+npm install @quatrain/queue-amqp
 ```
 
-## Usage
+## Architecture
 
-This package requires a concrete queue adapter, such as `@quatrain/queue-amqp`.
+You register your chosen adapter to the `Queue` registry at startup. From anywhere in your application, you can then retrieve the queue adapter and dispatch messages to specific topics. The `@quatrain/worker` package uses this abstraction heavily to listen for incoming jobs.
 
-```typescript
-import { Queue } from '@quatrain/queue'
+## License
 
-// Assuming an adapter has been added
-await Queue.publish('email-queue', {
-   to: 'user@example.com',
-   subject: 'Welcome!',
-})
-
-Queue.subscribe('email-queue', async (message) => {
-   /* ... process message ... */
-})
-```
+AGPL-3.0-only

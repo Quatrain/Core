@@ -1,26 +1,40 @@
 # @quatrain/storage-s3
 
-A storage adapter for AWS S3 and other S3-compatible services like MinIO or DigitalOcean Spaces.
+The AWS S3 (and S3-compatible) adapter for `@quatrain/storage`.
 
-## Features
+## Introduction
 
--  Implements the `@quatrain/storage` abstract adapter.
--  Works with any S3-compatible object storage provider.
--  Leverages the official AWS SDK for JavaScript (`@aws-sdk/client-s3`).
--  Supports multipart uploads for large files.
+This adapter enables file operations across Amazon S3, Scaleway Object Storage, DigitalOcean Spaces, or any other S3-compatible service.
 
 ## Installation
 
 ```bash
 npm install @quatrain/storage-s3 @aws-sdk/client-s3
+# or
+yarn add @quatrain/storage-s3 @aws-sdk/client-s3
 ```
 
-## Usage
+## Configuration
+
+Initialize the adapter with your S3 credentials and endpoint.
 
 ```typescript
-import { Storage } from '@quatrain/storage';
-import { S3StorageAdapter } from '@quatrain/storage-s3';
+import { Storage } from '@quatrain/storage'
+import { S3Adapter } from '@quatrain/storage-s3'
 
-const adapter = new S3StorageAdapter({ config: { region: 'us-east-1', credentials: { ... } } });
-Storage.addAdapter(adapter, 'default', true);
+const s3Adapter = new S3Adapter({
+    config: {
+        accesskey: process.env.AWS_ACCESS_KEY_ID,
+        secret: process.env.AWS_SECRET_ACCESS_KEY,
+        region: process.env.AWS_REGION || 'eu-west-1',
+        // Provide endpoint if using an S3-compatible service like Scaleway
+        endpoint: 'https://s3.fr-par.scw.cloud'
+    }
+})
+
+Storage.addAdapter('s3', s3Adapter, true)
 ```
+
+## License
+
+AGPL-3.0-only

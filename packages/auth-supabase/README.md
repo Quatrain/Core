@@ -1,89 +1,37 @@
 # @quatrain/auth-supabase
 
-An authentication adapter for Supabase Auth. This package provides a seamless integration between Quatrain and Supabase's GoTrue-based authentication service.
+The Supabase Authentication adapter for `@quatrain/auth`.
 
-## Features
+## Introduction
 
--  Implements the `@quatrain/auth` abstract adapter.
--  Works with both Supabase SaaS and self-hosted instances.
--  Leverages Supabase's Row-Level Security (RLS) for data access.
--  Uses the `@supabase/supabase-js` library.
+Supabase Auth provides robust user management based on PostgreSQL Row Level Security. This adapter implements the Quatrain Auth interface to verify Supabase JWTs and manage user sessions.
 
 ## Installation
 
 ```bash
 npm install @quatrain/auth-supabase @supabase/supabase-js
+# or
+yarn add @quatrain/auth-supabase @supabase/supabase-js
 ```
 
-## Usage
+## Configuration
 
-### Setup
+Initialize the adapter using your Supabase project URL and service role key.
 
 ```typescript
 import { Auth } from '@quatrain/auth'
 import { SupabaseAuthAdapter } from '@quatrain/auth-supabase'
 
-const adapter = new SupabaseAuthAdapter({
-   config: { supabaseUrl: '...', supabaseKey: '...' },
-})
-Auth.addProvider(adapter, 'default', true)
-```
-
-### Register a New User
-
-```typescript
-import { User } from '@quatrain/backend'
-
-const user = new User({
-   _: {
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '+1234567890',
-   },
+const supabaseAuth = new SupabaseAuthAdapter({
+    config: {
+        url: process.env.SUPABASE_URL,
+        key: process.env.SUPABASE_SERVICE_ROLE_KEY
+    }
 })
 
-const supabaseUser = await adapter.register(user, 'password123')
-console.log('User registered:', supabaseUser.id)
+Auth.addAdapter('supabase', supabaseAuth, true)
 ```
 
-### Sign In
+## License
 
-```typescript
-const result = await adapter.signup('john@example.com', 'password123')
-if (result) {
-   console.log('Signed in:', result.user)
-   console.log('Session token:', result.session.access_token)
-}
-```
-
-### Sign Out
-
-```typescript
-const success = await adapter.signout()
-console.log('Signed out:', success)
-```
-
-### Update User Profile
-
-```typescript
-await adapter.update(user, {
-   email: 'newemail@example.com',
-   phone: '+0987654321',
-})
-```
-
-### Refresh Token
-
-```typescript
-const newTokens = await adapter.refreshToken(refreshToken)
-console.log('New access token:', newTokens.access_token)
-```
-
-### Set Custom User Claims
-
-```typescript
-await adapter.setCustomUserClaims(userId, {
-   role: 'admin',
-   permissions: ['read', 'write', 'delete'],
-})
-```
+AGPL-3.0-only

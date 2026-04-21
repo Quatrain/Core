@@ -1,30 +1,38 @@
 # @quatrain/storage-firebase
 
-A storage adapter for Google Cloud Storage for Firebase. This package allows Quatrain applications to store and manage user-generated content like images and videos.
+The Firebase Storage adapter for `@quatrain/storage`. 
 
-## Features
+## Introduction
 
--  Implements the `@quatrain/storage` abstract adapter.
--  Integrates with Firebase security rules for fine-grained access control.
--  Automatic CDN distribution for low-latency content delivery.
--  Uses the `firebase-admin` SDK for server-side operations.
+This adapter enables you to securely upload, download, and manage files in Google Cloud Storage buckets linked to your Firebase project, using the standard Quatrain API.
 
 ## Installation
 
 ```bash
 npm install @quatrain/storage-firebase firebase-admin
+# or
+yarn add @quatrain/storage-firebase firebase-admin
 ```
 
-## Usage
+## Configuration
+
+Register the adapter by providing your Firebase service account credentials.
 
 ```typescript
 import { Storage } from '@quatrain/storage'
 import { FirebaseStorageAdapter } from '@quatrain/storage-firebase'
 
-const adapter = new FirebaseStorageAdapter({
-   config: {
-      /* Firebase Admin SDK config */
-   },
+const firebaseAdapter = new FirebaseStorageAdapter({
+    config: {
+        projectId: 'your-project-id',
+        clientEmail: 'firebase-adminsdk-xxx@your-project-id.iam.gserviceaccount.com',
+        privateKey: '-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n'
+    }
 })
-Storage.addAdapter(adapter, 'default', true)
+
+Storage.addAdapter('firebase', firebaseAdapter, true)
 ```
+
+## License
+
+AGPL-3.0-only

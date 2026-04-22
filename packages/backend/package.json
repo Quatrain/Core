@@ -12,6 +12,11 @@
       "dist/",
       "README.md"
    ],
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/Quatrain/Core.git",
+      "directory": "packages/backend"
+   },
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "dependencies": {
       "@faker-js/faker": "^7.6.0",

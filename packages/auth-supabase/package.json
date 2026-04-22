@@ -11,6 +11,11 @@
       "dist/",
       "README.md"
    ],
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/Quatrain/Core.git",
+      "directory": "packages/auth-supabase"
+   },
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "dependencies": {
       "@quatrain/auth": "^1.1.28",

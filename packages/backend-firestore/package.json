@@ -12,6 +12,11 @@
       "dist/",
       "README.md"
    ],
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/Quatrain/Core.git",
+      "directory": "packages/backend-firestore"
+   },
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "peerDependencies": {
       "@quatrain/core": "^1.1.49"

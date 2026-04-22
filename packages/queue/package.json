@@ -11,6 +11,11 @@
       "dist/",
       "README.md"
    ],
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/Quatrain/Core.git",
+      "directory": "packages/queue"
+   },
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "license": "AGPL-3.0-only",
    "devDependencies": {

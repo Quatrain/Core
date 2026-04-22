@@ -49,8 +49,8 @@ export class FileSystem {
          response.data.pipe(writer)
 
          return new Promise((resolve, reject) => {
-            writer.on('finish', resolve)
-            writer.on('error', reject)
+            writer.on('finish', () => resolve(true))
+            writer.on('error', (err) => reject(err))
          })
       } catch (err) {
          Worker.error(`Download error: ${(err as Error).message}`)

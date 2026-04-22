@@ -28,8 +28,8 @@
    },
    "dependencies": {
       "@faker-js/faker": "^7.6.0",
-      "@quatrain/core": "workspace:^",
-      "@quatrain/backend": "workspace:^"
+      "@quatrain/backend": "workspace:^",
+      "@quatrain/core": "workspace:^"
    },
    "scripts": {
       "test-ci": "jest --runInBand",

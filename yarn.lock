@@ -3149,6 +3149,7 @@ __metadata:
     "@faker-js/faker": "npm:^7.6.0"
     "@quatrain/backend": "npm:^1.1.36"
     "@quatrain/core": "workspace:^"
+    "@quatrain/testing": "workspace:^"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
     "@types/node": "npm:^22.10.1"
@@ -3187,13 +3188,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/backend@npm:^1.1.36, @quatrain/backend@workspace:packages/backend":
+"@quatrain/backend@npm:^1.1.36, @quatrain/backend@workspace:^, @quatrain/backend@workspace:packages/backend":
   version: 0.0.0-use.local
   resolution: "@quatrain/backend@workspace:packages/backend"
   dependencies:
     "@faker-js/faker": "npm:^7.6.0"
     "@quatrain/core": "npm:^1.1.51"
     "@quatrain/log": "npm:^1.1.10"
+    "@quatrain/testing": "workspace:^"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
     "@types/module-alias": "npm:^2"
@@ -3285,16 +3287,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/core@workspace:packages/core"
   dependencies:
-    "@faker-js/faker": "npm:^7.6.0"
     "@quatrain/log": "workspace:^"
+    "@quatrain/testing": "workspace:^"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
-    "@types/module-alias": "npm:^2"
     "@types/node": "npm:^22.10.1"
     "@types/node-persist": "npm:^3.1.8"
     "@types/which": "npm:^3.0.4"
     jest: "npm:^29.7.0"
-    module-alias: "npm:^2.2.3"
     node-persist: "npm:^4.0.4"
     trace-unhandled: "npm:^2.0.1"
     ts-jest: "npm:^29.4.6"
@@ -3527,6 +3527,22 @@ __metadata:
     ts-jest: "npm:^29.4.6"
     ts-node: "npm:^10.4.0"
     typescript: "npm:^5.1.5"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/testing@workspace:^, @quatrain/testing@workspace:packages/testing":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/testing@workspace:packages/testing"
+  dependencies:
+    "@faker-js/faker": "npm:^7.6.0"
+    "@quatrain/backend": "workspace:^"
+    "@quatrain/core": "workspace:^"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:^22.10.1"
+    jest: "npm:^29.7.0"
+    ts-jest: "npm:^29.4.6"
+    typescript: "npm:^5.2.2"
   languageName: unknown
   linkType: soft
 
@@ -8861,13 +8877,6 @@ __metadata:
   bin:
     mkdirp: dist/cjs/src/bin.js
   checksum: 10c0/9f2b975e9246351f5e3a40dcfac99fcd0baa31fbfab615fe059fb11e51f10e4803c63de1f384c54d656e4db31d000e4767e9ef076a22e12a641357602e31d57d
-  languageName: node
-  linkType: hard
-
-"module-alias@npm:^2.2.3":
-  version: 2.2.3
-  resolution: "module-alias@npm:2.2.3"
-  checksum: 10c0/47dc5b6d04f6e7df0ff330ca9b2a37c688a682ed661e9432b0b327e1e6c43eedad052151b8d50d6beea8b924828d2a92fa4625c18d651bf2d93d8f03aa0172fa
   languageName: node
   linkType: hard
 

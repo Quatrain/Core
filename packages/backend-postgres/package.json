@@ -10,7 +10,8 @@
       "LICENSE.md",
       "src/",
       "dist/",
-      "README.md"
+      "README.md",
+      "NOTICE.md"
    ],
    "repository": {
       "type": "git",
@@ -26,6 +27,7 @@
    },
    "devDependencies": {
       "@faker-js/faker": "^7.6.0",
+      "@quatrain/testing": "workspace:^",
       "@tsconfig/recommended": "^1.0.1",
       "@types/jest": "^29.5.12",
       "@types/node": "^22.10.1",

@@ -15,7 +15,8 @@
       "LICENSE.md",
       "src/",
       "dist/",
-      "README.md"
+      "README.md",
+      "NOTICE.md"
    ],
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "peerDependencies": {

@@ -44,9 +44,11 @@ import {
    NotFoundError,
    GoneError,
 } from './common/ResourcesErrors'
+import * as htmlType from './properties/types/PropertyHTMLType'
 import { DataObjectParams } from './components/types/DataObjectParams'
 
 export {
+   htmlType,
    statuses,
    Core,
    Property,

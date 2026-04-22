@@ -10,7 +10,8 @@
       "LICENSE.md",
       "dist/",
       "src/",
-      "README.md"
+      "README.md",
+      "NOTICE.md"
    ],
    "repository": {
       "type": "git",

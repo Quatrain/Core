@@ -163,8 +163,6 @@ async function publishAll() {
                 try {
                     // Temporarily write the versioned + stripped file
                     fs.writeFileSync(pkgJsonPath, JSON.stringify(updatedPkgJson, null, 2), 'utf8');
-                    
-                    execSync('cp ../../LICENSE.md .', { cwd: pkgDir, stdio: 'inherit' });
                     // Provide explicit .npmignore so yarn pack doesn't use .gitignore (which ignores lib and dist)
                     fs.writeFileSync(path.join(pkgDir, '.npmignore'), 'node_modules\ncoverage\n.git\n', 'utf8');
                     

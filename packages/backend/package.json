@@ -10,7 +10,8 @@
       "LICENSE.md",
       "src/",
       "dist/",
-      "README.md"
+      "README.md",
+      "NOTICE.md"
    ],
    "repository": {
       "type": "git",
@@ -24,6 +25,7 @@
       "@quatrain/log": "^1.1.10"
    },
    "devDependencies": {
+      "@quatrain/testing": "workspace:^",
       "@tsconfig/recommended": "^1.0.1",
       "@types/jest": "^29.5.12",
       "@types/module-alias": "^2",

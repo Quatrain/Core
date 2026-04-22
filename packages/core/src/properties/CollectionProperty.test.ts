@@ -1,6 +1,6 @@
 import { Entity } from '../components/Entity'
 import { User } from '../components/User'
-import { DataGenerator } from '../common/DataGenerator'
+import { DataGenerator } from '@quatrain/testing'
 import * as statuses from '../common/statuses'
 
 describe('Collection Property', () => {

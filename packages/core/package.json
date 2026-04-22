@@ -9,7 +9,8 @@
       "LICENSE.md",
       "dist/",
       "src/",
-      "README.md"
+      "README.md",
+      "NOTICE.md"
    ],
    "repository": {
       "type": "git",
@@ -19,9 +20,9 @@
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "license": "AGPL-3.0-only",
    "devDependencies": {
+      "@quatrain/testing": "workspace:^",
       "@tsconfig/recommended": "^1.0.1",
       "@types/jest": "^29.5.12",
-      "@types/module-alias": "^2",
       "@types/node": "^22.10.1",
       "@types/node-persist": "^3.1.8",
       "@types/which": "^3.0.4",
@@ -32,9 +33,7 @@
       "typescript": "^5.2.2"
    },
    "dependencies": {
-      "@faker-js/faker": "^7.6.0",
       "@quatrain/log": "workspace:^",
-      "module-alias": "^2.2.3",
       "node-persist": "^4.0.4",
       "which": "^5.0.0"
    },
@@ -43,8 +42,5 @@
       "build": "tsc",
       "wbuild": "tsc --watch",
       "bump-to": "yarn version"
-   },
-   "_moduleAliases": {
-      "@core": "."
    }
 }

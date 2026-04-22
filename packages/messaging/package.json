@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/messaging",
-   "version": "1.0.11",
+   "version": "1.0.12",
    "license": "AGPL-3.0-only",
    "description": "Messaging adapters commons",
    "main": "dist/index.js",
@@ -19,7 +19,7 @@
    },
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "dependencies": {
-      "@quatrain/core": "^1.1.49",
+      "@quatrain/core": "^1.1.50",
       "mustache": "^4.2.0"
    },
    "devDependencies": {

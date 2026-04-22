@@ -214,7 +214,7 @@ export class S3StorageAdapter extends AbstractStorageAdapter {
    async download(file: FileType, meta: DownloadFileMetaType) {
       const stream: Readable = await this.getReadable(file)
       await new Promise((res) =>
-         stream.pipe(createWriteStream(meta.path)).on('close', res)
+         stream.pipe(createWriteStream(meta.path)).on('close', () => res(true))
       )
 
       return meta.path

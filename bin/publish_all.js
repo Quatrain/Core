@@ -171,7 +171,8 @@ async function publishAll() {
                     execSync('yarn pack --out package.tgz', { cwd: pkgDir, stdio: 'inherit' });
                     
                     // Publish
-                    execSync('npm publish package.tgz --registry https://registry.npmjs.org/ --access public', { cwd: pkgDir, stdio: 'inherit' });
+                    execSync('npm publish package.tgz --registry https://registry.npmjs.org/ --access public --provenance', { cwd: pkgDir, stdio: 'inherit' });
+                    // Note: GitHub Packages does not fully support --provenance yet for scoped packages in all scenarios, but we try it if needed, or leave it standard. We leave github standard for now.
                     execSync('npm publish package.tgz --registry https://npm.pkg.github.com/', { cwd: pkgDir, stdio: 'inherit' });
                 } finally {
                     // Restore the package.json to retain workspace: protocols but keep the version bump

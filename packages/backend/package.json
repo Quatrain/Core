@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/backend",
-   "version": "1.1.35",
+   "version": "1.1.36",
    "license": "AGPL-3.0-only",
    "description": "Backend adapters commons",
    "main": "dist/index.js",
@@ -20,8 +20,8 @@
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "dependencies": {
       "@faker-js/faker": "^7.6.0",
-      "@quatrain/core": "^1.1.50",
-      "@quatrain/log": "^1.1.9"
+      "@quatrain/core": "^1.1.51",
+      "@quatrain/log": "^1.1.10"
    },
    "devDependencies": {
       "@tsconfig/recommended": "^1.0.1",

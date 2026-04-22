@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/queue-amqp",
-   "version": "1.2.25",
+   "version": "1.2.26",
    "description": "Queue adapter for AMQP compatible queue",
    "main": "dist/index.js",
    "types": "dist/index.d.ts",
@@ -35,8 +35,8 @@
    },
    "dependencies": {
       "@cloudamqp/amqp-client": "^3.4.1",
-      "@quatrain/core": "^1.1.51",
-      "@quatrain/queue": "^1.1.31",
+      "@quatrain/core": "^1.1.52",
+      "@quatrain/queue": "^1.1.32",
       "amqplib": "^0.10.9"
    },
    "scripts": {

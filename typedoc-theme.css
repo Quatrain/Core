@@ -40,10 +40,16 @@ code, pre, .tsd-signature {
     box-shadow: none;
 }
 
-/* Ajustement du logo dans la barre d'outils */
-.tsd-page-toolbar img {
+/* Injection du logo de l'entreprise dans la barre d'outils */
+.tsd-page-toolbar .title::before {
+    content: "";
+    display: inline-block;
+    width: 140px;
     height: 32px;
+    background: url('./assets/quatrain-logo.png') no-repeat left center;
+    background-size: contain;
     margin-right: 12px;
+    vertical-align: middle;
 }
 
 /* Bannière de titre de page très sobre */

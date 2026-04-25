@@ -11,7 +11,5 @@
   "customCss": "typedoc-theme.css",
   "hideGenerator": true,
   "searchInComments": true,
-  "projectDocuments": ["packages/*/HOWTO.md"],
-  "logo": "assets/quatrain-logo.png",
-  "mergeReadme": true
+  "projectDocuments": ["packages/*/README.md", "packages/*/HOWTO.md"]
 }

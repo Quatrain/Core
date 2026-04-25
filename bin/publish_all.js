@@ -65,6 +65,7 @@ async function publishAll() {
     const packages = fs.readdirSync(packagesDir);
     const computedHashes = {};
     const previousDataMap = {};
+    let anyPackageChanged = false;
     
     console.log('[PREPARE] Computing stable hashes prior to build...');
     for (const pkg of packages) {
@@ -94,9 +95,16 @@ async function publishAll() {
         
         computedHashes[pkgName] = `${rawHash}-${depsHash}`;
         previousDataMap[pkgName] = registry[pkgName] || {};
+        
+        if (previousDataMap[pkgName].hash !== computedHashes[pkgName]) {
+            anyPackageChanged = true;
+        }
     }
 
-    console.log('[PREPARE] Building all workspaces in explicit dependency order...');
+    if (!anyPackageChanged) {
+        console.log('[BUILD] No package changes detected. Skipping build phase completely.');
+    } else {
+        console.log('[PREPARE] Building all workspaces in explicit dependency order...');
     for (const pkg of BUILD_ORDER) {
         const pkgDir = path.join(packagesDir, pkg);
         if (!fs.existsSync(pkgDir)) {
@@ -111,11 +119,12 @@ async function publishAll() {
         fs.statSync(path.join(packagesDir, p)).isDirectory() &&
         !BUILD_ORDER.includes(p)
     );
-    for (const pkg of allPkgs) {
-        const pkgDir = path.join(packagesDir, pkg);
-        if (!fs.existsSync(path.join(pkgDir, 'package.json'))) continue;
-        console.log(`[BUILD] Building ${pkg} (unlisted)...`);
-        execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
+        for (const pkg of allPkgs) {
+            const pkgDir = path.join(packagesDir, pkg);
+            if (!fs.existsSync(path.join(pkgDir, 'package.json'))) continue;
+            console.log(`[BUILD] Building ${pkg} (unlisted)...`);
+            execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
+        }
     }
 
     for (const pkg of packages) {
@@ -219,6 +228,12 @@ async function publishAll() {
         }
     }
     
+    const isBuildOnly = process.argv.includes('--build-only');
+    if (isBuildOnly) {
+        console.log('[POST-BUILD] --build-only flag detected, skipping publishing.');
+        return;
+    }
+
     if (changed) {
         console.log('[POST-PUBLISH] Recomputing stable hashes to account for automatic workspace version bumps...');
         for (const pkg of packages) {

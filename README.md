@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="./assets/logo.png" alt="Quatrain Logo" width="300" />
+</div>
+
 # Quatrain Core - A Modular BaaS Framework
 
 Quatrain Core is a modular TypeScript framework designed to accelerate business application development with **Backend as a Service (BaaS)** solutions like Firebase and Supabase. It provides a clean separation of concerns between logic, data, and storage, using an adapter pattern to provide consistent interfaces across different BaaS providers.
@@ -163,3 +167,15 @@ await repository.update(persistedGarfield)
 // Delete
 await repository.delete(persistedGarfield.uid) // Will throw "Don't delete the cats!"
 ```
+
+## ⚖️ License & Professional Services
+
+Quatrain Core is released under the **AGPL-3.0** (Affero General Public License). This ensures that any enhancements to the open-source core remain free and accessible to the community. If you build a SaaS or application using this framework, you must comply with the AGPL-3.0 terms.
+
+**Professional Services & Commercial Licensing**  
+If your organization requires a commercial license (to integrate Quatrain Core without the AGPL-3.0 restrictions), or if you need expert assistance, the **Quatrain** team offers:
+- **Commercial Licensing**: Tailored licenses for proprietary software and enterprise deployments.
+- **Custom Development**: Expert engineers to help you build or migrate your backend architecture.
+- **Premium Support**: Priority SLA, architectural consulting, and code reviews.
+
+Contact us at **developers@quatrain.com** to discuss your project needs.

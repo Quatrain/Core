@@ -36,7 +36,7 @@ jobs:
         run: YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
 
       - name: Build packages
-        run: node bin/publish_all.js --build-only
+        run: yarn node bin/publish_all.js --build-only
 
       - name: Build documentation
         run: yarn typedoc

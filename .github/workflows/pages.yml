@@ -33,7 +33,7 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
 
       - name: Build documentation
         run: yarn typedoc

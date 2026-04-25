@@ -92,17 +92,20 @@ async function publishAll() {
             scripts: pkgJson.scripts || {},
             bin: pkgJson.bin || {}
         })).digest('hex');
-        
         computedHashes[pkgName] = `${rawHash}-${depsHash}`;
         previousDataMap[pkgName] = registry[pkgName] || {};
         
-        if (previousDataMap[pkgName].hash !== computedHashes[pkgName]) {
+        const hasDist = fs.existsSync(path.join(pkgDir, 'dist')) || fs.existsSync(path.join(pkgDir, 'lib'));
+        
+        if (!hasDist || previousDataMap[pkgName].hash !== computedHashes[pkgName]) {
             anyPackageChanged = true;
         }
     }
 
-    if (!anyPackageChanged) {
-        console.log('[BUILD] No package changes detected. Skipping build phase completely.');
+    const forceBuild = process.argv.includes('--force');
+
+    if (!anyPackageChanged && !forceBuild) {
+        console.log('[BUILD] No package changes detected and build artifacts present. Skipping build phase completely.');
     } else {
         console.log('[PREPARE] Building all workspaces in explicit dependency order...');
     for (const pkg of BUILD_ORDER) {

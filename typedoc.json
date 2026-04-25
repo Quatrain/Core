@@ -1,0 +1,11 @@
+{
+  "entryPointStrategy": "packages",
+  "entryPoints": ["packages/*"],
+  "out": "docs",
+  "name": "Quatrain Core Documentation",
+  "readme": "README.md",
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "githubPages": true,
+  "cleanOutputDir": true
+}

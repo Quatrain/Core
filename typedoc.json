@@ -7,5 +7,9 @@
   "excludePrivate": true,
   "excludeInternal": true,
   "githubPages": true,
-  "cleanOutputDir": true
+  "cleanOutputDir": true,
+  "customCss": "typedoc-theme.css",
+  "hideGenerator": true,
+  "searchInComments": true,
+  "projectDocuments": ["packages/*/HOWTO.md"]
 }

@@ -12,5 +12,6 @@
   "hideGenerator": true,
   "searchInComments": true,
   "projectDocuments": ["packages/*/HOWTO.md"],
-  "logo": "assets/quatrain-logo.png"
+  "logo": "assets/quatrain-logo.png",
+  "mergeReadme": true
 }

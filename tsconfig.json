@@ -14,10 +14,7 @@
       "isolatedModules": true,
       "incremental": true,
       "outDir": "dist",
-      "removeComments": true,
-      "paths": {
-         "@quatrain/*": ["packages/*/src"]
-      }
+      "removeComments": true
    },
    "exclude": ["node_modules", "**/dist", "**/lib"]
 }

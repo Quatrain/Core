@@ -48,5 +48,8 @@
       "build": "tsc",
       "wbuild": "tsc --watch",
       "bump-to": "yarn version"
+   },
+   "typedoc": {
+      "entryPoint": "src/index.ts"
    }
 }

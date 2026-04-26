@@ -13,3 +13,12 @@ coverage/*
 .DS_Store
 **/.DS_Store
 packages/**/.*.txt
+
+# Secrets & Local Environment
+.env
+.env.*
+!.env.example
+
+# Databases
+*.sqlite
+*.sqlite3

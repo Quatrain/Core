@@ -1,0 +1,17 @@
+{
+  "name": "@quatrain/ui-form-react",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "AGPL-3.0-only",
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "dependencies": {
+    "@quatrain/core": "workspace:*",
+    "@quatrain/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}

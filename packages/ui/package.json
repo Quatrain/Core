@@ -1,0 +1,17 @@
+{
+  "name": "@quatrain/ui",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "AGPL-3.0-only",
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "dependencies": {
+    "@mantine/core": "^7.15.0",
+    "@mantine/hooks": "^7.15.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}

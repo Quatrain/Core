@@ -14,7 +14,11 @@
       "isolatedModules": true,
       "incremental": true,
       "outDir": "dist",
-      "removeComments": true
+      "removeComments": true,
+      "baseUrl": ".",
+      "paths": {
+         "@quatrain/*": ["packages/*/src/index.ts", "apps/*/src/index.ts"]
+      }
    },
    "exclude": ["node_modules", "**/dist", "**/lib"]
 }

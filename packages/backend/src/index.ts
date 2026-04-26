@@ -32,8 +32,6 @@ import {
 export {
    Backend,
    BackendAction,
-   BackendParameters,
-   BackendInterface,
    PersistedBaseObject,
    BaseRepository,
    AbstractBackendAdapter,
@@ -41,8 +39,6 @@ export {
    MockAdapter,
    OperatorKeys,
    Query,
-   QueryResultType,
-   QueryMetaType,
    Filter,
    Filters,
    Sorting,
@@ -50,15 +46,22 @@ export {
    SortAndLimit,
    CollectionHierarchy,
    CollectionProperty,
-   DataObjectClass,
    PersistedDataObject,
    User,
    UserRepository,
    InjectKeywordsMiddleware,
-   InjectKeywordsMiddlewareParams,
    InjectMetaMiddleware,
-   InjectMetaMiddlewareParams,
    Repository,
    BackendContext,
    asyncContextMiddleware,
+}
+
+export type {
+   DataObjectClass,
+   BackendParameters,
+   BackendInterface,
+   QueryResultType,
+   QueryMetaType,
+   InjectKeywordsMiddlewareParams,
+   InjectMetaMiddlewareParams,
 }

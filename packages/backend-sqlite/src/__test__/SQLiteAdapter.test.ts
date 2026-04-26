@@ -123,6 +123,20 @@ describe('SQLiteAdapter Tests', () => {
          expect(result.val('email')).toBe('john@doe.com')
       })
 
+      test('should correctly map SQLite id column back to Quatrain uid property', async () => {
+         const db = await (adapter as any)._connect()
+         // Vérifier que la colonne id existe bien en base
+         const rawData = await db.get(`SELECT id, firstname FROM user WHERE id = ?`, [user.uid])
+         expect(rawData.id).toBeDefined()
+         expect((rawData as any).uid).toBeUndefined() // SQLite ne stocke pas de colonne uid
+
+         // Vérifier que l'adaptateur remonte bien la valeur dans la propriété uid
+         const readUser = await User.factory()
+         readUser.dataObject.uri.path = user.dataObject.uri.path
+         const result = await adapter.read(readUser.dataObject)
+         expect(result.uid).toBe(rawData.id)
+      })
+
       test('should throw NotFoundError for non-existent record', async () => {
          const nonExistentUser = await User.factory()
          nonExistentUser.dataObject.uri.path = 'user/non-existent-id'

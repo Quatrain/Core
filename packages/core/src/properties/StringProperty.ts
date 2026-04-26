@@ -74,7 +74,7 @@ export class StringProperty extends BaseProperty {
          }
 
          if (this._minLength > 0 && value.length < this._minLength) {
-            throw new Error(`Value is too short`)
+            throw new Error(`${this._name}: value '${value}' is too short (min ${this._minLength})`)
          }
 
          if (this._maxLength > 0 && value.length > this._maxLength) {

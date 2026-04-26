@@ -863,6 +863,11 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
                }
             })
 
+            // Map SQLite 'id' column back to Quatrain 'uid' property
+            if (doc.id && !doc.uid) {
+               doc.uid = doc.id
+            }
+
             const newDataObject: DataObjectClass<any> = await dataObject.clone({
                ...doc,
             })

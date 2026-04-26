@@ -1,0 +1,30 @@
+{
+  "name": "@quatrain/studio-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local API server for Quatrain Studio",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "scripts": {
+    "start": "bun src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@quatrain/api-server": "workspace:^",
+    "@quatrain/backend": "workspace:^",
+    "@quatrain/backend-sqlite": "workspace:^",
+    "@quatrain/core": "workspace:^",
+    "@quatrain/studio": "workspace:^",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.1.5"
+  }
+}

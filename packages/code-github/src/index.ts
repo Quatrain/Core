@@ -1,0 +1,1 @@
+export { GithubAdapter } from './GithubAdapter'

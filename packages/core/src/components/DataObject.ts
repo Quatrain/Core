@@ -401,7 +401,7 @@ export class DataObject implements DataObjectType {
    }
 
    async clone(data: any = {}): Promise<DataObject> {
-      const cloned = await DataObject.factory()
+      const cloned = await (this.constructor as any).factory()
       cloned.uri.class = this.uri.class
       cloned._populated = false
 

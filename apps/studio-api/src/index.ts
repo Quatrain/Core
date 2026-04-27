@@ -1,4 +1,5 @@
 import path from 'path'
+import fs from 'fs'
 import { Backend, InjectMetaMiddleware } from '@quatrain/backend'
 import { SQLiteAdapter } from '@quatrain/backend-sqlite'
 import { StudioModel, StudioProperty, StudioBackend, StudioDeployment } from '@quatrain/studio'
@@ -172,6 +173,9 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             const sqlite3 = require('sqlite3')
             const { open } = require('sqlite')
 
+            // Ensure directory exists
+            fs.mkdirSync(path.dirname(clientDbPath), { recursive: true })
+
             const db = await open({
                filename: clientDbPath,
                driver: sqlite3.Database
@@ -189,7 +193,7 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             const existDeploysResult = await StudioDeployment.query()
                .where('modelId', modelId)
                .where('backendId', backendId)
-               .execute('dataObjects')
+               .execute('classInstances')
             const existDeploys = existDeploysResult.items
             if (Array.isArray(existDeploys) && existDeploys.length > 0) {
                const deploy = existDeploys[0]

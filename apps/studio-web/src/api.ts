@@ -13,17 +13,17 @@ export const api = {
   
   getModel: async (id: string) => {
     const res = await apiClient.get(`models/${id}`)
-    return res.data?.[0] || null
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
   },
 
   createModel: async (name: string, collectionName?: string) => {
     const res = await apiClient.post('models', { name, collectionName, isPersisted: true })
-    return res.data?.[0] || null
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
   },
 
   updateModel: async (id: string, data: any) => {
     const res = await apiClient.put(`models/${id}`, data)
-    return res.data?.[0] || null
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
   },
 
   getModelProperties: async (id: string, version?: number) => {
@@ -37,12 +37,12 @@ export const api = {
 
   addProperty: async (modelId: string, propertyData: any) => {
     const res = await apiClient.post(`properties`, { ...propertyData, modelId })
-    return res.data?.[0] || null
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
   },
 
   updateProperty: async (id: string, data: any) => {
     const res = await apiClient.put(`properties/${id}`, data)
-    return res.data?.[0] || null
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
   },
   
   deleteProperty: async (id: string) => {
@@ -56,7 +56,7 @@ export const api = {
 
   createBackend: async (data: any) => {
     const res = await apiClient.post('backends', data)
-    return res.data?.[0] || null
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
   },
 
   deleteBackend: async (id: string) => {

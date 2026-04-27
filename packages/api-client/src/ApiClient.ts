@@ -35,7 +35,7 @@ export type SelectValuesOptions = {
 
 type ApiPayload = {
    status: number
-   data: any[]
+   data: any | any[]
    meta: object
 }
 
@@ -226,15 +226,16 @@ export class ApiClient implements RestApi {
       return payload
    }
 
-   protected preparePayload(payload: any): any[] {
+   protected preparePayload(payload: any): any {
       if (Array.isArray(payload)) {
          return payload.map(({ objectId, uid, ...others }) => ({
             uid: objectId || uid,
             ...others,
          }))
-      } else {
+      } else if (typeof payload === 'object' && payload !== null) {
          const { objectId, uid, ...others } = payload
-         return [{ ...others, uid: objectId || uid }]
+         return { ...others, ...(objectId || uid ? { uid: objectId || uid } : {}) }
       }
+      return payload
    }
 }

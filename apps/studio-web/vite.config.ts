@@ -6,6 +6,9 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   server: {
+    fs: {
+      allow: ['../..'] // Allow serving assets from monorepo root
+    },
     watch: {
       usePolling: true // Force Vite à détecter mes modifications instantanément !
     }

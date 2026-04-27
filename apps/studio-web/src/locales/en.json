@@ -1,0 +1,83 @@
+{
+  "app": {
+    "title": "Core Studio",
+    "dashboard": "Dashboard",
+    "backends": "Backends",
+    "storages": "Storages",
+    "auth": "Authentication",
+    "developedBy": "Core is an AGPL-v3 licensed project developed by"
+  },
+  "dashboard": {
+    "addModel": "Add Model",
+    "activeBackend": "Active Backend:",
+    "deployed": "Deployed",
+    "draft": "Draft (Never deployed)",
+    "pending": "Pending Deployment",
+    "records": "records",
+    "editData": "Edit Data",
+    "currentActiveVersion": "Current active version is:",
+    "noModels": "No models have been created yet."
+  },
+  "model": {
+    "addProperties": "Add properties",
+    "propertyName": "Name (ex: amount)",
+    "required": "Required field",
+    "addPropBtn": "Add Property",
+    "modelData": "Model Data",
+    "modelName": "Model Name",
+    "collection": "Collection (DB)",
+    "persisted": "Persisted in database",
+    "save": "Save",
+    "properties": "Properties",
+    "version": "Version:",
+    "saveVersion": "Save Version",
+    "deploy": "Deploy",
+    "edit": "Edit",
+    "draft": "Draft"
+  },
+  "backends": {
+    "title": "Backends Manager",
+    "desc": "Configure the target databases for your deployments here.",
+    "addBackend": "Add a Backend",
+    "default": "Default",
+    "deployedModels": "Deployed models:",
+    "noDeployments": "No models deployed.",
+    "name": "Backend Name",
+    "sqlitePath": "SQLite file path",
+    "setDefault": "Set as default backend",
+    "cancel": "Cancel",
+    "add": "Add",
+    "error": "Error:",
+    "deleteConfirm": "Delete this backend? Associated deployments will be orphaned."
+  },
+  "storages": {
+    "title": "Storages Manager",
+    "desc": "Configure your storage providers here (S3, Local, Azure Blob, etc.).",
+    "addStorage": "Add Storage",
+    "name": "Name",
+    "provider": "Provider",
+    "selectProvider": "Select a provider",
+    "cancel": "Cancel",
+    "add": "Add",
+    "devAlert": "Feature in development."
+  },
+  "auth": {
+    "title": "Authentication Adapters",
+    "desc": "Configure your authentication providers here (OAuth, JWT, Local, etc.).",
+    "addAuth": "Add Auth Adapter",
+    "name": "Name",
+    "type": "Adapter type",
+    "selectType": "Select a type",
+    "cancel": "Cancel",
+    "add": "Add",
+    "devAlert": "Feature in development."
+  },
+  "createModel": {
+    "title": "Create a new Model",
+    "desc": "A model defines the structure of your data.",
+    "name": "Model Name (e.g. User, Invoice)",
+    "collection": "DB Collection Name (optional)",
+    "cancel": "Cancel",
+    "create": "Create Model"
+  }
+}

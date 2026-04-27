@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react'
+import { Card, Text, Badge, Group, SimpleGrid, Title, UnstyledButton, Center, ThemeIcon, ActionIcon } from '@mantine/core'
 import { api } from './api'
+import { useTranslation } from 'react-i18next'
 
-export function Dashboard({ models, backends }: { models: any[], backends: any[] }) {
+export function Dashboard({ models, backends, onNavigateToNewModel }: { models: any[], backends: any[], onNavigateToNewModel: () => void }) {
+  const { t } = useTranslation()
   const [stats, setStats] = useState<Record<string, {count: number, status: string}>>({})
 
   useEffect(() => {
@@ -25,67 +28,126 @@ export function Dashboard({ models, backends }: { models: any[], backends: any[]
 
   return (
     <div style={{ padding: '20px' }}>
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-        <h2 style={{color: 'white', margin: 0}}>Tableau de Bord</h2>
-        <span style={{color: 'var(--text-muted)'}}>
-          Backend actif : {backends.length > 0 ? backends[0].name : 'Aucun backend configuré'}
-        </span>
-      </div>
+      <Group justify="space-between" align="flex-start" mb="xl">
+        <div>
+          <Title order={2} mb="xs">{t('app.dashboard')}</Title>
+          <Text c="dimmed">
+            {t('dashboard.activeBackend')} {backends.length > 0 ? <Text component="span" fw={600} c="blue">{backends[0].name}</Text> : 'None'}
+          </Text>
+        </div>
+      </Group>
 
-      {models.length === 0 ? (
-        <p style={{color: 'var(--text-muted)'}}>Aucun modèle créé. Créez-en un dans la barre latérale.</p>
-      ) : (
-        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px'}}>
-          {models.map(m => (
-            <div key={m.uid} style={{
-              backgroundColor: 'rgba(255,255,255,0.05)', 
-              borderRadius: '12px', 
-              padding: '20px', 
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
+        {/* BIG ADD MODEL CARD */}
+        <Card 
+          shadow="sm" 
+          padding="lg" 
+          radius="md" 
+          withBorder
+          onClick={onNavigateToNewModel}
+          style={{ 
+            cursor: 'pointer', 
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease', 
+            minHeight: '200px',
+            backgroundColor: 'var(--mantine-color-default)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderStyle: 'dashed',
+            borderWidth: '2px',
+            borderColor: 'var(--mantine-color-dimmed)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)'
+            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-md)'
+            e.currentTarget.style.borderColor = 'var(--mantine-color-blue-filled)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-sm)'
+            e.currentTarget.style.borderColor = 'var(--mantine-color-dimmed)'
+          }}
+        >
+          <Center style={{ flexDirection: 'column', gap: '15px' }}>
+            <ThemeIcon size={60} radius="xl" variant="light" color="blue">
+              <span style={{ fontSize: '30px' }}>+</span>
+            </ThemeIcon>
+            <Text fw={600} size="lg">{t('dashboard.addModel')}</Text>
+          </Center>
+        </Card>
+
+        {/* EXISTING MODELS */}
+        {models.map(m => (
+          <Card 
+            key={m.uid} 
+            shadow="sm" 
+            padding="lg" 
+            radius="md" 
+            withBorder
+            style={{ 
+              transition: 'transform 0.2s ease', 
               display: 'flex', 
-              flexDirection: 'column', 
-              gap: '10px',
-              border: '1px solid var(--border-color)',
-              position: 'relative'
-            }}>
-              <h3 style={{margin: 0}}>
-                <a href={`#/models/${m.name}`} style={{color: 'white', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px'}}>
-                  {m.name} <span style={{fontSize: '14px', color: 'teal'}}>✎</span>
+              flexDirection: 'column',
+              minHeight: '200px'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            <Card.Section withBorder inheritPadding py="xs">
+              <Group justify="space-between">
+                <a href={`#/models/${m.name}`} style={{textDecoration: 'none'}}>
+                  <Text fw={700} size="lg" className="hover:underline">{m.name}</Text>
                 </a>
-              </h3>
-              <div style={{color: 'var(--text-muted)', fontSize: '13px'}}>
-                Collection: <code style={{color: 'var(--text-main)'}}>{m.collectionName || m.name.toLowerCase()}</code>
-              </div>
-              <div style={{color: 'var(--text-muted)', fontSize: '13px'}}>
-                Version courante : <strong>{m.version > 1 ? `v${m.version - 1}` : 'Aucune (Brouillon en cours)'}</strong>
-              </div>
-              
-              <div style={{marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.1)'}}>
-                {stats[m.uid] ? (
-                  <>
-                    <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px'}}>
+                <ActionIcon component="a" href={`#/models/${m.name}`} variant="light" color="blue" aria-label="Edit">
+                  ✎
+                </ActionIcon>
+              </Group>
+            </Card.Section>
+
+            <Group mt="md" mb="xs">
+              <Badge color="gray" variant="light">
+                {m.collectionName || m.name.toLowerCase()}
+              </Badge>
+              <Badge color="grape" variant="light">
+                v{m.version > 1 ? m.version - 1 : 1}
+              </Badge>
+            </Group>
+
+            <Text size="sm" c="dimmed" style={{ flex: 1 }}>
+              {m.version === 1 ? t('dashboard.draft') : `${t('dashboard.currentActiveVersion')} ${m.version - 1}`}
+            </Text>
+
+            <Card.Section withBorder inheritPadding py="sm" mt="md" style={{ backgroundColor: 'var(--mantine-color-default-hover)' }}>
+              {stats[m.uid] ? (
+                <>
+                  <Group justify="space-between" mb="xs">
+                    <Group gap="xs">
                       <div style={{
                         width: '8px', height: '8px', borderRadius: '50%', 
-                        backgroundColor: stats[m.uid].status === 'deployed' ? '#20c997' : '#ffc078'
+                        backgroundColor: stats[m.uid].status === 'deployed' ? 'var(--mantine-color-teal-6)' : 'var(--mantine-color-orange-6)'
                       }} />
-                      <span style={{fontSize: '13px', color: stats[m.uid].status === 'deployed' ? '#20c997' : '#ffc078'}}>
-                        {stats[m.uid].status === 'deployed' ? 'Déployé' : 'Non déployé (table absente)'}
-                      </span>
-                    </div>
-                    {stats[m.uid].status === 'deployed' && (
-                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                        <span style={{fontSize: '13px', color: 'var(--text-muted)'}}>{stats[m.uid].count} enregistrements</span>
-                        <a href={`#/data/${m.name}`} style={{fontSize: '13px', color: 'teal', textDecoration: 'none'}}>Éditer les données →</a>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <span style={{fontSize: '13px', color: 'var(--text-muted)'}}>Vérification du statut...</span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                      <Text size="sm" c={stats[m.uid].status === 'deployed' ? 'teal' : 'orange'} fw={500}>
+                        {stats[m.uid].status === 'deployed' ? t('dashboard.deployed') : t('dashboard.pending')}
+                      </Text>
+                    </Group>
+                  </Group>
+                  
+                  {stats[m.uid].status === 'deployed' && (
+                    <Group justify="space-between">
+                      <Text size="sm" c="dimmed">{stats[m.uid].count} {t('dashboard.records')}</Text>
+                      <a href={`#/data/${m.name}`} style={{fontSize: '13px', color: 'var(--mantine-color-blue-filled)', textDecoration: 'none', fontWeight: 500}}>
+                        {t('dashboard.editData')} →
+                      </a>
+                    </Group>
+                  )}
+                </>
+              ) : (
+                <Text size="sm" c="dimmed">...</Text>
+              )}
+            </Card.Section>
+          </Card>
+        ))}
+      </SimpleGrid>
     </div>
   )
 }

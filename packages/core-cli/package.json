@@ -1,0 +1,41 @@
+{
+   "name": "@quatrain/core-cli",
+   "version": "1.0.0",
+   "license": "AGPL-3.0-only",
+   "description": "Quatrain Core CLI for generating configurations and migrations",
+   "main": "dist/index.js",
+   "types": "dist/index.d.ts",
+   "bin": {
+      "core": "./bin/core.js"
+   },
+   "files": [
+      "LICENSE.md",
+      "src/",
+      "dist/",
+      "bin/",
+      "README.md",
+      "NOTICE.md"
+   ],
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/Quatrain/Core.git",
+      "directory": "packages/core-cli"
+   },
+   "author": "Quatrain Développement SAS <developers@quatrain.com>",
+   "dependencies": {
+      "@quatrain/core": "workspace:^",
+      "@quatrain/log": "workspace:^",
+      "commander": "^11.1.0",
+      "inquirer": "^9.2.12"
+   },
+   "devDependencies": {
+      "@tsconfig/recommended": "^1.0.1",
+      "@types/inquirer": "^9.0.7",
+      "@types/node": "^22.10.1",
+      "typescript": "^5.2.2"
+   },
+   "scripts": {
+      "build": "tsc",
+      "wbuild": "tsc --watch"
+   }
+}

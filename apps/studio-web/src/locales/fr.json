@@ -1,0 +1,83 @@
+{
+  "app": {
+    "title": "Core Studio",
+    "dashboard": "Tableau de bord",
+    "backends": "Backends",
+    "storages": "Storages",
+    "auth": "Authentification",
+    "developedBy": "Core est un projet sous licence AGPL-v3 développé par"
+  },
+  "dashboard": {
+    "addModel": "Ajouter un Modèle",
+    "activeBackend": "Backend Actif :",
+    "deployed": "Déployé",
+    "draft": "Brouillon (Jamais déployé)",
+    "pending": "Déploiement en attente",
+    "records": "enregistrements",
+    "editData": "Modifier les données",
+    "currentActiveVersion": "Version active :",
+    "noModels": "Aucun modèle n'a encore été créé."
+  },
+  "model": {
+    "addProperties": "Ajouter des propriétés",
+    "propertyName": "Nom (ex: amount)",
+    "required": "Champ obligatoire",
+    "addPropBtn": "Ajouter la propriété",
+    "modelData": "Données du modèle",
+    "modelName": "Nom du Modèle",
+    "collection": "Collection (BDD)",
+    "persisted": "Persisté en base de données",
+    "save": "Sauvegarder",
+    "properties": "Propriétés",
+    "version": "Version :",
+    "saveVersion": "Sauvegarder la version",
+    "deploy": "Déployer",
+    "edit": "Modifier",
+    "draft": "Brouillon"
+  },
+  "backends": {
+    "title": "Gestion des Backends",
+    "desc": "Configurez ici les bases de données cibles pour vos déploiements.",
+    "addBackend": "Ajouter un Backend",
+    "default": "Par défaut",
+    "deployedModels": "Modèles déployés :",
+    "noDeployments": "Aucun modèle déployé.",
+    "name": "Nom du Backend",
+    "sqlitePath": "Chemin du fichier SQLite",
+    "setDefault": "Définir comme backend par défaut",
+    "cancel": "Annuler",
+    "add": "Ajouter",
+    "error": "Erreur :",
+    "deleteConfirm": "Supprimer ce backend ? Les déploiements associés seront orphelins."
+  },
+  "storages": {
+    "title": "Gestion des Storages",
+    "desc": "Configurez ici vos fournisseurs de stockage (S3, Local, Azure Blob, etc.).",
+    "addStorage": "Ajouter un Storage",
+    "name": "Nom",
+    "provider": "Fournisseur",
+    "selectProvider": "Sélectionnez un fournisseur",
+    "cancel": "Annuler",
+    "add": "Ajouter",
+    "devAlert": "Fonctionnalité en cours de développement."
+  },
+  "auth": {
+    "title": "Adaptateurs d'Authentification",
+    "desc": "Configurez ici vos fournisseurs d'authentification (OAuth, JWT, Local, etc.).",
+    "addAuth": "Ajouter un Adaptateur Auth",
+    "name": "Nom",
+    "type": "Type d'adaptateur",
+    "selectType": "Sélectionnez un type",
+    "cancel": "Annuler",
+    "add": "Ajouter",
+    "devAlert": "Fonctionnalité en cours de développement."
+  },
+  "createModel": {
+    "title": "Créer un nouveau Modèle",
+    "desc": "Un modèle définit la structure de vos données.",
+    "name": "Nom du Modèle (ex: User, Invoice)",
+    "collection": "Nom de la Collection BDD (optionnel)",
+    "cancel": "Annuler",
+    "create": "Créer le Modèle"
+  }
+}

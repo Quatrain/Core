@@ -1,0 +1,40 @@
+{
+   "name": "@quatrain/app",
+   "version": "1.0.0",
+   "license": "AGPL-3.0-only",
+   "description": "Quatrain App Bootloader and configuration helpers",
+   "main": "dist/index.js",
+   "types": "dist/index.d.ts",
+   "bun": "src/index.ts",
+   "files": [
+      "LICENSE.md",
+      "src/",
+      "dist/",
+      "README.md",
+      "NOTICE.md"
+   ],
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/Quatrain/Core.git",
+      "directory": "packages/app"
+   },
+   "author": "Quatrain Développement SAS <developers@quatrain.com>",
+   "dependencies": {
+      "@quatrain/auth": "workspace:^",
+      "@quatrain/backend": "workspace:^",
+      "@quatrain/core": "workspace:^",
+      "@quatrain/log": "workspace:^",
+      "@quatrain/messaging": "workspace:^",
+      "@quatrain/queue": "workspace:^",
+      "@quatrain/storage": "workspace:^"
+   },
+   "devDependencies": {
+      "@tsconfig/recommended": "^1.0.1",
+      "@types/node": "^22.10.1",
+      "typescript": "^5.2.2"
+   },
+   "scripts": {
+      "build": "tsc",
+      "wbuild": "tsc --watch"
+   }
+}

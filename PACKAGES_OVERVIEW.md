@@ -608,6 +608,7 @@ const mockBackend = new MockAdapter()
 -  API documentation generated from TypeScript definitions
 -  Example implementations in `__test__` directories
 -  Database setup guides (e.g., `DATABASE_SETUP.md` for PostgreSQL)
+-  **⚠️ Architectural Rules & Pitfalls:** Be sure to read [ARCHITECTURE_GUIDELINES.md](./ARCHITECTURE_GUIDELINES.md) to understand Quatrain's specific conventions (e.g., `fromBackend` vs `factory`, properties definitions, soft deletion).
 
 ## 🤝 Contributing
 

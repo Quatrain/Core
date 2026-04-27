@@ -172,7 +172,7 @@ export class PersistedBaseObject extends BaseObject {
       return this
    }
 
-   async delete(): Promise<DataObjectClass<any>> {
-      return await this._dataObject.delete()
+   async delete(hardDelete = false): Promise<DataObjectClass<any>> {
+      return await this._dataObject.delete(hardDelete)
    }
 }

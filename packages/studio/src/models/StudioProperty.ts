@@ -6,8 +6,8 @@ export interface StudioPropertyType extends BaseObjectType {
    name: string
    propertyType: string
    mandatory: boolean
-   minLength?: number
-   maxLength?: number
+   version: number
+   options?: any
    [x: string]: any
 }
 
@@ -40,16 +40,24 @@ export const StudioPropertyDef: any = [
       htmlType: htmlType.CHECKBOX,
    },
    {
-      name: 'minLength',
+      name: 'options',
       mandatory: false,
-      type: NumberProperty.TYPE,
-      htmlType: htmlType.NUMBER,
+      type: 'map', // MapProperty.TYPE
+      htmlType: htmlType.HIDDEN,
    },
    {
-      name: 'maxLength',
+      name: 'version',
+      mandatory: true,
+      type: NumberProperty.TYPE,
+      htmlType: htmlType.NUMBER,
+      defaultValue: 1,
+   },
+   {
+      name: 'order',
       mandatory: false,
       type: NumberProperty.TYPE,
       htmlType: htmlType.NUMBER,
+      defaultValue: 0,
    }
 ]
 

@@ -126,6 +126,10 @@ export class PostgresAdapter extends AbstractBackendAdapter {
       }
    }
 
+   async rawQuery(sql: string, params?: any[]): Promise<any> {
+      return this._query(sql, params)
+   }
+
    /**
     * Disconnect the pool and close all idle connections.
     */
@@ -745,5 +749,81 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             }`
          )
       }
+   }
+
+   /**
+    * Generates the SQL up and down statements to create a collection table.
+    */
+   generateCreateSql(collection: string, properties: any[]): { upSql: string; downSql: string } {
+      let query = `CREATE TABLE IF NOT EXISTS "${collection.toLowerCase()}" (\n    id VARCHAR(255) PRIMARY KEY`
+
+      properties.forEach((propDef: any) => {
+         const propName = propDef.name.toLowerCase()
+         let columnType = 'TEXT'
+
+         const type = propDef.type || propDef.constructor.name
+         if (type === 'NumberProperty') {
+            columnType = 'NUMERIC'
+         } else if (type === 'BooleanProperty') {
+            columnType = 'BOOLEAN'
+         } else if (type === 'DateTimeProperty') {
+            columnType = 'TIMESTAMP'
+         } else if (type === 'ArrayProperty') {
+            columnType = 'JSONB'
+         } else if (type === 'ObjectProperty') {
+            columnType = 'VARCHAR(255)'
+         }
+
+         query += `,\n    "${propName}" ${columnType}`
+      })
+
+      query += `\n)`
+
+      return {
+         upSql: `await adapter.rawQuery(\`${query}\`)`,
+         downSql: `await adapter.rawQuery(\`DROP TABLE IF EXISTS "${collection.toLowerCase()}"\`)`,
+      }
+   }
+
+   /**
+    * Generates the SQL up and down statements to apply a schema delta to a collection.
+    */
+   generateDeltaSql(collection: string, delta: any): { upSql: string[]; downSql: string[] } {
+      const upSql: string[] = []
+      const downSql: string[] = []
+
+      // Added columns
+      delta.added.forEach((propDef: any) => {
+         const propName = propDef.name.toLowerCase()
+         let columnType = 'TEXT'
+
+         const type = propDef.type || propDef.constructor.name
+         if (type === 'NumberProperty') columnType = 'NUMERIC'
+         else if (type === 'BooleanProperty') columnType = 'BOOLEAN'
+         else if (type === 'DateTimeProperty') columnType = 'TIMESTAMP'
+         else if (type === 'ArrayProperty') columnType = 'JSONB'
+         else if (type === 'ObjectProperty') columnType = 'VARCHAR(255)'
+
+         upSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" ADD COLUMN "${propName}" ${columnType}\`)`)
+         downSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" DROP COLUMN "${propName}"\`)`)
+      })
+
+      // Removed columns
+      delta.removed.forEach((propDef: any) => {
+         const propName = propDef.name.toLowerCase()
+         let columnType = 'TEXT'
+
+         const type = propDef.type || propDef.constructor.name
+         if (type === 'NumberProperty') columnType = 'NUMERIC'
+         else if (type === 'BooleanProperty') columnType = 'BOOLEAN'
+         else if (type === 'DateTimeProperty') columnType = 'TIMESTAMP'
+         else if (type === 'ArrayProperty') columnType = 'JSONB'
+         else if (type === 'ObjectProperty') columnType = 'VARCHAR(255)'
+
+         upSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" DROP COLUMN "${propName}"\`)`)
+         downSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" ADD COLUMN "${propName}" ${columnType}\`)`)
+      })
+
+      return { upSql, downSql }
    }
 }

@@ -79,6 +79,15 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
       return path
    }
 
+   /**
+    * Executes a raw query on the backend.
+    * Only supported by SQL adapters.
+    */
+   async rawQuery(sql: string, params: any[] = []): Promise<any> {
+      const connection = await this._connect()
+      return await connection.all(sql, params)
+   }
+
    protected async _connect(): Promise<Database<sqlite3.Database>> {
       if (!this._connection) {
          // Open SQLite database
@@ -241,7 +250,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
 
             Object.entries(data).forEach(
                ([key, value]: [key: string, value: any]) => {
-                  columns.push(key.toLowerCase())
+                  columns.push(`"${key.toLowerCase()}"`)
                   placeholders.push('?')
 
                   // Convert arrays and objects to JSON strings
@@ -351,14 +360,14 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
                   }
                }
             }
-         } else if (propDef.constructor.name === 'ArrayProperty') {
-            // Parse JSON arrays
+         } else if (propDef.constructor.name === 'ArrayProperty' || propDef.constructor.name === 'MapProperty') {
+            // Parse JSON arrays and objects
             try {
                if (result[prop.toLowerCase()]) {
                   result[prop] = JSON.parse(result[prop.toLowerCase()])
                }
             } catch (e) {
-               Backend.warn(`[SQLA] Failed to parse array for ${prop}: ${e}`)
+               Backend.warn(`[SQLA] Failed to parse JSON for ${prop}: ${e}`)
             }
          }
 
@@ -397,8 +406,6 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
          return dataObject
       }
 
-      Backend.debug(`[SQLA] Data to update ${JSON.stringify(data)}`)
-
       const db = await this._connect()
       const collection = this.getCollection(dataObject)
 
@@ -410,7 +417,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
 
       Object.entries(data).forEach(
          ([key, value]: [key: string, value: any]) => {
-            updates.push(`${key.toLowerCase()} = ?`)
+            updates.push(`"${key.toLowerCase()}" = ?`)
 
             // Convert arrays and objects to JSON strings
             if (
@@ -460,7 +467,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
 
       const db = await this._connect()
 
-      if (!hardDelete) {
+      if (this._params.softDelete !== false && !hardDelete) {
          dataObject.set('status', statuses.DELETED)
          await db.run(
             `UPDATE ${collection.toLowerCase()} SET status = ? WHERE id = ?`,
@@ -844,15 +851,15 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
                      }
                   }
                }
-               // Handle array properties
-               else if (propDef.constructor.name === 'ArrayProperty') {
+               // Handle array and map properties
+               else if (propDef.constructor.name === 'ArrayProperty' || propDef.constructor.name === 'MapProperty') {
                   try {
                      if (doc[lcProp]) {
                         doc[prop] = JSON.parse(doc[lcProp])
                      }
                   } catch (e) {
                      Backend.warn(
-                        `[SQLA] Failed to parse array for ${prop}: ${e}`
+                        `[SQLA] Failed to parse JSON for ${prop}: ${e}`
                      )
                   }
                }
@@ -917,5 +924,82 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
          await this._connection.close()
          this._connection = undefined
       }
+   }
+
+   /**
+    * Generates the SQL up and down statements to create a collection table.
+    */
+   generateCreateSql(collection: string, properties: any[]): { upSql: string; downSql: string } {
+      let query = `CREATE TABLE IF NOT EXISTS "${collection.toLowerCase()}" (\n    id TEXT PRIMARY KEY`
+
+      properties.forEach((propDef: any) => {
+         const propName = propDef.name.toLowerCase()
+         let columnType = 'TEXT'
+
+         const type = propDef.type || propDef.constructor.name
+         if (type === 'NumberProperty') {
+            columnType = 'REAL'
+         } else if (type === 'BooleanProperty') {
+            columnType = 'INTEGER'
+         } else if (type === 'DateTimeProperty') {
+            columnType = 'INTEGER'
+         } else if (type === 'ArrayProperty') {
+            columnType = 'TEXT'
+         } else if (type === 'ObjectProperty') {
+            columnType = 'TEXT'
+         }
+
+         query += `,\n    "${propName}" ${columnType}`
+      })
+
+      query += `\n)`
+
+      return {
+         upSql: `await adapter.rawQuery(\`${query}\`)`,
+         downSql: `await adapter.rawQuery(\`DROP TABLE IF EXISTS "${collection.toLowerCase()}"\`)`,
+      }
+   }
+
+   /**
+    * Generates the SQL up and down statements to apply a schema delta to a collection.
+    */
+   generateDeltaSql(collection: string, delta: any): { upSql: string[]; downSql: string[] } {
+      const upSql: string[] = []
+      const downSql: string[] = []
+
+      // Added columns
+      delta.added.forEach((propDef: any) => {
+         const propName = propDef.name.toLowerCase()
+         let columnType = 'TEXT'
+
+         const type = propDef.type || propDef.constructor.name
+         if (type === 'NumberProperty') {
+            columnType = 'REAL'
+         } else if (type === 'BooleanProperty') {
+            columnType = 'INTEGER'
+         } else if (type === 'DateTimeProperty') {
+            columnType = 'INTEGER'
+         }
+
+         upSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" ADD COLUMN "${propName}" ${columnType}\`)`)
+         // SQLite < 3.35 doesn't support DROP COLUMN, so we add a comment but keep the syntax
+         downSql.push(`// NOTE: DROP COLUMN requires SQLite >= 3.35\n   // await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" DROP COLUMN "${propName}"\`)`)
+      })
+
+      // Removed columns
+      delta.removed.forEach((propDef: any) => {
+         const propName = propDef.name.toLowerCase()
+         let columnType = 'TEXT'
+         
+         const type = propDef.type || propDef.constructor.name
+         if (type === 'NumberProperty') columnType = 'REAL'
+         else if (type === 'BooleanProperty') columnType = 'INTEGER'
+         else if (type === 'DateTimeProperty') columnType = 'INTEGER'
+
+         upSql.push(`// NOTE: DROP COLUMN requires SQLite >= 3.35\n   // await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" DROP COLUMN "${propName}"\`)`)
+         downSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" ADD COLUMN "${propName}" ${columnType}\`)`)
+      })
+
+      return { upSql, downSql }
    }
 }

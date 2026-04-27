@@ -194,9 +194,14 @@ export class ApiClient implements RestApi {
       if (!response.ok) {
          let errorMessage = `API Error: ${response.status} ${response.statusText}`
          try {
-            const errorData = await response.json()
+            const errorData: any = await response.json()
             if (errorData.error) {
                errorMessage = errorData.error
+               if (errorData.message) {
+                  errorMessage += `: ${errorData.message}`
+               }
+            } else if (errorData.message) {
+               errorMessage = errorData.message
             }
          } catch (e) {
             // Ignore parse errors
@@ -204,7 +209,7 @@ export class ApiClient implements RestApi {
          throw new Error(errorMessage)
       }
 
-      const data = await response.json()
+      const data: any = await response.json()
 
       if (ApiClient.debug === true) {
          console.log(`API: [${response.status}] ${config.method.toUpperCase()} ${config.url}`)

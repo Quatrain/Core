@@ -3,6 +3,7 @@ import { Filter } from '../Filter'
 import { Filters } from '../Filters'
 import { Query, QueryResultType } from '../Query'
 import { SortAndLimit } from '../SortAndLimit'
+import { SchemaDelta } from './SchemaDelta'
 
 export interface BackendInterface {
    create(
@@ -27,4 +28,7 @@ export interface BackendInterface {
       pagination: SortAndLimit | undefined,
       parent: any
    ): Promise<QueryResultType<DataObjectClass<any>>>
+
+   generateCreateSql(collection: string, properties: any[]): { upSql: string, downSql: string }
+   generateDeltaSql(collection: string, delta: SchemaDelta): { upSql: string[], downSql: string[] }
 }

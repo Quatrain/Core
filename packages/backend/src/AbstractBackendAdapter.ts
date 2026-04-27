@@ -12,6 +12,7 @@ import { SortAndLimit } from './SortAndLimit'
 import BackendMiddleware from './middlewares/Middleware'
 import { BackendError } from './BackendError'
 import { MiddlewareParams } from './middlewares/types/MiddlewareParams'
+import { SchemaDelta } from './types/SchemaDelta'
 
 interface BM extends BackendMiddleware {}
 
@@ -144,4 +145,22 @@ export abstract class AbstractBackendAdapter implements BackendInterface {
 
       return dataObject
    }
+
+   /**
+    * Executes a raw query on the backend.
+    * Only supported by SQL adapters.
+    */
+   async rawQuery(sql: string, params?: any[]): Promise<any> {
+      throw new BackendError(`Raw queries are not supported on this adapter`)
+   }
+
+   /**
+    * Generates the SQL up and down statements to create a collection table.
+    */
+   abstract generateCreateSql(collection: string, properties: any[]): { upSql: string, downSql: string }
+
+   /**
+    * Generates the SQL up and down statements to apply a schema delta to a collection.
+    */
+   abstract generateDeltaSql(collection: string, delta: SchemaDelta): { upSql: string[], downSql: string[] }
 }

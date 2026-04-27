@@ -3,6 +3,7 @@ import { AbstractBackendAdapter } from './AbstractBackendAdapter'
 import { MockAdapter } from './MockAdapter'
 import { BackendError } from './BackendError'
 import { BackendInterface } from './types/BackendInterface'
+import { SchemaDelta } from './types/SchemaDelta'
 import { PersistedBaseObject } from './PersistedBaseObject'
 import { BaseRepository } from './BaseRepository'
 import * as CollectionHierarchy from './types/CollectionHierarchy'
@@ -62,6 +63,7 @@ export type {
    BackendInterface,
    QueryResultType,
    QueryMetaType,
+   SchemaDelta,
    InjectKeywordsMiddlewareParams,
    InjectMetaMiddlewareParams,
 }

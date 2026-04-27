@@ -26,9 +26,13 @@ export const api = {
     return res.data?.[0] || null
   },
 
-  getModelProperties: async (id: string) => {
-    const res = await apiClient.get(`properties`, { modelId: id })
-    return res.data || []
+  getModelProperties: async (id: string, version?: number) => {
+    const filters: any = { modelId: id }
+    if (version !== undefined) {
+       filters.version = version
+    }
+    const res = await apiClient.get(`properties`, filters)
+    return (res.data || []).filter((p: any) => p.status !== 'deleted')
   },
 
   addProperty: async (modelId: string, propertyData: any) => {
@@ -42,6 +46,35 @@ export const api = {
   },
   
   deleteProperty: async (id: string) => {
-    await apiClient.delete(`properties/${id}`)
+    await apiClient.delete(`properties/${id}`, {})
+  },
+
+  getBackends: async () => {
+    const res = await apiClient.get('backends')
+    return res.data || []
+  },
+
+  createBackend: async (data: any) => {
+    const res = await apiClient.post('backends', data)
+    return res.data?.[0] || null
+  },
+
+  deleteBackend: async (id: string) => {
+    await apiClient.delete(`backends/${id}`, {})
+  },
+
+  getDeployments: async (backendId: string) => {
+    const res = await apiClient.get('deployments', { backendId })
+    return res.data || []
+  },
+
+  getModelStats: async (modelId: string, backendId: string) => {
+    const res = await apiClient.get(`models/${modelId}/stats`, { backendId })
+    return res
+  },
+
+  deployModel: async (modelId: string, version: number, backendId: string) => {
+    const res = await apiClient.post(`models/${modelId}/deploy`, { version, backendId })
+    return res.data
   }
 }

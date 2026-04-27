@@ -1,11 +1,12 @@
 import { PersistedBaseObject } from '@quatrain/backend'
-import { StringProperty, ObjectProperty, htmlType, BaseObjectProperties, BaseObjectType, BooleanProperty } from '@quatrain/core'
+import { StringProperty, ObjectProperty, htmlType, BaseObjectProperties, BaseObjectType, BooleanProperty, NumberProperty } from '@quatrain/core'
 
 export interface StudioModelType extends BaseObjectType {
    projectId: string
    name: string
    collectionName: string
    isPersisted: boolean
+   version: number
    [x: string]: any
 }
 
@@ -39,6 +40,13 @@ export const StudioModelProperties: any = [
       type: BooleanProperty.TYPE,
       htmlType: htmlType.CHECKBOX,
       defaultValue: true,
+   },
+   {
+      name: 'version',
+      mandatory: true,
+      type: NumberProperty.TYPE,
+      htmlType: htmlType.NUMBER,
+      defaultValue: 1,
    }
 ]
 

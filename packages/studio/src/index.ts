@@ -13,5 +13,17 @@ export type { StudioBackendType, StudioBackendDef } from './models/StudioBackend
 export { StudioDeployment } from './models/StudioDeployment'
 export type { StudioDeploymentType, StudioDeploymentDef } from './models/StudioDeployment'
 
+export { StudioStorage } from './models/StudioStorage'
+export type { StudioStorageType, StudioStorageProperties } from './models/StudioStorage'
+
+export { StudioAuth } from './models/StudioAuth'
+export type { StudioAuthType, StudioAuthProperties } from './models/StudioAuth'
+
+export { StudioSecret } from './models/StudioSecret'
+export type { StudioSecretType, StudioSecretProperties } from './models/StudioSecret'
+
+export { StudioEnvironment } from './models/StudioEnvironment'
+export type { StudioEnvironmentType, StudioEnvironmentProperties } from './models/StudioEnvironment'
+
 export { CodeGenerator } from './generator'
 export { StudioAgent } from './agent'

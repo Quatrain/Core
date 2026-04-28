@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import { Backend, InjectMetaMiddleware } from '@quatrain/backend'
 import { SQLiteAdapter } from '@quatrain/backend-sqlite'
-import { StudioModel, StudioProperty, StudioBackend, StudioDeployment } from '@quatrain/studio'
+import { StudioModel, StudioProperty, StudioBackend, StudioDeployment, StudioProject, StudioEnvironment, StudioStorage, StudioAuth, StudioSecret } from '@quatrain/studio'
 import { ExpressAdapter, ListEndpoint, CrudEndpoint } from '@quatrain/api-server'
 import { Api } from '@quatrain/api'
 import { MigrationManager } from '@quatrain/backend-migrations'
@@ -39,13 +39,31 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
       server.addEndpoint(CrudEndpoint(StudioProperty), '/properties', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
 
       // ==========================================
-      // BACKENDS & DEPLOYMENTS ENDPOINTS
+      // BACKENDS, STORAGES, AUTHS, SECRETS, DEPLOYMENTS ENDPOINTS
       // ==========================================
       server.addEndpoint(ListEndpoint(StudioBackend), '/backends')
       server.addEndpoint(CrudEndpoint(StudioBackend), '/backends', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
 
+      server.addEndpoint(ListEndpoint(StudioStorage), '/storages')
+      server.addEndpoint(CrudEndpoint(StudioStorage), '/storages', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
+
+      server.addEndpoint(ListEndpoint(StudioAuth), '/auths')
+      server.addEndpoint(CrudEndpoint(StudioAuth), '/auths', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
+
+      server.addEndpoint(ListEndpoint(StudioSecret), '/secrets')
+      server.addEndpoint(CrudEndpoint(StudioSecret), '/secrets', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
+
       server.addEndpoint(ListEndpoint(StudioDeployment), '/deployments')
       server.addEndpoint(CrudEndpoint(StudioDeployment), '/deployments', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
+
+      // ==========================================
+      // PROJECTS & ENVIRONMENTS ENDPOINTS
+      // ==========================================
+      server.addEndpoint(ListEndpoint(StudioProject), '/projects')
+      server.addEndpoint(CrudEndpoint(StudioProject), '/projects', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
+
+      server.addEndpoint(ListEndpoint(StudioEnvironment), '/environments')
+      server.addEndpoint(CrudEndpoint(StudioEnvironment), '/environments', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
 
       // ==========================================
       // CUSTOM STATS ENDPOINT

@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack } from '@mantine/core'
+import React, { useState, useEffect } from 'react'
+import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack, ActionIcon, Badge } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
+import { api } from './api'
 
 export function AuthManager() {
   const { t } = useTranslation()
+  const [auths, setAuths] = useState<any[]>([])
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [name, setName] = useState('')
   const [provider, setProvider] = useState<string | null>(null)
@@ -11,14 +13,59 @@ export function AuthManager() {
 
   // Dynamic fields
   const [pbUrl, setPbUrl] = useState('http://127.0.0.1:8090')
-  const [oauthClientId, setOauthClientId] = useState('')
-  const [oauthSecret, setOauthSecret] = useState('')
-  const [jwtIssuer, setJwtIssuer] = useState('')
+  const [sbUrl, setSbUrl] = useState('')
+  const [sbAnonKey, setSbAnonKey] = useState('')
+  const [fbProjectId, setFbProjectId] = useState('')
+  const [fbApiKey, setFbApiKey] = useState('')
 
-  const handleAdd = (e: React.FormEvent) => {
+  useEffect(() => {
+    loadAuths()
+  }, [])
+
+  const loadAuths = async () => {
+    const data = await api.getAuths()
+    setAuths(data)
+  }
+
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    alert(t('auth.devAlert'))
-    setIsAddModalOpen(false)
+    if (!name || !provider) return
+
+    const options: any = {}
+    if (provider === 'pocketbase') {
+      options.url = pbUrl
+    } else if (provider === 'supabase') {
+      options.url = sbUrl
+      options.anonKey = sbAnonKey
+    } else if (provider === 'firebase') {
+      options.projectId = fbProjectId
+      options.apiKey = fbApiKey
+    }
+
+    try {
+      await api.createAuth({
+        name,
+        provider,
+        options,
+        isDefault
+      })
+      await loadAuths()
+      setIsAddModalOpen(false)
+      setName('')
+      setProvider(null)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm(t('app.confirmDelete', 'Êtes-vous sûr de vouloir supprimer cet élément ?'))) return
+    try {
+      await api.deleteAuth(id)
+      await loadAuths()
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   return (
@@ -61,13 +108,54 @@ export function AuthManager() {
             e.currentTarget.style.borderColor = 'var(--mantine-color-dimmed)'
           }}
         >
-          <Center style={{ flexDirection: 'column', gap: '15px' }}>
+          <Stack align="center" gap="xs">
             <ThemeIcon size={60} radius="xl" variant="light" color="violet">
               <span style={{ fontSize: '30px' }}>+</span>
             </ThemeIcon>
-            <Text fw={600} size="lg">{t('auth.addAuth')}</Text>
-          </Center>
+            <Text fw={600} size="lg" mt="md" c="dimmed">
+              {t('auth.add')}
+            </Text>
+          </Stack>
         </Card>
+
+        {auths.map(a => (
+          <Card 
+            key={a.uid} 
+            shadow="sm" 
+            padding="lg" 
+            radius={0} 
+            withBorder
+            style={{ 
+              transition: 'transform 0.2s ease', 
+              minHeight: '200px',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            <Card.Section withBorder inheritPadding py="xs">
+              <Group justify="space-between">
+                <Text fw={700} size="lg">{a.name}</Text>
+                <ActionIcon variant="light" color="red" onClick={() => handleDelete(a.uid)} title="Supprimer">
+                  ✖
+                </ActionIcon>
+              </Group>
+            </Card.Section>
+            
+            <Stack gap="xs" mt="md" style={{ flex: 1 }}>
+              <Badge color={a.provider === 'pocketbase' ? 'teal' : a.provider === 'supabase' ? 'green' : 'orange'} variant="light" style={{ alignSelf: 'flex-start' }}>
+                {a.provider.toUpperCase()}
+              </Badge>
+              <Text size="sm" c="dimmed" lineClamp={3}>
+                {a.provider === 'pocketbase' && `URL: ${a.options?.url || ''}`}
+                {a.provider === 'supabase' && `URL: ${a.options?.url || ''}`}
+                {a.provider === 'firebase' && `Project ID: ${a.options?.projectId || ''}`}
+              </Text>
+            </Stack>
+            {a.isDefault && (
+              <Badge color="green" mt="md" fullWidth>Adaptateur par défaut</Badge>
+            )}
+          </Card>
+        ))}
       </SimpleGrid>
 
       <Modal opened={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title={t('auth.addAuth')}>
@@ -81,7 +169,7 @@ export function AuthManager() {
           />
           <Text fw={500} size="sm">{t('auth.type')}</Text>
           <SimpleGrid cols={3} spacing="sm">
-            {['pocketbase', 'oauth', 'jwt'].map(p => (
+            {['pocketbase', 'supabase', 'firebase'].map(p => (
               <Card 
                 key={p} 
                 withBorder 
@@ -106,15 +194,18 @@ export function AuthManager() {
             <TextInput label="PocketBase API URL" required value={pbUrl} onChange={e => setPbUrl(e.currentTarget.value)} />
           )}
 
-          {provider === 'oauth' && (
+          {provider === 'supabase' && (
             <Stack gap="sm">
-              <TextInput label="Client ID" required value={oauthClientId} onChange={e => setOauthClientId(e.currentTarget.value)} />
-              <TextInput label="Client Secret" type="password" required value={oauthSecret} onChange={e => setOauthSecret(e.currentTarget.value)} />
+              <TextInput label="Supabase URL" required value={sbUrl} onChange={e => setSbUrl(e.currentTarget.value)} />
+              <TextInput label="Anon Key" type="password" required value={sbAnonKey} onChange={e => setSbAnonKey(e.currentTarget.value)} />
             </Stack>
           )}
 
-          {provider === 'jwt' && (
-            <TextInput label="Issuer URL" required value={jwtIssuer} onChange={e => setJwtIssuer(e.currentTarget.value)} />
+          {provider === 'firebase' && (
+            <Stack gap="sm">
+              <TextInput label="Project ID" required value={fbProjectId} onChange={e => setFbProjectId(e.currentTarget.value)} />
+              <TextInput label="API Key" type="password" required value={fbApiKey} onChange={e => setFbApiKey(e.currentTarget.value)} />
+            </Stack>
           )}
 
           <Checkbox 

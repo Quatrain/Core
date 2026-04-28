@@ -115,5 +115,25 @@
     "EnumProperty": "Énumération",
     "FileProperty": "Fichier",
     "HashProperty": "Mot de passe / Hash"
+  },
+  "appManager": {
+    "title": "Mon Application",
+    "desc": "Gérez les informations globales de votre application et ses environnements de déploiement.",
+    "appName": "Nom de l'application",
+    "appDesc": "Description",
+    "saveApp": "Enregistrer les infos",
+    "environments": "Environnements",
+    "addEnv": "Ajouter un environnement",
+    "envName": "Nom (ex: Local, Production)",
+    "cancel": "Annuler",
+    "add": "Ajouter",
+    "backend": "Backend",
+    "storage": "Storage",
+    "auth": "Authentification",
+    "secrets": "Secrets",
+    "addSecret": "Ajouter un secret",
+    "secretName": "Clé",
+    "secretValue": "Valeur",
+    "deleteEnv": "Supprimer l'environnement"
   }
 }

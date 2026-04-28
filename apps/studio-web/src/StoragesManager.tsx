@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack, Image } from '@mantine/core'
+import React, { useState, useEffect } from 'react'
+import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack, Image, ActionIcon, Badge } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
+import { api } from './api'
 
 export function StoragesManager() {
   const { t } = useTranslation()
+  const [storages, setStorages] = useState<any[]>([])
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [name, setName] = useState('')
   const [provider, setProvider] = useState<string | null>(null)
@@ -14,10 +16,51 @@ export function StoragesManager() {
   const [s3Region, setS3Region] = useState('')
   const [localPath, setLocalPath] = useState('/data/storage')
 
-  const handleAdd = (e: React.FormEvent) => {
+  useEffect(() => {
+    loadStorages()
+  }, [])
+
+  const loadStorages = async () => {
+    const data = await api.getStorages()
+    setStorages(data)
+  }
+
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    alert(t('storages.devAlert'))
-    setIsAddModalOpen(false)
+    if (!name || !provider) return
+
+    const options: any = {}
+    if (provider === 's3') {
+      options.bucket = s3Bucket
+      options.region = s3Region
+    } else if (provider === 'local') {
+      options.path = localPath
+    }
+
+    try {
+      await api.createStorage({
+        name,
+        provider,
+        options,
+        isDefault
+      })
+      await loadStorages()
+      setIsAddModalOpen(false)
+      setName('')
+      setProvider(null)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm(t('app.confirmDelete', 'Êtes-vous sûr de vouloir supprimer cet élément ?'))) return
+    try {
+      await api.deleteStorage(id)
+      await loadStorages()
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   return (
@@ -60,13 +103,53 @@ export function StoragesManager() {
             e.currentTarget.style.borderColor = 'var(--mantine-color-dimmed)'
           }}
         >
-          <Center style={{ flexDirection: 'column', gap: '15px' }}>
+          <Stack align="center" gap="xs">
             <ThemeIcon size={60} radius="xl" variant="light" color="blue">
               <span style={{ fontSize: '30px' }}>+</span>
             </ThemeIcon>
-            <Text fw={600} size="lg">{t('storages.addStorage')}</Text>
-          </Center>
+            <Text fw={600} size="lg" mt="md" c="dimmed">
+              {t('storages.addStorage')}
+            </Text>
+          </Stack>
         </Card>
+
+        {storages.map(s => (
+          <Card 
+            key={s.uid} 
+            shadow="sm" 
+            padding="lg" 
+            radius={0} 
+            withBorder
+            style={{ 
+              transition: 'transform 0.2s ease', 
+              minHeight: '200px',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            <Card.Section withBorder inheritPadding py="xs">
+              <Group justify="space-between">
+                <Text fw={700} size="lg">{s.name}</Text>
+                <ActionIcon variant="light" color="red" onClick={() => handleDelete(s.uid)} title="Supprimer">
+                  ✖
+                </ActionIcon>
+              </Group>
+            </Card.Section>
+            
+            <Stack gap="xs" mt="md" style={{ flex: 1 }}>
+              <Badge color={s.provider === 's3' ? 'orange' : s.provider === 'gcs' ? 'blue' : 'gray'} variant="light" style={{ alignSelf: 'flex-start' }}>
+                {s.provider.toUpperCase()}
+              </Badge>
+              <Text size="sm" c="dimmed" lineClamp={3}>
+                {s.provider === 'local' && `Path: ${s.options?.path || ''}`}
+                {s.provider === 's3' && `Bucket: ${s.options?.bucket || ''}`}
+              </Text>
+            </Stack>
+            {s.isDefault && (
+              <Badge color="green" mt="md" fullWidth>Adaptateur par défaut</Badge>
+            )}
+          </Card>
+        ))}
       </SimpleGrid>
 
       <Modal opened={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title={t('storages.addStorage')}>

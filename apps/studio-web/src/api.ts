@@ -76,5 +76,78 @@ export const api = {
   deployModel: async (modelId: string, version: number, backendId: string) => {
     const res = await apiClient.post(`models/${modelId}/deploy`, { version, backendId })
     return res.data
+  },
+
+  // App & Environments
+  getProjects: async () => {
+    const res = await apiClient.get('projects')
+    return res.data || []
+  },
+  createProject: async (data: any) => {
+    const res = await apiClient.post('projects', data)
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
+  },
+  updateProject: async (id: string, data: any) => {
+    const res = await apiClient.put(`projects/${id}`, data)
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
+  },
+
+  getEnvironments: async (projectId: string) => {
+    const res = await apiClient.get('environments', { projectId })
+    return res.data || []
+  },
+  createEnvironment: async (data: any) => {
+    const res = await apiClient.post('environments', data)
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
+  },
+  updateEnvironment: async (id: string, data: any) => {
+    const res = await apiClient.put(`environments/${id}`, data)
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
+  },
+  deleteEnvironment: async (id: string) => {
+    await apiClient.delete(`environments/${id}`, {})
+  },
+
+  // Storages
+  getStorages: async () => {
+    const res = await apiClient.get('storages')
+    return res.data || []
+  },
+  createStorage: async (data: any) => {
+    const res = await apiClient.post('storages', data)
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
+  },
+  deleteStorage: async (id: string) => {
+    await apiClient.delete(`storages/${id}`, {})
+  },
+
+  // Auths
+  getAuths: async () => {
+    const res = await apiClient.get('auths')
+    return res.data || []
+  },
+  createAuth: async (data: any) => {
+    const res = await apiClient.post('auths', data)
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
+  },
+  deleteAuth: async (id: string) => {
+    await apiClient.delete(`auths/${id}`, {})
+  },
+
+  // Secrets
+  getSecrets: async (environmentId?: string) => {
+    const res = await apiClient.get('secrets', environmentId ? { environmentId } : {})
+    return res.data || []
+  },
+  createSecret: async (data: any) => {
+    const res = await apiClient.post('secrets', data)
+    return res.data
+  },
+  updateSecret: async (id: string, data: any) => {
+    const res = await apiClient.put(`secrets/${id}`, data)
+    return res.data
+  },
+  deleteSecret: async (id: string) => {
+    await apiClient.delete(`secrets/${id}`, {})
   }
 }

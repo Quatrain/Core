@@ -24,6 +24,8 @@ import {
    CollectionPropertyType,
 } from './properties/CollectionProperty'
 import { ArrayProperty, ArrayPropertyType } from './properties/ArrayProperty'
+import { MapProperty, MapPropertyType } from './properties/MapProperty'
+import { FileProperty, FilePropertyType } from './properties/FileProperty'
 import { AbstractObject } from './components/AbstractObject'
 import { ObjectUri } from './components/ObjectUri'
 import { DataObjectClass } from './components/types/DataObjectClass'
@@ -63,6 +65,8 @@ export {
    NumberProperty,
    returnAs,
    StringProperty,
+   MapProperty,
+   FileProperty,
    ObjectUri,
    DataObject,
    AbstractObject,
@@ -90,6 +94,8 @@ export type {
    ObjectPropertyType,
    NumberPropertyType,
    StringPropertyType,
+   MapPropertyType,
+   FilePropertyType,
    DataObjectClass,
    DataObjectProperties,
    BaseObjectType,

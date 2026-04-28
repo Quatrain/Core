@@ -10,6 +10,13 @@ export const PASSWORD = 'password'
 export const BIRTHDAY = 'bday'
 export const GENDER = 'sex'
 export const ORG = 'organization'
+export const TEXT = 'text'
+export const TEXTAREA = 'textarea'
+export const HIDDEN = 'hidden'
+export const SELECT = 'select'
+export const CHECKBOX = 'checkbox'
+export const NUMBER = 'number'
+export const FILE = 'file'
 
 export type PropertyHTMLType =
    | typeof OFF
@@ -21,3 +28,10 @@ export type PropertyHTMLType =
    | typeof BIRTHDAY
    | typeof GENDER
    | typeof ORG
+   | typeof TEXT
+   | typeof TEXTAREA
+   | typeof HIDDEN
+   | typeof SELECT
+   | typeof CHECKBOX
+   | typeof NUMBER
+   | typeof FILE

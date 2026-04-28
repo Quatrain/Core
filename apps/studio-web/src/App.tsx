@@ -7,6 +7,7 @@ import { ModelsManager } from './ModelsManager'
 import { BackendsManager } from './BackendsManager'
 import { StoragesManager } from './StoragesManager'
 import { AuthManager } from './AuthManager'
+import { AppManager } from './AppManager'
 import { CreateModel } from './CreateModel'
 import { I18nextProvider, useTranslation } from 'react-i18next'
 import i18n from './i18n'
@@ -31,7 +32,6 @@ const Icons = {
   Map: <SvgIcon><path d="M4 4v16M20 4v16M9 4v16M15 4v16M4 9h16M4 15h16" /></SvgIcon>, // Grid like a map
   Enum: <SvgIcon><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></SvgIcon>,
   File: <SvgIcon><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><polyline points="13 2 13 9 20 9" /></SvgIcon>,
-  Hash: <SvgIcon><line x1="4" y1="9" x2="20" y2="9" /><line x1="4" y1="15" x2="20" y2="15" /><line x1="10" y1="3" x2="8" y2="21" /><line x1="16" y1="3" x2="14" y2="21" /></SvgIcon>,
   Default: <SvgIcon><circle cx="12" cy="12" r="10"/></SvgIcon>
 }
 
@@ -58,7 +58,7 @@ function AppContent() {
   const [models, setModels] = useState<any[]>([])
   const [backends, setBackends] = useState<any[]>([])
   const [currentModel, setCurrentModel] = useState<any>(null)
-  const [currentView, setCurrentView] = useState<'dashboard' | 'backends' | 'storages' | 'auth' | 'model' | 'models' | 'new-model'>('dashboard')
+  const [currentView, setCurrentView] = useState<'dashboard' | 'app' | 'backends' | 'storages' | 'auth' | 'model' | 'models' | 'new-model'>('dashboard')
   const [selectedVersion, setSelectedVersion] = useState<number | null>(null)
 
   // DnD state
@@ -110,6 +110,9 @@ function AppContent() {
           loadModelDetails(foundModel.uid)
         }
         setCurrentView('model')
+      } else if (hash === '/app') {
+        setCurrentModel(null)
+        setCurrentView('app')
       } else if (hash === '/backends') {
         setCurrentModel(null)
         setCurrentView('backends')
@@ -403,28 +406,30 @@ function AppContent() {
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
-        <Stack gap="sm">
-          <Text size="xs" fw={700} c="dimmed" tt="uppercase">Navigation</Text>
+        <Stack gap="xs" mt="xl">
+          <Text size="xs" fw={700} c="dimmed" tt="uppercase">{t('app.navigation')}</Text>
           <NavLink 
-            label={t('app.dashboard')} 
-            active={currentView === 'dashboard'} 
-            onClick={() => { window.location.hash = '/'; setError(null); }} 
-            variant="light"
-            color="blue"
-            style={{ borderRadius: '8px' }}
+            href="#/"
+            label={t('app.dashboard')}
+            active={currentView === 'dashboard'}
+            leftSection={Icons.Date} 
+          />
+          <NavLink 
+            href="#/app"
+            label={t('appManager.title', 'Mon Application')}
+            active={currentView === 'app'}
+            leftSection={Icons.Collection}
+          />
+          <NavLink 
+            href="#/backends"
+            label={t('app.manageBackends')}
+            active={currentView === 'backends'}
+            leftSection={Icons.Hash}
           />
           <NavLink 
             label={t('app.models') || "Modèles"} 
             active={currentView === 'models'} 
             onClick={() => { window.location.hash = '/models'; setError(null); }} 
-            variant="light"
-            color="blue"
-            style={{ borderRadius: '8px' }}
-          />
-          <NavLink 
-            label={t('app.backends')} 
-            active={currentView === 'backends'} 
-            onClick={() => { window.location.hash = '/backends'; setError(null); }} 
             variant="light"
             color="blue"
             style={{ borderRadius: '8px' }}
@@ -469,6 +474,8 @@ function AppContent() {
             <StoragesManager />
           ) : currentView === 'auth' ? (
             <AuthManager />
+          ) : currentView === 'app' ? (
+            <AppManager />
           ) : currentView === 'models' ? (
             <ModelsManager models={models} backends={backends} onNavigateToNewModel={() => window.location.hash = '/models/new'} />
           ) : (

@@ -141,11 +141,19 @@ export class S3StorageAdapter extends AbstractStorageAdapter {
       return destFile
    }
 
-   async getUrl(file: FileType, expiresIn = 3600) {
-      const command = new GetObjectCommand({
+   async getUrl(file: FileType, expiresIn = 3600, action: any = 'read', extra: any = {}) {
+      const commandArgs: any = {
          Bucket: file.bucket,
          Key: encodeURI(file.ref),
-      })
+      }
+
+      const cacheControl = extra.cacheControl || (this._params.config.publicCacheDuration ? `max-age=${this._params.config.publicCacheDuration}` : undefined)
+
+      if (cacheControl) {
+         commandArgs.ResponseCacheControl = cacheControl
+      }
+
+      const command = new GetObjectCommand(commandArgs)
       Storage.debug(`Creating public url for ${file.bucket}/${file.ref}`)
       const url = await getSignedUrl(this._client, command, { expiresIn })
       return { url, expiresIn }

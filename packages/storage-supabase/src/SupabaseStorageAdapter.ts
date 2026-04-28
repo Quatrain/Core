@@ -138,10 +138,17 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
       return destFile
    }
 
-   async getUrl(file: FileType, expiresIn = 3600) {
+   async getUrl(file: FileType, expiresIn = 3600, action: any = 'read', extra: any = {}) {
       Storage.debug(
          `Getting signed url for file ${file.ref} in bucket ${file.bucket}`
       )
+
+      const cacheControl = extra.cacheControl || (this._params.config.publicCacheDuration ? `${this._params.config.publicCacheDuration}` : undefined)
+
+      // TODO: Le client Supabase JS ne supporte pas nativement l'override du ResponseCacheControl dans createSignedUrl.
+      // La variable publicCacheDuration / cacheControl n'est donc pas gérée correctement ici pour le moment.
+      // Voir si le SDK de Supabase permet de la supporter dans le futur.
+      
       const { data, error } = await this._client
          .from(file.bucket)
          .createSignedUrl(file.ref, expiresIn, { download: true })

@@ -143,6 +143,10 @@
     "addSecret": "Ajouter un secret",
     "secretName": "Clé",
     "secretValue": "Valeur",
-    "deleteEnv": "Supprimer l'environnement"
+    "deleteEnv": "Supprimer l'environnement",
+    "deployEnv": "Déployer l'environnement",
+    "deploying": "Déploiement en cours... (PoC)",
+    "deploySuccess": "Déploiement réussi dans le dossier app/ !",
+    "deployError": "Erreur lors du déploiement :"
   }
 }

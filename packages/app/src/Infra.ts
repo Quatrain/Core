@@ -20,15 +20,16 @@ export class AppInfra {
             fs.mkdirSync(fullTargetDir, { recursive: true })
          }
 
-         const { compose, env } = InfraBuilder.build(config)
+         const { compose, env, dockerfile } = InfraBuilder.build(config)
          
          fs.writeFileSync(composeFile, compose, 'utf8')
          fs.writeFileSync(path.resolve(fullTargetDir, '.env'), env, 'utf8')
+         fs.writeFileSync(path.resolve(fullTargetDir, 'Containerfile'), dockerfile, 'utf8')
          
          Log.info(`[Infra] Dynamically generated compose.yaml and .env in ${fullTargetDir}`)
       }
 
-      return this.runCompose('up -d', composeFile)
+      return this.runCompose('up -d --build', composeFile)
    }
 
    /**
@@ -40,8 +41,8 @@ export class AppInfra {
    }
 
    private static getComposeCommand(): string {
-      // Prioritize podman-compose if working 'modern', otherwise fallback to docker-compose
-      return 'podman-compose'
+      // Prioritize podman compose if working 'modern', otherwise fallback to docker compose
+      return 'podman compose'
    }
 
    private static async runCompose(action: string, composeFile: string): Promise<void> {
@@ -58,8 +59,8 @@ export class AppInfra {
             if (error) {
                // Fallback to docker-compose if podman-compose is not installed
                if (error.message.includes('command not found')) {
-                  Log.warn(`[Infra] podman-compose not found, falling back to docker-compose...`)
-                  exec(`docker-compose -f ${composeFile} ${action}`, (err2, out2, errOut2) => {
+                  Log.warn(`[Infra] podman compose not found, falling back to docker compose...`)
+                  exec(`docker compose -f ${composeFile} ${action}`, (err2, out2, errOut2) => {
                      if (err2) {
                         Log.error(`[Infra] Failed to run infrastructure: ${err2.message}`)
                         return reject(err2)

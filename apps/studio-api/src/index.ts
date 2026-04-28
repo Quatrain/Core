@@ -254,10 +254,28 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             if (backendId) {
                const b = await StudioBackend.fromBackend<StudioBackend>(backendId)
                if (b) {
+                  let config: any = {}
+                  if (b.val('engine') === 'sqlite') {
+                     config = { filename: b.val('filePath') }
+                  } else if (b.val('engine') === 'postgres') {
+                     config = {
+                        host: b.val('host'),
+                        port: b.val('port'),
+                        username: b.val('username'),
+                        password: b.val('password'),
+                        database: b.val('database')
+                     }
+                  } else if (b.val('engine') === 'firestore') {
+                     config = {
+                        projectId: b.val('projectId'),
+                        credentials: b.val('credentials')
+                     }
+                  }
+
                   backendConfig = {
-                     package: '@quatrain/backend-sqlite', // Fallback
-                     adapter: b.val('provider') === 'postgres' ? 'PostgresAdapter' : 'SQLiteAdapter',
-                     config: b.val('options')
+                     package: '@quatrain/backend-sqlite', // Default package (can be made dynamic later)
+                     adapter: b.val('engine') === 'postgres' ? 'PostgresAdapter' : 'SQLiteAdapter',
+                     config
                   }
                }
             }
@@ -286,10 +304,20 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                   .filter(p => (p as StudioProperty).val('status') !== 'deleted')
                   .map(p => {
                      const prop = p as StudioProperty
+                     const options = prop.val('options') || {}
+                     
+                     // Resolve instanceOf to model name instead of UID
+                     if (options.instanceOf) {
+                        const targetModel = modelsResult.items.find(m => (m as StudioModel).uid === options.instanceOf) as StudioModel
+                        if (targetModel) {
+                           options.instanceOf = targetModel.val('name')
+                        }
+                     }
+
                      return {
                         name: prop.val('name'),
                         type: prop.val('propertyType'),
-                        options: prop.val('options') || {}
+                        options
                      }
                   })
 

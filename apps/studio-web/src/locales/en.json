@@ -144,6 +144,10 @@
     "addSecret": "Add a secret",
     "secretName": "Key",
     "secretValue": "Value",
-    "deleteEnv": "Delete Environment"
+    "deleteEnv": "Delete Environment",
+    "deployEnv": "Deploy Environment",
+    "deploying": "Deployment in progress...",
+    "deploySuccess": "Deployment successful in the app/ folder!",
+    "deployError": "Deployment error:"
   }
 }

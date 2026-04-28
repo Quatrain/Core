@@ -1,0 +1,178 @@
+{
+  "name": "Env-Local",
+  "recipe": "crud",
+  "backend": {
+    "package": "@quatrain/backend-sqlite",
+    "adapter": "SQLiteAdapter",
+    "config": {
+      "filename": "../app/data.sqlite"
+    }
+  },
+  "storage": {
+    "package": "@quatrain/storage",
+    "adapter": "LocalAdapter",
+    "config": {
+      "path": "/data/storage"
+    }
+  },
+  "front": true,
+  "models": [
+    {
+      "uid": "95a70b0a-f35c-4e92-8d38-00f8443d8a16",
+      "name": "Book",
+      "collectionName": "books",
+      "properties": [
+        {
+          "name": "title",
+          "type": "StringProperty",
+          "options": {
+            "minLength": 3
+          }
+        },
+        {
+          "name": "year",
+          "type": "NumberProperty",
+          "options": {
+            "minVal": 1500
+          }
+        },
+        {
+          "name": "abstract",
+          "type": "StringProperty",
+          "options": {}
+        },
+        {
+          "name": "editor",
+          "type": "ObjectProperty",
+          "options": {
+            "instanceOf": "Editor"
+          }
+        },
+        {
+          "name": "author",
+          "type": "ObjectProperty",
+          "options": {
+            "instanceOf": "Author"
+          }
+        },
+        {
+          "name": "title",
+          "type": "StringProperty",
+          "options": {
+            "minLength": 3
+          }
+        },
+        {
+          "name": "year",
+          "type": "NumberProperty",
+          "options": {
+            "minVal": 1500
+          }
+        },
+        {
+          "name": "abstract",
+          "type": "StringProperty",
+          "options": {}
+        },
+        {
+          "name": "editor",
+          "type": "ObjectProperty",
+          "options": {
+            "instanceOf": "Editor"
+          }
+        },
+        {
+          "name": "author",
+          "type": "ObjectProperty",
+          "options": {
+            "instanceOf": "Author"
+          }
+        }
+      ]
+    },
+    {
+      "uid": "c4b504ed-44b7-4403-85ed-3a1c677761b6",
+      "name": "Author",
+      "collectionName": "authors",
+      "properties": [
+        {
+          "name": "name",
+          "type": "StringProperty",
+          "options": {}
+        },
+        {
+          "name": "birthdate",
+          "type": "DateTimeProperty",
+          "options": {}
+        },
+        {
+          "name": "name",
+          "type": "StringProperty",
+          "options": {}
+        },
+        {
+          "name": "birthdate",
+          "type": "DateTimeProperty",
+          "options": {}
+        },
+        {
+          "name": "nationality",
+          "type": "StringProperty",
+          "options": {}
+        },
+        {
+          "name": "name",
+          "type": "StringProperty",
+          "options": {}
+        },
+        {
+          "name": "birthdate",
+          "type": "DateTimeProperty",
+          "options": {}
+        },
+        {
+          "name": "nationality",
+          "type": "StringProperty",
+          "options": {}
+        },
+        {
+          "name": "sex",
+          "type": "EnumProperty",
+          "options": {
+            "enumLabels": {
+              "M": "Male",
+              "F": "Female"
+            },
+            "values": [
+              "M",
+              "F"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "uid": "0d5777c9-d3c7-4c7a-a309-2699ccd5f19f",
+      "name": "Editor",
+      "collectionName": "editors",
+      "properties": [
+        {
+          "name": "name",
+          "type": "StringProperty",
+          "options": {}
+        },
+        {
+          "name": "name",
+          "type": "StringProperty",
+          "options": {}
+        }
+      ]
+    },
+    {
+      "uid": "f3a19dcf-aad8-44b6-a518-278e9159b4d7",
+      "name": "Record",
+      "collectionName": "records",
+      "properties": []
+    }
+  ]
+}

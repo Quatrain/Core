@@ -1,0 +1,14 @@
+services:
+  engine:
+    build:
+      context: .
+      dockerfile: Containerfile
+    container_name: quatrain-app-engine
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+      - 4001:4000
+    environment:
+      NODE_ENV: production
+    volumes:
+      - ./quatrain.json:/app/quatrain.json:ro

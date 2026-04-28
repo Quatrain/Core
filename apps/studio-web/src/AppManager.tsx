@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Modal, TextInput, Textarea, Button, Stack, ActionIcon, Select, Badge, Divider, Table } from '@mantine/core'
+import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Modal, TextInput, Textarea, Button, Stack, ActionIcon, Select, Badge, Divider, Table, Loader, Center } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { api } from './api'
 
@@ -19,7 +19,8 @@ export function AppManager() {
   // Modals
   const [isEnvModalOpen, setIsEnvModalOpen] = useState(false)
   const [newEnvName, setNewEnvName] = useState('')
-
+  const [isDeploying, setIsDeploying] = useState(false)
+  const [deployResult, setDeployResult] = useState<{ success: boolean, message: string } | null>(null)
           
   useEffect(() => {
     loadAll()
@@ -100,17 +101,20 @@ export function AppManager() {
 
   const handleDeployEnvironment = async (env: any) => {
     if (!project || !project.recipe) return
+    setIsDeploying(true)
+    setDeployResult(null)
     try {
-      alert("Déploiement en cours... (PoC)")
       const res = await api.deployEnvironment(env.uid, { recipe: project.recipe })
       if (res && res.success) {
-        alert("Déploiement réussi dans le dossier app/ !")
+        setDeployResult({ success: true, message: t('appManager.deploySuccess') })
       } else {
-        alert("Erreur lors du déploiement : " + res.error)
+        setDeployResult({ success: false, message: `${t('appManager.deployError')} ${res.error}` })
       }
     } catch (e: any) {
       console.error(e)
-      alert("Erreur de déploiement : " + e.message)
+      setDeployResult({ success: false, message: `${t('appManager.deployError')} ${e.message}` })
+    } finally {
+      setIsDeploying(false)
     }
   }
 
@@ -293,7 +297,35 @@ export function AppManager() {
         </Stack>
       </Modal>
 
-      
+      <Modal
+        opened={isDeploying || deployResult !== null}
+        onClose={() => { if (!isDeploying) setDeployResult(null) }}
+        title={<Text fw={600} size="lg">{t('appManager.deployEnv')}</Text>}
+        centered
+        closeOnClickOutside={!isDeploying}
+        withCloseButton={!isDeploying}
+      >
+        <Stack align="center" gap="lg" py="xl">
+          {isDeploying ? (
+            <>
+              <Loader size="xl" type="bars" color="violet" />
+              <Text fw={500}>{t('appManager.deploying')}</Text>
+            </>
+          ) : deployResult && (
+            <>
+              <ThemeIcon size={80} radius="xl" color={deployResult.success ? "green" : "red"} variant="light">
+                <span style={{ fontSize: '40px' }}>{deployResult.success ? "✓" : "✖"}</span>
+              </ThemeIcon>
+              <Text fw={600} size="md" c={deployResult.success ? "green" : "red"} ta="center">
+                {deployResult.message}
+              </Text>
+              <Button mt="md" fullWidth variant="light" color={deployResult.success ? "green" : "red"} onClick={() => setDeployResult(null)}>
+                OK
+              </Button>
+            </>
+          )}
+        </Stack>
+      </Modal>
     </div>
   )
 }

@@ -20,9 +20,9 @@ export interface ComposeFile {
 
 export class InfraBuilder {
    /**
-    * Génère le contenu des fichiers compose.yaml et .env en fonction de la configuration de l'application
+    * Génère le contenu des fichiers compose.yaml, .env et Containerfile en fonction de la configuration de l'application
     */
-   public static build(config: any, appName: string = 'quatrain-app'): { compose: string, env: string } {
+   public static build(config: any, appName: string = 'quatrain-app'): { compose: string, env: string, dockerfile: string } {
       const compose: ComposeFile = {
          services: {},
          volumes: {}
@@ -32,10 +32,13 @@ export class InfraBuilder {
 
       // 1. Unified Engine Container (API + Front)
       compose.services['engine'] = {
-         image: 'quatrain-engine:latest', // For the PoC, a local generic image
+         build: {
+            context: '.',
+            dockerfile: 'Containerfile'
+         },
          container_name: `${appName}-engine`,
          restart: 'unless-stopped',
-         ports: ['3000:3000', '4000:4000'],
+         ports: ['3000:3000', '4001:4000'],
          environment: {
             NODE_ENV: 'production'
          },
@@ -121,7 +124,18 @@ export class InfraBuilder {
       // Generate outputs
       const composeYaml = yaml.stringify(compose)
       const envFile = Object.entries(envVars).map(([k, v]) => `${k}=${v}`).join('\n')
+      
+      const dockerfile = `
+FROM oven/bun:latest
+WORKDIR /app
+# Pour le PoC, on installe un serveur HTTP minimal pour l'instant
+RUN bun init -y
+RUN bun add serve
+COPY quatrain.json /app/quatrain.json
+EXPOSE 3000 4000
+CMD ["bun", "x", "serve", "-p", "3000", "."]
+      `.trim()
 
-      return { compose: composeYaml, env: envFile }
+      return { compose: composeYaml, env: envFile, dockerfile }
    }
 }

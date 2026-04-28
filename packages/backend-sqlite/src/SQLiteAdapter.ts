@@ -3,7 +3,6 @@ import {
    NotFoundError,
    statuses,
    StringProperty,
-   ObjectProperty,
 } from '@quatrain/core'
 import {
    DataObjectClass,
@@ -23,7 +22,6 @@ import {
 import { randomUUID } from 'crypto'
 import sqlite3, { Statement } from 'sqlite3'
 import { open, Database } from 'sqlite'
-import { AbstractPropertyType } from '@quatrain/core/dist/properties/types/AbstractPropertyType'
 
 const operatorsMap: { [x: string]: string } = {
    equals: '=',
@@ -74,7 +72,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
          path = `${dataObject.val(dataObject.parentProp).path}/${path}`
       }
 
-      Backend.log(`[SQLA] Record path is '${path}'`)
+      Backend.info(`[SQLA] Record path is '${path}'`)
 
       return path
    }
@@ -202,7 +200,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
 
          query += `)`
          await db.exec(query)
-         Backend.log(`[SQLA] Created table ${collection.toLowerCase()}`)
+         Backend.info(`[SQLA] Created table ${collection.toLowerCase()}`)
       }
    }
 
@@ -303,7 +301,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
          )
       }
 
-      Backend.log(`[SQLA] Getting document ${path}`)
+      Backend.info(`[SQLA] Getting document ${path}`)
 
       if (!collection) {
          throw new BackendError(

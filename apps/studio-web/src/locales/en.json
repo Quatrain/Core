@@ -2,33 +2,55 @@
   "app": {
     "title": "Core Studio",
     "dashboard": "Dashboard",
+    "models": "Models",
     "backends": "Backends",
     "storages": "Storages",
     "auth": "Authentication",
     "developedBy": "Core is an AGPL-v3 licensed project developed by"
   },
   "dashboard": {
-    "addModel": "Add Model",
+    "overview": "Overview",
+    "modelsDesc": "Defined data schemas.",
+    "noBackend": "No active backend.",
+    "storagesDesc": "File adapters.",
+    "authDesc": "Identity providers.",
+    "addModel": "Add a Model",
     "activeBackend": "Active Backend:",
     "deployed": "Deployed",
     "draft": "Draft (Never deployed)",
-    "pending": "Pending Deployment",
+    "pending": "Deployment pending",
     "records": "records",
-    "editData": "Edit Data",
-    "currentActiveVersion": "Current active version is:",
-    "noModels": "No models have been created yet."
+    "editData": "Edit data",
+    "currentActiveVersion": "Active version:",
+    "noModels": "No model has been created yet.",
+    "manageModels": "Manage Models",
+    "manageBackends": "Manage Backends",
+    "manageStorages": "Manage Storages",
+    "manageAuth": "Manage Authentication"
+  },
+  "modelsManager": {
+    "title": "Models Management",
+    "desc": "Manage your application's data schemas."
   },
   "model": {
     "addProperties": "Add properties",
-    "propertyName": "Name (ex: amount)",
-    "required": "Required field",
-    "addPropBtn": "Add Property",
-    "modelData": "Model Data",
-    "modelName": "Model Name",
-    "collection": "Collection (DB)",
-    "persisted": "Persisted in database",
+    "propertyName": "Name (e.g. amount)",
+    "type": "Type",
+    "selectType": "Select a type",
+    "mandatory": "Mandatory",
     "save": "Save",
-    "properties": "Properties",
+    "saveChanges": "Save changes",
+    "saveVersion": "Save version",
+    "restoreVersion": "Restore this version",
+    "deployVersion": "Deploy this version",
+    "cannotDeployDraft": "You cannot deploy a draft.",
+    "addPropButton": "+ Add property",
+    "modelName": "Model Name",
+    "collectionName": "Collection (DB)",
+    "persisted": "Persisted to database",
+    "required": "Required",
+    "modelData": "Model Data",
+    "collection": "Collection (DB)",
     "version": "Version:",
     "saveVersion": "Save Version",
     "deploy": "Deploy",
@@ -57,9 +79,10 @@
     "name": "Name",
     "provider": "Provider",
     "selectProvider": "Select a provider",
+    "setDefault": "Set as default storage",
     "cancel": "Cancel",
     "add": "Add",
-    "devAlert": "Feature in development."
+    "devAlert": "Feature under development."
   },
   "auth": {
     "title": "Authentication Adapters",
@@ -68,9 +91,10 @@
     "name": "Name",
     "type": "Adapter type",
     "selectType": "Select a type",
+    "setDefault": "Set as default auth adapter",
     "cancel": "Cancel",
     "add": "Add",
-    "devAlert": "Feature in development."
+    "devAlert": "Feature under development."
   },
   "createModel": {
     "title": "Create a new Model",
@@ -79,5 +103,18 @@
     "collection": "DB Collection Name (optional)",
     "cancel": "Cancel",
     "create": "Create Model"
+  },
+  "propertyTypes": {
+    "StringProperty": "Text",
+    "NumberProperty": "Number",
+    "BooleanProperty": "Boolean",
+    "ObjectProperty": "Reference",
+    "ArrayProperty": "List",
+    "DateTimeProperty": "Date/Time",
+    "CollectionProperty": "Collection",
+    "MapProperty": "Dictionary (JSON)",
+    "EnumProperty": "Enumeration",
+    "FileProperty": "File",
+    "HashProperty": "Password / Hash"
   }
 }

@@ -3232,6 +3232,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/auth-pocketbase@workspace:packages/auth-pocketbase":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/auth-pocketbase@workspace:packages/auth-pocketbase"
+  dependencies:
+    "@quatrain/auth": "workspace:*"
+    "@quatrain/backend": "npm:^1.1.37"
+    "@quatrain/core": "npm:^1.1.52"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.1.5"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/auth-supabase@workspace:packages/auth-supabase":
   version: 0.0.0-use.local
   resolution: "@quatrain/auth-supabase@workspace:packages/auth-supabase"
@@ -3253,7 +3266,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/auth@npm:^1.1.31, @quatrain/auth@workspace:^, @quatrain/auth@workspace:packages/auth":
+"@quatrain/auth@npm:^1.1.31, @quatrain/auth@workspace:*, @quatrain/auth@workspace:^, @quatrain/auth@workspace:packages/auth":
   version: 0.0.0-use.local
   resolution: "@quatrain/auth@workspace:packages/auth"
   dependencies:

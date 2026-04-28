@@ -2,12 +2,18 @@
   "app": {
     "title": "Core Studio",
     "dashboard": "Tableau de bord",
+    "models": "Modèles",
     "backends": "Backends",
     "storages": "Storages",
     "auth": "Authentification",
     "developedBy": "Core est un projet sous licence AGPL-v3 développé par"
   },
   "dashboard": {
+    "overview": "Vue d'ensemble",
+    "modelsDesc": "Schémas de données définis.",
+    "noBackend": "Aucun backend actif.",
+    "storagesDesc": "Adaptateurs de fichiers.",
+    "authDesc": "Fournisseurs d'identité.",
     "addModel": "Ajouter un Modèle",
     "activeBackend": "Backend Actif :",
     "deployed": "Déployé",
@@ -16,21 +22,36 @@
     "records": "enregistrements",
     "editData": "Modifier les données",
     "currentActiveVersion": "Version active :",
-    "noModels": "Aucun modèle n'a encore été créé."
+    "noModels": "Aucun modèle n'a encore été créé.",
+    "manageModels": "Gérer les Modèles",
+    "manageBackends": "Gérer les Backends",
+    "manageStorages": "Gérer les Storages",
+    "manageAuth": "Gérer l'Authentification"
+  },
+  "modelsManager": {
+    "title": "Gestion des Modèles",
+    "desc": "Gérez les schémas de données de votre application."
   },
   "model": {
     "addProperties": "Ajouter des propriétés",
     "propertyName": "Nom (ex: amount)",
-    "required": "Champ obligatoire",
-    "addPropBtn": "Ajouter la propriété",
-    "modelData": "Données du modèle",
-    "modelName": "Nom du Modèle",
-    "collection": "Collection (BDD)",
-    "persisted": "Persisté en base de données",
+    "type": "Type",
+    "selectType": "Sélectionnez un type",
+    "mandatory": "Obligatoire",
     "save": "Sauvegarder",
-    "properties": "Propriétés",
-    "version": "Version :",
+    "saveChanges": "Sauvegarder les modifications",
     "saveVersion": "Sauvegarder la version",
+    "restoreVersion": "Restaurer cette version",
+    "deployVersion": "Déployer cette version",
+    "cannotDeployDraft": "Vous ne pouvez pas déployer un brouillon.",
+    "addPropButton": "+ Ajouter la propriété",
+    "modelName": "Nom du Modèle",
+    "collectionName": "Collection (BDD)",
+    "persisted": "Persisté en base de données",
+    "required": "Requis",
+    "modelData": "Données du modèle",
+    "collection": "Collection (BDD)",
+    "version": "Version :",
     "deploy": "Déployer",
     "edit": "Modifier",
     "draft": "Brouillon"
@@ -57,6 +78,7 @@
     "name": "Nom",
     "provider": "Fournisseur",
     "selectProvider": "Sélectionnez un fournisseur",
+    "setDefault": "Définir comme stockage par défaut",
     "cancel": "Annuler",
     "add": "Ajouter",
     "devAlert": "Fonctionnalité en cours de développement."
@@ -68,6 +90,7 @@
     "name": "Nom",
     "type": "Type d'adaptateur",
     "selectType": "Sélectionnez un type",
+    "setDefault": "Définir comme adaptateur Auth par défaut",
     "cancel": "Annuler",
     "add": "Ajouter",
     "devAlert": "Fonctionnalité en cours de développement."
@@ -79,5 +102,18 @@
     "collection": "Nom de la Collection BDD (optionnel)",
     "cancel": "Annuler",
     "create": "Créer le Modèle"
+  },
+  "propertyTypes": {
+    "StringProperty": "Texte",
+    "NumberProperty": "Nombre",
+    "BooleanProperty": "Booléen",
+    "ObjectProperty": "Référence",
+    "ArrayProperty": "Liste",
+    "DateTimeProperty": "Date/Heure",
+    "CollectionProperty": "Collection",
+    "MapProperty": "Dictionnaire (JSON)",
+    "EnumProperty": "Énumération",
+    "FileProperty": "Fichier",
+    "HashProperty": "Mot de passe / Hash"
   }
 }

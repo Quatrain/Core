@@ -30,7 +30,7 @@ const PROPERTY_OPTIONS: Record<string, { key: string, label: string, type: strin
     { key: 'allowStrings', label: 'Autoriser texte', type: 'boolean' },
   ],
   EnumProperty: [
-    { key: 'values', label: 'Valeurs (séparées par virgule)', type: 'array' },
+    { key: 'enumLabels', label: 'Valeurs et libellés', type: 'keyValueList' },
   ],
   ObjectProperty: [],
   CollectionProperty: [
@@ -77,7 +77,12 @@ export function PropertyOptionsEditor({ propType, options, onChange, models, inp
   };
 
   const handleChangeOption = (key: string, value: any) => {
-    onChange({ ...options, [key]: value });
+    const newOptions = { ...options, [key]: value };
+    // Auto-sync 'values' array if enumLabels are changed for EnumProperty
+    if (propType === 'EnumProperty' && key === 'enumLabels') {
+      newOptions.values = Object.keys(value || {});
+    }
+    onChange(newOptions);
   };
 
   if (!propType) return null;
@@ -121,6 +126,44 @@ export function PropertyOptionsEditor({ propType, options, onChange, models, inp
                   styles={{ input: inputStyle }} 
                   disabled={disabled}
                 />
+              )}
+              {optDef.type === 'keyValueList' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  {Object.entries(options[key] || {}).map(([k, v]) => (
+                    <div key={k} style={{ display: 'flex', gap: '5px' }}>
+                      <TextInput value={k} disabled styles={{ input: { ...inputStyle, width: '100px', backgroundColor: 'transparent' } }} />
+                      <TextInput 
+                        value={v as string} 
+                        onChange={e => handleChangeOption(key, { ...options[key], [k]: e.target.value })} 
+                        styles={{ input: inputStyle }} 
+                        disabled={disabled} 
+                        placeholder="Libellé" 
+                      />
+                      {!disabled && (
+                        <Button variant="subtle" color="red" size="xs" onClick={() => {
+                          const newObj = { ...options[key] };
+                          delete newObj[k];
+                          handleChangeOption(key, newObj);
+                        }}>✖</Button>
+                      )}
+                    </div>
+                  ))}
+                  {!disabled && (
+                    <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
+                      <TextInput id={`new_key_${key}`} placeholder="Nouvelle clé (ex: FR)" styles={{ input: inputStyle }} style={{ width: '100px' }} />
+                      <TextInput id={`new_val_${key}`} placeholder="Libellé (ex: France)" styles={{ input: inputStyle }} />
+                      <Button variant="light" color="teal" onClick={() => {
+                        const keyInput = document.getElementById(`new_key_${key}`) as HTMLInputElement;
+                        const valInput = document.getElementById(`new_val_${key}`) as HTMLInputElement;
+                        if (keyInput.value && valInput.value) {
+                          handleChangeOption(key, { ...(options[key] || {}), [keyInput.value]: valInput.value });
+                          keyInput.value = '';
+                          valInput.value = '';
+                        }
+                      }}>Ajouter</Button>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
             {!disabled && (
@@ -173,6 +216,9 @@ export function PropertyOptionsEditor({ propType, options, onChange, models, inp
                     onChange={e => setTempValue(e.target.value.split(',').map(s => s.trim()))} 
                     styles={{ input: inputStyle }} 
                   />
+                )}
+                {selectedOptDef.type === 'keyValueList' && (
+                  <span style={{ fontSize: '13px', color: 'var(--mantine-color-dimmed)' }}>Cliquez sur Ajouter pour commencer la saisie</span>
                 )}
               </div>
             )}

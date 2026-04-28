@@ -3,6 +3,7 @@ import { Button, TextInput, Select as MantineSelect, Checkbox as MantineCheckbox
 import { api } from './api'
 import { PropertyOptionsEditor } from './PropertyOptionsEditor'
 import { Dashboard } from './Dashboard'
+import { ModelsManager } from './ModelsManager'
 import { BackendsManager } from './BackendsManager'
 import { StoragesManager } from './StoragesManager'
 import { AuthManager } from './AuthManager'
@@ -13,13 +14,51 @@ import i18n from './i18n'
 // Import Logo
 import logoUrl from '../../../assets/quatrain-logo.png'
 
+const SvgIcon = ({ children }: { children: React.ReactNode }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display: 'inline-block', verticalAlign: 'middle'}}>
+    {children}
+  </svg>
+)
+
+const Icons = {
+  Text: <SvgIcon><path d="M4 7V4h16v3m-8 13V4" /></SvgIcon>,
+  Hash: <SvgIcon><line x1="4" y1="9" x2="20" y2="9" /><line x1="4" y1="15" x2="20" y2="15" /><line x1="10" y1="3" x2="8" y2="21" /><line x1="16" y1="3" x2="14" y2="21" /></SvgIcon>,
+  Boolean: <SvgIcon><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M9 12l2 2 4-4"/></SvgIcon>,
+  Link: <SvgIcon><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></SvgIcon>,
+  List: <SvgIcon><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></SvgIcon>,
+  Date: <SvgIcon><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></SvgIcon>,
+  Collection: <SvgIcon><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></SvgIcon>,
+  Map: <SvgIcon><path d="M4 4v16M20 4v16M9 4v16M15 4v16M4 9h16M4 15h16" /></SvgIcon>, // Grid like a map
+  Enum: <SvgIcon><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></SvgIcon>,
+  File: <SvgIcon><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><polyline points="13 2 13 9 20 9" /></SvgIcon>,
+  Hash: <SvgIcon><line x1="4" y1="9" x2="20" y2="9" /><line x1="4" y1="15" x2="20" y2="15" /><line x1="10" y1="3" x2="8" y2="21" /><line x1="16" y1="3" x2="14" y2="21" /></SvgIcon>,
+  Default: <SvgIcon><circle cx="12" cy="12" r="10"/></SvgIcon>
+}
+
+const getPropertyTypeIcon = (type: string) => {
+  switch (type) {
+    case 'StringProperty': return Icons.Text;
+    case 'NumberProperty': return Icons.Hash;
+    case 'BooleanProperty': return Icons.Boolean;
+    case 'ObjectProperty': return Icons.Link;
+    case 'ArrayProperty': return Icons.List;
+    case 'DateTimeProperty': return Icons.Date;
+    case 'CollectionProperty': return Icons.Collection;
+    case 'MapProperty': return Icons.Map;
+    case 'EnumProperty': return Icons.Enum;
+    case 'FileProperty': return Icons.File;
+    case 'HashProperty': return Icons.Hash;
+    default: return Icons.Default;
+  }
+}
+
 function AppContent() {
   const { t } = useTranslation()
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
   const [models, setModels] = useState<any[]>([])
   const [backends, setBackends] = useState<any[]>([])
   const [currentModel, setCurrentModel] = useState<any>(null)
-  const [currentView, setCurrentView] = useState<'dashboard' | 'backends' | 'storages' | 'auth' | 'model' | 'new-model'>('dashboard')
+  const [currentView, setCurrentView] = useState<'dashboard' | 'backends' | 'storages' | 'auth' | 'model' | 'models' | 'new-model'>('dashboard')
   const [selectedVersion, setSelectedVersion] = useState<number | null>(null)
 
   // DnD state
@@ -67,8 +106,7 @@ function AppContent() {
       } else if (hash && hash.startsWith('/models/')) {
         const name = hash.split('/models/')[1]
         const foundModel = models.find((m: any) => m.name === name)
-        // Only load if not already loaded to avoid infinite loops
-        if (foundModel && currentModel?.uid !== foundModel.uid) {
+        if (foundModel) {
           loadModelDetails(foundModel.uid)
         }
         setCurrentView('model')
@@ -81,6 +119,9 @@ function AppContent() {
       } else if (hash === '/auth') {
         setCurrentModel(null)
         setCurrentView('auth')
+      } else if (hash === '/models') {
+        setCurrentModel(null)
+        setCurrentView('models')
       } else if (!hash || hash === '/') {
         setCurrentModel(null)
         setCurrentView('dashboard')
@@ -336,7 +377,12 @@ function AppContent() {
           <Group>
             <MantineSelect 
               value={i18n.language}
-              onChange={(val) => val && i18n.changeLanguage(val)}
+              onChange={(val) => {
+                if (val) {
+                  i18n.changeLanguage(val);
+                  localStorage.setItem('coreStudioLang', val);
+                }
+              }}
               data={[
                 { value: 'fr', label: 'FR' },
                 { value: 'en', label: 'EN' }
@@ -368,6 +414,14 @@ function AppContent() {
             style={{ borderRadius: '8px' }}
           />
           <NavLink 
+            label={t('app.models') || "Modèles"} 
+            active={currentView === 'models'} 
+            onClick={() => { window.location.hash = '/models'; setError(null); }} 
+            variant="light"
+            color="blue"
+            style={{ borderRadius: '8px' }}
+          />
+          <NavLink 
             label={t('app.backends')} 
             active={currentView === 'backends'} 
             onClick={() => { window.location.hash = '/backends'; setError(null); }} 
@@ -393,22 +447,7 @@ function AppContent() {
           />
         </Stack>
 
-        <Stack gap="sm" mt="xl">
-          <Text size="xs" fw={700} c="dimmed" tt="uppercase">Modèles ({models.length})</Text>
-          <div style={{ overflowY: 'auto', flex: 1, maxHeight: '50vh' }}>
-            {models.map(m => (
-              <NavLink 
-                key={m.uid}
-                label={m.name} 
-                active={currentModel?.uid === m.uid} 
-                onClick={() => { window.location.hash = `/models/${m.name}`; setError(null); }} 
-                variant="subtle"
-                color="teal"
-                style={{ borderRadius: '8px', marginBottom: '4px' }}
-              />
-            ))}
-          </div>
-        </Stack>
+
       </AppShell.Navbar>
 
       <AppShell.Main>
@@ -422,7 +461,7 @@ function AppContent() {
 
         {/* Views */}
         {currentView === 'new-model' ? (
-          <CreateModel onCreate={handleCreateModel} onCancel={() => window.location.hash = '/'} error={error} />
+          <CreateModel onCreate={handleCreateModel} onCancel={() => window.location.hash = '/models'} error={error} />
         ) : !currentModel ? (
           currentView === 'backends' ? (
             <BackendsManager backends={backends} models={models} onRefresh={loadModels} />
@@ -430,8 +469,10 @@ function AppContent() {
             <StoragesManager />
           ) : currentView === 'auth' ? (
             <AuthManager />
+          ) : currentView === 'models' ? (
+            <ModelsManager models={models} backends={backends} onNavigateToNewModel={() => window.location.hash = '/models/new'} />
           ) : (
-            <Dashboard models={models} backends={backends} onNavigateToNewModel={() => window.location.hash = '/models/new'} />
+            <Dashboard models={models} backends={backends} />
           )
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -442,7 +483,7 @@ function AppContent() {
 
             <div style={{display: 'flex', gap: '20px', flex: 1}}>
               <section style={{flex: 1}}>
-                <Paper shadow="sm" radius="md" p="xl" withBorder>
+                <Paper shadow="sm" radius={0} p="xl" withBorder>
                 {(!selectedVersion || selectedVersion === (currentModel.version || 1)) ? (
                   <>
                     <Title order={4} mb="md">{editingPropertyId ? 'Modifier la propriété' : 'Ajouter des propriétés'}</Title>
@@ -455,22 +496,22 @@ function AppContent() {
                       />
                       <SimpleGrid cols={4} spacing="xs">
                         {[
-                          { value: 'StringProperty', label: 'Texte', icon: '📝' },
-                          { value: 'NumberProperty', label: 'Nombre', icon: '🔢' },
-                          { value: 'BooleanProperty', label: 'Booléen', icon: '☑️' },
-                          { value: 'DateTimeProperty', label: 'Date', icon: '📅' },
-                          { value: 'ObjectProperty', label: 'Objet', icon: '🔗' },
-                          { value: 'CollectionProperty', label: 'Collection', icon: '📚' },
-                          { value: 'ArrayProperty', label: 'Liste', icon: '📋' },
-                          { value: 'MapProperty', label: 'Dico', icon: '🗂️' },
-                          { value: 'EnumProperty', label: 'Enum', icon: '🔠' },
-                          { value: 'FileProperty', label: 'Fichier', icon: '📁' },
-                          { value: 'HashProperty', label: 'Secret', icon: '🔑' }
+                          { value: 'StringProperty', icon: Icons.Text },
+                          { value: 'NumberProperty', icon: Icons.Hash },
+                          { value: 'BooleanProperty', icon: Icons.Boolean },
+                          { value: 'DateTimeProperty', icon: Icons.Date },
+                          { value: 'ObjectProperty', icon: Icons.Link },
+                          { value: 'CollectionProperty', icon: Icons.Collection },
+                          { value: 'ArrayProperty', icon: Icons.List },
+                          { value: 'MapProperty', icon: Icons.Map },
+                          { value: 'EnumProperty', icon: Icons.Enum },
+                          { value: 'FileProperty', icon: Icons.File },
+                          { value: 'HashProperty', icon: Icons.Hash }
                         ].map(pt => (
                           <Card
                             key={pt.value}
                             padding="xs"
-                            radius="md"
+                            radius={0}
                             withBorder
                             onClick={() => setPropType(pt.value)}
                             style={{
@@ -484,8 +525,10 @@ function AppContent() {
                               transition: 'all 0.2s ease'
                             }}
                           >
-                            <span style={{fontSize: '20px'}}>{pt.icon}</span>
-                            <Text size="xs" fw={propType === pt.value ? 700 : 500} c={propType === pt.value ? 'teal' : 'dimmed'}>{pt.label}</Text>
+                            <span style={{ fontSize: '24px', lineHeight: 1, display: 'flex', alignItems: 'center' }}>{pt.icon}</span>
+                            <Text size="xs" fw={propType === pt.value ? 700 : 500} c={propType === pt.value ? 'teal' : 'dimmed'} ta="center">
+                              {t(`propertyTypes.${pt.value}`, pt.value)}
+                            </Text>
                           </Card>
                         ))}
                       </SimpleGrid>
@@ -512,11 +555,11 @@ function AppContent() {
                         inputStyle={inputStyle} 
                       />
                       <Group grow>
-                        <Button type="submit" color="teal" variant="light">
-                          {editingPropertyId ? 'Sauvegarder les modifications' : '+ Ajouter la propriété'}
+                        <Button type="submit" variant="light" color="teal" style={{ transition: 'all 0.2s' }}>
+                          {editingPropertyId ? t('model.saveChanges', 'Sauvegarder les modifications') : t('model.addPropButton', '+ Ajouter la propriété')}
                         </Button>
                         {editingPropertyId && (
-                          <Button type="button" color="gray" variant="subtle" onClick={cancelEditProperty}>Annuler</Button>
+                          <Button type="button" color="gray" variant="subtle" onClick={cancelEditProperty}>{t('app.cancel', 'Annuler')}</Button>
                         )}
                       </Group>
                     </form>
@@ -533,14 +576,14 @@ function AppContent() {
               </section>
 
               <section style={{flex: 1, overflowY: 'auto'}}>
-                <Paper shadow="sm" radius="md" p="xl" withBorder>
+                <Paper shadow="sm" radius={0} p="xl" withBorder>
                   <Title order={4} mb="md">Données du modèle</Title>
                   
                   <form onSubmit={handleUpdateModel} style={{display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px'}}>
-                    <TextInput label="Nom du Modèle" value={currentModel.name} onChange={e => setCurrentModel({...currentModel, name: e.target.value})} />
-                    <TextInput label="Collection (BDD)" value={currentModel.collectionName || ''} onChange={e => setCurrentModel({...currentModel, collectionName: e.target.value})} />
-                    <MantineCheckbox label="Persisté en base de données" checked={currentModel.isPersisted || false} onChange={e => setCurrentModel({...currentModel, isPersisted: e.currentTarget.checked})} />
-                    <Button type="submit" style={{alignSelf: 'flex-start'}}>Sauvegarder</Button>
+                    <TextInput label={t('model.modelName', 'Nom du Modèle')} value={currentModel.name} onChange={e => setCurrentModel({...currentModel, name: e.target.value})} />
+                    <TextInput label={t('model.collectionName', 'Collection (BDD)')} value={currentModel.collectionName || ''} onChange={e => setCurrentModel({...currentModel, collectionName: e.target.value})} />
+                    <MantineCheckbox label={t('model.persisted', 'Persisté en base de données')} checked={currentModel.isPersisted || false} onChange={e => setCurrentModel({...currentModel, isPersisted: e.currentTarget.checked})} />
+                    <Button type="submit" variant="filled" color="blue" style={{alignSelf: 'flex-start'}}>{t('model.save', 'Sauvegarder')}</Button>
                   </form>
 
                   <Group justify="space-between" mb="md">
@@ -558,13 +601,13 @@ function AppContent() {
                       />
                       {selectedVersion === (currentModel.version || 1) ? (
                         <Group gap="xs">
-                          <Button color="teal" size="sm" onClick={handleVersionner}>Sauvegarder la version</Button>
-                          <Button color="blue" size="sm" disabled variant="outline" title="Vous ne pouvez pas déployer un brouillon.">Déployer</Button>
+                          <Button color="teal" variant="light" size="sm" onClick={handleVersionner}>{t('model.saveVersion', 'Sauvegarder la version')}</Button>
+                          <Button variant="outline" color="gray" size="sm" disabled title={t('model.cannotDeployDraft', 'Vous ne pouvez pas déployer un brouillon.')}>{t('dashboard.deployed', 'Déployer')}</Button>
                         </Group>
                       ) : (
                         <Group gap="xs">
-                          <Button color="orange" size="sm" onClick={handleRestaurer}>Restaurer cette version</Button>
-                          <Button color="blue" size="sm" onClick={handleDeployClick} disabled={backends.length === 0} title={backends.length === 0 ? "Aucun backend configuré" : "Déployer cette version"}>Déployer</Button>
+                          <Button variant="light" color="orange" size="sm" onClick={handleRestaurer}>{t('model.restoreVersion', 'Restaurer cette version')}</Button>
+                          <Button variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }} size="sm" onClick={handleDeployClick} disabled={backends.length === 0} title={backends.length === 0 ? t('dashboard.noBackend', "Aucun backend configuré") : t('model.deployVersion', "Déployer cette version")}>{t('dashboard.deployed', 'Déployer')}</Button>
                         </Group>
                       )}
                     </Group>
@@ -597,12 +640,14 @@ function AppContent() {
                           <Group gap="md" style={{ flex: 1 }}>
                             {!isReadOnly && <span style={{fontSize: '18px', color: 'var(--mantine-color-dimmed)', cursor: 'grab'}}>☰</span>}
                             <Text fw={700}>{p.name}</Text>
-                            <Badge color="gray" variant="light">{p.propertyType}</Badge>
-                            {p.mandatory && <Badge color="yellow" variant="outline">Requis</Badge>}
+                            <Badge color="blue" variant="light" leftSection={<span style={{fontSize: '12px'}}>{getPropertyTypeIcon(p.propertyType)}</span>}>
+                              {t(`propertyTypes.${p.propertyType}`, p.propertyType)}
+                            </Badge>
+                            {p.mandatory && <Badge color="yellow" variant="outline">{t('model.required', 'Requis')}</Badge>}
                           </Group>
                           {!isReadOnly && (
                             <Group gap="xs">
-                              <Button variant="light" size="xs" onClick={() => handleEditProperty(p)}>Modifier</Button>
+                              <Button variant="light" size="xs" onClick={() => handleEditProperty(p)}>{t('model.edit', 'Modifier')}</Button>
                               <ActionIcon variant="light" color="red" onClick={() => handleDeleteProperty(p.uid)} title="Supprimer">✖</ActionIcon>
                             </Group>
                           )}

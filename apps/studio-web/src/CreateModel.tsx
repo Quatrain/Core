@@ -59,7 +59,7 @@ export function CreateModel({ onCreate, onCancel, error }: CreateModelProps) {
                 <Button variant="subtle" color="gray" onClick={onCancel} disabled={isLoading}>
                   {t('createModel.cancel')}
                 </Button>
-                <Button type="submit" size="md" loading={isLoading}>
+                <Button type="submit" size="md" variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }} loading={isLoading}>
                   {t('createModel.create')}
                 </Button>
               </Group>

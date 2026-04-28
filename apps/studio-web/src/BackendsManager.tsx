@@ -78,7 +78,7 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
         <Card 
           shadow="sm" 
           padding="lg" 
-          radius="md" 
+          radius={0} 
           withBorder
           onClick={() => setIsAddModalOpen(true)}
           style={{ 
@@ -118,7 +118,7 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
             key={b.uid} 
             shadow="sm" 
             padding="lg" 
-            radius="md" 
+            radius={0} 
             withBorder
             style={{ 
               transition: 'transform 0.2s ease', 
@@ -192,7 +192,7 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
           />
           <Group justify="flex-end" mt="md">
             <Button variant="subtle" color="gray" onClick={() => setIsAddModalOpen(false)}>{t('backends.cancel')}</Button>
-            <Button type="submit" color="teal">{t('backends.add')}</Button>
+            <Button type="submit" variant="gradient" gradient={{ from: 'teal', to: 'green', deg: 90 }}>{t('backends.add')}</Button>
           </Group>
         </form>
       </Modal>

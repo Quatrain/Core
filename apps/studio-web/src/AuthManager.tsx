@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Select, Button } from '@mantine/core'
+import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 
 export function AuthManager() {
@@ -7,6 +7,13 @@ export function AuthManager() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [name, setName] = useState('')
   const [provider, setProvider] = useState<string | null>(null)
+  const [isDefault, setIsDefault] = useState(false)
+
+  // Dynamic fields
+  const [pbUrl, setPbUrl] = useState('http://127.0.0.1:8090')
+  const [oauthClientId, setOauthClientId] = useState('')
+  const [oauthSecret, setOauthSecret] = useState('')
+  const [jwtIssuer, setJwtIssuer] = useState('')
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,7 +35,7 @@ export function AuthManager() {
         <Card 
           shadow="sm" 
           padding="lg" 
-          radius="md" 
+          radius={0} 
           withBorder
           onClick={() => setIsAddModalOpen(true)}
           style={{ 
@@ -72,21 +79,53 @@ export function AuthManager() {
             onChange={(e) => setName(e.currentTarget.value)} 
             required 
           />
-          <Select 
-            label={t('auth.type')}
-            placeholder={t('auth.selectType')}
-            value={provider}
-            onChange={setProvider}
-            data={[
-              { value: 'local', label: 'Local (Email / Password)' },
-              { value: 'oauth', label: 'OAuth 2.0 (Google, Github, etc.)' },
-              { value: 'jwt', label: 'JWT Externe' }
-            ]}
-            required
+          <Text fw={500} size="sm">{t('auth.type')}</Text>
+          <SimpleGrid cols={3} spacing="sm">
+            {['pocketbase', 'oauth', 'jwt'].map(p => (
+              <Card 
+                key={p} 
+                withBorder 
+                radius={0}
+                shadow={provider === p ? 'sm' : 'none'}
+                style={{ 
+                  cursor: 'pointer', 
+                  borderColor: provider === p ? 'var(--mantine-color-violet-filled)' : 'var(--mantine-color-default-border)',
+                  backgroundColor: provider === p ? 'var(--mantine-color-violet-light)' : 'transparent'
+                }}
+                onClick={() => setProvider(p)}
+                p="sm"
+              >
+                <Center style={{ flexDirection: 'column' }}>
+                  <Text fw={600} size="sm">{p.toUpperCase()}</Text>
+                </Center>
+              </Card>
+            ))}
+          </SimpleGrid>
+
+          {provider === 'pocketbase' && (
+            <TextInput label="PocketBase API URL" required value={pbUrl} onChange={e => setPbUrl(e.currentTarget.value)} />
+          )}
+
+          {provider === 'oauth' && (
+            <Stack gap="sm">
+              <TextInput label="Client ID" required value={oauthClientId} onChange={e => setOauthClientId(e.currentTarget.value)} />
+              <TextInput label="Client Secret" type="password" required value={oauthSecret} onChange={e => setOauthSecret(e.currentTarget.value)} />
+            </Stack>
+          )}
+
+          {provider === 'jwt' && (
+            <TextInput label="Issuer URL" required value={jwtIssuer} onChange={e => setJwtIssuer(e.currentTarget.value)} />
+          )}
+
+          <Checkbox 
+            label={t('auth.setDefault') || 'Définir comme adaptateur Auth par défaut'}
+            checked={isDefault}
+            onChange={(e) => setIsDefault(e.currentTarget.checked)}
           />
+
           <Group justify="flex-end" mt="md">
             <Button variant="subtle" color="gray" onClick={() => setIsAddModalOpen(false)}>{t('auth.cancel')}</Button>
-            <Button type="submit" color="violet">{t('auth.add')}</Button>
+            <Button type="submit" variant="gradient" gradient={{ from: 'violet', to: 'pink', deg: 90 }} disabled={!provider}>{t('auth.add')}</Button>
           </Group>
         </form>
       </Modal>

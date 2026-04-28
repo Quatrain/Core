@@ -74,3 +74,17 @@ Il est donc toujours prudent, côté frontend ou dans les services API, de filtr
 ```typescript
 const result = await Backend.execute(Model, 'read', { filters: { 'status:neq': 'deleted' } })
 ```
+
+---
+
+## 4. Recommandations pour l'utilisation du Logger (LLM & Devs)
+
+La méthode générale `Backend.log()` est considérée comme **deprecated**. 
+Afin de garantir des niveaux de verbosité appropriés et d'exploiter correctement la gestion des logs, vous devez utiliser l'une des méthodes spécifiques suivantes :
+
+- `Backend.debug('Message...')` : Pour les informations techniques de débogage et tracabilité fine.
+- `Backend.info('Message...')` : Pour les événements normaux du système (ex: "Server started", "Record created").
+- `Backend.warn('Message...')` : Pour les situations anormales mais non bloquantes.
+- `Backend.error('Message...')` : Pour les erreurs critiques et exceptions capturées.
+
+**Règle d'or pour tous les contenus textuels** : Les messages de logs, les commentaires dans le code, et plus généralement les contenus textuels destinés aux développeurs doivent impérativement être écrits en **Anglais international**.

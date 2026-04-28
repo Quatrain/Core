@@ -9,11 +9,13 @@ const resources = {
   fr: { translation: fr }
 }
 
+const savedLanguage = localStorage.getItem('coreStudioLang') || 'fr'
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'fr', // langue par défaut
+    lng: savedLanguage,
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false

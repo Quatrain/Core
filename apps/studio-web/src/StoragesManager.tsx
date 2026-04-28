@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, ActionIcon, Modal, TextInput, Select, Button } from '@mantine/core'
+import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack, Image } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 
 export function StoragesManager() {
@@ -7,6 +7,12 @@ export function StoragesManager() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [name, setName] = useState('')
   const [provider, setProvider] = useState<string | null>(null)
+  const [isDefault, setIsDefault] = useState(false)
+  
+  // Dynamic fields state
+  const [s3Bucket, setS3Bucket] = useState('')
+  const [s3Region, setS3Region] = useState('')
+  const [localPath, setLocalPath] = useState('/data/storage')
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,7 +34,7 @@ export function StoragesManager() {
         <Card 
           shadow="sm" 
           padding="lg" 
-          radius="md" 
+          radius={0} 
           withBorder
           onClick={() => setIsAddModalOpen(true)}
           style={{ 
@@ -72,21 +78,53 @@ export function StoragesManager() {
             onChange={(e) => setName(e.currentTarget.value)} 
             required 
           />
-          <Select 
-            label={t('storages.provider')}
-            placeholder={t('storages.selectProvider')}
-            value={provider}
-            onChange={setProvider}
-            data={[
-              { value: 's3', label: 'Amazon S3' },
-              { value: 'local', label: 'Stockage Local' },
-              { value: 'gcs', label: 'Google Cloud Storage' }
-            ]}
-            required
+          <Text fw={500} size="sm">{t('storages.provider')}</Text>
+          <SimpleGrid cols={3} spacing="sm">
+            {['s3', 'local', 'gcs'].map(p => (
+              <Card 
+                key={p} 
+                withBorder 
+                radius={0}
+                shadow={provider === p ? 'sm' : 'none'}
+                style={{ 
+                  cursor: 'pointer', 
+                  borderColor: provider === p ? 'var(--mantine-color-blue-filled)' : 'var(--mantine-color-default-border)',
+                  backgroundColor: provider === p ? 'var(--mantine-color-blue-light)' : 'transparent'
+                }}
+                onClick={() => setProvider(p)}
+                p="sm"
+              >
+                <Center style={{ flexDirection: 'column' }}>
+                  <Text fw={600} size="sm">{p.toUpperCase()}</Text>
+                </Center>
+              </Card>
+            ))}
+          </SimpleGrid>
+
+          {provider === 's3' && (
+            <Stack gap="sm">
+              <TextInput label="Bucket" required value={s3Bucket} onChange={e => setS3Bucket(e.currentTarget.value)} />
+              <TextInput label="Region" required value={s3Region} onChange={e => setS3Region(e.currentTarget.value)} />
+            </Stack>
+          )}
+
+          {provider === 'local' && (
+            <TextInput label="Base Path" required value={localPath} onChange={e => setLocalPath(e.currentTarget.value)} />
+          )}
+
+          {provider === 'gcs' && (
+            <TextInput label="Bucket" required />
+          )}
+
+          <Checkbox 
+            label={t('storages.setDefault') || 'Définir comme stockage par défaut'}
+            checked={isDefault}
+            onChange={(e) => setIsDefault(e.currentTarget.checked)}
           />
+
           <Group justify="flex-end" mt="md">
             <Button variant="subtle" color="gray" onClick={() => setIsAddModalOpen(false)}>{t('storages.cancel')}</Button>
-            <Button type="submit" color="blue">{t('storages.add')}</Button>
+            <Button type="submit" variant="gradient" gradient={{ from: 'blue', to: 'grape', deg: 90 }} disabled={!provider}>{t('storages.add')}</Button>
           </Group>
         </form>
       </Modal>

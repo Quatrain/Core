@@ -1,6 +1,6 @@
 {
    "name": "@quatrain/storage-s3",
-   "version": "1.1.25",
+   "version": "1.1.26",
    "description": "Storage adapter for S3 compatible services",
    "main": "dist/index.js",
    "types": "dist/index.d.ts",

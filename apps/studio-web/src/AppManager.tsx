@@ -20,12 +20,7 @@ export function AppManager() {
   const [isEnvModalOpen, setIsEnvModalOpen] = useState(false)
   const [newEnvName, setNewEnvName] = useState('')
 
-  const [activeSecretEnv, setActiveSecretEnv] = useState<any>(null)
-  const [newKeychainName, setNewKeychainName] = useState('')
-  const [newVarKey, setNewVarKey] = useState('')
-  const [newVarValue, setNewVarValue] = useState('')
-  const [activeKeychainForVar, setActiveKeychainForVar] = useState<string | null>(null)
-
+          
   useEffect(() => {
     loadAll()
   }, [])
@@ -103,55 +98,19 @@ export function AppManager() {
     }
   }
 
-  const handleCreateKeychain = async () => {
-    if (!activeSecretEnv || !newKeychainName) return
+  const handleDeployEnvironment = async (env: any) => {
+    if (!project || !project.recipe) return
     try {
-      await api.createSecret({
-        name: newKeychainName,
-        values: {},
-        environmentId: activeSecretEnv.uid
-      })
-      setNewKeychainName('')
-      loadAll()
-    } catch (e) {
+      alert("Déploiement en cours... (PoC)")
+      const res = await api.deployEnvironment(env.uid, { recipe: project.recipe })
+      if (res && res.success) {
+        alert("Déploiement réussi dans le dossier app/ !")
+      } else {
+        alert("Erreur lors du déploiement : " + res.error)
+      }
+    } catch (e: any) {
       console.error(e)
-    }
-  }
-
-  const handleAddVariable = async () => {
-    if (!activeKeychainForVar || !newVarKey || !newVarValue) return
-    try {
-      const secret = secrets.find(s => s.uid === activeKeychainForVar)
-      if (!secret) return
-      const updatedValues = { ...secret.values, [newVarKey]: newVarValue }
-      await api.updateSecret(activeKeychainForVar, { values: updatedValues })
-      setNewVarKey('')
-      setNewVarValue('')
-      loadAll()
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  const handleDeleteVariable = async (secretId: string, key: string) => {
-    try {
-      const secret = secrets.find(s => s.uid === secretId)
-      if (!secret) return
-      const updatedValues = { ...secret.values }
-      delete updatedValues[key]
-      await api.updateSecret(secretId, { values: updatedValues })
-      loadAll()
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  const handleDeleteSecret = async (secretId: string) => {
-    try {
-      await api.deleteSecret(secretId)
-      loadAll()
-    } catch (e) {
-      console.error(e)
+      alert("Erreur de déploiement : " + e.message)
     }
   }
 
@@ -183,6 +142,20 @@ export function AppManager() {
             onChange={(e) => setProjectDesc(e.currentTarget.value)} 
             radius="md"
             minRows={3}
+          />
+          <Select
+            label="Recette (Template) de l'application"
+            placeholder="-"
+            data={[{ value: 'crud', label: 'CRUD App (Engine unifié)' }]}
+            value={project?.recipe || null}
+            onChange={async (val) => {
+              if (project) {
+                await api.updateProject(project.uid, { recipe: val })
+                loadAll()
+              }
+            }}
+            clearable
+            radius="md"
           />
           <Button onClick={handleSaveProject} style={{ alignSelf: 'flex-start' }} radius="md" color="blue">
             {t('appManager.saveApp')}
@@ -266,17 +239,6 @@ export function AppManager() {
                 clearable
                 radius="md"
               />
-              {env.backendId && (
-                <Select
-                  placeholder="Trousseau de secrets"
-                  data={secrets.filter(s => s.environmentId === env.uid).map(s => ({ value: s.uid, label: s.name }))}
-                  value={env.backendSecretId || null}
-                  onChange={(val) => handleUpdateEnv(env.uid, { backendSecretId: val })}
-                  clearable
-                  radius="md"
-                  size="xs"
-                />
-              )}
 
               <Select
                 label={t('appManager.storage')}
@@ -287,17 +249,6 @@ export function AppManager() {
                 clearable
                 radius="md"
               />
-              {env.storageId && (
-                <Select
-                  placeholder="Trousseau de secrets"
-                  data={secrets.filter(s => s.environmentId === env.uid).map(s => ({ value: s.uid, label: s.name }))}
-                  value={env.storageSecretId || null}
-                  onChange={(val) => handleUpdateEnv(env.uid, { storageSecretId: val })}
-                  clearable
-                  radius="md"
-                  size="xs"
-                />
-              )}
 
               <Select
                 label={t('appManager.auth')}
@@ -308,20 +259,18 @@ export function AppManager() {
                 clearable
                 radius="md"
               />
-              {env.authId && (
-                <Select
-                  placeholder="Trousseau de secrets"
-                  data={secrets.filter(s => s.environmentId === env.uid).map(s => ({ value: s.uid, label: s.name }))}
-                  value={env.authSecretId || null}
-                  onChange={(val) => handleUpdateEnv(env.uid, { authSecretId: val })}
-                  clearable
-                  radius="md"
-                  size="xs"
-                />
-              )}
 
-              <Button variant="light" color="violet" mt="auto" radius="md" onClick={() => setActiveSecretEnv(env)}>
+              <Button variant="light" color="violet" mt="auto" radius="md" onClick={() => { window.location.hash = '/secrets' }}>
                 {t('appManager.secrets')} ({secrets.filter(s => s.environmentId === env.uid).length})
+              </Button>
+              <Button 
+                variant="gradient" 
+                gradient={{ from: 'indigo', to: 'cyan' }} 
+                radius="md" 
+                onClick={() => handleDeployEnvironment(env)}
+                disabled={!project?.recipe}
+              >
+                Déployer l'environnement
               </Button>
             </Stack>
           </Card>
@@ -344,75 +293,7 @@ export function AppManager() {
         </Stack>
       </Modal>
 
-      {/* Secrets Modal */}
-      <Modal opened={!!activeSecretEnv} onClose={() => setActiveSecretEnv(null)} title={`${t('appManager.secrets')} - ${activeSecretEnv?.name}`} size="lg">
-        <Stack>
-          {secrets.filter(s => s.environmentId === activeSecretEnv?.uid).map(keychain => (
-            <Card key={keychain.uid} withBorder radius="md" p="sm">
-              <Group justify="space-between" mb="xs">
-                <Text fw={700}>{keychain.name}</Text>
-                <ActionIcon color="red" variant="subtle" onClick={() => handleDeleteSecret(keychain.uid)}>✖</ActionIcon>
-              </Group>
-              <Table>
-                <Table.Tbody>
-                  {Object.keys(keychain.values || {}).map(k => (
-                    <Table.Tr key={k}>
-                      <Table.Td><Badge color="gray">{k}</Badge></Table.Td>
-                      <Table.Td>••••••••••••</Table.Td>
-                      <Table.Td>
-                        <ActionIcon color="red" variant="subtle" onClick={() => handleDeleteVariable(keychain.uid, k)}>✖</ActionIcon>
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </Card>
-          ))}
-
-          <Divider my="sm" />
-          
-          <Title order={5}>Ajouter une variable</Title>
-          <Group align="flex-end">
-            <Select 
-              label="Trousseau"
-              data={secrets.filter(s => s.environmentId === activeSecretEnv?.uid).map(s => ({ value: s.uid, label: s.name }))}
-              value={activeKeychainForVar}
-              onChange={setActiveKeychainForVar}
-              style={{ flex: 1 }}
-              radius="md"
-            />
-            <TextInput 
-              label={t('appManager.secretName')}
-              value={newVarKey}
-              onChange={(e) => setNewVarKey(e.currentTarget.value)}
-              style={{ flex: 1 }}
-              radius="md"
-            />
-            <TextInput 
-              label={t('appManager.secretValue')}
-              value={newVarValue}
-              onChange={(e) => setNewVarValue(e.currentTarget.value)}
-              type="password"
-              style={{ flex: 1 }}
-              radius="md"
-            />
-            <Button onClick={handleAddVariable} radius="md" color="violet">{t('appManager.add')}</Button>
-          </Group>
-
-          <Divider my="sm" />
-          <Title order={5}>Nouveau Trousseau</Title>
-          <Group align="flex-end">
-            <TextInput 
-              label="Nom du trousseau"
-              value={newKeychainName}
-              onChange={(e) => setNewKeychainName(e.currentTarget.value)}
-              style={{ flex: 1 }}
-              radius="md"
-            />
-            <Button onClick={handleCreateKeychain} radius="md" color="gray">{t('appManager.add')}</Button>
-          </Group>
-        </Stack>
-      </Modal>
+      
     </div>
   )
 }

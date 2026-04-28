@@ -107,6 +107,10 @@ export const api = {
   deleteEnvironment: async (id: string) => {
     await apiClient.delete(`environments/${id}`, {})
   },
+  deployEnvironment: async (id: string, config: any) => {
+    const res = await apiClient.post(`environments/${id}/deploy`, config)
+    return res.data
+  },
 
   // Storages
   getStorages: async () => {
@@ -115,6 +119,10 @@ export const api = {
   },
   createStorage: async (data: any) => {
     const res = await apiClient.post('storages', data)
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
+  },
+  updateStorage: async (id: string, data: any) => {
+    const res = await apiClient.put(`storages/${id}`, data)
     return (Array.isArray(res.data) ? res.data[0] : res.data) || null
   },
   deleteStorage: async (id: string) => {

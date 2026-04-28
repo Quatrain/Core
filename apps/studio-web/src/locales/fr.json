@@ -69,7 +69,16 @@
     "cancel": "Annuler",
     "add": "Ajouter",
     "error": "Erreur :",
-    "deleteConfirm": "Supprimer ce backend ? Les déploiements associés seront orphelins."
+    "deleteConfirm": "Supprimer ce backend ? Les déploiements associés seront orphelins.",
+    "delete": "Supprimer",
+    "engine": "Moteur de base de données",
+    "host": "Hôte",
+    "port": "Port",
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
+    "database": "Base de données",
+    "projectId": "ID du Projet",
+    "credentials": "Identifiants (JSON ou chemin)"
   },
   "storages": {
     "title": "Gestion des Storages",

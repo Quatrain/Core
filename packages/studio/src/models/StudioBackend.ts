@@ -10,6 +10,8 @@ export interface StudioBackendType extends BaseObjectType {
    username?: string
    password?: string
    database?: string
+   projectId?: string
+   credentials?: string
    isDefault?: boolean
    [x: string]: any
 }
@@ -60,6 +62,18 @@ export const StudioBackendDef: any = [
    },
    {
       name: 'database',
+      mandatory: false,
+      type: StringProperty.TYPE,
+      htmlType: htmlType.TEXT,
+   },
+   {
+      name: 'projectId',
+      mandatory: false,
+      type: StringProperty.TYPE,
+      htmlType: htmlType.TEXT,
+   },
+   {
+      name: 'credentials',
       mandatory: false,
       type: StringProperty.TYPE,
       htmlType: htmlType.TEXT,

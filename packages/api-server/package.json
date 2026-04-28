@@ -29,9 +29,9 @@
       "typescript": "^5.2.2"
    },
    "dependencies": {
-      "@quatrain/api": "workspace:^",
-      "@quatrain/backend": "workspace:^",
-      "@quatrain/core": "workspace:^",
+      "@quatrain/api": "workspace:*",
+      "@quatrain/backend": "workspace:*",
+      "@quatrain/core": "workspace:*",
       "express": "^4.19.2"
    },
    "scripts": {

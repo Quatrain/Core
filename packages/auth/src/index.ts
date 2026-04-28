@@ -1,14 +1,18 @@
-import { Auth, AuthAction, AuthParameters, AuthParametersKeys } from './Auth'
+import { Auth, AuthAction } from './Auth'
+import type { AuthParameters, AuthParametersKeys } from './Auth'
 import { AbstractAuthAdapter } from './AbstractAuthAdapter'
-import { AuthInterface } from './types/AuthInterface'
+import type { AuthInterface } from './types/AuthInterface'
 import { AuthenticationError } from './AuthenticationError'
 
 export {
    Auth,
    AuthAction,
+   AbstractAuthAdapter,
+   AuthenticationError,
+}
+
+export type {
    AuthParameters,
    AuthParametersKeys,
    AuthInterface,
-   AbstractAuthAdapter,
-   AuthenticationError,
 }

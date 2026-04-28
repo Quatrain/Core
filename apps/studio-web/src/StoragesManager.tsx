@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack, ActionIcon, Badge } from '@mantine/core'
+import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack, ActionIcon, Badge, Select } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { api } from './api'
 
@@ -7,6 +7,7 @@ export function StoragesManager() {
   const { t } = useTranslation()
   const [storages, setStorages] = useState<any[]>([])
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [editingStorageId, setEditingStorageId] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [provider, setProvider] = useState<string | null>(null)
   const [isDefault, setIsDefault] = useState(false)
@@ -14,15 +15,55 @@ export function StoragesManager() {
   // Dynamic fields state
   const [s3Bucket, setS3Bucket] = useState('')
   const [s3Region, setS3Region] = useState('')
+  const [s3Endpoint, setS3Endpoint] = useState('')
+  const [s3SecretId, setS3SecretId] = useState<string | null>(null)
   const [localPath, setLocalPath] = useState('/data/storage')
+  
+  const [secrets, setSecrets] = useState<any[]>([])
+  const [environments, setEnvironments] = useState<any[]>([])
 
   useEffect(() => {
     loadStorages()
   }, [])
 
   const loadStorages = async () => {
-    const data = await api.getStorages()
-    setStorages(data)
+    try {
+      const [data, secs, envs] = await Promise.all([
+        api.getStorages(),
+        api.getSecrets(),
+        api.getProjects().then(projs => projs.length > 0 ? api.getEnvironments(projs[0].uid) : [])
+      ])
+      setStorages(data)
+      setSecrets(secs)
+      setEnvironments(envs)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const handleEdit = (storage: any) => {
+    setEditingStorageId(storage.uid)
+    setName(storage.name)
+    setProvider(storage.provider)
+    setIsDefault(storage.isDefault || false)
+
+    // Reset fields
+    setS3Bucket('')
+    setS3Region('')
+    setS3Endpoint('')
+    setS3SecretId(null)
+    setLocalPath('/data/storage')
+
+    if (storage.provider === 's3' && storage.options) {
+      setS3Bucket(storage.options.bucket || '')
+      setS3Region(storage.options.region || '')
+      setS3Endpoint(storage.options.endpoint || '')
+      setS3SecretId(storage.options.secretId || null)
+    } else if (storage.provider === 'local' && storage.options) {
+      setLocalPath(storage.options.path || '/data/storage')
+    }
+
+    setIsAddModalOpen(true)
   }
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -33,19 +74,31 @@ export function StoragesManager() {
     if (provider === 's3') {
       options.bucket = s3Bucket
       options.region = s3Region
+      if (s3Endpoint) options.endpoint = s3Endpoint
+      if (s3SecretId) options.secretId = s3SecretId
     } else if (provider === 'local') {
       options.path = localPath
     }
 
     try {
-      await api.createStorage({
-        name,
-        provider,
-        options,
-        isDefault
-      })
+      if (editingStorageId) {
+        await api.updateStorage(editingStorageId, {
+          name,
+          provider,
+          options,
+          isDefault
+        })
+      } else {
+        await api.createStorage({
+          name,
+          provider,
+          options,
+          isDefault
+        })
+      }
       await loadStorages()
       setIsAddModalOpen(false)
+      setEditingStorageId(null)
       setName('')
       setProvider(null)
     } catch (err) {
@@ -130,9 +183,14 @@ export function StoragesManager() {
             <Card.Section withBorder inheritPadding py="xs">
               <Group justify="space-between">
                 <Text fw={700} size="lg">{s.name}</Text>
-                <ActionIcon variant="light" color="red" onClick={() => handleDelete(s.uid)} title="Supprimer">
-                  ✖
-                </ActionIcon>
+                <Group gap="xs">
+                  <ActionIcon variant="light" color="blue" onClick={() => handleEdit(s)} title="Modifier">
+                    ✏️
+                  </ActionIcon>
+                  <ActionIcon variant="light" color="red" onClick={() => handleDelete(s.uid)} title="Supprimer">
+                    ✖
+                  </ActionIcon>
+                </Group>
               </Group>
             </Card.Section>
             
@@ -142,7 +200,7 @@ export function StoragesManager() {
               </Badge>
               <Text size="sm" c="dimmed" lineClamp={3}>
                 {s.provider === 'local' && `Path: ${s.options?.path || ''}`}
-                {s.provider === 's3' && `Bucket: ${s.options?.bucket || ''}`}
+                {s.provider === 's3' && `Bucket: ${s.options?.bucket || ''}${s.options?.endpoint ? ` • ${s.options.endpoint}` : ''}`}
               </Text>
             </Stack>
             {s.isDefault && (
@@ -152,7 +210,7 @@ export function StoragesManager() {
         ))}
       </SimpleGrid>
 
-      <Modal opened={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title={t('storages.addStorage')}>
+      <Modal opened={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditingStorageId(null); setName(''); setProvider(null); }} title={editingStorageId ? 'Modifier le stockage' : t('storages.addStorage')}>
         <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <TextInput 
             label={t('storages.name')}
@@ -188,6 +246,18 @@ export function StoragesManager() {
             <Stack gap="sm">
               <TextInput label="Bucket" required value={s3Bucket} onChange={e => setS3Bucket(e.currentTarget.value)} />
               <TextInput label="Region" required value={s3Region} onChange={e => setS3Region(e.currentTarget.value)} />
+              <TextInput label="Endpoint (Optionnel)" placeholder="ex: https://s3.fr-par.scw.cloud" value={s3Endpoint} onChange={e => setS3Endpoint(e.currentTarget.value)} />
+              <Select 
+                label="Trousseau de secrets (Optionnel)" 
+                placeholder="Sélectionner un trousseau contenant les credentials"
+                data={secrets.map(s => {
+                  const env = environments.find(e => e.uid === s.environmentId)
+                  return { value: s.uid, label: `${s.name} ${env ? `(${env.name})` : ''}` }
+                })}
+                value={s3SecretId}
+                onChange={setS3SecretId}
+                clearable
+              />
             </Stack>
           )}
 
@@ -206,8 +276,8 @@ export function StoragesManager() {
           />
 
           <Group justify="flex-end" mt="md">
-            <Button variant="subtle" color="gray" onClick={() => setIsAddModalOpen(false)}>{t('storages.cancel')}</Button>
-            <Button type="submit" variant="gradient" gradient={{ from: 'blue', to: 'grape', deg: 90 }} disabled={!provider}>{t('storages.add')}</Button>
+            <Button variant="subtle" color="gray" onClick={() => { setIsAddModalOpen(false); setEditingStorageId(null); setName(''); setProvider(null); }}>{t('storages.cancel')}</Button>
+            <Button type="submit" variant="gradient" gradient={{ from: 'blue', to: 'grape', deg: 90 }} disabled={!provider}>{editingStorageId ? 'Sauvegarder' : t('storages.add')}</Button>
           </Group>
         </form>
       </Modal>

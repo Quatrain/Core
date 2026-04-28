@@ -8,6 +8,7 @@ import { BackendsManager } from './BackendsManager'
 import { StoragesManager } from './StoragesManager'
 import { AuthManager } from './AuthManager'
 import { AppManager } from './AppManager'
+import { SecretsManager } from './SecretsManager'
 import { CreateModel } from './CreateModel'
 import { I18nextProvider, useTranslation } from 'react-i18next'
 import i18n from './i18n'
@@ -58,7 +59,7 @@ function AppContent() {
   const [models, setModels] = useState<any[]>([])
   const [backends, setBackends] = useState<any[]>([])
   const [currentModel, setCurrentModel] = useState<any>(null)
-  const [currentView, setCurrentView] = useState<'dashboard' | 'app' | 'backends' | 'storages' | 'auth' | 'model' | 'models' | 'new-model'>('dashboard')
+  const [currentView, setCurrentView] = useState<'dashboard' | 'app' | 'backends' | 'storages' | 'auth' | 'secrets' | 'model' | 'models' | 'new-model'>('dashboard')
   const [selectedVersion, setSelectedVersion] = useState<number | null>(null)
 
   // DnD state
@@ -117,6 +118,9 @@ function AppContent() {
       } else if (hash === '/auth') {
         setCurrentModel(null)
         setCurrentView('auth')
+      } else if (hash === '/secrets') {
+        setCurrentModel(null)
+        setCurrentView('secrets')
       } else if (hash === '/models') {
         setCurrentModel(null)
         setCurrentView('models')
@@ -445,6 +449,15 @@ function AppContent() {
             color="blue"
             style={{ borderRadius: '8px' }}
           />
+          <NavLink 
+            label="Secrets" 
+            active={currentView === 'secrets'} 
+            onClick={() => { window.location.hash = '/secrets'; setError(null); }} 
+            variant="light"
+            color="violet"
+            style={{ borderRadius: '8px' }}
+            leftSection={<span style={{fontSize: '16px'}}>🔐</span>}
+          />
         </Stack>
 
 
@@ -469,6 +482,8 @@ function AppContent() {
             <StoragesManager />
           ) : currentView === 'auth' ? (
             <AuthManager />
+          ) : currentView === 'secrets' ? (
+            <SecretsManager />
           ) : currentView === 'app' ? (
             <AppManager />
           ) : currentView === 'models' ? (

@@ -1,12 +1,20 @@
 import React, { useState } from 'react'
 import { api } from './api'
-import { TextInput, Button, Card, Text, Badge, Group, SimpleGrid, Title, Center, ThemeIcon, ActionIcon, Modal, Checkbox } from '@mantine/core'
+import { TextInput, Button, Card, Text, Badge, Group, SimpleGrid, Title, Center, ThemeIcon, ActionIcon, Modal, Checkbox, Stack } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 
 export function BackendsManager({ backends, models, onRefresh }: { backends: any[], models: any[], onRefresh: () => void }) {
   const { t } = useTranslation()
   const [name, setName] = useState('')
+  const [engine, setEngine] = useState<string | null>('sqlite')
   const [filePath, setFilePath] = useState('../app/data.sqlite')
+  const [pgHost, setPgHost] = useState('localhost')
+  const [pgPort, setPgPort] = useState('5432')
+  const [pgUser, setPgUser] = useState('postgres')
+  const [pgPassword, setPgPassword] = useState('')
+  const [pgDatabase, setPgDatabase] = useState('')
+  const [fsProjectId, setFsProjectId] = useState('')
+  const [fsCredentials, setFsCredentials] = useState('')
   const [isDefault, setIsDefault] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [deployments, setDeployments] = useState<Record<string, any[]>>({})
@@ -40,15 +48,33 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!name || !engine) return
     try {
-      await api.createBackend({
-        name,
-        engine: 'sqlite',
-        filePath,
-        isDefault
-      })
+      const payload: any = { name, engine, isDefault }
+      if (engine === 'sqlite') {
+        payload.filePath = filePath
+      } else if (engine === 'postgres') {
+        payload.host = pgHost
+        payload.port = parseInt(pgPort, 10)
+        payload.username = pgUser
+        payload.password = pgPassword
+        payload.database = pgDatabase
+      } else if (engine === 'firestore') {
+        payload.projectId = fsProjectId
+        payload.credentials = fsCredentials
+      }
+
+      await api.createBackend(payload)
       setName('')
+      setEngine('sqlite')
       setFilePath('../app/data.sqlite')
+      setPgHost('localhost')
+      setPgPort('5432')
+      setPgUser('postgres')
+      setPgPassword('')
+      setPgDatabase('')
+      setFsProjectId('')
+      setFsCredentials('')
       setIsDefault(false)
       setIsAddModalOpen(false)
       onRefresh()
@@ -132,7 +158,7 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
             <Card.Section withBorder inheritPadding py="xs">
               <Group justify="space-between">
                 <Text fw={700} size="lg">{b.name}</Text>
-                <ActionIcon variant="light" color="red" onClick={() => handleDelete(b.uid)} title="Supprimer">
+                <ActionIcon variant="light" color="red" onClick={() => handleDelete(b.uid)} title={t('backends.delete')}>
                   ✖
                 </ActionIcon>
               </Group>
@@ -144,7 +170,9 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
             </Group>
 
             <Text size="sm" c="dimmed" style={{ flex: 1, fontFamily: 'monospace' }}>
-              {b.filePath}
+              {b.engine === 'sqlite' && b.filePath}
+              {b.engine === 'postgres' && `${b.username}@${b.host}:${b.port}/${b.database}`}
+              {b.engine === 'firestore' && `Project: ${b.projectId}`}
             </Text>
 
             <Card.Section withBorder inheritPadding py="sm" mt="md" style={{ backgroundColor: 'var(--mantine-color-default-hover)' }}>
@@ -177,13 +205,59 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
             onChange={(e) => setName(e.currentTarget.value)} 
             required 
           />
-          <TextInput 
-            label={t('backends.sqlitePath')}
-            placeholder="ex: ../app/data.sqlite" 
-            value={filePath} 
-            onChange={(e) => setFilePath(e.currentTarget.value)} 
-            required 
-          />
+          <Text fw={500} size="sm">{t('backends.engine') || 'Moteur de base de données'}</Text>
+          <SimpleGrid cols={3} spacing="sm">
+            {['sqlite', 'postgres', 'firestore'].map(eng => (
+              <Card 
+                key={eng} 
+                withBorder 
+                radius={0}
+                shadow={engine === eng ? 'sm' : 'none'}
+                style={{ 
+                  cursor: 'pointer', 
+                  borderColor: engine === eng ? 'var(--mantine-color-teal-filled)' : 'var(--mantine-color-default-border)',
+                  backgroundColor: engine === eng ? 'var(--mantine-color-teal-light)' : 'transparent'
+                }}
+                onClick={() => setEngine(eng)}
+                p="sm"
+              >
+                <Center style={{ flexDirection: 'column' }}>
+                  <Text fw={600} size="sm">{eng.toUpperCase()}</Text>
+                </Center>
+              </Card>
+            ))}
+          </SimpleGrid>
+
+          {engine === 'sqlite' && (
+            <TextInput 
+              label={t('backends.sqlitePath') || 'Chemin du fichier SQLite'}
+              placeholder="ex: ../app/data.sqlite" 
+              value={filePath} 
+              onChange={(e) => setFilePath(e.currentTarget.value)} 
+              required 
+            />
+          )}
+
+          {engine === 'postgres' && (
+            <Stack gap="sm">
+              <Group grow>
+                <TextInput label={t('backends.host')} required value={pgHost} onChange={e => setPgHost(e.currentTarget.value)} />
+                <TextInput label={t('backends.port')} required type="number" value={pgPort} onChange={e => setPgPort(e.currentTarget.value)} />
+              </Group>
+              <Group grow>
+                <TextInput label={t('backends.username')} required value={pgUser} onChange={e => setPgUser(e.currentTarget.value)} />
+                <TextInput label={t('backends.password')} type="password" value={pgPassword} onChange={e => setPgPassword(e.currentTarget.value)} />
+              </Group>
+              <TextInput label={t('backends.database')} required value={pgDatabase} onChange={e => setPgDatabase(e.currentTarget.value)} />
+            </Stack>
+          )}
+
+          {engine === 'firestore' && (
+            <Stack gap="sm">
+              <TextInput label={t('backends.projectId')} required value={fsProjectId} onChange={e => setFsProjectId(e.currentTarget.value)} />
+              <TextInput label={t('backends.credentials')} required value={fsCredentials} onChange={e => setFsCredentials(e.currentTarget.value)} />
+            </Stack>
+          )}
           <Checkbox 
             label={t('backends.setDefault')}
             checked={isDefault} 
@@ -192,7 +266,7 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
           />
           <Group justify="flex-end" mt="md">
             <Button variant="subtle" color="gray" onClick={() => setIsAddModalOpen(false)}>{t('backends.cancel')}</Button>
-            <Button type="submit" variant="gradient" gradient={{ from: 'teal', to: 'green', deg: 90 }}>{t('backends.add')}</Button>
+            <Button type="submit" variant="gradient" gradient={{ from: 'teal', to: 'green', deg: 90 }} disabled={!engine}>{t('backends.add')}</Button>
           </Group>
         </form>
       </Modal>

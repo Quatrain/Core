@@ -5,11 +5,9 @@ export interface StudioEnvironmentType extends BaseObjectType {
    projectId: string
    name: string
    backendId?: string
-   backendSecretId?: string
    storageId?: string
-   storageSecretId?: string
    authId?: string
-   authSecretId?: string
+   recipe?: string
 }
 
 export const StudioEnvironmentProperties: any = [
@@ -33,17 +31,7 @@ export const StudioEnvironmentProperties: any = [
       type: StringProperty.TYPE,
    },
    {
-      name: 'backendSecretId',
-      mandatory: false,
-      type: StringProperty.TYPE,
-   },
-   {
       name: 'storageId',
-      mandatory: false,
-      type: StringProperty.TYPE,
-   },
-   {
-      name: 'storageSecretId',
       mandatory: false,
       type: StringProperty.TYPE,
    },
@@ -53,7 +41,7 @@ export const StudioEnvironmentProperties: any = [
       type: StringProperty.TYPE,
    },
    {
-      name: 'authSecretId',
+      name: 'recipe',
       mandatory: false,
       type: StringProperty.TYPE,
    }

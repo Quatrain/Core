@@ -21,7 +21,7 @@
    "author": "Quatrain Développement SAS <developers@quatrain.com>",
    "dependencies": {
       "@quatrain/backend": "^1.1.37",
-      "@quatrain/core": "workspace:^",
+      "@quatrain/core": "workspace:*",
       "sqlite": "^5.1.1",
       "sqlite3": "^5.1.7"
    },

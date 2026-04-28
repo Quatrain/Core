@@ -70,7 +70,16 @@
     "cancel": "Cancel",
     "add": "Add",
     "error": "Error:",
-    "deleteConfirm": "Delete this backend? Associated deployments will be orphaned."
+    "deleteConfirm": "Delete this backend? Associated deployments will be orphaned.",
+    "delete": "Delete",
+    "engine": "Database Engine",
+    "host": "Host",
+    "port": "Port",
+    "username": "Username",
+    "password": "Password",
+    "database": "Database",
+    "projectId": "Project ID",
+    "credentials": "Credentials (JSON or path)"
   },
   "storages": {
     "title": "Storages Manager",

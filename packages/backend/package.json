@@ -25,7 +25,7 @@
       "@quatrain/log": "^1.1.11"
    },
    "devDependencies": {
-      "@quatrain/testing": "workspace:^",
+      "@quatrain/testing": "workspace:*",
       "@tsconfig/recommended": "^1.0.1",
       "@types/jest": "^29.5.12",
       "@types/module-alias": "^2",

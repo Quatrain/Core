@@ -4,6 +4,7 @@ import { StringProperty, htmlType, BaseObjectProperties, BaseObjectType, DataObj
 export interface StudioProjectType extends BaseObjectType {
    name: string
    description?: string
+   recipe?: string
    [x: string]: any
 }
 
@@ -24,6 +25,11 @@ export const StudioProjectProperties: any = [
       type: StringProperty.TYPE,
       maxLength: 500,
       htmlType: htmlType.TEXTAREA,
+   },
+   {
+      name: 'recipe',
+      mandatory: false,
+      type: StringProperty.TYPE,
    }
 ]
 

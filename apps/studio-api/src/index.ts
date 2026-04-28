@@ -7,6 +7,7 @@ import { StudioModel, StudioProperty, StudioBackend, StudioDeployment, StudioPro
 import { ExpressAdapter, ListEndpoint, CrudEndpoint } from '@quatrain/api-server'
 import { Api } from '@quatrain/api'
 import { MigrationManager } from '@quatrain/backend-migrations'
+import { AppInfra } from '@quatrain/app'
 
 // Initialize the backend with a persistent SQLite file for the Studio state
 const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
@@ -229,6 +230,98 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             }
 
             res.json({ success: true, message: 'Modèle déployé avec succès' })
+         } catch (e) {
+            console.error(e)
+            res.status(500).json({ error: (e as Error).message })
+         }
+      })
+
+      // ==========================================
+      // DEPLOY ENVIRONMENT ENDPOINT
+      // ==========================================
+      server.post('/api/environments/:id/deploy', async (req: any, res: any) => {
+         try {
+            const envId = req.params.id
+            const { recipe } = req.body
+            
+            if (!recipe) return res.status(400).json({ error: 'Recipe is required' })
+
+            const environment = await StudioEnvironment.fromBackend<StudioEnvironment>(envId)
+            if (!environment) return res.status(404).json({ error: 'Environment not found' })
+
+            const backendId = environment.val('backendId')
+            let backendConfig = null
+            if (backendId) {
+               const b = await StudioBackend.fromBackend<StudioBackend>(backendId)
+               if (b) {
+                  backendConfig = {
+                     package: '@quatrain/backend-sqlite', // Fallback
+                     adapter: b.val('provider') === 'postgres' ? 'PostgresAdapter' : 'SQLiteAdapter',
+                     config: b.val('options')
+                  }
+               }
+            }
+
+            const storageId = environment.val('storageId')
+            let storageConfig = null
+            if (storageId) {
+               const s = await StudioStorage.fromBackend<StudioStorage>(storageId)
+               if (s) {
+                  storageConfig = {
+                     package: '@quatrain/storage',
+                     adapter: s.val('provider') === 's3' ? 'S3Adapter' : 'LocalAdapter',
+                     config: s.val('options')
+                  }
+               }
+            }
+
+            // Export all models (for PoC)
+            const modelsResult = await StudioModel.query().execute(returnAs.AS_INSTANCES)
+            const models: any[] = []
+            for (const m of modelsResult.items) {
+               if ((m as StudioModel).val('status') === 'deleted') continue
+               
+               const propsResult = await StudioProperty.query().where('modelId', (m as StudioModel).uid).execute(returnAs.AS_INSTANCES)
+               const properties = propsResult.items
+                  .filter(p => (p as StudioProperty).val('status') !== 'deleted')
+                  .map(p => {
+                     const prop = p as StudioProperty
+                     return {
+                        name: prop.val('name'),
+                        type: prop.val('propertyType'),
+                        options: prop.val('options') || {}
+                     }
+                  })
+
+               models.push({
+                  uid: (m as StudioModel).uid,
+                  name: (m as StudioModel).val('name'),
+                  collectionName: (m as StudioModel).val('collectionName'),
+                  properties
+               })
+            }
+
+            // Create quatrain.json content
+            const quatrainConfig = {
+               name: `Env-${environment.val('name')}`,
+               recipe,
+               backend: backendConfig,
+               storage: storageConfig,
+               front: recipe === 'crud' ? true : false,
+               models
+            }
+
+            // Write quatrain.json to app/
+            const appDir = path.resolve(process.cwd(), '../../app')
+            if (!fs.existsSync(appDir)) {
+               fs.mkdirSync(appDir, { recursive: true })
+            }
+            fs.writeFileSync(path.resolve(appDir, 'quatrain.json'), JSON.stringify(quatrainConfig, null, 2))
+
+            // Generate compose.yaml and start containers via AppInfra
+            await AppInfra.start(quatrainConfig, '../../app')
+
+            res.json({ success: true, message: 'Environnement déployé avec succès' })
          } catch (e) {
             console.error(e)
             res.status(500).json({ error: (e as Error).message })

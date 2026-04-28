@@ -22,6 +22,7 @@ export type QueryOptions = {
    where?: object
    headers?: Record<string, string>
    responseType?: string
+   [key: string]: any
 }
 
 export type SelectValuesOptions = {

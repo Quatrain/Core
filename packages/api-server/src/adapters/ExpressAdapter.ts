@@ -51,28 +51,28 @@ export class ExpressAdapter implements ServerAdapter {
    }
 
    get(path: string, handler: ApiHandler): void {
-      this.appOrRouter.get(path, this.wrapHandler(handler))
+      (this.appOrRouter as express.Router).get(path, this.wrapHandler(handler))
    }
 
    post(path: string, handler: ApiHandler): void {
-      this.appOrRouter.post(path, this.wrapHandler(handler))
+      (this.appOrRouter as express.Router).post(path, this.wrapHandler(handler))
    }
 
    put(path: string, handler: ApiHandler): void {
-      this.appOrRouter.put(path, this.wrapHandler(handler))
+      (this.appOrRouter as express.Router).put(path, this.wrapHandler(handler))
    }
 
    delete(path: string, handler: ApiHandler): void {
-      this.appOrRouter.delete(path, this.wrapHandler(handler))
+      (this.appOrRouter as express.Router).delete(path, this.wrapHandler(handler))
    }
 
    use(middleware: any): void {
-      this.appOrRouter.use(middleware)
+      (this.appOrRouter as express.Router).use(middleware)
    }
 
    createRouter(path: string): ServerAdapter {
       const router = express.Router()
-      this.appOrRouter.use(path, router)
+      ;(this.appOrRouter as express.Router).use(path, router)
       return new ExpressAdapter(router)
    }
 

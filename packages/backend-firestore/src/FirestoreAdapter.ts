@@ -425,4 +425,12 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
          throw new BackendError((err as Error).message)
       }
    }
+
+   generateCreateSql(collection: string, properties: any[]): { upSql: string, downSql: string } {
+      throw new BackendError(`Raw queries are not supported on this adapter`)
+   }
+
+   generateDeltaSql(collection: string, delta: any): { upSql: string[], downSql: string[] } {
+      throw new BackendError(`Raw queries are not supported on this adapter`)
+   }
 }

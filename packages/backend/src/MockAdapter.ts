@@ -222,4 +222,12 @@ export class MockAdapter
          },
       }
    }
+
+   generateCreateSql(collection: string, properties: any[]): { upSql: string, downSql: string } {
+      return { upSql: '', downSql: '' }
+   }
+
+   generateDeltaSql(collection: string, delta: any): { upSql: string[], downSql: string[] } {
+      return { upSql: [], downSql: [] }
+   }
 }

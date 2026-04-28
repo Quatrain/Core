@@ -18,8 +18,10 @@
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
     "@quatrain/auth": "workspace:*",
-    "@quatrain/backend": "^1.1.37",
-    "@quatrain/core": "^1.1.52"
+    "@quatrain/backend": "workspace:*",
+    "@quatrain/core": "workspace:*",
+    "cross-fetch": "^4.0.0",
+    "pocketbase": "^0.21.1"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

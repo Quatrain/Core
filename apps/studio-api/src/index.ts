@@ -2,6 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import { Backend, InjectMetaMiddleware } from '@quatrain/backend'
 import { SQLiteAdapter } from '@quatrain/backend-sqlite'
+import { returnAs } from '@quatrain/core'
 import { StudioModel, StudioProperty, StudioBackend, StudioDeployment, StudioProject, StudioEnvironment, StudioStorage, StudioAuth, StudioSecret } from '@quatrain/studio'
 import { ExpressAdapter, ListEndpoint, CrudEndpoint } from '@quatrain/api-server'
 import { Api } from '@quatrain/api'
@@ -75,8 +76,8 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             
             if (!backendId) return res.json({ count: 0, status: 'no_backend' })
 
-            const backendConfig = await StudioBackend.fromBackend(backendId)
-            const model = await StudioModel.fromBackend(modelId)
+            const backendConfig = await StudioBackend.fromBackend<StudioBackend>(backendId)
+            const model = await StudioModel.fromBackend<StudioModel>(modelId)
             
             if (!backendConfig || !model || !model.val('collectionName')) {
                return res.json({ count: 0, status: 'error' })
@@ -126,8 +127,8 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             
             if (!backendId || !version) return res.status(400).json({ error: 'backendId and version are required' })
 
-            const backendConfig = await StudioBackend.fromBackend(backendId)
-            const model = await StudioModel.fromBackend(modelId)
+            const backendConfig = await StudioBackend.fromBackend<StudioBackend>(backendId)
+            const model = await StudioModel.fromBackend<StudioModel>(modelId)
             
             if (!backendConfig || !model || !model.val('collectionName')) {
                return res.status(400).json({ error: 'Invalid model or backend' })
@@ -137,7 +138,7 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             const propsResult = await StudioProperty.query()
                .where('modelId', modelId)
                .where('version', version)
-               .execute('dataObjects')
+               .execute(returnAs.AS_DATAOBJECTS)
             const properties = propsResult.items.filter((p: any) => p.val('status') !== 'deleted')
 
             // 2. Check dependencies
@@ -152,10 +153,10 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                      const depDeploysResult = await StudioDeployment.query()
                         .where('modelId', depModelId)
                         .where('backendId', backendId)
-                        .execute('dataObjects')
+                        .execute(returnAs.AS_DATAOBJECTS)
                      const depDeploys = depDeploysResult.items
                      if (!Array.isArray(depDeploys) || depDeploys.length === 0) {
-                        const depModel = await StudioModel.fromBackend(depModelId)
+                        const depModel = await StudioModel.fromBackend<StudioModel>(depModelId)
                         missingDeps.push(depModel ? depModel.val('name') : depModelId)
                      }
                   }
@@ -211,7 +212,7 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             const existDeploysResult = await StudioDeployment.query()
                .where('modelId', modelId)
                .where('backendId', backendId)
-               .execute('classInstances')
+               .execute(returnAs.AS_INSTANCES)
             const existDeploys = existDeploysResult.items
             if (Array.isArray(existDeploys) && existDeploys.length > 0) {
                const deploy = existDeploys[0]

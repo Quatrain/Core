@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack, Image, ActionIcon, Badge } from '@mantine/core'
+import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack, ActionIcon, Badge } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { api } from './api'
 

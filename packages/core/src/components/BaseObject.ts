@@ -43,6 +43,12 @@ export class BaseObject extends AbstractObject {
    ): Promise<DataObjectType> {
       const dao = this.fillProperties(child)
 
+      if (src instanceof ObjectUri) {
+         dao.uri = src
+      } else if (typeof src === 'string') {
+         dao.uri.path = src
+      }
+
       return dao
    }
 
@@ -76,6 +82,10 @@ export class BaseObject extends AbstractObject {
       try {
          if (typeof src == 'object' && !(src instanceof ObjectUri)) {
             return this.fromObject(src)
+         }
+
+         if (typeof src === 'string' && !src.includes('/')) {
+            src = `${this.COLLECTION}/${src}`
          }
 
          const dao = await this.daoFactory(src, child)

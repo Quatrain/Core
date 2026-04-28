@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Button, TextInput, Select as MantineSelect, Checkbox as MantineCheckbox, AppShell, Group, Title, ActionIcon, useMantineColorScheme, Stack, NavLink, Badge, Card, SimpleGrid, Paper, Center, ThemeIcon, Text } from '@mantine/core'
+import { Button, TextInput, Select as MantineSelect, Checkbox as MantineCheckbox, AppShell, Group, Title, ActionIcon, useMantineColorScheme, Stack, NavLink, Badge, Card, SimpleGrid, Paper, Center, Text } from '@mantine/core'
 import { api } from './api'
 import { PropertyOptionsEditor } from './PropertyOptionsEditor'
 import { Dashboard } from './Dashboard'
@@ -68,15 +68,10 @@ function AppContent() {
   const [error, setError] = useState<string | null>(null)
   const [editingPropertyId, setEditingPropertyId] = useState<string | null>(null)
 
-  // Deploy state
   const [isDeployModalOpen, setIsDeployModalOpen] = useState(false)
   const [selectedBackendForDeploy, setSelectedBackendForDeploy] = useState<string>('')
   const [deployError, setDeployError] = useState<string | null>(null)
 
-  // Forms State
-  const [modelName, setModelName] = useState('')
-  const [collectionName, setCollectionName] = useState('')
-  
   const [propName, setPropName] = useState('')
   const [propType, setPropType] = useState<string | null>(null)
   const [isMandatory, setIsMandatory] = useState(false)
@@ -648,13 +643,13 @@ function AppContent() {
                             {!isReadOnly && <span style={{fontSize: '18px', color: 'var(--mantine-color-dimmed)', cursor: 'grab'}}>☰</span>}
                             <Text fw={700}>{p.name}</Text>
                             <Badge color="blue" variant="light" leftSection={<span style={{fontSize: '12px'}}>{getPropertyTypeIcon(p.propertyType)}</span>}>
-                              {t(`propertyTypes.${p.propertyType}`, p.propertyType)}
+                              {t(`propertyTypes.${p.propertyType}`, p.propertyType) as any}
                             </Badge>
-                            {p.mandatory && <Badge color="yellow" variant="outline">{t('model.required', 'Requis')}</Badge>}
+                            {p.mandatory && <Badge color="yellow" variant="outline">{t('model.required', 'Requis') as any}</Badge>}
                           </Group>
                           {!isReadOnly && (
                             <Group gap="xs">
-                              <Button variant="light" size="xs" onClick={() => handleEditProperty(p)}>{t('model.edit', 'Modifier')}</Button>
+                              <Button variant="light" size="xs" onClick={() => handleEditProperty(p)}>{t('model.edit', 'Modifier') as any}</Button>
                               <ActionIcon variant="light" color="red" onClick={() => handleDeleteProperty(p.uid)} title="Supprimer">✖</ActionIcon>
                             </Group>
                           )}
@@ -731,7 +726,7 @@ function AppContent() {
       <AppShell.Footer p="md">
         <Group justify="center" align="center">
           <Text size="sm" c="dimmed">
-            {t('app.developedBy')}
+            {t('app.developedBy') as any}
           </Text>
           <img src={logoUrl} alt="Quatrain Logo" style={{ height: '24px' }} />
         </Group>

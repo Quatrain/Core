@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, Text, Badge, Group, SimpleGrid, Title, Center, ThemeIcon, ActionIcon } from '@mantine/core'
 import { api } from './api'
 import { useTranslation } from 'react-i18next'

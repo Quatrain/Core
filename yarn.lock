@@ -3180,6 +3180,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/api@workspace:packages/api"
   dependencies:
+    "@quatrain/core": "workspace:*"
     "@quatrain/log": "workspace:^"
     "@quatrain/testing": "workspace:^"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -3237,10 +3238,12 @@ __metadata:
   resolution: "@quatrain/auth-pocketbase@workspace:packages/auth-pocketbase"
   dependencies:
     "@quatrain/auth": "workspace:*"
-    "@quatrain/backend": "npm:^1.1.37"
-    "@quatrain/core": "npm:^1.1.52"
+    "@quatrain/backend": "workspace:*"
+    "@quatrain/core": "workspace:*"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/node": "npm:^22.10.1"
+    cross-fetch: "npm:^4.0.0"
+    pocketbase: "npm:^0.21.1"
     typescript: "npm:^5.1.5"
   languageName: unknown
   linkType: soft
@@ -3365,7 +3368,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/backend@npm:^1.1.37, @quatrain/backend@workspace:^, @quatrain/backend@workspace:packages/backend":
+"@quatrain/backend@npm:^1.1.37, @quatrain/backend@workspace:*, @quatrain/backend@workspace:^, @quatrain/backend@workspace:packages/backend":
   version: 0.0.0-use.local
   resolution: "@quatrain/backend@workspace:packages/backend"
   dependencies:
@@ -6972,6 +6975,15 @@ __metadata:
   version: 1.1.1
   resolution: "create-require@npm:1.1.1"
   checksum: 10c0/157cbc59b2430ae9a90034a5f3a1b398b6738bf510f713edc4d4e45e169bc514d3d99dd34d8d01ca7ae7830b5b8b537e46ae8f3c8f932371b0875c0151d7ec91
+  languageName: node
+  linkType: hard
+
+"cross-fetch@npm:^4.0.0":
+  version: 4.1.0
+  resolution: "cross-fetch@npm:4.1.0"
+  dependencies:
+    node-fetch: "npm:^2.7.0"
+  checksum: 10c0/628b134ea27cfcada67025afe6ef1419813fffc5d63d175553efa75a2334522d450300a0f3f0719029700da80e96327930709d5551cf6deb39bb62f1d536642e
   languageName: node
   linkType: hard
 
@@ -10698,6 +10710,13 @@ __metadata:
   dependencies:
     find-up: "npm:^4.0.0"
   checksum: 10c0/c56bda7769e04907a88423feb320babaed0711af8c436ce3e56763ab1021ba107c7b0cafb11cde7529f669cfc22bffcaebffb573645cbd63842ea9fb17cd7728
+  languageName: node
+  linkType: hard
+
+"pocketbase@npm:^0.21.1":
+  version: 0.21.5
+  resolution: "pocketbase@npm:0.21.5"
+  checksum: 10c0/782500741a8b964cefdd1cee3f7ed37a84078033ab162ef3f397439d16444f267a1ea86c56a7e14642802f96f7264a59c90bfd3f0bd4d3678dad39fa7ac049c6
   languageName: node
   linkType: hard
 

@@ -29,6 +29,7 @@
       "typescript": "^5.2.2"
    },
    "dependencies": {
+      "@quatrain/core": "workspace:*",
       "@quatrain/log": "workspace:^"
    },
    "scripts": {

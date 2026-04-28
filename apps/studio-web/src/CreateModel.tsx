@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, TextInput, Button, Title, Text, Group, Stack, Paper, Center } from '@mantine/core';
+import { TextInput, Button, Title, Text, Group, Stack, Paper, Center } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 
 interface CreateModelProps {

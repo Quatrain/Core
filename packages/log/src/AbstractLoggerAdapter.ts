@@ -30,7 +30,7 @@ export abstract class AbstractLoggerAdapter implements LoggerType {
    protected _logLevel: LogLevel = LogLevel.WARN
    protected _logger: any = undefined
 
-   constructor(prefix = '', level: LogLevel = LogLevel.WARN) {
+   constructor(prefix = '', _level: LogLevel = LogLevel.WARN) {
       this._me = prefix
    }
 
@@ -49,7 +49,7 @@ export abstract class AbstractLoggerAdapter implements LoggerType {
 
    formatLogMessage = (
       messages: any[],
-      loglevel: LogLevel = LogLevel.INFO,
+      _loglevel: LogLevel = LogLevel.INFO,
       tag: string = ''
    ): string => {
       // Flatten nested arrays (from rest parameter spreading)
@@ -74,27 +74,27 @@ export abstract class AbstractLoggerAdapter implements LoggerType {
     * @param message string | object
     * @param level string
     */
-   log(...messages: any[]): void {
+   log(..._messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 
-   debug(...messages: any[]): void {
+   debug(..._messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 
-   warn(...messages: any[]): void {
+   warn(..._messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 
-   info(...messages: any[]): void {
+   info(..._messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 
-   error(...messages: any[]): void {
+   error(..._messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 
-   trace(...messages: any[]): void {
+   trace(..._messages: any[]): void {
       throw new Error(`This method needs to be implemtend in child class`)
    }
 }

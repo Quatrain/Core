@@ -22,3 +22,12 @@ packages/**/.*.txt
 # Databases
 *.sqlite
 *.sqlite3
+
+# Compiled files
+*.map
+*.d.ts
+*.js
+!bin/**/*.js
+!**/bin/**/*.js
+!/*.js
+*.tsbuildinfo

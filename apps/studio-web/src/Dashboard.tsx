@@ -1,5 +1,4 @@
-import React from 'react'
-import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Button } from '@mantine/core'
+import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Button } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 
 export function Dashboard({ models, backends }: { models: any[], backends: any[] }) {

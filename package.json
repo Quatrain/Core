@@ -1,36 +1,36 @@
 {
-   "name": "core-monorepo",
-   "description": "Core objects for business apps monorepo",
-   "author": "Quatrain Développement SAS <developers@quatrain.com>",
-   "license": "AGPL-3.0-only",
-   "version": "1.1.11",
-   "devDependencies": {
-      "@tsconfig/recommended": "^1.0.1",
-      "@types/jest": "^29.5.12",
-      "@types/node": "^22.10.1",
-      "folder-hash": "^4.1.0",
-      "jest": "^29.7.0",
-      "trace-unhandled": "^2.0.1",
-      "ts-jest": "^29.4.6",
-      "ts-node": "^10.9.1",
-      "turbo": "^2.7.2",
-      "typedoc": "latest",
-      "typescript": "^5.2.2"
-   },
-   "scripts": {
-      "build": "yarn workspaces foreach -ptA --exclude core-monorepo run build",
-      "publish:all": "node bin/publish_all.js"
-   },
-   "private": true,
-   "workspaces": [
-      "packages/*",
-      "apps/*"
-   ],
-   "packageManager": "yarn@4.5.3",
-   "dependencies": {
-      "node-gyp": "^11.4.2"
-   },
-   "engines": {
-      "node": ">=22.0.0"
-   }
+  "name": "core-monorepo",
+  "description": "Core objects for business apps monorepo",
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "license": "AGPL-3.0-only",
+  "version": "1.2.0",
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.10.1",
+    "folder-hash": "^4.1.0",
+    "jest": "^29.7.0",
+    "trace-unhandled": "^2.0.1",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.1",
+    "turbo": "^2.7.2",
+    "typedoc": "latest",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "yarn workspaces foreach -ptA --exclude core-monorepo run build",
+    "publish:all": "node bin/publish_all.js"
+  },
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "packageManager": "yarn@4.5.3",
+  "dependencies": {
+    "node-gyp": "^11.4.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
 }

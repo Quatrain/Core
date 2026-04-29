@@ -26,26 +26,45 @@ const BUILD_ORDER = [
     'messaging',
     'queue',
     'storage',
-    // Layer 3: depends on backend / queue / storage
+    'testing',
+    'ui',
+    // Layer 3: depends on backend / queue / storage / ui
     'auth',
     'cloudwrapper',         // depends on backend + storage
     'backend-firestore',    // depends on backend (peerDep)
     'backend-postgres',     // depends on backend
     'backend-sqlite',       // depends on backend
+    'backend-migrations',
     'queue-amqp',           // depends on queue
     'queue-aws',            // depends on queue
     'queue-gcp',            // depends on queue
     'storage-firebase',     // depends on storage
     'storage-s3',           // depends on storage
     'storage-supabase',     // depends on storage
-    // Layer 4: depends on cloudwrapper / auth
+    'storage-local',
+    'api',
+    'ui-form-react',
+    'ui-list-react',
+    // Layer 4: depends on layer 3
     'cloudwrapper-firebase',  // depends on cloudwrapper (peerDep) + backend (peerDep)
     'cloudwrapper-supabase',  // depends on cloudwrapper + backend
     'auth-firebase',          // depends on auth
     'auth-supabase',          // depends on auth
+    'auth-pocketbase',
+    'auth-oidc',
     'messaging-firebase',     // depends on messaging
-    // Layer 5: depends on queue
+    'api-server',
+    'api-client',
+    // Layer 5:
     'worker',
+    'studio',
+    'app',
+    'code',
+    'ai',
+    // Layer 6:
+    'code-github',
+    'ai-gemini',
+    'core-cli'
 ];
 
 async function publishAll() {
@@ -103,6 +122,9 @@ async function publishAll() {
     }
 
     const forceBuild = process.argv.includes('--force');
+    const tagArgIndex = process.argv.indexOf('--tag');
+    const npmTag = tagArgIndex !== -1 ? process.argv[tagArgIndex + 1] : 'latest';
+    const tagString = npmTag ? `--tag ${npmTag}` : '';
 
     if (!anyPackageChanged && !forceBuild) {
         console.log('[BUILD] No package changes detected and build artifacts present. Skipping build phase completely.');
@@ -188,7 +210,7 @@ async function publishAll() {
                     } catch (e) { /* ignores 404 */ }
 
                     if (!existsNpmjs) {
-                        execSync('npm publish package.tgz --registry https://registry.npmjs.org/ --access public --provenance', { cwd: pkgDir, stdio: 'inherit' });
+                        execSync(`npm publish package.tgz --registry https://registry.npmjs.org/ --access public --provenance ${tagString}`, { cwd: pkgDir, stdio: 'inherit' });
                     } else {
                         console.log(`[PUBLISH] ${pkgName}@${newVersion} already exists on npmjs, skipping.`);
                     }
@@ -201,7 +223,7 @@ async function publishAll() {
                     } catch (e) { /* ignores 404 */ }
 
                     if (!existsGithub) {
-                        execSync('npm publish package.tgz --registry https://npm.pkg.github.com/', { cwd: pkgDir, stdio: 'inherit' });
+                        execSync(`npm publish package.tgz --registry https://npm.pkg.github.com/ ${tagString}`, { cwd: pkgDir, stdio: 'inherit' });
                     } else {
                         console.log(`[PUBLISH] ${pkgName}@${newVersion} already exists on GitHub Packages, skipping.`);
                     }
@@ -228,6 +250,15 @@ async function publishAll() {
             }
         } else {
             console.log(`[SKIP] No changes in ${pkgName}. Version remains ${previousData.version}`);
+            if (npmTag && npmTag !== 'latest') {
+                try {
+                    execSync(`npm dist-tag add ${pkgName}@${previousData.version} ${npmTag} --registry https://registry.npmjs.org/`, { stdio: 'ignore' });
+                    execSync(`npm dist-tag add ${pkgName}@${previousData.version} ${npmTag} --registry https://npm.pkg.github.com/`, { stdio: 'ignore' });
+                    console.log(`[PUBLISH] Tagged existing version ${pkgName}@${previousData.version} with ${npmTag}`);
+                } catch (e) {
+                    // Ignore if already tagged or unauthorized
+                }
+            }
         }
     }
     

@@ -1,51 +1,51 @@
 {
-   "name": "@quatrain/backend",
-   "version": "1.1.37",
-   "license": "AGPL-3.0-only",
-   "description": "Backend adapters commons",
-   "main": "dist/index.js",
-   "types": "dist/index.d.ts",
-   "bun": "src/index.ts",
-   "files": [
-      "LICENSE.md",
-      "src/",
-      "dist/",
-      "README.md",
-      "NOTICE.md"
-   ],
-   "repository": {
-      "type": "git",
-      "url": "git+https://github.com/Quatrain/Core.git",
-      "directory": "packages/backend"
-   },
-   "author": "Quatrain Développement SAS <developers@quatrain.com>",
-   "dependencies": {
-      "@faker-js/faker": "^7.6.0",
-      "@quatrain/core": "^1.1.52",
-      "@quatrain/log": "^1.1.11"
-   },
-   "devDependencies": {
-      "@quatrain/testing": "workspace:*",
-      "@tsconfig/recommended": "^1.0.1",
-      "@types/jest": "^29.5.12",
-      "@types/module-alias": "^2",
-      "@types/node": "^22.10.1",
-      "@types/node-persist": "^3.1.8",
-      "@types/which": "^3.0.4",
-      "jest": "^29.7.0",
-      "trace-unhandled": "^2.0.1",
-      "ts-jest": "^29.4.6",
-      "ts-node": "^10.9.1",
-      "typescript": "^5.2.2"
-   },
-   "scripts": {
-      "test": "jest --coverage --verbose",
-      "test-ci": "jest --runInBand",
-      "build": "tsc",
-      "wbuild": "tsc --watch",
-      "bump-to": "yarn version"
-   },
-   "typedoc": {
-      "entryPoint": "src/index.ts"
-   }
+  "name": "@quatrain/backend",
+  "version": "1.2.0",
+  "license": "AGPL-3.0-only",
+  "description": "Backend adapters commons",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "src/",
+    "dist/",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/backend"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "dependencies": {
+    "@faker-js/faker": "^7.6.0",
+    "@quatrain/core": "^1.1.52",
+    "@quatrain/log": "^1.1.11"
+  },
+  "devDependencies": {
+    "@quatrain/testing": "workspace:*",
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/jest": "^29.5.12",
+    "@types/module-alias": "^2",
+    "@types/node": "^22.10.1",
+    "@types/node-persist": "^3.1.8",
+    "@types/which": "^3.0.4",
+    "jest": "^29.7.0",
+    "trace-unhandled": "^2.0.1",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "test": "jest --coverage --verbose",
+    "test-ci": "jest --runInBand",
+    "build": "tsc",
+    "wbuild": "tsc --watch",
+    "bump-to": "yarn version"
+  },
+  "typedoc": {
+    "entryPoint": "src/index.ts"
+  }
 }

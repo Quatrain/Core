@@ -3,6 +3,7 @@ import path from 'path'
 import { Log } from '@quatrain/log'
 import fs from 'fs'
 import { InfraBuilder } from './InfraBuilder'
+import { CodeGenerator } from './CodeGenerator'
 
 export class AppInfra {
    /**
@@ -20,6 +21,10 @@ export class AppInfra {
             fs.mkdirSync(fullTargetDir, { recursive: true })
          }
 
+         // Generate Application Source Code
+         CodeGenerator.generate(config, targetDir)
+
+         // Generate Infrastructure configuration
          const { compose, env, dockerfile } = InfraBuilder.build(config)
          
          fs.writeFileSync(composeFile, compose, 'utf8')

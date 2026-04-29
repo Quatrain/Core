@@ -1,53 +1,53 @@
 {
-   "name": "@quatrain/cloudwrapper-firebase",
-   "version": "1.1.25",
-   "license": "AGPL-3.0-only",
-   "description": "Cloud Wrapper adapter for Firebase",
-   "main": "dist/index.js",
-   "types": "dist/index.d.ts",
-   "bun": "src/index.ts",
-   "files": [
-      "LICENSE.md",
-      "src/",
-      "dist/",
-      "README.md",
-      "NOTICE.md"
-   ],
-   "repository": {
-      "type": "git",
-      "url": "git+https://github.com/Quatrain/Core.git",
-      "directory": "packages/cloudwrapper-firebase"
-   },
-   "author": "Quatrain Développement SAS <developers@quatrain.com>",
-   "peerDependencies": {
-      "@quatrain/core": "^1.1.52"
-   },
-   "dependencies": {
-      "@quatrain/backend": "^1.1.37",
-      "@quatrain/cloudwrapper": "^1.1.27",
-      "@quatrain/core": "^1.1.52",
-      "firebase-admin": "^13.4.0",
-      "firebase-functions": "^6.4.0"
-   },
-   "devDependencies": {
-      "@tsconfig/recommended": "^1.0.1",
-      "@types/jest": "^29.5.12",
-      "@types/pg": "^8.11.4",
-      "jest": "^29.7.0",
-      "jest-node-exports-resolver": "^1.1.6",
-      "jest-serial-runner": "^1.2.1",
-      "trace-unhandled": "^2.0.1",
-      "ts-jest": "^29.4.6",
-      "ts-node": "^10.9.1",
-      "typescript": "^5.1.5"
-   },
-   "scripts": {
-      "test-ci": "jest --runInBand",
-      "build": "tsc",
-      "wbuild": "tsc --watch",
-      "bump-to": "yarn version"
-   },
-   "typedoc": {
-      "entryPoint": "src/index.ts"
-   }
+  "name": "@quatrain/cloudwrapper-firebase",
+  "version": "1.2.0",
+  "license": "AGPL-3.0-only",
+  "description": "Cloud Wrapper adapter for Firebase",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "src/",
+    "dist/",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/cloudwrapper-firebase"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "peerDependencies": {
+    "@quatrain/core": "^1.1.52"
+  },
+  "dependencies": {
+    "@quatrain/backend": "^1.1.37",
+    "@quatrain/cloudwrapper": "^1.1.27",
+    "@quatrain/core": "^1.1.52",
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.4.0"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/jest": "^29.5.12",
+    "@types/pg": "^8.11.4",
+    "jest": "^29.7.0",
+    "jest-node-exports-resolver": "^1.1.6",
+    "jest-serial-runner": "^1.2.1",
+    "trace-unhandled": "^2.0.1",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.5"
+  },
+  "scripts": {
+    "test-ci": "jest --runInBand",
+    "build": "tsc",
+    "wbuild": "tsc --watch",
+    "bump-to": "yarn version"
+  },
+  "typedoc": {
+    "entryPoint": "src/index.ts"
+  }
 }

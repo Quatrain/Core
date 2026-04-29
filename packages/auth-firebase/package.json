@@ -1,52 +1,52 @@
 {
-   "name": "@quatrain/auth-firebase",
-   "version": "1.1.26",
-   "license": "AGPL-3.0-only",
-   "main": "dist/index.js",
-   "types": "dist/index.d.ts",
-   "bun": "src/index.ts",
-   "files": [
-      "LICENSE.md",
-      "src/",
-      "dist/",
-      "README.md",
-      "NOTICE.md"
-   ],
-   "repository": {
-      "type": "git",
-      "url": "git+https://github.com/Quatrain/Core.git",
-      "directory": "packages/auth-firebase"
-   },
-   "author": "Quatrain Développement SAS <developers@quatrain.com>",
-   "peerDependencies": {
-      "@quatrain/core": "^1.1.52"
-   },
-   "dependencies": {
-      "@quatrain/auth": "^1.1.31",
-      "@quatrain/backend": "^1.1.37",
-      "@quatrain/core": "^1.1.52",
-      "firebase-admin": "^13.0.1",
-      "node-fetch-native": "^1.6.4"
-   },
-   "devDependencies": {
-      "@tsconfig/recommended": "^1.0.1",
-      "@types/jest": "^29.5.12",
-      "@types/node": "^22.10.1",
-      "jest": "^29.7.0",
-      "jest-node-exports-resolver": "^1.1.6",
-      "jest-serial-runner": "^1.2.1",
-      "trace-unhandled": "^2.0.1",
-      "ts-jest": "^29.4.6",
-      "ts-node": "^10.9.1",
-      "typescript": "^5.2.2"
-   },
-   "scripts": {
-      "test-ci": "jest --runInBand",
-      "build": "tsc",
-      "wbuild": "tsc --watch",
-      "bump-to": "yarn version"
-   },
-   "typedoc": {
-      "entryPoint": "src/index.ts"
-   }
+  "name": "@quatrain/auth-firebase",
+  "version": "1.2.0",
+  "license": "AGPL-3.0-only",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "src/",
+    "dist/",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/auth-firebase"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "peerDependencies": {
+    "@quatrain/core": "^1.1.52"
+  },
+  "dependencies": {
+    "@quatrain/auth": "^1.1.31",
+    "@quatrain/backend": "^1.1.37",
+    "@quatrain/core": "^1.1.52",
+    "firebase-admin": "^13.0.1",
+    "node-fetch-native": "^1.6.4"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.10.1",
+    "jest": "^29.7.0",
+    "jest-node-exports-resolver": "^1.1.6",
+    "jest-serial-runner": "^1.2.1",
+    "trace-unhandled": "^2.0.1",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "test-ci": "jest --runInBand",
+    "build": "tsc",
+    "wbuild": "tsc --watch",
+    "bump-to": "yarn version"
+  },
+  "typedoc": {
+    "entryPoint": "src/index.ts"
+  }
 }

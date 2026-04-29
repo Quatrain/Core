@@ -128,12 +128,12 @@ export class InfraBuilder {
       const dockerfile = `
 FROM oven/bun:latest
 WORKDIR /app
-# Pour le PoC, on installe un serveur HTTP minimal pour l'instant
-RUN bun init -y
-RUN bun add serve
-COPY quatrain.json /app/quatrain.json
-EXPOSE 3000 4000
-CMD ["bun", "x", "serve", "-p", "3000", "."]
+COPY package.json tsconfig.json quatrain.json ./
+RUN bun install
+COPY src ./src
+COPY data ./data
+EXPOSE 3000 4001
+CMD ["bun", "run", "src/index.ts"]
       `.trim()
 
       return { compose: composeYaml, env: envFile, dockerfile }

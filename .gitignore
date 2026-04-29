@@ -31,3 +31,7 @@ packages/**/.*.txt
 !**/bin/**/*.js
 !/*.js
 *.tsbuildinfo
+
+# Generated App
+app/
+

@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import { Backend, InjectMetaMiddleware } from '@quatrain/backend'
 import { SQLiteAdapter } from '@quatrain/backend-sqlite'
-import { returnAs } from '@quatrain/core'
+import { returnAs, UserProperties } from '@quatrain/core'
 import { StudioModel, StudioProperty, StudioBackend, StudioDeployment, StudioProject, StudioEnvironment, StudioStorage, StudioAuth, StudioSecret } from '@quatrain/studio'
 import { ExpressAdapter, ListEndpoint, CrudEndpoint } from '@quatrain/api-server'
 import { Api } from '@quatrain/api'
@@ -242,7 +242,7 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
       server.post('/api/environments/:id/deploy', async (req: any, res: any) => {
          try {
             const envId = req.params.id
-            const { recipe } = req.body
+            const { recipe, authMode } = req.body
             
             if (!recipe) return res.status(400).json({ error: 'Recipe is required' })
 
@@ -293,13 +293,20 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                }
             }
 
-            // Export all models (for PoC)
-            const modelsResult = await StudioModel.query().execute(returnAs.AS_INSTANCES)
+            // Export only versioned models for the current project
+            const modelsResult = await StudioModel.query()
+               .where('projectId', environment.val('projectId'))
+               .execute(returnAs.AS_INSTANCES)
+               
             const models: any[] = []
             for (const m of modelsResult.items) {
-               if ((m as StudioModel).val('status') === 'deleted') continue
+               const model = m as StudioModel
+               if (model.val('status') === 'deleted') continue
                
-               const propsResult = await StudioProperty.query().where('modelId', (m as StudioModel).uid).execute(returnAs.AS_INSTANCES)
+               // Exclure les modèles brouillons (version === 0 ou undefined)
+               if ((model.val('version') || 0) === 0) continue
+               
+               const propsResult = await StudioProperty.query().where('modelId', model.uid).execute(returnAs.AS_INSTANCES)
                const properties = propsResult.items
                   .filter(p => (p as StudioProperty).val('status') !== 'deleted')
                   .map(p => {
@@ -322,17 +329,35 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                   })
 
                models.push({
-                  uid: (m as StudioModel).uid,
-                  name: (m as StudioModel).val('name'),
-                  collectionName: (m as StudioModel).val('collectionName'),
+                  uid: model.uid,
+                  name: model.val('name'),
+                  collectionName: model.val('collectionName'),
                   properties
                })
+            }
+
+            // If OAuth, ensure a User model exists and prepare admin seed
+            if (authMode === 'oauth') {
+               const hasUser = models.find(m => m.name.toLowerCase() === 'user')
+               if (!hasUser) {
+                  models.push({
+                     uid: 'quatrain-builtin-user-model',
+                     name: 'User',
+                     collectionName: 'users',
+                     properties: UserProperties.map((p: any) => ({
+                        name: p.name,
+                        type: p.type,
+                        options: { ...p }
+                     }))
+                  })
+               }
             }
 
             // Create quatrain.json content
             const quatrainConfig = {
                name: `Env-${environment.val('name')}`,
                recipe,
+               authMode,
                backend: backendConfig,
                storage: storageConfig,
                front: recipe === 'crud' ? true : false,

@@ -1,49 +1,49 @@
 {
-   "name": "@quatrain/queue-gcp",
-   "version": "1.1.25",
-   "description": "Queue adapter for Google Cloud Platform PubSub",
-   "main": "dist/index.js",
-   "types": "dist/index.d.ts",
-   "bun": "src/index.ts",
-   "files": [
-      "LICENSE.md",
-      "src/",
-      "dist/",
-      "README.md",
-      "NOTICE.md"
-   ],
-   "repository": {
-      "type": "git",
-      "url": "git+https://github.com/Quatrain/Core.git",
-      "directory": "packages/queue-gcp"
-   },
-   "author": "Quatrain Développement SAS <developers@quatrain.com>",
-   "license": "AGPL-3.0-only",
-   "devDependencies": {
-      "@tsconfig/recommended": "^1.0.1",
-      "@types/fs-extra": "^11.0.4",
-      "@types/jest": "^29.5.12",
-      "@types/node": "^22.10.1",
-      "@types/object-hash": "^3.0.6",
-      "jest": "^29.7.0",
-      "jest-node-exports-resolver": "^1.1.6",
-      "trace-unhandled": "^2.0.1",
-      "ts-jest": "^29.4.6",
-      "ts-node": "^10.4.0",
-      "typescript": "^5.1.5"
-   },
-   "dependencies": {
-      "@google-cloud/pubsub": "^4.7.0",
-      "@quatrain/core": "^1.1.52",
-      "@quatrain/queue": "^1.1.32"
-   },
-   "scripts": {
-      "test-ci": "jest --runInBand",
-      "build": "tsc",
-      "wbuild": "tsc --watch",
-      "bump-to": "yarn version"
-   },
-   "typedoc": {
-      "entryPoint": "src/index.ts"
-   }
+  "name": "@quatrain/queue-gcp",
+  "version": "1.2.0",
+  "description": "Queue adapter for Google Cloud Platform PubSub",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "src/",
+    "dist/",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/queue-gcp"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "license": "AGPL-3.0-only",
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.10.1",
+    "@types/object-hash": "^3.0.6",
+    "jest": "^29.7.0",
+    "jest-node-exports-resolver": "^1.1.6",
+    "trace-unhandled": "^2.0.1",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.4.0",
+    "typescript": "^5.1.5"
+  },
+  "dependencies": {
+    "@google-cloud/pubsub": "^4.7.0",
+    "@quatrain/core": "^1.1.52",
+    "@quatrain/queue": "^1.1.32"
+  },
+  "scripts": {
+    "test-ci": "jest --runInBand",
+    "build": "tsc",
+    "wbuild": "tsc --watch",
+    "bump-to": "yarn version"
+  },
+  "typedoc": {
+    "entryPoint": "src/index.ts"
+  }
 }

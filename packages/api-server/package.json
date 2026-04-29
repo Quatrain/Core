@@ -1,43 +1,43 @@
 {
-   "name": "@quatrain/api-server",
-   "version": "1.0.0",
-   "description": "API Server Utilities for Quatrain",
-   "main": "dist/index.js",
-   "types": "dist/index.d.ts",
-   "bun": "src/index.ts",
-   "files": [
-      "LICENSE.md",
-      "dist/",
-      "src/",
-      "README.md",
-      "NOTICE.md"
-   ],
-   "repository": {
-      "type": "git",
-      "url": "git+https://github.com/Quatrain/Core.git",
-      "directory": "packages/api-server"
-   },
-   "author": "Quatrain Développement SAS <developers@quatrain.com>",
-   "license": "AGPL-3.0-only",
-   "devDependencies": {
-      "@tsconfig/recommended": "^1.0.1",
-      "@types/express": "^4.17.21",
-      "@types/jest": "^29.5.12",
-      "@types/node": "^22.10.1",
-      "jest": "^29.7.0",
-      "ts-jest": "^29.4.6",
-      "typescript": "^5.2.2"
-   },
-   "dependencies": {
-      "@quatrain/api": "workspace:*",
-      "@quatrain/backend": "workspace:*",
-      "@quatrain/core": "workspace:*",
-      "express": "^4.19.2"
-   },
-   "scripts": {
-      "test-ci": "jest --runInBand",
-      "build": "tsc",
-      "wbuild": "tsc --watch",
-      "bump-to": "yarn version"
-   }
+  "name": "@quatrain/api-server",
+  "version": "1.1.0",
+  "description": "API Server Utilities for Quatrain",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "dist/",
+    "src/",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/api-server"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "license": "AGPL-3.0-only",
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.10.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@quatrain/api": "workspace:*",
+    "@quatrain/backend": "workspace:*",
+    "@quatrain/core": "workspace:*",
+    "express": "^4.19.2"
+  },
+  "scripts": {
+    "test-ci": "jest --runInBand",
+    "build": "tsc",
+    "wbuild": "tsc --watch",
+    "bump-to": "yarn version"
+  }
 }

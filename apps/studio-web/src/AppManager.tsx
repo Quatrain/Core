@@ -104,7 +104,10 @@ export function AppManager() {
     setIsDeploying(true)
     setDeployResult(null)
     try {
-      const res = await api.deployEnvironment(env.uid, { recipe: project.recipe })
+      const res = await api.deployEnvironment(env.uid, { 
+        recipe: project.recipe, 
+        authMode: project.authMode || 'none' 
+      })
       if (res && res.success) {
         setDeployResult({ success: true, message: t('appManager.deploySuccess') })
       } else {
@@ -159,6 +162,24 @@ export function AppManager() {
               }
             }}
             clearable
+            radius="md"
+          />
+          <Select
+            label={t('appManager.authMode')}
+            placeholder="-"
+            data={[
+              { value: 'none', label: t('appManager.authNone') },
+              { value: 'basic', label: t('appManager.authBasic') },
+              { value: 'oauth', label: t('appManager.authOAuth') }
+            ]}
+            value={project?.authMode || 'none'}
+            onChange={async (val) => {
+              if (project) {
+                await api.updateProject(project.uid, { authMode: val })
+                loadAll()
+              }
+            }}
+            clearable={false}
             radius="md"
           />
           <Button onClick={handleSaveProject} style={{ alignSelf: 'flex-start' }} radius="md" color="blue">

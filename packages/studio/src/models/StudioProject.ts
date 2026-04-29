@@ -5,6 +5,7 @@ export interface StudioProjectType extends BaseObjectType {
    name: string
    description?: string
    recipe?: string
+   authMode?: string
    [x: string]: any
 }
 
@@ -30,6 +31,12 @@ export const StudioProjectProperties: any = [
       name: 'recipe',
       mandatory: false,
       type: StringProperty.TYPE,
+   },
+   {
+      name: 'authMode',
+      mandatory: false,
+      type: StringProperty.TYPE,
+      defaultValue: 'none',
    }
 ]
 

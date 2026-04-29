@@ -142,13 +142,14 @@ export function AuthManager() {
             </Card.Section>
             
             <Stack gap="xs" mt="md" style={{ flex: 1 }}>
-              <Badge color={a.provider === 'pocketbase' ? 'teal' : a.provider === 'supabase' ? 'green' : 'orange'} variant="light" style={{ alignSelf: 'flex-start' }}>
+              <Badge color={a.provider === 'pocketbase' ? 'teal' : a.provider === 'supabase' ? 'green' : a.provider === 'quatrain-oidc' ? 'violet' : 'orange'} variant="light" style={{ alignSelf: 'flex-start' }}>
                 {a.provider.toUpperCase()}
               </Badge>
               <Text size="sm" c="dimmed" lineClamp={3}>
                 {a.provider === 'pocketbase' && `URL: ${a.options?.url || ''}`}
                 {a.provider === 'supabase' && `URL: ${a.options?.url || ''}`}
                 {a.provider === 'firebase' && `Project ID: ${a.options?.projectId || ''}`}
+                {a.provider === 'quatrain-oidc' && `Serverless OIDC`}
               </Text>
             </Stack>
             {a.isDefault && (
@@ -168,8 +169,8 @@ export function AuthManager() {
             required 
           />
           <Text fw={500} size="sm">{t('auth.type')}</Text>
-          <SimpleGrid cols={3} spacing="sm">
-            {['pocketbase', 'supabase', 'firebase'].map(p => (
+          <SimpleGrid cols={2} spacing="sm">
+            {['pocketbase', 'supabase', 'firebase', 'quatrain-oidc'].map(p => (
               <Card 
                 key={p} 
                 withBorder 
@@ -184,7 +185,7 @@ export function AuthManager() {
                 p="sm"
               >
                 <Center style={{ flexDirection: 'column' }}>
-                  <Text fw={600} size="sm">{p.toUpperCase()}</Text>
+                  <Text fw={600} size="sm">{p === 'quatrain-oidc' ? 'SERVERLESS OIDC' : p.toUpperCase()}</Text>
                 </Center>
               </Card>
             ))}
@@ -206,6 +207,12 @@ export function AuthManager() {
               <TextInput label="Project ID" required value={fbProjectId} onChange={e => setFbProjectId(e.currentTarget.value)} />
               <TextInput label="API Key" type="password" required value={fbApiKey} onChange={e => setFbApiKey(e.currentTarget.value)} />
             </Stack>
+          )}
+
+          {provider === 'quatrain-oidc' && (
+            <Text size="sm" c="dimmed" mt="xs">
+              L'adaptateur embarqué ne nécessite aucune configuration externe. Le serveur OAuth sera instancié localement au sein de l'API.
+            </Text>
           )}
 
           <Checkbox 

@@ -1,3 +1,4 @@
+// @ts-ignore
 import Provider from 'oidc-provider'
 
 export class AuthOIDC {

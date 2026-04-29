@@ -12,8 +12,8 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@quatrain/app": "workspace:*",
     "@quatrain/api-server": "workspace:^",
+    "@quatrain/app": "workspace:*",
     "@quatrain/backend": "workspace:^",
     "@quatrain/backend-sqlite": "workspace:^",
     "@quatrain/core": "workspace:^",

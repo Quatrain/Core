@@ -35,7 +35,7 @@ jobs:
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
 
       - name: Publish all changed packages (latest-dev)
-        run: node bin/publish_all.js --tag latest-dev
+        run: yarn node bin/publish_all.js --tag latest-dev
 
       - name: Commit version bumps & hashes
         uses: stefanzweifel/git-auto-commit-action@v5

@@ -20,14 +20,14 @@
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
-    "yaml": "^2.4.0",
     "@quatrain/auth": "workspace:*",
     "@quatrain/backend": "workspace:*",
     "@quatrain/core": "workspace:*",
     "@quatrain/log": "workspace:*",
     "@quatrain/messaging": "workspace:*",
     "@quatrain/queue": "workspace:*",
-    "@quatrain/storage": "workspace:*"
+    "@quatrain/storage": "workspace:*",
+    "yaml": "^2.4.0"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

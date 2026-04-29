@@ -28,7 +28,9 @@ const BUILD_ORDER = [
     'storage',
     'testing',
     'ui',
-    // Layer 3: depends on backend / queue / storage / ui
+    'code',
+    'ai',
+    // Layer 3: depends on backend / queue / storage / ui / code / ai
     'auth',
     'cloudwrapper',         // depends on backend + storage
     'backend-firestore',    // depends on backend (peerDep)
@@ -45,6 +47,8 @@ const BUILD_ORDER = [
     'api',
     'ui-form-react',
     'ui-list-react',
+    'code-github',
+    'ai-gemini',
     // Layer 4: depends on layer 3
     'cloudwrapper-firebase',  // depends on cloudwrapper (peerDep) + backend (peerDep)
     'cloudwrapper-supabase',  // depends on cloudwrapper + backend
@@ -59,11 +63,7 @@ const BUILD_ORDER = [
     'worker',
     'studio',
     'app',
-    'code',
-    'ai',
     // Layer 6:
-    'code-github',
-    'ai-gemini',
     'core-cli'
 ];
 

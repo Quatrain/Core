@@ -33,5 +33,5 @@ packages/**/.*.txt
 *.tsbuildinfo
 
 # Generated App
-app/
+/app/
 

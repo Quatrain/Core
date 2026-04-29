@@ -19,8 +19,8 @@
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
-    "@quatrain/auth": "^1.1.31",
-    "@quatrain/backend": "^1.1.37",
+    "@quatrain/auth": "^1.2.1",
+    "@quatrain/backend": "^1.2.1",
     "@supabase/supabase-js": "^2.87.3",
     "node-fetch-native": "^1.6.4"
   },

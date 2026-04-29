@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/ai-gemini",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "license": "AGPL-3.0-only",
   "description": "AI adapter for Google Gemini",
   "main": "dist/index.js",
@@ -21,8 +21,8 @@
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
     "@google/genai": "latest",
-    "@quatrain/ai": "^1.0.0",
-    "@quatrain/core": "^1.1.52"
+    "@quatrain/ai": "^1.1.1",
+    "@quatrain/core": "^1.2.1"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

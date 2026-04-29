@@ -34,8 +34,8 @@
   },
   "dependencies": {
     "@google-cloud/pubsub": "^4.7.0",
-    "@quatrain/core": "^1.1.52",
-    "@quatrain/queue": "^1.1.32"
+    "@quatrain/core": "^1.2.1",
+    "@quatrain/queue": "^1.2.1"
   },
   "scripts": {
     "test-ci": "jest --runInBand",

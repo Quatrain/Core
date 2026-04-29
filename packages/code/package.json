@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/code",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "license": "AGPL-3.0-only",
   "description": "Remote code repository adapters commons",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
-    "@quatrain/core": "^1.1.52"
+    "@quatrain/core": "^1.2.1"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

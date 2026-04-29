@@ -20,5 +20,10 @@
   "scripts": {
     "build": "tsc",
     "wbuild": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/backend-migrations"
   }
 }

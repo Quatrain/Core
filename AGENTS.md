@@ -109,3 +109,15 @@ These skills define the expected workflow for modifying packages, managing depen
      "paths": {}
   }
   ```
+
+### E. Package.json & NPM Provenance
+- The Quatrain monorepo uses NPM Provenance in GitHub Actions for secure releases.
+- **CRITICAL:** Whenever a new package is created, its `package.json` MUST contain a valid `repository` block. If this is missing, the release pipeline will fail with a 422 Unprocessable Entity error during publication.
+- Example of a required `repository` block:
+  ```json
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/<package-name>"
+  }
+  ```

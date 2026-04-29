@@ -16,5 +16,10 @@
   },
   "scripts": {
     "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/ui-form-react"
   }
 }

@@ -1,2 +1,3 @@
 export const FormPlaceholder = () => 'Form UI Component';
-export * from './QuatrainForm';
+export * from './CoreForm';
+export * from './useCoreForm';

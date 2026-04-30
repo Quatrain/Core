@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { TextInput, NumberInput, Checkbox, Button, Group, Title, Paper, Select } from '@mantine/core'
+import { useCoreForm } from './useCoreForm'
 
-export interface QuatrainFormProps {
+/**
+ * Properties required by the CoreForm React component.
+ */
+export interface CoreFormProps {
     modelSchema: any
     objectId: string | undefined
     apiClient: any
@@ -9,57 +13,30 @@ export interface QuatrainFormProps {
     onCancel: () => void
 }
 
-export function QuatrainForm({ modelSchema, objectId, apiClient, onSave, onCancel }: QuatrainFormProps) {
-    const [formData, setFormData] = useState<any>({ status: 'created' })
-    const [relationOptions, setRelationOptions] = useState<Record<string, {label: string, value: string}[]>>({})
+/**
+ * A generic dynamic form component for Quatrain models using Mantine UI.
+ * It renders fields based on the provided model schema and manages its state internally
+ * via the useCoreForm hook and CoreFormManager.
+ * 
+ * @param props - The component properties conforming to CoreFormProps.
+ * @returns A React functional component.
+ */
+export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }: CoreFormProps) {
+    const { state, setFieldValue, save } = useCoreForm(modelSchema, objectId, apiClient)
+    const { formData, relationOptions, status } = state
 
     const m = modelSchema.name
     const props = modelSchema.properties || []
     const ignoredProps = ['id', 'status', 'createdat', 'updatedat', 'deletedat', 'createdby', 'updatedby', 'deletedby']
 
-    useEffect(() => {
-        if (objectId && objectId !== 'new') {
-            apiClient.get(`${m.toLowerCase()}s/` + objectId).then((res: any) => {
-                if (res && res.data) {
-                    setFormData(res.data)
-                }
-            })
-        }
-    }, [objectId, m, apiClient])
-
-    useEffect(() => {
-        // Fetch values for all relation properties
-        for (const p of props) {
-            if (p.options?.instanceOf) {
-                const targetModel = typeof p.options.instanceOf === 'string' ? p.options.instanceOf : p.type
-                let url = `${targetModel.toLowerCase()}s/values`
-                apiClient.get(url).then((res: any) => {
-                    if (res && res.data) {
-                        const pattern = p.options?.pattern
-                        const formattedData = res.data.map((item: any) => {
-                            let label = item.name || item.value
-                            if (pattern) {
-                                label = pattern.replace(/\\$\\{([^}]+)\\}/g, (match: string, prop: string) => {
-                                    return item[prop] !== undefined ? String(item[prop]) : match
-                                })
-                            }
-                            return { label, value: item.value }
-                        })
-                        setRelationOptions(prev => ({ ...prev, [p.name]: formattedData }))
-                    }
-                }).catch((e: any) => console.error('Failed to load relation values', e))
-            }
-        }
-    }, [props, apiClient])
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (objectId === 'new') {
-            await apiClient.post(`${m.toLowerCase()}s`, formData)
-        } else {
-            await apiClient.patch(`${m.toLowerCase()}s/` + objectId, formData)
+        try {
+            await save()
+            onSave()
+        } catch (err) {
+            // Error is handled in the manager state
         }
-        onSave()
     }
 
     const renderField = (p: any) => {
@@ -74,8 +51,9 @@ export function QuatrainForm({ modelSchema, objectId, apiClient, onSave, onCance
                     key={propName}
                     label={propName} 
                     value={formData[propName] || ''} 
-                    onChange={e => setFormData({...formData, [propName]: e.target.value})} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.target.value)} 
                     mb="sm" 
+                    disabled={status === 'loading' || status === 'saving'}
                 />
             )
         } else if (p.type === 'NumberProperty') {
@@ -84,8 +62,9 @@ export function QuatrainForm({ modelSchema, objectId, apiClient, onSave, onCance
                     key={propName}
                     label={propName} 
                     value={formData[propName] || 0} 
-                    onChange={val => setFormData({...formData, [propName]: val})} 
+                    onChange={(val: string | number) => setFieldValue(propName, val)} 
                     mb="sm" 
+                    disabled={status === 'loading' || status === 'saving'}
                 />
             )
         } else if (p.type === 'BooleanProperty') {
@@ -94,8 +73,9 @@ export function QuatrainForm({ modelSchema, objectId, apiClient, onSave, onCance
                     key={propName}
                     label={propName} 
                     checked={formData[propName] || false} 
-                    onChange={e => setFormData({...formData, [propName]: e.currentTarget.checked})} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.currentTarget.checked)} 
                     mb="sm" 
+                    disabled={status === 'loading' || status === 'saving'}
                 />
             )
         } else if (p.type === 'EnumProperty') {
@@ -106,8 +86,9 @@ export function QuatrainForm({ modelSchema, objectId, apiClient, onSave, onCance
                     label={propName} 
                     data={enumValues}
                     value={formData[propName] || ''} 
-                    onChange={val => setFormData({...formData, [propName]: val})} 
+                    onChange={(val: string | null) => setFieldValue(propName, val)} 
                     mb="sm" 
+                    disabled={status === 'loading' || status === 'saving'}
                 />
             )
         } else if (p.type === 'DateTimeProperty') {
@@ -117,8 +98,9 @@ export function QuatrainForm({ modelSchema, objectId, apiClient, onSave, onCance
                     type="datetime-local"
                     label={propName} 
                     value={formData[propName] || ''} 
-                    onChange={e => setFormData({...formData, [propName]: e.target.value})} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.target.value)} 
                     mb="sm" 
+                    disabled={status === 'loading' || status === 'saving'}
                 />
             )
         } else if (p.options?.instanceOf) {
@@ -129,10 +111,11 @@ export function QuatrainForm({ modelSchema, objectId, apiClient, onSave, onCance
                     label={propName + ' (Relation)'}
                     data={relationOptions[propName] || []}
                     value={formData[propName] || ''}
-                    onChange={val => setFormData({...formData, [propName]: val})}
+                    onChange={(val: string | null) => setFieldValue(propName, val)}
                     searchable
                     clearable
                     mb="sm"
+                    disabled={status === 'loading' || status === 'saving'}
                 />
             )
         } else {
@@ -141,8 +124,9 @@ export function QuatrainForm({ modelSchema, objectId, apiClient, onSave, onCance
                     key={propName}
                     label={propName + ' (' + p.type + ')'} 
                     value={formData[propName] || ''} 
-                    onChange={e => setFormData({...formData, [propName]: e.target.value})} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.target.value)} 
                     mb="sm" 
+                    disabled={status === 'loading' || status === 'saving'}
                 />
             )
         }
@@ -155,8 +139,9 @@ export function QuatrainForm({ modelSchema, objectId, apiClient, onSave, onCance
                 <TextInput 
                     label="Name" 
                     value={formData.name || ''} 
-                    onChange={e => setFormData({...formData, name: e.target.value})} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue('name', e.target.value)} 
                     mb="sm" 
+                    disabled={status === 'loading' || status === 'saving'}
                 />
                 
                 {props.map((p: any) => renderField(p))}
@@ -165,12 +150,13 @@ export function QuatrainForm({ modelSchema, objectId, apiClient, onSave, onCance
                     label="Status"
                     data={['created', 'pending', 'active', 'deleted']}
                     value={formData.status || 'created'}
-                    onChange={val => setFormData({...formData, status: val})}
+                    onChange={(val: string | null) => setFieldValue('status', val)}
                     mb="md"
+                    disabled={status === 'loading' || status === 'saving'}
                 />
                 <Group>
-                    <Button type="submit">Save</Button>
-                    <Button variant="outline" onClick={onCancel}>Cancel</Button>
+                    <Button type="submit" loading={status === 'saving'} disabled={status === 'loading'}>Save</Button>
+                    <Button variant="outline" onClick={onCancel} disabled={status === 'loading' || status === 'saving'}>Cancel</Button>
                 </Group>
             </form>
         </Paper>

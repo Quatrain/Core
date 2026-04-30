@@ -16,7 +16,11 @@
     "@tabler/icons-react": "^3.10.0"
   },
   "devDependencies": {
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "scripts": {
     "build": "tsc"

@@ -72,11 +72,11 @@ By default, Quatrain uses a "soft delete" system via the `status` property inher
   - `Backend.error('...')`: For critical errors and captured exceptions.
 - **Language Rule:** All log messages, code comments, and developer-facing textual content MUST be written in **international English**.
 
-### E. Documenting New Methods (JSDoc)
+### E. Documenting New Classes, Functions & Methods (JSDoc)
 
-- **CRITICAL:** Any time an AI agent or a developer adds a new method to a class, it **MUST** be accompanied by a comprehensive JSDoc block.
-- The documentation block must explain what the method does, list its `@param` arguments with descriptions, and define its `@returns` value.
-- This ensures the codebase remains self-documenting and accessible for both human developers and AI assistants.
+- **CRITICAL:** Systematically, at **every iteration**, any time an AI agent or a developer adds a new class, standalone function, or method, it **MUST** be accompanied by a comprehensive JSDoc block.
+- The documentation block must explain what the entity does, list its `@param` arguments with descriptions, and define its `@returns` value (if applicable).
+- Do not forget this step. It is mandatory for every single new implementation to ensure the codebase remains self-documenting and accessible for both human developers and AI assistants.
 
 ---
 

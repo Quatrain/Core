@@ -536,7 +536,7 @@ export function ${m}List() {
 
          const modelSchemaStr = JSON.stringify(modelConfig, null, 3)
 
-         const formTsx = `import { QuatrainForm } from '@quatrain/ui-form-react'
+         const formTsx = `import { CoreForm } from '@quatrain/ui-form-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api'
 
@@ -547,7 +547,7 @@ export function ${m}Form() {
    const modelSchema = ${modelSchemaStr}
 
    return (
-      <QuatrainForm 
+      <CoreForm 
          modelSchema={modelSchema} 
          objectId={id} 
          apiClient={api} 

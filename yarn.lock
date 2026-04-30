@@ -2796,7 +2796,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/core@npm:^7.15.0":
+"@mantine/core@npm:^7.11.1, @mantine/core@npm:^7.15.0":
   version: 7.17.8
   resolution: "@mantine/core@npm:7.17.8"
   dependencies:
@@ -2814,7 +2814,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/hooks@npm:^7.15.0":
+"@mantine/hooks@npm:^7.11.1, @mantine/hooks@npm:^7.15.0":
   version: 7.17.8
   resolution: "@mantine/hooks@npm:7.17.8"
   peerDependencies:
@@ -3909,8 +3909,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/ui-form-react@workspace:packages/ui-form-react"
   dependencies:
+    "@mantine/core": "npm:^7.11.1"
+    "@mantine/hooks": "npm:^7.11.1"
     "@quatrain/core": "workspace:*"
     "@quatrain/ui": "workspace:*"
+    "@tabler/icons-react": "npm:^3.10.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
     typescript: "npm:^5.2.2"
   peerDependencies:
     react: ^18.3.1
@@ -5415,6 +5422,24 @@ __metadata:
   dependencies:
     defer-to-connect: "npm:^2.0.1"
   checksum: 10c0/4629d2fbb2ea67c2e9dc03af235c0991c79ebdddcbc19aed5d5732fb29ce01c13331e9b1a491584b9069bd6ecde6581dcbf871f11b7eefdebbab34de6cf2197e
+  languageName: node
+  linkType: hard
+
+"@tabler/icons-react@npm:^3.10.0":
+  version: 3.41.1
+  resolution: "@tabler/icons-react@npm:3.41.1"
+  dependencies:
+    "@tabler/icons": "npm:3.41.1"
+  peerDependencies:
+    react: ">= 16"
+  checksum: 10c0/d103816d91df212ef6a4fc05e9f8d5f01deec2197d3accc4a398d325d1cfa8910e06b4daaf82cd08749f242c3908885ac60b21c4129b21094ece9fe0ecd46e4c
+  languageName: node
+  linkType: hard
+
+"@tabler/icons@npm:3.41.1":
+  version: 3.41.1
+  resolution: "@tabler/icons@npm:3.41.1"
+  checksum: 10c0/b1238157fe6e57c0202f1f7153621ad937a6f73ff7c0f0af5a71fcbdace18a3281cddd6632229029c3a3df7c530ae8bcefa75c18e35db4b65e7f884282762cf1
   languageName: node
   linkType: hard
 

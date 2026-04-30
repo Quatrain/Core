@@ -14,18 +14,18 @@ export type FormState = {
  * independently of any UI framework.
  */
 export class CoreFormManager {
-    private modelSchema: any
-    private objectId: string | undefined
-    private apiClient: any
+    protected modelSchema: any
+    protected objectId: string | undefined
+    protected apiClient: any
 
-    private state: FormState = {
+    protected state: FormState = {
         formData: { status: 'created' },
         relationOptions: {},
         status: 'idle',
         error: null
     }
 
-    private listeners: ((state: FormState) => void)[] = []
+    protected listeners: ((state: FormState) => void)[] = []
 
     /**
      * Initializes a new instance of the CoreFormManager.
@@ -54,13 +54,13 @@ export class CoreFormManager {
         }
     }
 
-    private emit() {
+    protected emit() {
         for (const listener of this.listeners) {
             listener({ ...this.state })
         }
     }
 
-    private setState(partialState: Partial<FormState>) {
+    protected setState(partialState: Partial<FormState>) {
         this.state = { ...this.state, ...partialState }
         this.emit()
     }
@@ -83,7 +83,7 @@ export class CoreFormManager {
         }
     }
 
-    private async fetchData() {
+    protected async fetchData() {
         if (this.objectId && this.objectId !== 'new') {
             const m = this.modelSchema.name
             const res = await this.apiClient.get(`${m.toLowerCase()}s/` + this.objectId)
@@ -93,7 +93,7 @@ export class CoreFormManager {
         }
     }
 
-    private async fetchRelations() {
+    protected async fetchRelations() {
         const props = this.modelSchema.properties || []
         const newRelationOptions = { ...this.state.relationOptions }
         

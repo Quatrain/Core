@@ -78,6 +78,16 @@ By default, Quatrain uses a "soft delete" system via the `status` property inher
 - The documentation block must explain what the entity does, list its `@param` arguments with descriptions, and define its `@returns` value (if applicable).
 - Do not forget this step. It is mandatory for every single new implementation to ensure the codebase remains self-documenting and accessible for both human developers and AI assistants.
 
+### F. Class Encapsulation (Protected vs Private)
+
+- **CRITICAL:** Prefer using `protected` instead of `private` for class properties and methods.
+- This allows classes to be easily extended via inheritance unless the class is explicitly marked as `final`.
+
+### G. API Endpoints (PATCH vs PUT)
+
+- **CRITICAL:** Always prefer `PATCH` over `PUT` when updating objects via API endpoints.
+- `PATCH` optimizes processing, especially since Quatrain's models track modified properties using a `hasChanged` flag, allowing only the modified properties to be pushed and processed.
+
 ---
 
 ## 2. Monorepo & Production Workflow Skills

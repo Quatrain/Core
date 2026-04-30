@@ -6,6 +6,7 @@ export type FormState = {
     relationOptions: Record<string, { label: string, value: string }[]>
     status: 'idle' | 'loading' | 'saving' | 'error'
     error: any | null
+    validationErrors: Record<string, string>
 }
 
 /**
@@ -22,7 +23,8 @@ export class CoreFormManager {
         formData: { status: 'created' },
         relationOptions: {},
         status: 'idle',
-        error: null
+        error: null,
+        validationErrors: {}
     }
 
     protected listeners: ((state: FormState) => void)[] = []
@@ -112,7 +114,7 @@ export class CoreFormManager {
                                     return item[prop] !== undefined ? String(item[prop]) : match
                                 })
                             }
-                            return { label, value: item.value }
+                            return { label, value: item.value, _search: item._search || '' }
                         })
                         newRelationOptions[p.name] = formattedData
                     }
@@ -124,6 +126,29 @@ export class CoreFormManager {
 
         await Promise.all(relationPromises)
         this.patchState({ relationOptions: newRelationOptions })
+    }
+
+    /**
+     * Validates the form data against the model schema.
+     * Checks for mandatory fields.
+     * 
+     * @returns boolean - true if the form is valid, false otherwise.
+     */
+    public validate(): boolean {
+        const errors: Record<string, string> = {}
+        const props = this.modelSchema.properties || []
+
+        for (const prop of props) {
+            if (prop.mandatory || prop.required) { // Handle both terminologies depending on how schema generates it
+                const val = this.state.formData[prop.name]
+                if (val === undefined || val === null || val === '') {
+                    errors[prop.name] = `${prop.name} is required`
+                }
+            }
+        }
+
+        this.patchState({ validationErrors: errors })
+        return Object.keys(errors).length === 0
     }
 
     /**
@@ -141,11 +166,16 @@ export class CoreFormManager {
     /**
      * Saves the current form data to the backend via the API client.
      * Performs a POST request for new objects or a PATCH request for existing objects.
+     * Performs local validation before attempting to save.
      * 
-     * @throws Will throw an error if the API request fails.
+     * @throws Will throw an error if the API request fails or validation fails.
      */
     public async save() {
-        this.patchState({ status: 'saving', error: null })
+        if (!this.validate()) {
+            throw new Error('Validation failed')
+        }
+
+        this.patchState({ status: 'saving', error: null, validationErrors: {} })
         try {
             const m = this.modelSchema.name
             if (this.objectId === 'new') {
@@ -156,7 +186,11 @@ export class CoreFormManager {
             this.patchState({ status: 'idle' })
         } catch (e: any) {
             console.error('Failed to save form', e)
-            this.patchState({ status: 'error', error: e })
+            
+            // Map backend validation errors to UI state if present
+            const validationErrors = e.response?.data?.validationErrors || {}
+            this.patchState({ status: 'error', error: e, validationErrors })
+            
             throw e
         }
     }

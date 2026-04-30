@@ -346,32 +346,41 @@ export const down = async ({ context: adapter }: { context: AbstractBackendAdapt
             strict: true,
             noUnusedLocals: true,
             noUnusedParameters: true,
-            noFallthroughCasesInSwitch: true
+            noFallthroughCasesInSwitch: true,
+            types: ["vite/client"]
          },
          include: ["src"]
       }
       fs.writeFileSync(path.join(webDir, 'tsconfig.json'), JSON.stringify(tsConfig, null, 2))
 
       // vite.config.ts
-      const viteConfig = `import { defineConfig } from 'vite'
+      const viteConfig = `import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    host: '0.0.0.0',
-    port: 3000,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:4001',
-        changeOrigin: true
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  return {
+    plugins: [react()],
+    server: {
+      host: '0.0.0.0',
+      port: 3000,
+      proxy: {
+        '/api': {
+          target: env.VITE_API_URL || 'http://localhost:4001',
+          changeOrigin: true
+        }
       }
     }
   }
 })
 `
       fs.writeFileSync(path.join(webDir, 'vite.config.ts'), viteConfig)
+
+      // .env
+      const envContent = `VITE_API_URL=/api
+`
+      fs.writeFileSync(path.join(webDir, '.env'), envContent)
 
       // index.html
       const indexHtml = `<!doctype html>
@@ -412,7 +421,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       // api.ts
       const apiTs = `import { ApiClient } from '@quatrain/api-client'
 
-export const api = new ApiClient('/api')
+const apiUrl = import.meta.env.VITE_API_URL || '/api'
+export const api = new ApiClient(apiUrl)
 `
       fs.writeFileSync(path.join(srcDir, 'api.ts'), apiTs)
 

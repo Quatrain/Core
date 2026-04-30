@@ -20,7 +20,11 @@ export const ValuesEndpoint = (ModelClass: typeof BaseObject): EndpointHandler =
                .filter((p: any) => p.htmlType && p.htmlType !== 'off')
                .map((p: any) => p.name)
             
-            const values = results.items.map((dataObject: DataObjectClass<any>) => {
+            const searchFields = ['name', ...propsDef
+               .filter((p: any) => p.type === 'StringProperty' && p.fullSearch === true)
+               .map((p: any) => p.name)]
+            
+            let values = results.items.map((dataObject: DataObjectClass<any>) => {
                const payload: any = { 
                   value: dataObject.uid,
                   name: dataObject.has('name') ? dataObject.get('name') : dataObject.uid
@@ -32,8 +36,25 @@ export const ValuesEndpoint = (ModelClass: typeof BaseObject): EndpointHandler =
                   }
                }
                
+               const searchVals = searchFields.map(f => {
+                  const val = dataObject.get(f)
+                  return typeof val === 'string' ? val : ''
+               }).filter(Boolean)
+               payload._search = searchVals.join(' ').toLowerCase()
+               
                return payload
             })
+            
+            const qParam = req.query.q as string
+            if (qParam) {
+               const searchStr = qParam.toLowerCase()
+               values = values.filter((payload: any) => {
+                  return searchFields.some(field => {
+                     const val = payload[field]
+                     return typeof val === 'string' && val.toLowerCase().includes(searchStr)
+                  })
+               })
+            }
             
             res.json(values)
          } catch (e) {

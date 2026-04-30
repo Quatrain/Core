@@ -5,6 +5,7 @@ import { BaseObjectType } from './types/BaseObjectType'
 import { BaseObjectProperties } from './BaseObjectProperties'
 import { AbstractObject } from './AbstractObject'
 import { DataObjectType } from './types/DataObjectType'
+import { ValidationError } from '../common/ResourcesErrors'
 
 export class BaseObject extends AbstractObject {
    // implements BaseObjectClass {
@@ -129,5 +130,27 @@ export class BaseObject extends AbstractObject {
 
    asReference() {
       return this._dataObject.toReference()
+   }
+
+   /**
+    * Validates the object's properties against the model definition.
+    * Throws a ValidationError if any mandatory properties are missing or empty.
+    */
+   validate() {
+      const errors: Record<string, string> = {}
+      const props = (this.constructor as typeof BaseObject).PROPS_DEFINITION || []
+
+      for (const prop of props) {
+         if (prop.mandatory) {
+            const val = this.get(prop.name)
+            if (val === undefined || val === null || val === '') {
+               errors[prop.name] = `${prop.name} is required`
+            }
+         }
+      }
+
+      if (Object.keys(errors).length > 0) {
+         throw new ValidationError('Validation failed', errors)
+      }
    }
 }

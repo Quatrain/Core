@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Modal, TextInput, Select, Button, Stack, ActionIcon, Badge, Table, Center } from '@mantine/core'
-import { useTranslation } from 'react-i18next'
 import { api } from './api'
 
 export function SecretsManager() {
-  const { t } = useTranslation()
   const [environments, setEnvironments] = useState<any[]>([])
   const [secrets, setSecrets] = useState<any[]>([])
   const [activeEnvId, setActiveEnvId] = useState<string | null>(null)

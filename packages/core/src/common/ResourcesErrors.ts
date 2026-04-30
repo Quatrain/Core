@@ -15,3 +15,12 @@ export class ForbiddenError extends ResourceError {}
 export class NotFoundError extends ResourceError {}
 
 export class GoneError extends ResourceError {}
+
+export class ValidationError extends ResourceError {
+   public errors: Record<string, string>
+
+   constructor(message: string, errors: Record<string, string> = {}) {
+      super(message)
+      this.errors = errors
+   }
+}

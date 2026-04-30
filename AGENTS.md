@@ -97,6 +97,7 @@ These skills define the expected workflow for modifying packages, managing depen
 ### A. Zero TypeScript Errors Policy
 - A development task or feature is **NEVER** considered finished until the TypeScript compiler (`tsc`) passes without a single type error.
 - **Do not ignore compiler errors.** If `yarn build` fails at the root, you must isolate and fix the underlying TypeScript errors before proceeding.
+- **Unused Imports / Variables (TS6133):** You must strictly verify and remove any unused imports or variables before declaring a task complete. The TypeScript configuration considers these as errors, and they will block CI/CD pipelines.
 
 ### B. Local Package Compilation Checks
 - Because root-level builds can fail or become noisy, always verify your types locally inside the modified package.

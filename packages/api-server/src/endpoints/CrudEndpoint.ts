@@ -1,6 +1,7 @@
 import { EndpointHandler, ServerAdapter, EndpointOptions } from '@quatrain/api'
 import { BaseObject, DataObjectClass } from '@quatrain/core'
 import { Backend } from '@quatrain/backend'
+import { ValidationError } from '@quatrain/core'
 
 export const CrudEndpoint = (ModelClass: typeof BaseObject): EndpointHandler => {
    return (router: ServerAdapter, path: string, options: EndpointOptions) => {
@@ -17,13 +18,18 @@ export const CrudEndpoint = (ModelClass: typeof BaseObject): EndpointHandler => 
                   if (newObj.has(key)) {
                      newObj.set(key, data[key])
                   }
-               })
+               });
                
+               (newObj as any).validate()
                await (newObj as any).save()
                res.status(201).json(newObj.dataObject.toJSON())
-            } catch (e) {
-               Backend.error(`[API Error] POST: ${(e as Error).message}`)
-               res.status(400).json({ error: (e as Error).message })
+            } catch (e: any) {
+               if (e.name === 'ValidationError') {
+                  res.status(400).json({ error: e.message, validationErrors: e.errors })
+               } else {
+                  Backend.error(`[API Error] POST: ${e.message}`)
+                  res.status(400).json({ error: e.message })
+               }
             }
          })
       }
@@ -61,13 +67,18 @@ export const CrudEndpoint = (ModelClass: typeof BaseObject): EndpointHandler => 
                   if (obj.has(key)) {
                      obj.set(key, data[key])
                   }
-               })
+               });
                
+               obj.validate()
                await obj.save()
                res.json(obj.dataObject.toJSON())
-            } catch (e) {
-               Backend.error(`[API Error] PUT /${req.params.id}: ${(e as Error).message}`)
-               res.status(400).json({ error: (e as Error).message })
+            } catch (e: any) {
+               if (e.name === 'ValidationError') {
+                  res.status(400).json({ error: e.message, validationErrors: e.errors })
+               } else {
+                  Backend.error(`[API Error] PUT /${req.params.id}: ${e.message}`)
+                  res.status(400).json({ error: e.message })
+               }
             }
          })
       }

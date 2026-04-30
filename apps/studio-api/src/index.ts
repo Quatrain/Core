@@ -353,7 +353,7 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             }
 
             // Create quatrain.json content
-            const quatrainConfig = {
+            const quatrainConfig: Record<string, any> = {
                name: `Env-${environment.val('name')}`,
                recipe,
                authMode,
@@ -364,14 +364,16 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             }
 
             // Write quatrain.json to app/
-            const appDir = path.resolve(process.cwd(), '../../app')
+            const targetDir = '../../app'
+            const appDir = path.resolve(process.cwd(), targetDir)
             if (!fs.existsSync(appDir)) {
                fs.mkdirSync(appDir, { recursive: true })
             }
+            quatrainConfig.path = targetDir
             fs.writeFileSync(path.resolve(appDir, 'quatrain.json'), JSON.stringify(quatrainConfig, null, 2))
 
             // Generate compose.yaml and start containers via AppInfra
-            await AppInfra.start(quatrainConfig, '../../app')
+            await AppInfra.start(quatrainConfig)
 
             res.json({ success: true, message: 'Environnement déployé avec succès' })
          } catch (e) {

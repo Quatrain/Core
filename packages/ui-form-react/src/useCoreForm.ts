@@ -17,7 +17,8 @@ export function useCoreForm(modelSchema: any, objectId: string | undefined, apiC
         formData: { status: 'created' },
         relationOptions: {},
         status: 'idle',
-        error: null
+        error: null,
+        validationErrors: {}
     })
 
     useEffect(() => {

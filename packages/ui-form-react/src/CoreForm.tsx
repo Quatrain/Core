@@ -1,5 +1,5 @@
 import React from 'react'
-import { TextInput, NumberInput, Checkbox, Button, Group, Title, Paper, Select } from '@mantine/core'
+import { TextInput, NumberInput, Checkbox, Button, Group, Title, Paper, Select, Stack, Divider, Text } from '@mantine/core'
 import { useCoreForm } from './useCoreForm'
 
 /**
@@ -23,7 +23,7 @@ export interface CoreFormProps {
  */
 export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }: CoreFormProps) {
     const { state, setFieldValue, save } = useCoreForm(modelSchema, objectId, apiClient)
-    const { formData, relationOptions, status } = state
+    const { formData, relationOptions, status, validationErrors } = state
 
     const m = modelSchema.name
     const props = modelSchema.properties || []
@@ -45,6 +45,8 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
         const lowerName = propName.toLowerCase()
         if (ignoredProps.includes(lowerName)) return null
 
+        const isProtected = objectId !== 'new' && p.protected
+
         if (p.type === 'StringProperty') {
             return (
                 <TextInput 
@@ -52,8 +54,9 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
                     label={propName} 
                     value={formData[propName] || ''} 
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.target.value)} 
-                    mb="sm" 
-                    disabled={status === 'loading' || status === 'saving'}
+                    disabled={status === 'loading' || status === 'saving' || isProtected}
+                    error={validationErrors[propName]}
+                    radius="md"
                 />
             )
         } else if (p.type === 'NumberProperty') {
@@ -63,8 +66,9 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
                     label={propName} 
                     value={formData[propName] || 0} 
                     onChange={(val: string | number) => setFieldValue(propName, val)} 
-                    mb="sm" 
-                    disabled={status === 'loading' || status === 'saving'}
+                    disabled={status === 'loading' || status === 'saving' || isProtected}
+                    error={validationErrors[propName]}
+                    radius="md"
                 />
             )
         } else if (p.type === 'BooleanProperty') {
@@ -74,8 +78,10 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
                     label={propName} 
                     checked={formData[propName] || false} 
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.currentTarget.checked)} 
-                    mb="sm" 
-                    disabled={status === 'loading' || status === 'saving'}
+                    disabled={status === 'loading' || status === 'saving' || isProtected}
+                    error={validationErrors[propName]}
+                    radius="md"
+                    mt="xs"
                 />
             )
         } else if (p.type === 'EnumProperty') {
@@ -87,8 +93,9 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
                     data={enumValues}
                     value={formData[propName] || ''} 
                     onChange={(val: string | null) => setFieldValue(propName, val)} 
-                    mb="sm" 
-                    disabled={status === 'loading' || status === 'saving'}
+                    disabled={status === 'loading' || status === 'saving' || isProtected}
+                    error={validationErrors[propName]}
+                    radius="md"
                 />
             )
         } else if (p.type === 'DateTimeProperty') {
@@ -99,8 +106,9 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
                     label={propName} 
                     value={formData[propName] || ''} 
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.target.value)} 
-                    mb="sm" 
-                    disabled={status === 'loading' || status === 'saving'}
+                    disabled={status === 'loading' || status === 'saving' || isProtected}
+                    error={validationErrors[propName]}
+                    radius="md"
                 />
             )
         } else if (p.options?.instanceOf) {
@@ -114,8 +122,15 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
                     onChange={(val: string | null) => setFieldValue(propName, val)}
                     searchable
                     clearable
-                    mb="sm"
-                    disabled={status === 'loading' || status === 'saving'}
+                    filter={({ options, search }) => {
+                        const s = search.toLowerCase().trim()
+                        return (options as any[]).filter(opt => 
+                            (opt as any)._search?.includes(s) || (opt as any).label.toLowerCase().includes(s)
+                        )
+                    }}
+                    disabled={status === 'loading' || status === 'saving' || isProtected}
+                    error={validationErrors[propName]}
+                    radius="md"
                 />
             )
         } else {
@@ -125,38 +140,58 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
                     label={propName + ' (' + p.type + ')'} 
                     value={formData[propName] || ''} 
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.target.value)} 
-                    mb="sm" 
-                    disabled={status === 'loading' || status === 'saving'}
+                    disabled={status === 'loading' || status === 'saving' || isProtected}
+                    error={validationErrors[propName]}
+                    radius="md"
                 />
             )
         }
     }
 
     return (
-        <Paper p="md" shadow="sm">
-            <Title order={2} mb="md">{objectId === 'new' ? `Create ${m}` : `Edit ${m}`}</Title>
-            <form onSubmit={handleSubmit}>
-                <TextInput 
-                    label="Name" 
-                    value={formData.name || ''} 
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue('name', e.target.value)} 
-                    mb="sm" 
-                    disabled={status === 'loading' || status === 'saving'}
-                />
-                
-                {props.map((p: any) => renderField(p))}
+        <Paper p="xl" radius="md" shadow="sm" withBorder>
+            <Title order={3} mb="xs" fw={600}>
+                {objectId === 'new' ? `Create ${m}` : `Edit ${m}`}
+            </Title>
+            <Text c="dimmed" size="sm" mb="xl">
+                Fill in the information below to {objectId === 'new' ? 'create a new' : 'update this'} {m.toLowerCase()}.
+            </Text>
 
-                <Select
-                    label="Status"
-                    data={['created', 'pending', 'active', 'deleted']}
-                    value={formData.status || 'created'}
-                    onChange={(val: string | null) => setFieldValue('status', val)}
-                    mb="md"
-                    disabled={status === 'loading' || status === 'saving'}
-                />
-                <Group>
-                    <Button type="submit" loading={status === 'saving'} disabled={status === 'loading'}>Save</Button>
-                    <Button variant="outline" onClick={onCancel} disabled={status === 'loading' || status === 'saving'}>Cancel</Button>
+            <form onSubmit={handleSubmit}>
+                <Stack gap="md">
+                    <TextInput 
+                        label="Name" 
+                        description={`Unique name identifier for this ${m.toLowerCase()}`}
+                        value={formData.name || ''} 
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue('name', e.target.value)} 
+                        disabled={status === 'loading' || status === 'saving'}
+                        error={validationErrors['name']}
+                        radius="md"
+                        withAsterisk
+                    />
+                    
+                    {props.map((p: any) => renderField(p))}
+
+                    <Divider my="sm" variant="dashed" />
+
+                    <Select
+                        label="Status"
+                        description="Current lifecycle status of this object"
+                        data={['created', 'pending', 'active', 'deleted']}
+                        value={formData.status || 'created'}
+                        onChange={(val: string | null) => setFieldValue('status', val)}
+                        disabled={status === 'loading' || status === 'saving'}
+                        radius="md"
+                    />
+                </Stack>
+
+                <Group justify="flex-end" mt="xl">
+                    <Button variant="subtle" color="gray" onClick={onCancel} disabled={status === 'loading' || status === 'saving'} radius="md">
+                        Cancel
+                    </Button>
+                    <Button type="submit" loading={status === 'saving'} disabled={status === 'loading'} radius="md">
+                        Save Changes
+                    </Button>
                 </Group>
             </form>
         </Paper>

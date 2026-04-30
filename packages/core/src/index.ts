@@ -45,6 +45,7 @@ import {
    ForbiddenError,
    NotFoundError,
    GoneError,
+   ValidationError,
 } from './common/ResourcesErrors'
 import * as htmlType from './properties/types/PropertyHTMLType'
 import { DataObjectParams } from './components/types/DataObjectParams'
@@ -80,6 +81,7 @@ export {
    ForbiddenError,
    NotFoundError,
    GoneError,
+   ValidationError,
 }
 
 export type {

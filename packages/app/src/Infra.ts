@@ -11,12 +11,12 @@ export class AppInfra {
     * via podman-compose ou docker-compose
     * Si une configuration est fournie, génère d'abord les fichiers compose.yaml et .env dans le dossier app/
     */
-   public static async start(config?: any, targetDir: string = 'app'): Promise<void> {
-      let composeFile = path.resolve(process.cwd(), targetDir, 'compose.yaml')
-
-      if (config) {
-         // Générer dynamiquement les fichiers de déploiement
+   public static async start(config: Record<string, any>): Promise<void> {
+      try {
+         const targetDir = config.path || './app'
          const fullTargetDir = path.resolve(process.cwd(), targetDir)
+         const composeFile = path.join(fullTargetDir, 'compose.yaml')
+
          if (!fs.existsSync(fullTargetDir)) {
             fs.mkdirSync(fullTargetDir, { recursive: true })
          }
@@ -32,17 +32,26 @@ export class AppInfra {
          fs.writeFileSync(path.resolve(fullTargetDir, 'Containerfile'), dockerfile, 'utf8')
          
          Log.info(`[Infra] Dynamically generated compose.yaml and .env in ${fullTargetDir}`)
-      }
 
-      return this.runCompose('up -d --build', composeFile)
+         await this.runCompose('up -d --build', composeFile)
+      } catch (e: any) {
+         Log.error(`[Infra] Failed to start infrastructure: ${e.message}`)
+      }
    }
 
    /**
     * Arrêter l'infrastructure locale
     */
-   public static async stop(targetDir: string = 'app'): Promise<void> {
-      const composeFile = path.resolve(process.cwd(), targetDir, 'compose.yaml')
-      return this.runCompose('down', composeFile)
+   public static async stop(config: Record<string, any>): Promise<void> {
+      try {
+         const targetDir = config.path || './app'
+         const composeFile = path.resolve(process.cwd(), targetDir, 'compose.yaml')
+
+         Log.info(`[Infra] Stopping infrastructure...`)
+         await this.runCompose('down', composeFile)
+      } catch (e: any) {
+         Log.error(`[Infra] Failed to stop infrastructure: ${e.message}`)
+      }
    }
 
    private static getComposeCommand(): string {

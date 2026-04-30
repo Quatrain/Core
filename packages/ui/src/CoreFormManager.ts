@@ -60,7 +60,7 @@ export class CoreFormManager {
         }
     }
 
-    protected setState(partialState: Partial<FormState>) {
+    protected patchState(partialState: Partial<FormState>) {
         this.state = { ...this.state, ...partialState }
         this.emit()
     }
@@ -70,16 +70,16 @@ export class CoreFormManager {
      * Updates the status to 'loading' during execution and 'idle' upon completion.
      */
     public async init() {
-        this.setState({ status: 'loading', error: null })
+        this.patchState({ status: 'loading', error: null })
         try {
             await Promise.all([
                 this.fetchData(),
                 this.fetchRelations()
             ])
-            this.setState({ status: 'idle' })
+            this.patchState({ status: 'idle' })
         } catch (e: any) {
             console.error('Failed to init form', e)
-            this.setState({ status: 'error', error: e })
+            this.patchState({ status: 'error', error: e })
         }
     }
 
@@ -88,7 +88,7 @@ export class CoreFormManager {
             const m = this.modelSchema.name
             const res = await this.apiClient.get(`${m.toLowerCase()}s/` + this.objectId)
             if (res && res.data) {
-                this.setState({ formData: { ...this.state.formData, ...res.data } })
+                this.patchState({ formData: { ...this.state.formData, ...res.data } })
             }
         }
     }
@@ -123,18 +123,18 @@ export class CoreFormManager {
         })
 
         await Promise.all(relationPromises)
-        this.setState({ relationOptions: newRelationOptions })
+        this.patchState({ relationOptions: newRelationOptions })
     }
 
     /**
-     * Updates the value of a specific field in the form data.
+     * Updates the value of a specific property in the form data.
      * 
-     * @param field - The name of the field to update.
-     * @param value - The new value for the field.
+     * @param property - The name of the property to update.
+     * @param value - The new value for the property.
      */
-    public setFieldValue(field: string, value: any) {
-        this.setState({
-            formData: { ...this.state.formData, [field]: value }
+    public setProperty(property: string, value: any) {
+        this.patchState({
+            formData: { ...this.state.formData, [property]: value }
         })
     }
 
@@ -145,7 +145,7 @@ export class CoreFormManager {
      * @throws Will throw an error if the API request fails.
      */
     public async save() {
-        this.setState({ status: 'saving', error: null })
+        this.patchState({ status: 'saving', error: null })
         try {
             const m = this.modelSchema.name
             if (this.objectId === 'new') {
@@ -153,10 +153,10 @@ export class CoreFormManager {
             } else {
                 await this.apiClient.patch(`${m.toLowerCase()}s/` + this.objectId, this.state.formData)
             }
-            this.setState({ status: 'idle' })
+            this.patchState({ status: 'idle' })
         } catch (e: any) {
             console.error('Failed to save form', e)
-            this.setState({ status: 'error', error: e })
+            this.patchState({ status: 'error', error: e })
             throw e
         }
     }

@@ -30,7 +30,7 @@ export function useCoreForm(modelSchema: any, objectId: string | undefined, apiC
 
     return {
         state,
-        setFieldValue: (field: string, value: any) => manager.setFieldValue(field, value),
-        save: () => manager.save()
+        setFieldValue: manager.setProperty.bind(manager),
+        save: manager.save.bind(manager)
     }
 }

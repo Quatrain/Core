@@ -20,7 +20,7 @@
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
-    "@quatrain/core": "^1.2.1",
+    "@quatrain/core": "^1.2.2",
     "mustache": "^4.2.0"
   },
   "devDependencies": {

@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@cloudamqp/amqp-client": "^3.4.1",
-    "@quatrain/core": "^1.2.1",
+    "@quatrain/core": "^1.2.2",
     "@quatrain/queue": "^1.2.1",
     "amqplib": "^0.10.9"
   },

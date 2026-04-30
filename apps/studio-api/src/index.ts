@@ -293,9 +293,8 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                }
             }
 
-            // Export only versioned models for the current project
+            // Export all versioned models (mono-project currently)
             const modelsResult = await StudioModel.query()
-               .where('projectId', environment.val('projectId'))
                .execute(returnAs.AS_INSTANCES)
                
             const models: any[] = []

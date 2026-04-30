@@ -9,12 +9,18 @@ export class CodeGenerator {
    public static generate(config: any, targetDir: string): void {
       const fullTargetDir = path.resolve(process.cwd(), targetDir)
       
-      // Ensure base directories exist
-      const dirs = ['src/models', 'src/api', 'data/migrations/default']
+      // Ensure base directories exist and clear old files to prevent orphans
+      const dirs = ['src/models', 'src/api', 'data/migrations/default', 'web/src/pages']
       for (const dir of dirs) {
          const d = path.resolve(fullTargetDir, dir)
          if (!fs.existsSync(d)) {
             fs.mkdirSync(d, { recursive: true })
+         } else if (dir === 'src/models' || dir === 'src/api' || dir === 'web/src/pages') {
+            fs.readdirSync(d).forEach(file => {
+               if (file.endsWith('.ts') || file.endsWith('.tsx')) {
+                  fs.unlinkSync(path.join(d, file))
+               }
+            })
          }
       }
 
@@ -104,10 +110,11 @@ export class CodeGenerator {
          // Use imports from core properties
          const propsCode = model.properties.map((p: any) => {
             const propClass = mapTypeToClass(p.type)
+            const htmlTypeLine = p.htmlType ? `,\n      htmlType: '${p.htmlType}'` : ''
             return `   {
       name: '${p.name}',
       type: ${propClass}.TYPE,
-      mandatory: ${p.options?.mandatory ? 'true' : 'false'}
+      mandatory: ${p.options?.mandatory ? 'true' : 'false'}${htmlTypeLine}
    }`
          }).join(',\n')
 
@@ -137,10 +144,14 @@ export class ${className} extends PersistedBaseObject {
 
    private static generateApiEndpoints(config: any, targetDir: string, models: string[]): void {
       for (const className of models) {
-         const apiCode = `import { CrudEndpoint } from '@quatrain/api-server'
+         const apiCode = `import { CrudEndpoint, ValuesEndpoint } from '@quatrain/api-server'
+import { ServerAdapter, EndpointOptions } from '@quatrain/api'
 import { ${className} } from '../models/${className}'
 
-export const ${className}Api = CrudEndpoint(${className})
+export const ${className}Api = (router: ServerAdapter, path: string, options: EndpointOptions) => {
+   CrudEndpoint(${className})(router, path, options)
+   ValuesEndpoint(${className})(router, path, options)
+}
 `
          fs.writeFileSync(path.resolve(targetDir, `src/api/${className}Api.ts`), apiCode)
       }
@@ -303,6 +314,7 @@ export const down = async ({ context: adapter }: { context: AbstractBackendAdapt
             "@mantine/core": "^7.11.1",
             "@mantine/hooks": "^7.11.1",
             "@quatrain/api-client": "latest-dev",
+            "@quatrain/ui-form-react": "latest-dev",
             "react": "^18.3.1",
             "react-dom": "^18.3.1",
             "react-router-dom": "^6.24.1"
@@ -522,59 +534,26 @@ export function ${m}List() {
 `
          fs.writeFileSync(path.join(pagesDir, `${m}List.tsx`), listTsx)
 
-         const formTsx = `import { useEffect, useState } from 'react'
-import { TextInput, Button, Group, Title, Paper, Select } from '@mantine/core'
+         const modelSchemaStr = JSON.stringify(modelConfig, null, 3)
+
+         const formTsx = `import { QuatrainForm } from '@quatrain/ui-form-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api'
 
 export function ${m}Form() {
    const { id } = useParams()
    const navigate = useNavigate()
-   const [formData, setFormData] = useState<any>({ status: 'created' })
 
-   useEffect(() => {
-      if (id && id !== 'new') {
-         api.get('${m.toLowerCase()}s/' + id).then(res => {
-            if (res && res.data) {
-               setFormData(res.data)
-            }
-         })
-      }
-   }, [id])
-
-   const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault()
-      if (id === 'new') {
-         await api.post('${m.toLowerCase()}s', formData)
-      } else {
-         await api.patch('${m.toLowerCase()}s/' + id, formData)
-      }
-      navigate('/${m.toLowerCase()}s')
-   }
+   const modelSchema = ${modelSchemaStr}
 
    return (
-      <Paper p="md" shadow="sm">
-         <Title order={2} mb="md">{id === 'new' ? \`Create ${m}\` : \`Edit ${m}\`}</Title>
-         <form onSubmit={handleSubmit}>
-            <TextInput 
-               label="Name" 
-               value={formData.name || ''} 
-               onChange={e => setFormData({...formData, name: e.target.value})} 
-               mb="sm" 
-            />
-            <Select
-               label="Status"
-               data={['created', 'pending', 'active', 'deleted']}
-               value={formData.status || 'created'}
-               onChange={val => setFormData({...formData, status: val})}
-               mb="md"
-            />
-            <Group>
-               <Button type="submit">Save</Button>
-               <Button variant="outline" onClick={() => navigate('/${m.toLowerCase()}s')}>Cancel</Button>
-            </Group>
-         </form>
-      </Paper>
+      <QuatrainForm 
+         modelSchema={modelSchema} 
+         objectId={id} 
+         apiClient={api} 
+         onSave={() => navigate('/${m.toLowerCase()}s')}
+         onCancel={() => navigate('/${m.toLowerCase()}s')}
+      />
    )
 }
 `
@@ -609,7 +588,7 @@ CMD ["nginx", "-g", "daemon off;"]
     }
 
     location /api/ {
-        proxy_pass http://api:4001/;
+        proxy_pass http://engine:4001/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';

@@ -42,7 +42,7 @@ export class InfraBuilder {
          environment: {
             NODE_ENV: 'production'
          },
-         volumes: ['./quatrain.json:/app/quatrain.json:ro'],
+         volumes: ['./quatrain.json:/app/quatrain.json:ro', './data:/app/data'],
          depends_on: []
       }
 
@@ -144,7 +144,7 @@ COPY package.json tsconfig.json quatrain.json ./
 RUN bun install
 COPY src ./src
 COPY data ./data
-EXPOSE 3000 4001
+EXPOSE 4001
 CMD ["bun", "run", "src/index.ts"]
       `.trim()
 

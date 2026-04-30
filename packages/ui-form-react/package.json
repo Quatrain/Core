@@ -1,7 +1,8 @@
 {
   "name": "@quatrain/ui-form-react",
   "version": "1.1.1",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "license": "AGPL-3.0-only",
   "peerDependencies": {
     "react": "^18.3.1",
@@ -9,7 +10,10 @@
   },
   "dependencies": {
     "@quatrain/core": "workspace:*",
-    "@quatrain/ui": "workspace:*"
+    "@quatrain/ui": "workspace:*",
+    "@mantine/core": "^7.11.1",
+    "@mantine/hooks": "^7.11.1",
+    "@tabler/icons-react": "^3.10.0"
   },
   "devDependencies": {
     "typescript": "^5.2.2"

@@ -30,7 +30,7 @@ export class InfraBuilder {
 
       const envVars: Record<string, string> = {}
 
-      // 1. Unified Engine Container (API + Front)
+      // 1. Backend Engine Container
       compose.services['engine'] = {
          build: {
             context: '.',
@@ -38,12 +38,24 @@ export class InfraBuilder {
          },
          container_name: `${appName}-engine`,
          restart: 'unless-stopped',
-         ports: ['3000:3000', '4001:4000'],
+         ports: ['4001:4001'],
          environment: {
             NODE_ENV: 'production'
          },
          volumes: ['./quatrain.json:/app/quatrain.json:ro'],
          depends_on: []
+      }
+
+      // 1b. Frontend UI Container
+      compose.services['ui'] = {
+         build: {
+            context: './web',
+            dockerfile: 'Dockerfile'
+         },
+         container_name: `${appName}-ui`,
+         restart: 'unless-stopped',
+         ports: ['3000:80'],
+         depends_on: ['engine']
       }
 
       // 2. Backend Infrastructure

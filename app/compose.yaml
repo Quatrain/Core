@@ -6,9 +6,18 @@ services:
     container_name: quatrain-app-engine
     restart: unless-stopped
     ports:
-      - 3000:3000
-      - 4001:4000
+      - 4001:4001
     environment:
       NODE_ENV: production
     volumes:
       - ./quatrain.json:/app/quatrain.json:ro
+  ui:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: quatrain-app-ui
+    restart: unless-stopped
+    ports:
+      - 3000:80
+    depends_on:
+      - engine

@@ -25,6 +25,8 @@ export class CodeGenerator {
       this.generateApiEndpoints(config, fullTargetDir, generatedModels)
       this.generateIndex(config, fullTargetDir, generatedModels)
       this.generateMigration(config, fullTargetDir)
+      
+      this.generateFrontend(config, fullTargetDir, generatedModels)
 
       Log.info(`[CodeGenerator] Application générée avec succès dans ${fullTargetDir}`)
    }
@@ -41,7 +43,8 @@ export class CodeGenerator {
          main: "src/index.ts",
          type: "module",
          scripts: {
-            start: "bun run src/index.ts"
+            "start:dev": "NODE_ENV=development bun run --watch src/index.ts",
+            "start:prod": "NODE_ENV=production bun run src/index.ts"
          },
          dependencies: {
             "@quatrain/core": targetNpmTag,
@@ -92,17 +95,23 @@ export class CodeGenerator {
          const collectionName = model.collectionName || className.toLowerCase()
          generatedNames.push(className)
 
+         // Helper to map raw types to Property classes
+         const mapTypeToClass = (type: string) => {
+            if (type.toLowerCase() === 'datetime') return 'DateTimeProperty'
+            return type.charAt(0).toUpperCase() + type.slice(1) + 'Property'
+         }
+
          // Use imports from core properties
          const propsCode = model.properties.map((p: any) => {
-            const propType = p.type // e.g. "StringProperty"
+            const propClass = mapTypeToClass(p.type)
             return `   {
       name: '${p.name}',
-      type: ${propType}.TYPE,
+      type: ${propClass}.TYPE,
       mandatory: ${p.options?.mandatory ? 'true' : 'false'}
    }`
          }).join(',\n')
 
-         const propTypesToImport = Array.from(new Set(model.properties.map((p: any) => p.type)))
+         const propTypesToImport = Array.from(new Set(model.properties.map((p: any) => mapTypeToClass(p.type))))
          
          const modelCode = `import { PersistedBaseObject } from '@quatrain/backend'
 import { ${propTypesToImport.join(', ')} } from '@quatrain/core'
@@ -131,11 +140,7 @@ export class ${className} extends PersistedBaseObject {
          const apiCode = `import { CrudEndpoint } from '@quatrain/api-server'
 import { ${className} } from '../models/${className}'
 
-export class ${className}Api extends CrudEndpoint {
-   constructor() {
-      super('/api/${className.toLowerCase()}s', ${className})
-   }
-}
+export const ${className}Api = CrudEndpoint(${className})
 `
          fs.writeFileSync(path.resolve(targetDir, `src/api/${className}Api.ts`), apiCode)
       }
@@ -147,28 +152,32 @@ export class ${className}Api extends CrudEndpoint {
       
       const modelImports = models.map(m => `import { ${m} } from './models/${m}'`).join('\n')
       const apiImports = models.map(m => `import { ${m}Api } from './api/${m}Api'`).join('\n')
-      const apiRegisters = models.map(m => `      server.addEndpoint(new ${m}Api())`).join('\n')
+      const apiRegisters = models.map(m => `      server.addEndpoint(${m}Api, '/api/${m.toLowerCase()}s')`).join('\n')
 
       const indexCode = `import * as path from 'path'
 import { Backend, InjectMetaMiddleware } from '@quatrain/backend'
 import { ${adapterClass} } from '${adapterImport}'
 import { ExpressAdapter } from '@quatrain/api-server'
 import { MigrationManager } from '@quatrain/backend-migrations'
+import { Log, DefaultLoggerAdapter, LogLevel } from '@quatrain/log'
 ${config.authMode === 'oauth' ? `import { AuthOIDC } from '@quatrain/auth-oidc'\n` : ''}
 ${modelImports}
 ${apiImports}
 
 ;(async () => {
    try {
+      const isProd = process.env.NODE_ENV === 'production'
+      Log.addLogger('default', new DefaultLoggerAdapter('', isProd ? LogLevel.INFO : LogLevel.DEBUG), true)
+      
       const adapter = new ${adapterClass}({ 
          config: ${adapterClass === 'SQLiteAdapter' ? '{ database: path.resolve(process.cwd(), "data/app.sqlite") }' : 'process.env.DATABASE_URL'},
          middlewares: [new InjectMetaMiddleware()]
       })
 
-      Backend.init(adapter)
+      Backend.addBackend(adapter, 'default', true)
       
-      const mm = new MigrationManager()
-      await mm.up()
+      const mm = new MigrationManager(adapter)
+      await mm.executeMigrations()
       
       const server = new ExpressAdapter()
       
@@ -176,7 +185,7 @@ ${apiRegisters}
 
 ${config.authMode === 'oauth' ? `      // Initialize OIDC Auth
       const oidc = AuthOIDC.init('http://localhost:4001')
-      server.getApp().use('/oidc', oidc.callback())
+      server.getNativeInstance().use('/oidc', oidc.callback())
 ` : ''}
 
       const PORT = Number(process.env.PORT) || 4001
@@ -202,22 +211,33 @@ ${config.authMode === 'oauth' ? `      // Initialize OIDC Auth
          if (!model.name) continue
          const collectionName = model.collectionName || model.name.toLowerCase()
          
-         const columns = model.properties.map((p: any) => {
-            // Very simplified SQLite type mapping for the PoC
-            let sqlType = 'TEXT'
-            if (p.type === 'NumberProperty' || p.type === 'BooleanProperty') sqlType = 'INTEGER'
-            return `${p.name} ${sqlType}`
-         }).join(',\n         ')
+         const baseColumns = ['id', 'name', 'status', 'createdby', 'createdat', 'updatedby', 'updatedat', 'deletedby', 'deletedat']
+         
+         const customColumns = model.properties
+            .filter((p: any) => !baseColumns.includes(p.name.toLowerCase()))
+            .map((p: any) => {
+               // Very simplified SQLite type mapping for the PoC
+               let sqlType = 'TEXT'
+               if (p.type === 'NumberProperty' || p.type === 'BooleanProperty') sqlType = 'INTEGER'
+               return `${p.name.toLowerCase()} ${sqlType}`
+            })
+
+         const allColumns = [
+            'id TEXT PRIMARY KEY',
+            'name TEXT',
+            'status TEXT',
+            'createdat INTEGER',
+            'updatedat INTEGER',
+            'deletedat INTEGER',
+            'createdby TEXT',
+            'updatedby TEXT',
+            'deletedby TEXT',
+            ...customColumns
+         ].join(',\n            ')
 
          upQueries += `
       await adapter.rawQuery(\`CREATE TABLE IF NOT EXISTS ${collectionName} (
-         id TEXT PRIMARY KEY,
-         status TEXT,
-         created_at TEXT,
-         updated_at TEXT,
-         created_by TEXT,
-         updated_by TEXT,
-         ${columns}
+            ${allColumns}
       )\`)\n`
 
          downQueries += `
@@ -240,7 +260,364 @@ export const down = async ({ context: adapter }: { context: AbstractBackendAdapt
    }
 }
 `
+      const migrationsDir = path.resolve(targetDir, 'data/migrations/default')
+      // Clear old migrations to prevent executing buggy or duplicate past generations
+      if (fs.existsSync(migrationsDir)) {
+         fs.readdirSync(migrationsDir).forEach(file => {
+            if (file.endsWith('.ts')) {
+               fs.unlinkSync(path.join(migrationsDir, file))
+            }
+         })
+      }
+
       const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)
-      fs.writeFileSync(path.resolve(targetDir, `data/migrations/default/${timestamp}_init.ts`), migrationCode)
+      fs.writeFileSync(path.join(migrationsDir, `${timestamp}_init.ts`), migrationCode)
+   }
+
+   private static generateFrontend(config: any, targetDir: string, models: string[]): void {
+      const webDir = path.resolve(targetDir, 'web')
+      if (!fs.existsSync(webDir)) {
+         fs.mkdirSync(webDir, { recursive: true })
+      }
+      const srcDir = path.resolve(webDir, 'src')
+      if (!fs.existsSync(srcDir)) {
+         fs.mkdirSync(srcDir, { recursive: true })
+      }
+      const pagesDir = path.resolve(srcDir, 'pages')
+      if (!fs.existsSync(pagesDir)) {
+         fs.mkdirSync(pagesDir, { recursive: true })
+      }
+
+      // package.json
+      const packageJson = {
+         name: "quatrain-ui-front",
+         private: true,
+         version: "1.0.0",
+         type: "module",
+         scripts: {
+            "dev": "vite",
+            "build": "tsc && vite build",
+            "preview": "vite preview"
+         },
+         dependencies: {
+            "@mantine/core": "^7.11.1",
+            "@mantine/hooks": "^7.11.1",
+            "@quatrain/api-client": "latest-dev",
+            "react": "^18.3.1",
+            "react-dom": "^18.3.1",
+            "react-router-dom": "^6.24.1"
+         },
+         devDependencies: {
+            "@types/react": "^18.3.3",
+            "@types/react-dom": "^18.3.0",
+            "@vitejs/plugin-react": "^4.3.1",
+            "typescript": "^5.5.3",
+            "vite": "^5.3.4"
+         }
+      }
+      fs.writeFileSync(path.join(webDir, 'package.json'), JSON.stringify(packageJson, null, 2))
+
+      // tsconfig.json
+      const tsConfig = {
+         compilerOptions: {
+            target: "ES2020",
+            useDefineForClassFields: true,
+            lib: ["ES2020", "DOM", "DOM.Iterable"],
+            module: "ESNext",
+            skipLibCheck: true,
+            moduleResolution: "bundler",
+            allowImportingTsExtensions: true,
+            resolveJsonModule: true,
+            isolatedModules: true,
+            noEmit: true,
+            jsx: "react-jsx",
+            strict: true,
+            noUnusedLocals: true,
+            noUnusedParameters: true,
+            noFallthroughCasesInSwitch: true
+         },
+         include: ["src"]
+      }
+      fs.writeFileSync(path.join(webDir, 'tsconfig.json'), JSON.stringify(tsConfig, null, 2))
+
+      // vite.config.ts
+      const viteConfig = `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:4001',
+        changeOrigin: true
+      }
+    }
+  }
+})
+`
+      fs.writeFileSync(path.join(webDir, 'vite.config.ts'), viteConfig)
+
+      // index.html
+      const indexHtml = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quatrain App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+`
+      fs.writeFileSync(path.join(webDir, 'index.html'), indexHtml)
+
+      // main.tsx
+      const mainTsx = `import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { MantineProvider } from '@mantine/core'
+import '@mantine/core/styles.css'
+import { BrowserRouter } from 'react-router-dom'
+import App from './App.tsx'
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <MantineProvider defaultColorScheme="dark">
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </MantineProvider>
+  </React.StrictMode>,
+)
+`
+      fs.writeFileSync(path.join(srcDir, 'main.tsx'), mainTsx)
+
+      // api.ts
+      const apiTs = `import { ApiClient } from '@quatrain/api-client'
+
+export const api = new ApiClient('/api')
+`
+      fs.writeFileSync(path.join(srcDir, 'api.ts'), apiTs)
+
+      // App.tsx
+      const menuItems = models.map(m => 
+         `          <a href="/${m.toLowerCase()}s" style={{display: 'block', padding: '10px', color: 'white', textDecoration: 'none'}}>${m}s</a>`
+      ).join('\n')
+
+      const routes = models.map(m => 
+         `            <Route path="/${m.toLowerCase()}s" element={<${m}List />} />\n            <Route path="/${m.toLowerCase()}s/:id" element={<${m}Form />} />`
+      ).join('\n')
+
+      const imports = models.map(m => 
+         `import { ${m}List } from './pages/${m}List'\nimport { ${m}Form } from './pages/${m}Form'`
+      ).join('\n')
+
+      const appTsx = `import { AppShell, Burger, Group, Title } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { Routes, Route } from 'react-router-dom'
+${imports}
+
+export default function App() {
+  const [opened, { toggle }] = useDisclosure()
+
+  return (
+    <AppShell
+      header={{ height: 60 }}
+      navbar={{
+        width: 300,
+        breakpoint: 'sm',
+        collapsed: { mobile: !opened },
+      }}
+      padding="md"
+    >
+      <AppShell.Header>
+        <Group h="100%" px="md">
+          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+          <Title order={3}>Quatrain App</Title>
+        </Group>
+      </AppShell.Header>
+
+      <AppShell.Navbar p="md">
+${menuItems}
+      </AppShell.Navbar>
+
+      <AppShell.Main>
+         <Routes>
+${routes}
+            <Route path="/" element={<div>Welcome to your Quatrain Application</div>} />
+         </Routes>
+      </AppShell.Main>
+    </AppShell>
+  )
+}
+`
+      fs.writeFileSync(path.join(srcDir, 'App.tsx'), appTsx)
+
+      // Generate CRUD pages
+      for (const m of models) {
+         const modelConfig = config.models.find((mod: any) => mod.name === m)
+         const props = modelConfig?.properties || []
+
+         const listTsx = `import { useEffect, useState } from 'react'
+import { Table, Button, Group, Title } from '@mantine/core'
+import { useNavigate } from 'react-router-dom'
+import { api } from '../api'
+
+export function ${m}List() {
+   const [data, setData] = useState<any[]>([])
+   const navigate = useNavigate()
+
+   useEffect(() => {
+      api.get('${m.toLowerCase()}s').then((res) => {
+         if (res && res.data) {
+            setData(res.data)
+         }
+      })
+   }, [])
+
+   const handleDelete = async (id: string) => {
+      if (confirm('Are you sure?')) {
+         await api.delete('${m.toLowerCase()}s/' + id, {})
+         setData(data.filter(item => item.uid !== id))
+      }
+   }
+
+   return (
+      <div>
+         <Group justify="space-between" mb="md">
+            <Title order={2}>${m}s</Title>
+            <Button onClick={() => navigate('/${m.toLowerCase()}s/new')}>Create ${m}</Button>
+         </Group>
+         <Table>
+            <Table.Thead>
+               <Table.Tr>
+                  <Table.Th>Name</Table.Th>
+                  <Table.Th>Status</Table.Th>
+                  <Table.Th>Actions</Table.Th>
+               </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+               {data.map(item => (
+                  <Table.Tr key={item.uid}>
+                     <Table.Td>{item.name || item.uid}</Table.Td>
+                     <Table.Td>{item.status}</Table.Td>
+                     <Table.Td>
+                        <Group>
+                           <Button size="xs" variant="outline" onClick={() => navigate(\`/${m.toLowerCase()}s/\${item.uid}\`)}>Edit</Button>
+                           <Button size="xs" color="red" variant="outline" onClick={() => handleDelete(item.uid)}>Delete</Button>
+                        </Group>
+                     </Table.Td>
+                  </Table.Tr>
+               ))}
+            </Table.Tbody>
+         </Table>
+      </div>
+   )
+}
+`
+         fs.writeFileSync(path.join(pagesDir, `${m}List.tsx`), listTsx)
+
+         const formTsx = `import { useEffect, useState } from 'react'
+import { TextInput, Button, Group, Title, Paper, Select } from '@mantine/core'
+import { useNavigate, useParams } from 'react-router-dom'
+import { api } from '../api'
+
+export function ${m}Form() {
+   const { id } = useParams()
+   const navigate = useNavigate()
+   const [formData, setFormData] = useState<any>({ status: 'created' })
+
+   useEffect(() => {
+      if (id && id !== 'new') {
+         api.get('${m.toLowerCase()}s/' + id).then(res => {
+            if (res && res.data) {
+               setFormData(res.data)
+            }
+         })
+      }
+   }, [id])
+
+   const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault()
+      if (id === 'new') {
+         await api.post('${m.toLowerCase()}s', formData)
+      } else {
+         await api.patch('${m.toLowerCase()}s/' + id, formData)
+      }
+      navigate('/${m.toLowerCase()}s')
+   }
+
+   return (
+      <Paper p="md" shadow="sm">
+         <Title order={2} mb="md">{id === 'new' ? \`Create ${m}\` : \`Edit ${m}\`}</Title>
+         <form onSubmit={handleSubmit}>
+            <TextInput 
+               label="Name" 
+               value={formData.name || ''} 
+               onChange={e => setFormData({...formData, name: e.target.value})} 
+               mb="sm" 
+            />
+            <Select
+               label="Status"
+               data={['created', 'pending', 'active', 'deleted']}
+               value={formData.status || 'created'}
+               onChange={val => setFormData({...formData, status: val})}
+               mb="md"
+            />
+            <Group>
+               <Button type="submit">Save</Button>
+               <Button variant="outline" onClick={() => navigate('/${m.toLowerCase()}s')}>Cancel</Button>
+            </Group>
+         </form>
+      </Paper>
+   )
+}
+`
+         fs.writeFileSync(path.join(pagesDir, `${m}Form.tsx`), formTsx)
+      }
+
+      // Dockerfile
+      const dockerfile = `FROM node:22-alpine as builder
+WORKDIR /app
+COPY package*.json ./
+RUN yarn install
+COPY . .
+RUN yarn build
+
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+`
+      fs.writeFileSync(path.join(webDir, 'Dockerfile'), dockerfile)
+
+      // nginx.conf
+      const nginxConf = `server {
+    listen       80;
+    server_name  localhost;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://api:4001/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+`
+      fs.writeFileSync(path.join(webDir, 'nginx.conf'), nginxConf)
    }
 }

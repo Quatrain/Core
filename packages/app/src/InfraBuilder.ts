@@ -10,22 +10,28 @@ export interface ComposeService {
    volumes?: string[]
    command?: string
    depends_on?: string[]
+   networks?: string[]
 }
 
 export interface ComposeFile {
    version?: string
    services: Record<string, ComposeService>
    volumes?: Record<string, any>
+   networks?: Record<string, any>
 }
 
 export class InfraBuilder {
    /**
     * Génère le contenu des fichiers compose.yaml, .env et Containerfile en fonction de la configuration de l'application
     */
-   public static build(config: any, appName: string = 'quatrain-app'): { compose: string, env: string, dockerfile: string } {
+   public static build(config: any, appName?: string): { compose: string, env: string, dockerfile: string } {
+      const finalAppName = appName || config.name?.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'quatrain-app'
       const compose: ComposeFile = {
          services: {},
-         volumes: {}
+         volumes: {},
+         networks: {
+            [`${finalAppName}-net`]: { driver: 'bridge' }
+         }
       }
 
       const envVars: Record<string, string> = {}
@@ -36,12 +42,12 @@ export class InfraBuilder {
             context: '.',
             dockerfile: 'Containerfile'
          },
-         container_name: `${appName}-engine`,
          restart: 'unless-stopped',
          ports: ['4001:4001'],
          environment: {
             NODE_ENV: 'production'
          },
+         networks: [`${finalAppName}-net`],
          volumes: ['./quatrain.json:/app/quatrain.json:ro', './data:/app/data'],
          depends_on: []
       }
@@ -52,9 +58,9 @@ export class InfraBuilder {
             context: './web',
             dockerfile: 'Dockerfile'
          },
-         container_name: `${appName}-ui`,
          restart: 'unless-stopped',
          ports: ['3000:80'],
+         networks: [`${finalAppName}-net`],
          depends_on: ['engine']
       }
 
@@ -66,7 +72,6 @@ export class InfraBuilder {
 
          compose.services['postgres'] = {
             image: 'postgres:15-alpine',
-            container_name: `${appName}-postgres`,
             restart: 'unless-stopped',
             ports: ['5432:5432'],
             environment: {
@@ -74,6 +79,7 @@ export class InfraBuilder {
                POSTGRES_PASSWORD: dbPass,
                POSTGRES_DB: dbName
             },
+            networks: [`${finalAppName}-net`],
             volumes: ['postgres_data:/var/lib/postgresql/data']
          }
          compose.volumes!['postgres_data'] = {}
@@ -90,13 +96,13 @@ export class InfraBuilder {
 
          compose.services['minio'] = {
             image: 'minio/minio:latest',
-            container_name: `${appName}-minio`,
             restart: 'unless-stopped',
             ports: ['9000:9000', '9001:9001'],
             environment: {
                MINIO_ROOT_USER: s3User,
                MINIO_ROOT_PASSWORD: s3Pass
             },
+            networks: [`${finalAppName}-net`],
             command: 'server /data --console-address ":9001"',
             volumes: ['minio_data:/data']
          }
@@ -107,14 +113,18 @@ export class InfraBuilder {
          envVars['S3_ENDPOINT'] = `http://minio:9000`
          envVars['S3_ACCESS_KEY'] = s3User
          envVars['S3_SECRET_KEY'] = s3Pass
+      } else if (config.storage && config.storage.adapter === 'LocalAdapter') {
+         const storagePath = config.storage.config?.path || '/data/storage'
+         compose.services['engine'].volumes!.push(`local_storage_data:${storagePath}`)
+         compose.volumes!['local_storage_data'] = {}
       }
 
       // 4. Messaging/Queue Infrastructure
       if (config.queue && config.queue.adapter === 'AmqpAdapter') {
          compose.services['rabbitmq'] = {
             image: 'rabbitmq:3-management-alpine',
-            container_name: `${appName}-rabbitmq`,
             restart: 'unless-stopped',
+            networks: [`${finalAppName}-net`],
             ports: ['5672:5672', '15672:15672']
          }
          

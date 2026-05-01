@@ -450,7 +450,7 @@ function AppContent() {
             style={{ borderRadius: '8px' }}
           />
           <NavLink 
-            label="Secrets" 
+            label={t('app.secrets') || "Secrets"} 
             active={currentView === 'secrets'} 
             onClick={() => { window.location.hash = '/secrets'; setError(null); }} 
             variant="light"

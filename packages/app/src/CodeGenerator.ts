@@ -104,7 +104,8 @@ export class CodeGenerator {
          // Helper to map raw types to Property classes
          const mapTypeToClass = (type: string) => {
             if (type.toLowerCase() === 'datetime') return 'DateTimeProperty'
-            return type.charAt(0).toUpperCase() + type.slice(1) + 'Property'
+            const formatted = type.charAt(0).toUpperCase() + type.slice(1)
+            return formatted.endsWith('Property') ? formatted : formatted + 'Property'
          }
 
          // Use imports from core properties
@@ -144,13 +145,14 @@ export class ${className} extends PersistedBaseObject {
 
    private static generateApiEndpoints(config: any, targetDir: string, models: string[]): void {
       for (const className of models) {
-         const apiCode = `import { CrudEndpoint, ValuesEndpoint } from '@quatrain/api-server'
+         const apiCode = `import { CrudEndpoint, ValuesEndpoint, ListEndpoint } from '@quatrain/api-server'
 import { ServerAdapter, EndpointOptions } from '@quatrain/api'
 import { ${className} } from '../models/${className}'
 
 export const ${className}Api = (router: ServerAdapter, path: string, options: EndpointOptions) => {
-   CrudEndpoint(${className})(router, path, options)
    ValuesEndpoint(${className})(router, path, options)
+   ListEndpoint(${className})(router, path, options)
+   CrudEndpoint(${className})(router, path, options)
 }
 `
          fs.writeFileSync(path.resolve(targetDir, `src/api/${className}Api.ts`), apiCode)
@@ -286,6 +288,7 @@ export const down = async ({ context: adapter }: { context: AbstractBackendAdapt
    }
 
    private static generateFrontend(config: any, targetDir: string, models: string[]): void {
+      const appName = config.name?.toLowerCase().replace(/[^a-z0-9]/g, '-') || "quatrain-app"
       const webDir = path.resolve(targetDir, 'web')
       if (!fs.existsSync(webDir)) {
          fs.mkdirSync(webDir, { recursive: true })
@@ -367,7 +370,7 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       proxy: {
         '/api': {
-          target: env.VITE_API_URL || 'http://localhost:4001',
+          target: 'http://localhost:4001',
           changeOrigin: true
         }
       }
@@ -598,7 +601,7 @@ CMD ["nginx", "-g", "daemon off;"]
     }
 
     location /api/ {
-        proxy_pass http://engine:4001/;
+        proxy_pass http://engine:4001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';

@@ -3,22 +3,30 @@ services:
     build:
       context: .
       dockerfile: Containerfile
-    container_name: quatrain-app-engine
     restart: unless-stopped
     ports:
       - 4001:4001
     environment:
       NODE_ENV: production
+    networks:
+      - env-local-net
     volumes:
       - ./quatrain.json:/app/quatrain.json:ro
       - ./data:/app/data
+      - local_storage_data:/data/storage
   ui:
     build:
       context: ./web
       dockerfile: Dockerfile
-    container_name: quatrain-app-ui
     restart: unless-stopped
     ports:
       - 3000:80
+    networks:
+      - env-local-net
     depends_on:
       - engine
+volumes:
+  local_storage_data: {}
+networks:
+  env-local-net:
+    driver: bridge

@@ -1,5 +1,5 @@
 import { PersistedBaseObject } from '@quatrain/backend'
-import { StringProperty, BaseObjectProperties, BaseObjectType, htmlType } from '@quatrain/core'
+import { StringProperty, EnumProperty, BaseObjectProperties, BaseObjectType, htmlType } from '@quatrain/core'
 
 export interface StudioEnvironmentType extends BaseObjectType {
    projectId: string
@@ -7,7 +7,7 @@ export interface StudioEnvironmentType extends BaseObjectType {
    backendId?: string
    storageId?: string
    authId?: string
-   recipe?: string
+   environment?: string
 }
 
 export const StudioEnvironmentProperties: any = [
@@ -41,9 +41,15 @@ export const StudioEnvironmentProperties: any = [
       type: StringProperty.TYPE,
    },
    {
-      name: 'recipe',
-      mandatory: false,
-      type: StringProperty.TYPE,
+      name: 'environment',
+      mandatory: true,
+      type: EnumProperty.TYPE,
+      defaultValue: 'development',
+      values: ['development', 'staging', 'production'],
+      options: {
+         values: ['development', 'staging', 'production'],
+         badge: true
+      }
    }
 ]
 

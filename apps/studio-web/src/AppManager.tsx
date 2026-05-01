@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Modal, TextInput, Textarea, Button, Stack, ActionIcon, Select, Loader } from '@mantine/core'
+import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Modal, TextInput, Textarea, Button, Stack, ActionIcon, Select, Loader, Badge } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { api } from './api'
 
@@ -19,6 +19,7 @@ export function AppManager() {
   // Modals
   const [isEnvModalOpen, setIsEnvModalOpen] = useState(false)
   const [newEnvName, setNewEnvName] = useState('')
+  const [newEnvType, setNewEnvType] = useState('development')
   const [isDeploying, setIsDeploying] = useState(false)
   const [deployResult, setDeployResult] = useState<{ success: boolean, message: string } | null>(null)
           
@@ -71,9 +72,10 @@ export function AppManager() {
   const handleAddEnv = async () => {
     if (!newEnvName || !project) return
     try {
-      await api.createEnvironment({ projectId: project.uid, name: newEnvName })
+      await api.createEnvironment({ projectId: project.uid, name: newEnvName, environment: newEnvType })
       setIsEnvModalOpen(false)
       setNewEnvName('')
+      setNewEnvType('development')
       loadAll()
     } catch (e) {
       console.error(e)
@@ -151,9 +153,9 @@ export function AppManager() {
             minRows={3}
           />
           <Select
-            label="Recette (Template) de l'application"
+            label={t('appManager.recipeLabel') || "Recette (Template) de l'application"}
             placeholder="-"
-            data={[{ value: 'crud', label: 'CRUD App (Engine unifié)' }]}
+            data={[{ value: 'crud', label: t('appManager.recipeCrud') || 'CRUD App (Engine unifié)' }]}
             value={project?.recipe || null}
             onChange={async (val) => {
               if (project) {
@@ -247,7 +249,14 @@ export function AppManager() {
           >
             <Card.Section withBorder inheritPadding py="xs">
               <Group justify="space-between">
-                <Text fw={700} size="lg">{env.name}</Text>
+                <Group gap="xs">
+                  <Text fw={700} size="lg">{env.name}</Text>
+                  {env.environment && (
+                    <Badge color={env.environment === 'production' ? 'red' : env.environment === 'staging' ? 'yellow' : 'green'} variant="light">
+                      {env.environment}
+                    </Badge>
+                  )}
+                </Group>
                 <ActionIcon variant="light" color="red" onClick={() => handleDeleteEnv(env.uid)}>
                   ✖
                 </ActionIcon>
@@ -309,6 +318,18 @@ export function AppManager() {
             label={t('appManager.envName')}
             value={newEnvName}
             onChange={(e) => setNewEnvName(e.currentTarget.value)}
+            radius="md"
+          />
+          <Select
+            label={t('appManager.environment')}
+            data={[
+               { value: 'development', label: 'Development' },
+               { value: 'staging', label: 'Staging' },
+               { value: 'production', label: 'Production' }
+            ]}
+            value={newEnvType}
+            onChange={(val) => setNewEnvType(val || 'development')}
+            clearable={false}
             radius="md"
           />
           <Group justify="flex-end" mt="md">

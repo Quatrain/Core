@@ -145,9 +145,9 @@
     "last_published": "2026-04-30T19:42:20.032Z"
   },
   "@quatrain/app": {
-    "version": "1.1.5",
-    "hash": "s5+kgWjRq9/TuX8YiX0FTYVVH8k=-e67af5ecafc87b797f74f3050e24c53bb86354b234cd9853a7fe2f398f334278",
-    "last_published": "2026-04-30T19:42:28.898Z"
+    "version": "1.1.6",
+    "hash": "236uuz5O2lWAnGlZVENXzzA5JXw=-e67af5ecafc87b797f74f3050e24c53bb86354b234cd9853a7fe2f398f334278",
+    "last_published": "2026-05-01T10:52:26.640Z"
   },
   "@quatrain/auth-oidc": {
     "version": "1.1.1",
@@ -185,9 +185,9 @@
     "last_published": "2026-04-29T19:43:37.101Z"
   },
   "@quatrain/studio": {
-    "version": "1.1.1",
-    "hash": "1C3SV09QA/pe0bsSj41Os9zu8NI=-576a67a3bce312a16a9d0e923f709e36fb83cd8ce9f25f4f7facd0327ad35ae5",
-    "last_published": "2026-04-29T19:43:52.436Z"
+    "version": "1.1.2",
+    "hash": "aV3zQRGRMDBpIw+NDxF2pzkIi08=-576a67a3bce312a16a9d0e923f709e36fb83cd8ce9f25f4f7facd0327ad35ae5",
+    "last_published": "2026-05-01T10:53:14.948Z"
   },
   "@quatrain/ui": {
     "version": "1.1.5",

@@ -1,145 +1,141 @@
 {
-  "name": "Env-Local",
+  "name": "Env-Development",
   "recipe": "crud",
   "authMode": "none",
   "backend": {
     "package": "@quatrain/backend-sqlite",
     "adapter": "SQLiteAdapter",
     "config": {
-      "filename": "../app/data.sqlite"
+      "filename": "data.db"
     }
   },
   "storage": null,
+  "target": {
+    "name": "Docker Local",
+    "type": "docker-compose"
+  },
   "front": true,
+  "outputTarget": "default-target-docker",
   "models": [
     {
-      "uid": "dd368543-67e8-49a5-aa6a-0d6c074ebada",
-      "name": "editor",
-      "collectionName": null,
-      "properties": [
-        {
-          "name": "name",
-          "type": "StringProperty",
-          "options": {},
-          "ui": {
-            "labels": {
-              "en": "Editor",
-              "fr": "Editeur"
-            }
-          }
-        },
-        {
-          "name": "name",
-          "type": "StringProperty",
-          "options": {},
-          "ui": {
-            "labels": {
-              "en": "Editor",
-              "fr": "Editeur"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "uid": "f46632c7-0257-4bda-8e1b-9b57ed631d8b",
+      "uid": "07a97c0d-fd19-4bb2-be37-02367ed989e6",
       "name": "Author",
-      "collectionName": null,
+      "collectionName": "authors",
       "properties": [
         {
-          "name": "name",
-          "type": "StringProperty",
+          "name": "firstName",
+          "type": "string",
+          "mandatory": 1,
           "options": {},
           "ui": {
             "labels": {
-              "en": "Author",
-              "fr": "Auteur"
+              "en": "First Name",
+              "fr": "Prénom"
+            }
+          }
+        },
+        {
+          "name": "lastName",
+          "type": "string",
+          "mandatory": 1,
+          "options": {},
+          "ui": {
+            "labels": {
+              "en": "Last Name",
+              "fr": "Nom"
             }
           }
         },
         {
           "name": "name",
           "type": "StringProperty",
+          "mandatory": 1,
           "options": {},
           "ui": {
-            "labels": {
-              "en": "Author",
-              "fr": "Auteur"
-            }
+            "labels": {}
           }
         }
       ]
     },
     {
-      "uid": "7bb3cd79-806c-4af3-be9e-a0a927bedfdf",
-      "name": "Book",
-      "collectionName": null,
+      "uid": "ebc85d44-ef3c-4da1-ab18-3a672ba3800d",
+      "name": "Editor",
+      "collectionName": "editors",
       "properties": [
         {
           "name": "name",
-          "type": "StringProperty",
+          "type": "string",
+          "mandatory": 1,
           "options": {},
-          "ui": {
-            "labels": {
-              "en": "Title",
-              "fr": "Titre"
-            }
-          }
+          "ui": {}
         },
         {
-          "name": "editor",
-          "type": "ObjectProperty",
-          "options": {
-            "instanceOf": "editor"
-          },
-          "ui": {
-            "labels": {}
-          }
-        },
+          "name": "city",
+          "type": "string",
+          "mandatory": 0,
+          "options": {},
+          "ui": {}
+        }
+      ]
+    },
+    {
+      "uid": "c70b836f-d341-4e2d-95a2-ff7d719d9c57",
+      "name": "Book",
+      "collectionName": "books",
+      "properties": [
         {
-          "name": "author",
-          "type": "ObjectProperty",
+          "name": "authorAuthor",
+          "type": "object",
+          "mandatory": 1,
           "options": {
             "instanceOf": "Author"
           },
           "ui": {
-            "labels": {}
+            "labels": {
+              "en": "Editor",
+              "fr": "Editeur"
+            }
           }
+        },
+        {
+          "name": "editorEditor",
+          "type": "object",
+          "mandatory": 1,
+          "options": {
+            "instanceOf": "Editor"
+          },
+          "ui": {}
         },
         {
           "name": "name",
           "type": "StringProperty",
+          "mandatory": 1,
           "options": {},
           "ui": {
             "labels": {
               "en": "Title",
               "fr": "Titre"
             }
-          }
-        },
-        {
-          "name": "editor",
-          "type": "ObjectProperty",
-          "options": {
-            "instanceOf": "editor"
-          },
-          "ui": {
-            "labels": {}
-          }
-        },
-        {
-          "name": "author",
-          "type": "ObjectProperty",
-          "options": {
-            "instanceOf": "Author"
-          },
-          "ui": {
-            "labels": {}
           }
         }
       ]
     }
   ],
-  "widgets": [],
+  "widgets": [
+    {
+      "uid": "316bcaf1-df8e-4448-bcf5-8cc290a070c2",
+      "name": "BookForm",
+      "widgetType": "form",
+      "modelName": "Book",
+      "layout": null
+    },
+    {
+      "uid": "5c9e4cf8-5998-490c-9b75-27ca6f61fa8b",
+      "name": "BookForm",
+      "widgetType": "form",
+      "modelName": "Book",
+      "layout": null
+    }
+  ],
   "path": "../../app"
 }

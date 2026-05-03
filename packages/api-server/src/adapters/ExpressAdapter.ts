@@ -40,6 +40,15 @@ export class ExpressAdapter implements ServerAdapter {
                },
                send: (data: string) => {
                   res.send(data)
+               },
+               setHeader: (name: string, value: string) => {
+                  res.setHeader(name, value)
+               },
+               write: (data: string) => {
+                  res.write(data)
+               },
+               end: () => {
+                  res.end()
                }
             }
 

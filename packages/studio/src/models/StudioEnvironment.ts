@@ -11,6 +11,7 @@ export interface StudioEnvironmentType extends BaseObjectType {
    backendStudioSecret?: string
    storageStudioSecret?: string
    authStudioSecret?: string
+   studioTarget?: string
 }
 
 export const StudioEnvironmentProperties: any = [
@@ -55,6 +56,11 @@ export const StudioEnvironmentProperties: any = [
    },
    {
       name: 'authStudioSecret',
+      mandatory: false,
+      type: StringProperty.TYPE,
+   },
+   {
+      name: 'studioTarget',
       mandatory: false,
       type: StringProperty.TYPE,
    },

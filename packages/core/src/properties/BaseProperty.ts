@@ -16,6 +16,7 @@ export interface BasePropertyType extends AbstractPropertyType {
    onChange?: (dao: DataObjectClass<any>) => DataObjectClass<any>
 }
 
+// TODO: add `meta: boolean`. If meta is true, it is a meta-property strictly manipulated by the backend, and read-only for the user.
 export class BaseProperty implements PropertyClassType {
    static TYPE = 'any'
    static EVENT_ONCHANGE = 'onChange'

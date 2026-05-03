@@ -20,11 +20,14 @@ export class CodeGenerator {
       properties.forEach(p => propTypes.add(p.val('propertyType')))
 
       let imports = `import { ${baseClass} } from '${baseImport}'\n`
-      imports += `import { BaseObjectType, BaseObjectProperties, htmlType, ${Array.from(propTypes).join(', ')} } from '@quatrain/core'\n`
+      imports += `import { BaseObjectType, htmlType, ${Array.from(propTypes).join(', ')} } from '@quatrain/core'\n`
 
       // Generate Interface
+      const basePropNames = ['name', 'status', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt']
+      const filteredProps = properties.filter(p => !basePropNames.includes(p.val('name')))
+
       let interfaceProps = ''
-      properties.forEach(p => {
+      filteredProps.forEach(p => {
          // Simple mapping for TS types
          let tsType = 'string'
          if (p.val('propertyType') === 'BooleanProperty') tsType = 'boolean'
@@ -43,7 +46,7 @@ ${interfaceProps}   [x: string]: any
 
       // Generate PROPS_DEFINITION
       let propsDef = ''
-      properties.forEach(p => {
+      filteredProps.forEach(p => {
          propsDef += `   {\n`
          propsDef += `      name: '${p.val('name')}',\n`
          propsDef += `      mandatory: ${p.val('mandatory') ? 'true' : 'false'},\n`
@@ -55,7 +58,6 @@ ${interfaceProps}   [x: string]: any
 
       const propsDefCode = `
 export const ${modelName}Properties: any = [
-   ...BaseObjectProperties,
 ${propsDef}]
 `
 

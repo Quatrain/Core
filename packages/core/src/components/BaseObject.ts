@@ -138,11 +138,11 @@ export class BaseObject extends AbstractObject {
     */
    validate() {
       const errors: Record<string, string> = {}
-      const props = (this.constructor as typeof BaseObject).PROPS_DEFINITION || []
+      const props = Object.values(this._dataObject.properties) as any[]
 
       for (const prop of props) {
-         if (prop.mandatory) {
-            const val = this.get(prop.name)
+         if (prop.mandatory && !prop.protected) {
+            const val = prop.val()
             if (val === undefined || val === null || val === '') {
                errors[prop.name] = `${prop.name} is required`
             }

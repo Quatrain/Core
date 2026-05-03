@@ -1,6 +1,6 @@
 import { ApiClient } from '@quatrain/api-client'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 // Initialize the isomorphic API Client
 export const apiClient = ApiClient.instance(API_BASE_URL)
@@ -110,6 +110,11 @@ export const api = {
   deployEnvironment: async (id: string, config: any) => {
     const res = await apiClient.post(`environments/${id}/deploy`, config)
     return res.data
+  },
+
+  getTargets: async () => {
+    const res = await apiClient.get('targets')
+    return res.data || []
   },
 
   // Storages

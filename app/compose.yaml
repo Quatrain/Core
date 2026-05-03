@@ -9,7 +9,7 @@ services:
     environment:
       NODE_ENV: production
     networks:
-      - env-local-net
+      - env-development-net
     volumes:
       - ./quatrain.json:/app/quatrain.json:ro
       - ./data:/app/data
@@ -21,9 +21,9 @@ services:
     ports:
       - 3000:80
     networks:
-      - env-local-net
+      - env-development-net
     depends_on:
       - engine
 networks:
-  env-local-net:
+  env-development-net:
     driver: bridge

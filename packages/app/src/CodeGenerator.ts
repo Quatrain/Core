@@ -186,17 +186,21 @@ ${layoutCode}         {/* --- Fin du layout --- */}
          }
 
          // Use imports from core properties
-         const propsCode = model.properties.map((p: any) => {
+         const basePropNames = ['name', 'status', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt']
+         const filteredProps = model.properties.filter((p: any) => !basePropNames.includes(p.name))
+
+         const propsCode = filteredProps.map((p: any) => {
             const propClass = mapTypeToClass(p.type)
             const htmlTypeLine = p.htmlType ? `,\n      htmlType: '${p.htmlType}'` : ''
             return `   {
       name: '${p.name}',
       type: ${propClass}.TYPE,
-      mandatory: ${p.options?.mandatory ? 'true' : 'false'}${htmlTypeLine}
+      mandatory: ${p.mandatory ? 'true' : 'false'}${htmlTypeLine}
    }`
          }).join(',\n')
 
-         const propTypesToImport = Array.from(new Set(model.properties.map((p: any) => mapTypeToClass(p.type))))
+         const coreImports = new Set(filteredProps.map((p: any) => mapTypeToClass(p.type)))
+         const propTypesToImport = Array.from(coreImports)
          
          const modelCode = `import { PersistedBaseObject } from '@quatrain/backend'
 import { ${propTypesToImport.join(', ')} } from '@quatrain/core'
@@ -325,10 +329,20 @@ ${config.authMode === 'oauth' ? `      // Initialize OIDC Auth
             ...customColumns
          ].join(',\n            ')
 
+         let alterQueries = ''
+         customColumns.forEach((colDef: string) => {
+            alterQueries += `
+      try {
+         await adapter.rawQuery(\`ALTER TABLE ${collectionName} ADD COLUMN ${colDef}\`)
+      } catch (e) {
+         // Ignore error if column already exists
+      }\n`
+         })
+
          upQueries += `
       await adapter.rawQuery(\`CREATE TABLE IF NOT EXISTS ${collectionName} (
             ${allColumns}
-      )\`)\n`
+      )\`)\n${alterQueries}`
 
          downQueries += `
       await adapter.rawQuery('DROP TABLE IF EXISTS ${collectionName}')\n`

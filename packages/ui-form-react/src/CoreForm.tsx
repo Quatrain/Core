@@ -26,7 +26,11 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
     const { formData, relationOptions, status, validationErrors } = state
 
     const m = modelSchema.name
-    const props = modelSchema.properties || []
+    const props = [...(modelSchema.properties || [])].sort((a: any, b: any) => {
+        if (a.name === 'name') return -1;
+        if (b.name === 'name') return 1;
+        return 0;
+    })
     const ignoredProps = ['id', 'status', 'createdat', 'updatedat', 'deletedat', 'createdby', 'updatedby', 'deletedby']
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -46,36 +50,39 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
         if (ignoredProps.includes(lowerName)) return null
 
         const isProtected = objectId !== 'new' && p.protected
+        const fieldLabel = p.ui?.label || p.options?.instanceOf || propName
 
-        if (p.type === 'StringProperty') {
+        if (p.type === 'StringProperty' || p.type === 'string') {
             return (
                 <TextInput 
                     key={propName}
-                    label={propName} 
+                    label={fieldLabel} 
                     value={formData[propName] || ''} 
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.target.value)} 
                     disabled={status === 'loading' || status === 'saving' || isProtected}
                     error={validationErrors[propName]}
                     radius="md"
+                    withAsterisk={p.mandatory}
                 />
             )
-        } else if (p.type === 'NumberProperty') {
+        } else if (p.type === 'NumberProperty' || p.type === 'number') {
             return (
                 <NumberInput 
                     key={propName}
-                    label={propName} 
+                    label={fieldLabel} 
                     value={formData[propName] || 0} 
                     onChange={(val: string | number) => setFieldValue(propName, val)} 
                     disabled={status === 'loading' || status === 'saving' || isProtected}
                     error={validationErrors[propName]}
                     radius="md"
+                    withAsterisk={p.mandatory}
                 />
             )
-        } else if (p.type === 'BooleanProperty') {
+        } else if (p.type === 'BooleanProperty' || p.type === 'boolean') {
             return (
                 <Checkbox 
                     key={propName}
-                    label={propName} 
+                    label={fieldLabel} 
                     checked={formData[propName] || false} 
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.currentTarget.checked)} 
                     disabled={status === 'loading' || status === 'saving' || isProtected}
@@ -84,31 +91,33 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
                     mt="xs"
                 />
             )
-        } else if (p.type === 'EnumProperty') {
+        } else if (p.type === 'EnumProperty' || p.type === 'enum') {
             const enumValues = p.options?.values || p.options?.enum || []
             return (
                 <Select 
                     key={propName}
-                    label={propName} 
+                    label={fieldLabel} 
                     data={enumValues}
                     value={formData[propName] || ''} 
                     onChange={(val: string | null) => setFieldValue(propName, val)} 
                     disabled={status === 'loading' || status === 'saving' || isProtected}
                     error={validationErrors[propName]}
                     radius="md"
+                    withAsterisk={p.mandatory}
                 />
             )
-        } else if (p.type === 'DateTimeProperty') {
+        } else if (p.type === 'DateTimeProperty' || p.type === 'datetime') {
             return (
                 <TextInput 
                     key={propName}
                     type="datetime-local"
-                    label={propName} 
+                    label={fieldLabel} 
                     value={formData[propName] || ''} 
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.target.value)} 
                     disabled={status === 'loading' || status === 'saving' || isProtected}
                     error={validationErrors[propName]}
                     radius="md"
+                    withAsterisk={p.mandatory}
                 />
             )
         } else if (p.options?.instanceOf) {
@@ -116,7 +125,7 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
             return (
                 <Select
                     key={propName}
-                    label={propName + ' (Relation)'}
+                    label={fieldLabel}
                     data={relationOptions[propName] || []}
                     value={formData[propName] || ''}
                     onChange={(val: string | null) => setFieldValue(propName, val)}
@@ -131,18 +140,20 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
                     disabled={status === 'loading' || status === 'saving' || isProtected}
                     error={validationErrors[propName]}
                     radius="md"
+                    withAsterisk={p.mandatory}
                 />
             )
         } else {
             return (
                 <TextInput 
                     key={propName}
-                    label={propName + ' (' + p.type + ')'} 
+                    label={fieldLabel + ' (' + p.type + ')'} 
                     value={formData[propName] || ''} 
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue(propName, e.target.value)} 
                     disabled={status === 'loading' || status === 'saving' || isProtected}
                     error={validationErrors[propName]}
                     radius="md"
+                    withAsterisk={p.mandatory}
                 />
             )
         }
@@ -159,16 +170,6 @@ export function CoreForm({ modelSchema, objectId, apiClient, onSave, onCancel }:
 
             <form onSubmit={handleSubmit}>
                 <Stack gap="md">
-                    <TextInput 
-                        label="Name" 
-                        description={`Unique name identifier for this ${m.toLowerCase()}`}
-                        value={formData.name || ''} 
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldValue('name', e.target.value)} 
-                        disabled={status === 'loading' || status === 'saving'}
-                        error={validationErrors['name']}
-                        radius="md"
-                        withAsterisk
-                    />
                     
                     {props.map((p: any) => renderField(p))}
 

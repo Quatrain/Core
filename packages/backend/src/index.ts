@@ -21,6 +21,7 @@ import { User } from './User'
 import { UserRepository } from './UserRepository'
 import { Repository } from './Repository'
 import { BackendContext, asyncContextMiddleware } from './BackendContext'
+import BackendMiddleware from './middlewares/Middleware'
 
 import {
    InjectKeywordsMiddleware,
@@ -66,4 +67,5 @@ export type {
    SchemaDelta,
    InjectKeywordsMiddlewareParams,
    InjectMetaMiddlewareParams,
+   BackendMiddleware,
 }

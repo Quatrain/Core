@@ -3,20 +3,21 @@ import fs from 'fs'
 import { Backend, InjectMetaMiddleware } from '@quatrain/backend'
 import { SQLiteAdapter } from '@quatrain/backend-sqlite'
 import { returnAs, UserProperties } from '@quatrain/core'
-import { StudioModel, StudioProperty, StudioBackend, StudioDeployment, StudioProject, StudioEnvironment, StudioStorage, StudioAuth, StudioSecret, StudioWidget, StudioView } from '@quatrain/studio'
-import { ExpressAdapter, ListEndpoint, CrudEndpoint } from '@quatrain/api-server'
+import { StudioModel, StudioProperty, StudioBackend, StudioDeployment, StudioProject, StudioEnvironment, StudioStorage, StudioAuth, StudioSecret, StudioWidget, StudioView, StudioHistory, StudioTarget } from '@quatrain/studio'
+import { ExpressAdapter, ListEndpoint, CrudEndpoint, ValuesEndpoint } from '@quatrain/api-server'
 import { Api } from '@quatrain/api'
 import { MigrationManager } from '@quatrain/backend-migrations'
 import { AppInfra } from '@quatrain/app'
+import { HistoryMiddleware } from './middlewares/HistoryMiddleware'
 
 // Initialize the backend with a persistent SQLite file for the Studio state
-const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
+const sqlitePath = path.resolve(process.cwd(), 'data/quatrain-studio.sqlite')
 // Lancer les migrations SQLite (doit être fait dans une fonction async auto-exécutée)
 ;(async () => {
    try {
       const adapter = new SQLiteAdapter({ 
          config: { database: sqlitePath },
-         middlewares: [new InjectMetaMiddleware()],
+         middlewares: [new InjectMetaMiddleware(), new HistoryMiddleware()],
          softDelete: false
       })
       Backend.addBackend(adapter, 'default', true)
@@ -27,6 +28,12 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
       // Initialize the API Server Adapter
       const server = new ExpressAdapter(undefined, { apiPrefix: '/api' })
       Api.addServer(server, 'default')
+
+      CrudEndpoint(StudioHistory)(server, '/api/history', {})
+
+      ValuesEndpoint(StudioTarget)(server, '/api/targets', {})
+      ListEndpoint(StudioTarget)(server, '/api/targets', {})
+      CrudEndpoint(StudioTarget)(server, '/api/targets', {})
 
       // ==========================================
       // MODELS ENDPOINTS
@@ -57,6 +64,9 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
 
       server.addEndpoint(ListEndpoint(StudioDeployment), '/deployments')
       server.addEndpoint(CrudEndpoint(StudioDeployment), '/deployments', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
+
+      server.addEndpoint(ListEndpoint(StudioHistory), '/history')
+      server.addEndpoint(CrudEndpoint(StudioHistory), '/history', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
 
       // ==========================================
       // PROJECTS & ENVIRONMENTS ENDPOINTS
@@ -238,6 +248,18 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                await (deploy as any).save()
             }
 
+            try {
+               const history = await StudioHistory.factory()
+               history.set('action', 'DEPLOY')
+               history.set('entityType', 'StudioModel')
+               history.set('entity', modelId)
+               history.set('entityName', model.val('name'))
+               history.set('details', JSON.stringify({ version, backendId }))
+               await history.save()
+            } catch (he) {
+               Backend.error(`[History] Failed to log model deploy: ${he}`)
+            }
+
             res.json({ success: true, message: 'Modèle déployé avec succès' })
          } catch (e) {
             console.error(e)
@@ -251,7 +273,7 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
       server.post('/api/environments/:id/deploy', async (req: any, res: any) => {
          try {
             const envId = req.params.id
-            const { recipe, authMode } = req.body
+            const { recipe, authMode, outputTarget } = req.body
             
             if (!recipe) return res.status(400).json({ error: 'Recipe is required' })
 
@@ -302,6 +324,19 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                }
             }
 
+            const targetId = environment.val('studioTarget')
+            let targetConfig = null
+            if (targetId) {
+               const target = await StudioTarget.fromBackend<StudioTarget>(targetId)
+               if (target) {
+                  targetConfig = {
+                     name: target.val('name'),
+                     type: target.val('targetType'),
+                     options: target.val('options')
+                  }
+               }
+            }
+
             // Export all versioned models (mono-project currently)
             const modelsResult = await StudioModel.query()
                .execute(returnAs.AS_INSTANCES)
@@ -314,7 +349,10 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                // Exclure les modèles brouillons (version === 0 ou undefined)
                if ((model.val('version') || 0) === 0) continue
                
-               const propsResult = await StudioProperty.query().where('studioModel', model.uid).execute(returnAs.AS_INSTANCES)
+               const propsResult = await StudioProperty.query()
+                  .where('studioModel', model.uid)
+                  .where('version', model.val('version'))
+                  .execute(returnAs.AS_INSTANCES)
                const properties = propsResult.items
                   .filter(p => (p as StudioProperty).val('status') !== 'deleted')
                   .map(p => {
@@ -332,6 +370,7 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                      return {
                         name: prop.val('name'),
                         type: prop.val('propertyType'),
+                        mandatory: prop.val('mandatory'),
                         options,
                         ui: prop.val('ui') || {}
                      }
@@ -385,9 +424,20 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                authMode,
                backend: backendConfig,
                storage: storageConfig,
+               target: targetConfig || { type: 'docker-compose' },
                front: recipe === 'crud' ? true : false,
+               outputTarget: outputTarget || environment.val('studioTarget') || 'docker-compose',
                models,
                widgets
+            }
+
+            // Switch to NDJSON streaming
+            res.setHeader('Content-Type', 'application/x-ndjson')
+            res.setHeader('Cache-Control', 'no-cache')
+            res.setHeader('Connection', 'keep-alive')
+
+            const sendEvent = (event: any) => {
+               res.write(JSON.stringify(event) + '\n')
             }
 
             // Write quatrain.json to app/
@@ -400,12 +450,32 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             fs.writeFileSync(path.resolve(appDir, 'quatrain.json'), JSON.stringify(quatrainConfig, null, 2))
 
             // Generate compose.yaml and start containers via AppInfra
-            await AppInfra.start(quatrainConfig)
+            await AppInfra.start(quatrainConfig, (progressEvent) => {
+               sendEvent(progressEvent)
+            })
 
-            res.json({ success: true, message: 'Environnement déployé avec succès' })
+            try {
+               const history = await StudioHistory.factory()
+               history.set('action', 'DEPLOY')
+               history.set('entityType', 'StudioEnvironment')
+               history.set('entity', envId)
+               history.set('entityName', environment.val('name'))
+               history.set('details', JSON.stringify({ recipe, authMode, outputTarget }))
+               await history.save()
+            } catch (he) {
+               Backend.error(`[History] Failed to log environment deploy: ${he}`)
+            }
+
+            sendEvent({ step: 'done', status: 'success', message: 'Environnement déployé avec succès' })
+            res.end()
          } catch (e) {
             console.error(e)
-            res.status(500).json({ error: (e as Error).message })
+            if (!res.headersSent) {
+               res.status(500).json({ error: (e as Error).message })
+            } else {
+               res.write(JSON.stringify({ step: 'error', status: 'error', message: (e as Error).message }) + '\n')
+               res.end()
+            }
          }
       })
 

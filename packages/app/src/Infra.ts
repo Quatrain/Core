@@ -11,7 +11,10 @@ export class AppInfra {
     * via podman-compose ou docker-compose
     * Si une configuration est fournie, génère d'abord les fichiers compose.yaml et .env dans le dossier app/
     */
-   public static async start(config: Record<string, any>): Promise<void> {
+   public static async start(
+      config: Record<string, any>,
+      onProgress?: (event: { step: string; status: 'running' | 'success' | 'error'; message: string }) => void
+   ): Promise<void> {
       try {
          const targetDir = config.path || './app'
          const fullTargetDir = path.resolve(process.cwd(), targetDir)
@@ -22,9 +25,12 @@ export class AppInfra {
          }
 
          // Generate Application Source Code
+         onProgress?.({ step: 'code', status: 'running', message: 'Génération du code source...' })
          CodeGenerator.generate(config, targetDir)
+         onProgress?.({ step: 'code', status: 'success', message: 'Code source généré' })
 
          // Generate Infrastructure configuration
+         onProgress?.({ step: 'infra', status: 'running', message: "Configuration de l'infrastructure..." })
          const { compose, env, dockerfile } = InfraBuilder.build(config)
          
          fs.writeFileSync(composeFile, compose, 'utf8')
@@ -32,10 +38,15 @@ export class AppInfra {
          fs.writeFileSync(path.resolve(fullTargetDir, 'Containerfile'), dockerfile, 'utf8')
          
          Log.info(`[Infra] Dynamically generated compose.yaml and .env in ${fullTargetDir}`)
+         onProgress?.({ step: 'infra', status: 'success', message: 'Infrastructure configurée' })
 
-         await this.runCompose('up -d --build', composeFile)
+         onProgress?.({ step: 'compose', status: 'running', message: 'Démarrage des containers...' })
+         await this.runCompose('up -d --build', composeFile, onProgress)
+         onProgress?.({ step: 'compose', status: 'success', message: 'Containers démarrés' })
       } catch (e: any) {
          Log.error(`[Infra] Failed to start infrastructure: ${e.message}`)
+         onProgress?.({ step: 'error', status: 'error', message: `Erreur: ${e.message}` })
+         throw e
       }
    }
 
@@ -59,7 +70,7 @@ export class AppInfra {
       return 'podman compose'
    }
 
-   private static async runCompose(action: string, composeFile: string): Promise<void> {
+   private static async runCompose(action: string, composeFile: string, onProgress?: (event: { step: string; status: 'running' | 'success' | 'error'; message: string }) => void): Promise<void> {
       return new Promise((resolve, reject) => {
          if (!fs.existsSync(composeFile)) {
             Log.error(`[Infra] Compose file not found at: ${composeFile}`)
@@ -93,12 +104,20 @@ export class AppInfra {
             resolve()
          })
 
-         // Stream output to console
+         // Stream output to console and emit progress events
          if (child.stdout) {
-            child.stdout.on('data', (data) => console.log(data.toString().trim()))
+            child.stdout.on('data', (data) => {
+               const text = data.toString().trim()
+               console.log(text)
+               // Could emit sub-steps here if desired:
+               // onProgress?.({ step: 'compose', status: 'running', message: text })
+            })
          }
          if (child.stderr) {
-            child.stderr.on('data', (data) => console.error(data.toString().trim()))
+            child.stderr.on('data', (data) => {
+               const text = data.toString().trim()
+               console.error(text)
+            })
          }
       })
    }

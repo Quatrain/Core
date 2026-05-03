@@ -194,7 +194,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
                   columnType = 'TEXT' // Store reference ID
                }
 
-               query += `,\n${propName} ${columnType}`
+               query += `,\n"${propName}" ${columnType}`
             }
          )
 
@@ -226,6 +226,9 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
 
             // Make sure table exists
             await this._ensureTable(dataObject)
+
+            // Set uid before middlewares so they can use it
+            dataObject.uri.path = this._buildPath(dataObject, uid)
 
             // execute middlewares
             await this.executeMiddlewares(dataObject, BackendAction.CREATE, {
@@ -273,7 +276,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
 
             await db.run(query, values)
 
-            dataObject.uri.path = this._buildPath(dataObject, uid)
+            // uri.path is already set before middlewares
             dataObject.uri.label = data && Reflect.get(data, 'name')
             dataObject.isPersisted(true)
 

@@ -8,6 +8,9 @@ export interface ApiResponse {
    status(code: number): this
    json(data: any): void
    send(data: string): void
+   setHeader(name: string, value: string): void
+   write(data: string): void
+   end(): void
 }
 
 export type ApiHandler = (req: ApiRequest, res: ApiResponse) => Promise<void> | void

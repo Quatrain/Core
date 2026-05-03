@@ -31,8 +31,14 @@ export type { StudioWidgetType, StudioWidgetDef } from './models/StudioWidget'
 export { StudioView } from './models/StudioView'
 export type { StudioViewType, StudioViewDef } from './models/StudioView'
 
+export { StudioHistory } from './models/StudioHistory'
+export type { StudioHistoryType, StudioHistoryDef } from './models/StudioHistory'
+
 export { CodeGenerator } from './generator'
 export { StudioAgent } from './agent'
+
+export { StudioTarget } from './models/StudioTarget'
+export type { StudioTargetType } from './models/StudioTarget'
 
 export { StudioProjectRepository } from './repositories/StudioProjectRepository'
 export { StudioModelRepository } from './repositories/StudioModelRepository'

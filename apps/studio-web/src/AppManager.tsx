@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Modal, TextInput, Textarea, Button, Stack, ActionIcon, Select, TagsInput, Loader, Badge, Alert } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
-import { api } from './api'
+import { api, API_BASE_URL } from './api'
 
 export function AppManager({ onSaved }: { onSaved?: () => void }) {
   const { t } = useTranslation()
@@ -11,6 +11,7 @@ export function AppManager({ onSaved }: { onSaved?: () => void }) {
   const [storages, setStorages] = useState<any[]>([])
   const [auths, setAuths] = useState<any[]>([])
   const [secrets, setSecrets] = useState<any[]>([])
+  const [targets, setTargets] = useState<any[]>([])
   const [isAddingEnv, setIsAddingEnv] = useState(false)
 
   // Project form
@@ -26,6 +27,7 @@ export function AppManager({ onSaved }: { onSaved?: () => void }) {
   const [newEnvName, setNewEnvName] = useState('')
   const [newEnvType, setNewEnvType] = useState('development')
   const [isDeploying, setIsDeploying] = useState(false)
+  const [deploySteps, setDeploySteps] = useState<any[]>([])
   const [deployResult, setDeployResult] = useState<{ success: boolean, message: string } | null>(null)
           
   useEffect(() => {
@@ -34,12 +36,13 @@ export function AppManager({ onSaved }: { onSaved?: () => void }) {
 
   const loadAll = async () => {
     try {
-      const [projs, bks, stgs, aths, secs] = await Promise.all([
+      const [projs, bks, stgs, aths, secs, tgts] = await Promise.all([
         api.getProjects(),
         api.getBackends(),
         api.getStorages(),
         api.getAuths(),
-        api.getSecrets()
+        api.getSecrets(),
+        api.getTargets()
       ])
       
       let proj = projs.length > 0 ? projs[0] : null
@@ -63,6 +66,7 @@ export function AppManager({ onSaved }: { onSaved?: () => void }) {
       setStorages(stgs)
       setAuths(aths)
       setSecrets(secs)
+      setTargets(tgts || [])
 
     } catch (e) {
       console.error(e)
@@ -138,15 +142,49 @@ export function AppManager({ onSaved }: { onSaved?: () => void }) {
     if (!project || !project.recipe) return
     setIsDeploying(true)
     setDeployResult(null)
+    setDeploySteps([])
     try {
-      const res = await api.deployEnvironment(env.uid, { 
-        recipe: project.recipe, 
-        authMode: project.authMode || 'none' 
+      const response = await fetch(`${API_BASE_URL}/environments/${env.uid}/deploy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          recipe: project.recipe, 
+          authMode: project.authMode || 'none' 
+        })
       })
-      if (res && res.success) {
-        setDeployResult({ success: true, message: t('appManager.deploySuccess') })
-      } else {
-        setDeployResult({ success: false, message: `${t('appManager.deployError')} ${res.error}` })
+
+      if (!response.body) throw new Error('No readable stream')
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n').filter(Boolean)
+        
+        for (const line of lines) {
+           try {
+              const event = JSON.parse(line)
+              setDeploySteps(prev => {
+                 const newSteps = [...prev]
+                 const existingIdx = newSteps.findIndex(s => s.step === event.step)
+                 if (existingIdx >= 0) {
+                    newSteps[existingIdx] = event
+                 } else {
+                    newSteps.push(event)
+                 }
+                 return newSteps
+              })
+              if (event.step === 'done') {
+                 setDeployResult({ success: true, message: event.message })
+              } else if (event.status === 'error') {
+                 setDeployResult({ success: false, message: event.message })
+              }
+           } catch (e) {}
+        }
       }
     } catch (e: any) {
       console.error(e)
@@ -159,6 +197,7 @@ export function AppManager({ onSaved }: { onSaved?: () => void }) {
   const backendOptions = backends.map(b => ({ value: b.uid, label: b.name }))
   const storageOptions = storages.map(s => ({ value: s.uid, label: s.name }))
   const authOptions = auths.map(a => ({ value: a.uid, label: a.name }))
+  const targetOptions = targets.map(t => ({ value: t.uid, label: t.name }))
 
   return (
     <div style={{ padding: '20px' }}>
@@ -339,6 +378,16 @@ export function AppManager({ onSaved }: { onSaved?: () => void }) {
                 radius="md"
               />
 
+              <Select
+                label="Cible de déploiement"
+                placeholder="-"
+                data={targetOptions}
+                value={env.studioTarget || null}
+                onChange={(val) => handleUpdateEnv(env.uid, { studioTarget: val })}
+                clearable
+                radius="md"
+              />
+
               <Button variant="light" color="violet" mt="auto" radius="md" onClick={() => { window.location.hash = '/secrets' }}>
                 {t('appManager.secrets')} ({secrets.filter(s => s.environmentId === env.uid).length})
               </Button>
@@ -392,12 +441,23 @@ export function AppManager({ onSaved }: { onSaved?: () => void }) {
         closeOnClickOutside={!isDeploying}
         withCloseButton={!isDeploying}
       >
-        <Stack align="center" gap="lg" py="xl">
-          {isDeploying ? (
-            <>
-              <Loader size="xl" type="bars" color="violet" />
-              <Text fw={500}>{t('appManager.deploying')}</Text>
-            </>
+        <Stack align="center" gap="lg" py="xl" style={{ width: '100%' }}>
+          {deploySteps.length > 0 || isDeploying ? (
+            <Stack style={{ width: '100%' }} gap="md">
+               {deploySteps.map((step, idx) => (
+                  <Group key={idx} align="center">
+                     {step.status === 'running' ? <Loader size="sm" color="violet" /> : 
+                      step.status === 'success' ? <ThemeIcon size="sm" color="green" radius="xl"><span style={{fontSize:'12px'}}>✓</span></ThemeIcon> :
+                      step.status === 'error' ? <ThemeIcon size="sm" color="red" radius="xl"><span style={{fontSize:'12px'}}>✖</span></ThemeIcon> : <Loader size="sm" color="violet" />}
+                     <Text fw={step.status === 'running' ? 600 : 400} c={step.status === 'error' ? 'red' : undefined} style={{ flex: 1 }}>{step.message}</Text>
+                  </Group>
+               ))}
+               {deployResult && (
+                 <Button mt="xl" fullWidth variant="light" color={deployResult.success ? "green" : "red"} onClick={() => setDeployResult(null)}>
+                   OK
+                 </Button>
+               )}
+            </Stack>
           ) : deployResult && (
             <>
               <ThemeIcon size={80} radius="xl" color={deployResult.success ? "green" : "red"} variant="light">

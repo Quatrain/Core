@@ -59,6 +59,38 @@ export const up = async ({ context: adapter }: { context: AbstractBackendAdapter
          deletedBy TEXT,
          deletedAt INTEGER
       )`,
+      `CREATE TABLE IF NOT EXISTS studio_history (
+         id TEXT PRIMARY KEY,
+         uid TEXT UNIQUE,
+         name TEXT,
+         action TEXT NOT NULL,
+         entityType TEXT NOT NULL,
+         entity TEXT NOT NULL,
+         entityName TEXT,
+         user TEXT,
+         details TEXT,
+         status TEXT,
+         createdBy TEXT,
+         createdAt INTEGER,
+         updatedBy TEXT,
+         updatedAt INTEGER,
+         deletedBy TEXT,
+         deletedAt INTEGER
+      )`,
+      `CREATE TABLE IF NOT EXISTS studio_target (
+         id TEXT PRIMARY KEY,
+         uid TEXT UNIQUE,
+         name TEXT NOT NULL,
+         targetType TEXT NOT NULL,
+         options TEXT,
+         status TEXT,
+         createdBy TEXT,
+         createdAt INTEGER,
+         updatedBy TEXT,
+         updatedAt INTEGER,
+         deletedBy TEXT,
+         deletedAt INTEGER
+      )`,
       `CREATE TABLE IF NOT EXISTS studio_deployment (
          id TEXT PRIMARY KEY,
          uid TEXT UNIQUE,
@@ -84,6 +116,7 @@ export const up = async ({ context: adapter }: { context: AbstractBackendAdapter
          studioBackend TEXT,
          studioStorage TEXT,
          studioAuth TEXT,
+         studioTarget TEXT,
          backendStudioSecret TEXT,
          storageStudioSecret TEXT,
          authStudioSecret TEXT,
@@ -187,9 +220,16 @@ export const up = async ({ context: adapter }: { context: AbstractBackendAdapter
       )`
    ]
 
-   for (const sql of tables) {
-      await adapter.rawQuery(sql)
+   for (const query of tables) {
+      await adapter.rawQuery(query)
    }
+
+   const defaultTargetId = 'default-target-docker'
+   const now = new Date().getTime()
+   const insertQuery = `INSERT INTO studio_target (id, uid, name, targetType, status, createdAt) 
+      VALUES ('${defaultTargetId}', '${defaultTargetId}', 'Docker Local', 'docker-compose', 'created', ${now}) 
+      ON CONFLICT(uid) DO NOTHING`
+   await adapter.rawQuery(insertQuery)
 }
 
 export const down = async ({ context: adapter }: { context: AbstractBackendAdapter }) => {

@@ -22,7 +22,7 @@
   "dependencies": {
     "@google/genai": "latest",
     "@quatrain/ai": "^1.1.1",
-    "@quatrain/core": "^1.2.2"
+    "@quatrain/core": "^1.2.3"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

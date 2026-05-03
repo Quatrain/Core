@@ -3833,7 +3833,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/studio-cli@workspace:apps/studio-cli"
   dependencies:
-    "@quatrain/studio": "npm:^1.1.2"
+    "@quatrain/studio": "npm:^1.1.3"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/inquirer": "npm:^9.0.7"
     "@types/node": "npm:^22.10.1"
@@ -3867,7 +3867,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/studio@npm:^1.1.2, @quatrain/studio@workspace:^, @quatrain/studio@workspace:packages/studio":
+"@quatrain/studio@npm:^1.1.3, @quatrain/studio@workspace:^, @quatrain/studio@workspace:packages/studio":
   version: 0.0.0-use.local
   resolution: "@quatrain/studio@workspace:packages/studio"
   dependencies:

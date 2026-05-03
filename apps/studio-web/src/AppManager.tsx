@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Modal, TextInput, Textarea, Button, Stack, ActionIcon, Select, Loader, Badge } from '@mantine/core'
+import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Modal, TextInput, Textarea, Button, Stack, ActionIcon, Select, TagsInput, Loader, Badge, Alert } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { api } from './api'
 
-export function AppManager() {
+export function AppManager({ onSaved }: { onSaved?: () => void }) {
   const { t } = useTranslation()
   const [project, setProject] = useState<any>(null)
   const [environments, setEnvironments] = useState<any[]>([])
@@ -11,10 +11,15 @@ export function AppManager() {
   const [storages, setStorages] = useState<any[]>([])
   const [auths, setAuths] = useState<any[]>([])
   const [secrets, setSecrets] = useState<any[]>([])
+  const [isAddingEnv, setIsAddingEnv] = useState(false)
 
   // Project form
   const [projectName, setProjectName] = useState('')
   const [projectDesc, setProjectDesc] = useState('')
+  const [projectDefaultLanguage, setProjectDefaultLanguage] = useState('en')
+  const [projectLanguages, setProjectLanguages] = useState<string[]>(['fr'])
+  const [projectRecipe, setProjectRecipe] = useState<string | null>(null)
+  const [projectAuthMode, setProjectAuthMode] = useState<string>('none')
 
   // Modals
   const [isEnvModalOpen, setIsEnvModalOpen] = useState(false)
@@ -38,47 +43,75 @@ export function AppManager() {
       ])
       
       let proj = projs.length > 0 ? projs[0] : null
-      if (!proj) {
-        proj = await api.createProject({ name: 'My Application' })
-        // Create default local environment
-        await api.createEnvironment({ projectId: proj.uid, name: 'Local' })
+      
+      if (proj) {
+        setProject(proj)
+        setProjectName(proj.name)
+        setProjectDesc(proj.description || '')
+        setProjectDefaultLanguage(proj.defaultLanguage || 'en')
+        setProjectLanguages(proj.languages || ['fr'])
+        setProjectRecipe(proj.recipe || null)
+        setProjectAuthMode(proj.authMode || 'none')
+        
+        const envs = await api.getEnvironments(proj.uid)
+        setEnvironments(envs)
+      } else {
+        setProject(null)
       }
-      setProject(proj)
-      setProjectName(proj.name)
-      setProjectDesc(proj.description || '')
 
       setBackends(bks)
       setStorages(stgs)
       setAuths(aths)
       setSecrets(secs)
 
-      const envs = await api.getEnvironments(proj.uid)
-      setEnvironments(envs)
     } catch (e) {
       console.error(e)
     }
   }
 
   const handleSaveProject = async () => {
-    if (!project) return
     try {
-      await api.updateProject(project.uid, { name: projectName, description: projectDesc })
+      if (project) {
+        await api.updateProject(project.uid, { 
+           name: projectName, 
+           description: projectDesc, 
+           defaultLanguage: projectDefaultLanguage,
+           languages: projectLanguages,
+           recipe: projectRecipe,
+           authMode: projectAuthMode
+        })
+      } else {
+        const newProj = await api.createProject({ 
+           name: projectName || 'My Application', 
+           description: projectDesc, 
+           defaultLanguage: projectDefaultLanguage,
+           languages: projectLanguages,
+           recipe: projectRecipe,
+           authMode: projectAuthMode
+        })
+        await api.createEnvironment({ studioProject: newProj.uid, name: 'Local' })
+      }
       // alert 'Saved' could be done using a notification system
+      if (onSaved) onSaved()
+      loadAll()
     } catch (e) {
       console.error(e)
     }
   }
 
   const handleAddEnv = async () => {
-    if (!newEnvName || !project) return
+    if (!newEnvName || !project || isAddingEnv) return
+    setIsAddingEnv(true)
     try {
-      await api.createEnvironment({ projectId: project.uid, name: newEnvName, environment: newEnvType })
+      await api.createEnvironment({ studioProject: project.uid, name: newEnvName, environment: newEnvType })
       setIsEnvModalOpen(false)
       setNewEnvName('')
       setNewEnvType('development')
       loadAll()
     } catch (e) {
       console.error(e)
+    } finally {
+      setIsAddingEnv(false)
     }
   }
 
@@ -136,6 +169,12 @@ export function AppManager() {
         </div>
       </Group>
 
+      {!project && (
+        <Alert title="Attention" color="yellow" mb="xl">
+          {t('appManager.notConfiguredAlert')}
+        </Alert>
+      )}
+
       {/* Project Card */}
       <Card shadow="sm" padding="lg" radius={0} withBorder mb="xl">
         <Stack gap="md">
@@ -156,13 +195,8 @@ export function AppManager() {
             label={t('appManager.recipeLabel') || "Recette (Template) de l'application"}
             placeholder="-"
             data={[{ value: 'crud', label: t('appManager.recipeCrud') || 'CRUD App (Engine unifié)' }]}
-            value={project?.recipe || null}
-            onChange={async (val) => {
-              if (project) {
-                await api.updateProject(project.uid, { recipe: val })
-                loadAll()
-              }
-            }}
+            value={projectRecipe}
+            onChange={setProjectRecipe}
             clearable
             radius="md"
           />
@@ -174,14 +208,25 @@ export function AppManager() {
               { value: 'basic', label: t('appManager.authBasic') },
               { value: 'oauth', label: t('appManager.authOAuth') }
             ]}
-            value={project?.authMode || 'none'}
-            onChange={async (val) => {
-              if (project) {
-                await api.updateProject(project.uid, { authMode: val })
-                loadAll()
-              }
-            }}
+            value={projectAuthMode}
+            onChange={(val) => setProjectAuthMode(val || 'none')}
             clearable={false}
+            radius="md"
+          />
+          <TextInput
+            label={t('appManager.defaultLanguage') || 'Langue par défaut'}
+            placeholder="ex: en"
+            value={projectDefaultLanguage}
+            onChange={(e) => setProjectDefaultLanguage(e.currentTarget.value)}
+            radius="md"
+            required
+          />
+          <TagsInput
+            label={t('appManager.languages') || 'Langues supportées'}
+            description="Entrez les codes pays (ex: fr, en, es). Appuyez sur Entrée pour valider."
+            placeholder="Ajouter une langue"
+            value={projectLanguages}
+            onChange={setProjectLanguages}
             radius="md"
           />
           <Button onClick={handleSaveProject} style={{ alignSelf: 'flex-start' }} radius="md" color="blue">
@@ -268,8 +313,8 @@ export function AppManager() {
                 label={t('appManager.backend')}
                 placeholder="-"
                 data={backendOptions}
-                value={env.backendId || null}
-                onChange={(val) => handleUpdateEnv(env.uid, { backendId: val })}
+                value={env.studioBackend || null}
+                onChange={(val) => handleUpdateEnv(env.uid, { studioBackend: val })}
                 clearable
                 radius="md"
               />
@@ -278,8 +323,8 @@ export function AppManager() {
                 label={t('appManager.storage')}
                 placeholder="-"
                 data={storageOptions}
-                value={env.storageId || null}
-                onChange={(val) => handleUpdateEnv(env.uid, { storageId: val })}
+                value={env.studioStorage || null}
+                onChange={(val) => handleUpdateEnv(env.uid, { studioStorage: val })}
                 clearable
                 radius="md"
               />
@@ -288,8 +333,8 @@ export function AppManager() {
                 label={t('appManager.auth')}
                 placeholder="-"
                 data={authOptions}
-                value={env.authId || null}
-                onChange={(val) => handleUpdateEnv(env.uid, { authId: val })}
+                value={env.studioAuth || null}
+                onChange={(val) => handleUpdateEnv(env.uid, { studioAuth: val })}
                 clearable
                 radius="md"
               />
@@ -333,8 +378,8 @@ export function AppManager() {
             radius="md"
           />
           <Group justify="flex-end" mt="md">
-            <Button variant="default" onClick={() => setIsEnvModalOpen(false)} radius="md">{t('appManager.cancel')}</Button>
-            <Button color="green" onClick={handleAddEnv} radius="md">{t('appManager.add')}</Button>
+            <Button variant="default" onClick={() => setIsEnvModalOpen(false)} radius="md" disabled={isAddingEnv}>{t('appManager.cancel')}</Button>
+            <Button color="green" onClick={handleAddEnv} radius="md" loading={isAddingEnv}>{t('appManager.add')}</Button>
           </Group>
         </Stack>
       </Modal>

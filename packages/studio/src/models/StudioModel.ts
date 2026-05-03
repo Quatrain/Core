@@ -2,7 +2,7 @@ import { PersistedBaseObject } from '@quatrain/backend'
 import { StringProperty, ObjectProperty, htmlType, BaseObjectProperties, BaseObjectType, BooleanProperty, NumberProperty } from '@quatrain/core'
 
 export interface StudioModelType extends BaseObjectType {
-   projectId: string
+   studioProject: string
    name: string
    collectionName: string
    isPersisted: boolean
@@ -13,7 +13,7 @@ export interface StudioModelType extends BaseObjectType {
 export const StudioModelProperties: any = [
    ...BaseObjectProperties,
    {
-      name: 'projectId',
+      name: 'studioProject',
       mandatory: true,
       type: StringProperty.TYPE, // In real Quatrain, this might be an ObjectProperty referencing StudioProject, but storing ID is simpler
       htmlType: htmlType.HIDDEN,

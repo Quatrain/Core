@@ -43,7 +43,6 @@
     "mandatory": "Mandatory",
     "save": "Save",
     "saveChanges": "Save changes",
-    "saveVersion": "Save version",
     "restoreVersion": "Restore this version",
     "deployVersion": "Deploy this version",
     "cannotDeployDraft": "You cannot deploy a draft.",
@@ -134,6 +133,8 @@
     "desc": "Manage global application information and deployment environments.",
     "appName": "Application Name",
     "appDesc": "Description",
+    "languages": "Supported Languages",
+    "defaultLanguage": "Default Language",
     "recipeLabel": "Application Recipe (Template)",
     "recipeCrud": "CRUD App (Unified Engine)",
     "saveApp": "Save Info",
@@ -158,6 +159,7 @@
     "deployEnv": "Launch Deployment",
     "deploying": "Deploying... (PoC)",
     "deploySuccess": "Deployment successful in app/ directory!",
-    "deployError": "Deployment error:"
+    "deployError": "Deployment error:",
+    "notConfiguredAlert": "Please create your application first, you can return to it later to refine its configuration"
   }
 }

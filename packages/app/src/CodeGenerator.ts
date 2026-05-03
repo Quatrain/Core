@@ -37,6 +37,83 @@ export class CodeGenerator {
       Log.info(`[CodeGenerator] Application générée avec succès dans ${fullTargetDir}`)
    }
 
+   private static generateWidgetForm(modelConfig: any, widget: any): string {
+      const m = modelConfig.name
+      let layoutCode = ''
+      
+      const properties = modelConfig.properties || []
+      const getFieldCode = (fieldName: string) => {
+         const prop = properties.find((p:any) => p.name === fieldName)
+         let label = fieldName
+         if (prop && prop.ui && prop.ui.labels) {
+            label = prop.ui.labels.fr || prop.ui.labels.en || fieldName
+         }
+         return `<TextInput label="${label}" value={data.${fieldName} || ''} onChange={e => setData({...data, ${fieldName}: e.currentTarget.value})} />`
+      }
+
+      if (Array.isArray(widget.layout)) {
+         widget.layout.forEach((item: any) => {
+            if (item.type === 'field' && item.name) {
+               layoutCode += `         ${getFieldCode(item.name)}\n`
+            } else if (item.type === 'group' && Array.isArray(item.fields)) {
+               layoutCode += `         <Group grow align="flex-start">\n`
+               item.fields.forEach((f: string) => {
+                  layoutCode += `            ${getFieldCode(f)}\n`
+               })
+               layoutCode += `         </Group>\n`
+            }
+         })
+      }
+
+      return `import { useEffect, useState } from 'react'
+import { Group, TextInput, Button, Title, Stack } from '@mantine/core'
+import { useNavigate, useParams } from 'react-router-dom'
+import { api } from '../api'
+
+export function ${m}Form() {
+   const { id } = useParams()
+   const navigate = useNavigate()
+   const [data, setData] = useState<any>({})
+
+   useEffect(() => {
+      if (id && id !== 'new') {
+         api.get('${m.toLowerCase()}s/' + id).then(res => {
+            if (res && res.data) setData(res.data)
+         })
+      }
+   }, [id])
+
+   const handleSave = async () => {
+      try {
+         if (id && id !== 'new') {
+            await api.patch('${m.toLowerCase()}s/' + id, data)
+         } else {
+            await api.post('${m.toLowerCase()}s', data)
+         }
+         navigate('/${m.toLowerCase()}s')
+      } catch (e) {
+         console.error(e)
+         alert("Erreur de sauvegarde")
+      }
+   }
+
+   return (
+      <Stack gap="md" style={{ maxWidth: '800px', margin: '0 auto' }}>
+         <Title order={2}>{id === 'new' ? 'Créer' : 'Éditer'} ${m}</Title>
+         
+         {/* --- Début du layout généré par le WidgetBuilder --- */}
+${layoutCode}         {/* --- Fin du layout --- */}
+         
+         <Group mt="xl">
+            <Button onClick={handleSave}>Sauvegarder</Button>
+            <Button variant="default" onClick={() => navigate('/${m.toLowerCase()}s')}>Annuler</Button>
+         </Group>
+      </Stack>
+   )
+}
+`
+   }
+
    private static generatePackageJson(config: any, targetDir: string): void {
       const packagePath = path.resolve(targetDir, 'package.json')
       
@@ -549,7 +626,16 @@ export function ${m}List() {
 
          const modelSchemaStr = JSON.stringify(modelConfig, null, 3)
 
-         const formTsx = `import { CoreForm } from '@quatrain/ui-form-react'
+         let formTsx = ''
+         const widgets = config.widgets || []
+         const formWidget = widgets.find((w: any) => w.modelName === m && w.widgetType === 'form')
+
+         if (formWidget && Array.isArray(formWidget.layout) && formWidget.layout.length > 0) {
+            // Utilisation du générateur natif de composants !
+            formTsx = this.generateWidgetForm(modelConfig, formWidget)
+         } else {
+            // Fallback historique sur CoreForm dynamique
+            formTsx = `import { CoreForm } from '@quatrain/ui-form-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api'
 
@@ -570,6 +656,7 @@ export function ${m}Form() {
    )
 }
 `
+         }
          fs.writeFileSync(path.join(pagesDir, `${m}Form.tsx`), formTsx)
       }
 

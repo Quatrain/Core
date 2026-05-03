@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Button, TextInput, Select as MantineSelect, Checkbox as MantineCheckbox, AppShell, Group, Title, ActionIcon, useMantineColorScheme, Stack, NavLink, Badge, Card, SimpleGrid, Paper, Center, Text } from '@mantine/core'
+import { Button, TextInput, Select as MantineSelect, Checkbox as MantineCheckbox, AppShell, Group, Title, ActionIcon, useMantineColorScheme, Stack, NavLink, Badge, Card, SimpleGrid, Paper, Center, Text, Tabs } from '@mantine/core'
 import { api } from './api'
 import { PropertyOptionsEditor } from './PropertyOptionsEditor'
 import { Dashboard } from './Dashboard'
@@ -10,6 +10,8 @@ import { AuthManager } from './AuthManager'
 import { AppManager } from './AppManager'
 import { SecretsManager } from './SecretsManager'
 import { CreateModel } from './CreateModel'
+import { WidgetBuilder } from './WidgetBuilder'
+import { WidgetsManager } from './WidgetsManager'
 import { I18nextProvider, useTranslation } from 'react-i18next'
 import i18n from './i18n'
 
@@ -58,8 +60,14 @@ function AppContent() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
   const [models, setModels] = useState<any[]>([])
   const [backends, setBackends] = useState<any[]>([])
+  const [projectLanguages, setProjectLanguages] = useState<string[]>(['en', 'fr'])
+  const [projectDefaultLanguage, setProjectDefaultLanguage] = useState<string>('en')
+  const [isAppSetup, setIsAppSetup] = useState<boolean>(true)
   const [currentModel, setCurrentModel] = useState<any>(null)
-  const [currentView, setCurrentView] = useState<'dashboard' | 'app' | 'backends' | 'storages' | 'auth' | 'secrets' | 'model' | 'models' | 'new-model'>('dashboard')
+  const [widgets, setWidgets] = useState<any[]>([])
+  const [currentWidget, setCurrentWidget] = useState<any>(null)
+  const [currentView, setCurrentView] = useState<'dashboard' | 'app' | 'backends' | 'storages' | 'auth' | 'secrets' | 'model' | 'models' | 'new-model' | 'widgets' | 'widget'>('dashboard')
+  const [modelTab, setModelTab] = useState<string | null>('schema')
   const [selectedVersion, setSelectedVersion] = useState<number | null>(null)
 
   // DnD state
@@ -77,6 +85,7 @@ function AppContent() {
   const [propType, setPropType] = useState<string | null>(null)
   const [isMandatory, setIsMandatory] = useState(false)
   const [propOptions, setPropOptions] = useState<any>({})
+  const [propUi, setPropUi] = useState<any>({ labels: {} })
 
   // Load models on startup
   useEffect(() => {
@@ -87,7 +96,25 @@ function AppContent() {
   useEffect(() => {
     if (currentModel && selectedVersion !== null) {
       api.getModelProperties(currentModel.uid, selectedVersion)
-         .then(props => setProperties(props))
+         .then(async props => {
+            const hasName = props.find((p: any) => p.name === 'name')
+            if (!hasName && selectedVersion === (currentModel.version || 1)) {
+               // Auto create the 'name' property for the draft version if it doesn't exist
+               await api.addProperty(currentModel.uid, {
+                  name: 'name',
+                  propertyType: 'StringProperty',
+                  mandatory: true,
+                  options: {},
+                  ui: { labels: {} },
+                  version: selectedVersion,
+                  order: -1
+               })
+               const newProps = await api.getModelProperties(currentModel.uid, selectedVersion)
+               setProperties(newProps)
+            } else {
+               setProperties(props)
+            }
+         })
          .catch(console.error)
     }
   }, [currentModel, selectedVersion])
@@ -95,6 +122,15 @@ function AppContent() {
   // Simple Hash Routing
   useEffect(() => {
     const handleHashChange = () => {
+      // Enforce /app route if app is not fully setup yet
+      if (!isAppSetup) {
+         if (window.location.hash !== '#/app') {
+            window.location.hash = '/app'
+         }
+         setCurrentView('app')
+         return
+      }
+
       const hash = window.location.hash.slice(1)
       if (hash && hash.startsWith('/models/new')) {
         setCurrentModel(null)
@@ -121,6 +157,14 @@ function AppContent() {
       } else if (hash === '/secrets') {
         setCurrentModel(null)
         setCurrentView('secrets')
+      } else if (hash.startsWith('/widgets/')) {
+        const id = hash.replace('/widgets/', '')
+        loadWidgetDetails(id)
+        setCurrentView('widget')
+      } else if (hash === '/widgets') {
+        setCurrentModel(null)
+        setCurrentWidget(null)
+        setCurrentView('widgets')
       } else if (hash === '/models') {
         setCurrentModel(null)
         setCurrentView('models')
@@ -130,13 +174,12 @@ function AppContent() {
       }
     }
 
-    if (models.length > 0) {
-       handleHashChange()
-    }
+    // Call immediately to parse the URL on load or on models update
+    handleHashChange()
 
     window.addEventListener('hashchange', handleHashChange)
     return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [models])
+  }, [models, isAppSetup])
 
   const loadModels = async () => {
     try {
@@ -144,6 +187,29 @@ function AppContent() {
       setModels(data)
       const backs = await api.getBackends()
       setBackends(backs)
+      
+      try {
+        const projs = await api.getProjects()
+        let setup = false
+        if (projs && projs.length > 0) {
+           const p = projs[0]
+           setProjectLanguages(p.languages || ['en', 'fr'])
+           setProjectDefaultLanguage(p.defaultLanguage || 'en')
+           setup = true
+        }
+        
+        setIsAppSetup(setup)
+        if (!setup) {
+           if (window.location.hash !== '#/app') {
+              window.location.hash = '/app'
+           }
+        }
+      } catch(e) {}
+      
+      try {
+         const wdg = await api.getWidgets()
+         setWidgets(wdg)
+      } catch (e) {}
     } catch (e) {
       console.error(e)
     }
@@ -159,11 +225,42 @@ function AppContent() {
     }
   }
 
+  const loadWidgetDetails = async (id: string) => {
+    try {
+      const widget = await api.getWidget(id)
+      setCurrentWidget(widget)
+      if (widget.studioModel) {
+         const model = await api.getModel(widget.studioModel)
+         setCurrentModel(model)
+         setSelectedVersion(model.version || 1)
+         // DEBUG ALERT
+         const props = await api.getModelProperties(model.uid, model.version || 1)
+         if (props.length === 0) {
+            alert(`No properties found for model ${model.name} (uid: ${model.uid}, version: ${model.version})`)
+         }
+      } else {
+         setCurrentModel(null)
+         setProperties([])
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   const handleCreateModel = async (name: string, collection: string) => {
     try {
       const newModel = await api.createModel(name, collection)
+      
+      // Auto-create standard 'name' property
+      const defaultProp = await api.addProperty(newModel.uid, {
+         name: 'name',
+         propertyType: 'StringProperty',
+         mandatory: true,
+         order: 0
+      })
+      
       setCurrentModel(newModel)
-      setProperties([])
+      setProperties([defaultProp])
       loadModels() // Refresh sidebar list
       window.location.hash = `/models/${newModel.name}`
     } catch (e) {
@@ -181,7 +278,8 @@ function AppContent() {
           name: propName,
           propertyType: propType,
           mandatory: isMandatory,
-          options: propOptions
+          options: propOptions,
+          ui: propUi
         })
       } else {
         await api.addProperty(currentModel.uid, {
@@ -189,6 +287,7 @@ function AppContent() {
           propertyType: propType,
           mandatory: isMandatory,
           options: propOptions,
+          ui: propUi,
           version: currentModel.version || 1,
           order: properties.length
         })
@@ -209,6 +308,7 @@ function AppContent() {
     setPropType(prop.propertyType)
     setIsMandatory(prop.mandatory)
     setPropOptions(prop.options || {})
+    setPropUi(prop.ui || { labels: {} })
   }
 
   const cancelEditProperty = () => {
@@ -217,6 +317,7 @@ function AppContent() {
     setPropType(null)
     setIsMandatory(false)
     setPropOptions({})
+    setPropUi({ labels: {} })
   }
 
   const handleUpdateModel = async (e: React.FormEvent) => {
@@ -419,12 +520,7 @@ function AppContent() {
             active={currentView === 'app'}
             leftSection={Icons.Collection}
           />
-          <NavLink 
-            href="#/backends"
-            label={t('app.manageBackends')}
-            active={currentView === 'backends'}
-            leftSection={Icons.Hash}
-          />
+          <Text size="xs" fw={700} c="dimmed" mt="md" mb="sm" style={{ paddingLeft: '16px', textTransform: 'uppercase' }}>Architecture</Text>
           <NavLink 
             label={t('app.models') || "Modèles"} 
             active={currentView === 'models'} 
@@ -432,22 +528,32 @@ function AppContent() {
             variant="light"
             color="blue"
             style={{ borderRadius: '8px' }}
+            leftSection={<span style={{fontSize: '16px'}}>📦</span>}
           />
           <NavLink 
-            label={t('app.storages')} 
+            href="#/backends"
+            label={t('app.manageBackends') || "Backends"}
+            active={currentView === 'backends'}
+            leftSection={<span style={{fontSize: '16px'}}>🗄️</span>}
+            style={{ borderRadius: '8px' }}
+          />
+          <NavLink 
+            label={t('app.storages') || "Storages"} 
             active={currentView === 'storages'} 
             onClick={() => { window.location.hash = '/storages'; setError(null); }} 
             variant="light"
             color="blue"
             style={{ borderRadius: '8px' }}
+            leftSection={<span style={{fontSize: '16px'}}>📂</span>}
           />
           <NavLink 
-            label={t('app.auth')} 
+            label={t('app.auth') || "Authentification"} 
             active={currentView === 'auth'} 
             onClick={() => { window.location.hash = '/auth'; setError(null); }} 
             variant="light"
             color="blue"
             style={{ borderRadius: '8px' }}
+            leftSection={<span style={{fontSize: '16px'}}>🔐</span>}
           />
           <NavLink 
             label={t('app.secrets') || "Secrets"} 
@@ -456,7 +562,27 @@ function AppContent() {
             variant="light"
             color="violet"
             style={{ borderRadius: '8px' }}
-            leftSection={<span style={{fontSize: '16px'}}>🔐</span>}
+            leftSection={<span style={{fontSize: '16px'}}>🔑</span>}
+          />
+
+          <Text size="xs" fw={700} c="dimmed" mt="md" mb="sm" style={{ paddingLeft: '16px', textTransform: 'uppercase' }}>Interfaces</Text>
+          <NavLink 
+            label="Widgets"
+            active={currentView === 'widgets' || currentView === 'widget'} 
+            onClick={() => { window.location.hash = '/widgets'; setError(null); }} 
+            variant="light"
+            color="orange"
+            style={{ borderRadius: '8px' }}
+            leftSection={<span style={{fontSize: '16px'}}>🧩</span>}
+          />
+          <NavLink 
+            label="Vues"
+            active={false} 
+            onClick={() => { alert('Fonctionnalité à venir') }} 
+            variant="light"
+            color="orange"
+            style={{ borderRadius: '8px' }}
+            leftSection={<span style={{fontSize: '16px'}}>🖥️</span>}
           />
         </Stack>
 
@@ -485,11 +611,22 @@ function AppContent() {
           ) : currentView === 'secrets' ? (
             <SecretsManager />
           ) : currentView === 'app' ? (
-            <AppManager />
+            <AppManager onSaved={loadModels} />
+          ) : currentView === 'widgets' ? (
+            <WidgetsManager widgets={widgets} models={models} onNavigateToWidget={(uid) => window.location.hash = `/widgets/${uid}`} />
+          ) : currentView === 'widget' && currentWidget ? (
+            <WidgetBuilder 
+               widget={currentWidget}
+               model={currentModel} 
+               properties={properties} 
+               projectLanguages={projectLanguages} 
+               projectDefaultLanguage={projectDefaultLanguage} 
+               onSave={(data) => api.updateWidget(currentWidget.uid, data)}
+            />
           ) : currentView === 'models' ? (
             <ModelsManager models={models} backends={backends} onNavigateToNewModel={() => window.location.hash = '/models/new'} />
           ) : (
-            <Dashboard models={models} backends={backends} />
+            <Dashboard models={models} backends={backends} widgets={widgets} />
           )
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -498,7 +635,14 @@ function AppContent() {
               <Text c="dimmed">L'état est sauvegardé en temps réel.</Text>
             </header>
 
-            <div style={{display: 'flex', gap: '20px', flex: 1}}>
+            <Tabs value={modelTab} onChange={setModelTab}>
+              <Tabs.List mb="md">
+                <Tabs.Tab value="schema" leftSection={<span style={{fontSize:'16px'}}>{Icons.List}</span>}>
+                  Schéma & Propriétés
+                </Tabs.Tab>
+              </Tabs.List>
+
+              <Tabs.Panel value="schema" style={{display: 'flex', gap: '20px', flex: 1}}>
               <section style={{flex: 1}}>
                 <Paper shadow="sm" radius={0} p="xl" withBorder>
                 {(!selectedVersion || selectedVersion === (currentModel.version || 1)) ? (
@@ -510,6 +654,7 @@ function AppContent() {
                         value={propName} 
                         onChange={(e) => setPropName(e.currentTarget.value)} 
                         required 
+                        disabled={propName === 'name' && editingPropertyId !== null}
                       />
                       <SimpleGrid cols={4} spacing="xs">
                         {[
@@ -530,11 +675,14 @@ function AppContent() {
                             padding="xs"
                             radius={0}
                             withBorder
-                            onClick={() => setPropType(pt.value)}
+                            onClick={() => {
+                              if (propName === 'name' && editingPropertyId !== null) return;
+                              setPropType(pt.value)
+                            }}
                             style={{
                               backgroundColor: propType === pt.value ? 'var(--mantine-color-teal-light)' : 'transparent',
                               borderColor: propType === pt.value ? 'var(--mantine-color-teal-filled)' : 'var(--mantine-color-default-border)',
-                              cursor: 'pointer',
+                              cursor: (propName === 'name' && editingPropertyId !== null) ? 'not-allowed' : 'pointer',
                               display: 'flex',
                               flexDirection: 'column',
                               alignItems: 'center',
@@ -571,6 +719,25 @@ function AppContent() {
                         models={models} 
                         inputStyle={inputStyle} 
                       />
+                      
+                      <Card withBorder radius={0} p="xs">
+                        <Text size="sm" fw={500} mb="xs">Libellés (Multilingue)</Text>
+                        <SimpleGrid cols={2} spacing="xs">
+                          {Array.from(new Set([projectDefaultLanguage, ...projectLanguages])).map(lang => (
+                             <TextInput
+                                key={lang}
+                                placeholder={`Libellé (${lang})`}
+                                label={lang.toUpperCase()}
+                                value={propUi?.labels?.[lang] || ''}
+                                onChange={e => {
+                                   const newUi = { ...propUi, labels: { ...(propUi?.labels || {}), [lang]: e.currentTarget.value } }
+                                   setPropUi(newUi)
+                                }}
+                                size="xs"
+                             />
+                          ))}
+                        </SimpleGrid>
+                      </Card>
                       <Group grow>
                         <Button type="submit" variant="light" color="teal" style={{ transition: 'all 0.2s' }}>
                           {editingPropertyId ? t('model.saveChanges', 'Sauvegarder les modifications') : t('model.addPropButton', '+ Ajouter la propriété')}
@@ -665,7 +832,9 @@ function AppContent() {
                           {!isReadOnly && (
                             <Group gap="xs">
                               <Button variant="light" size="xs" onClick={() => handleEditProperty(p)}>{t('model.edit', 'Modifier') as any}</Button>
-                              <ActionIcon variant="light" color="red" onClick={() => handleDeleteProperty(p.uid)} title="Supprimer">✖</ActionIcon>
+                              {p.name !== 'name' && (
+                                 <ActionIcon variant="light" color="red" onClick={() => handleDeleteProperty(p.uid)} title="Supprimer">✖</ActionIcon>
+                              )}
                             </Group>
                           )}
                         </Group>
@@ -692,7 +861,9 @@ function AppContent() {
                   </Stack>
                 </Paper>
               </section>
-            </div>
+              </Tabs.Panel>
+
+            </Tabs>
           </div>
         )}
       </AppShell.Main>

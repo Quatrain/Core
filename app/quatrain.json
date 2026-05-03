@@ -1,7 +1,7 @@
 {
   "name": "Env-Local",
   "recipe": "crud",
-  "authMode": "oauth",
+  "authMode": "none",
   "backend": {
     "package": "@quatrain/backend-sqlite",
     "adapter": "SQLiteAdapter",
@@ -9,493 +9,137 @@
       "filename": "../app/data.sqlite"
     }
   },
-  "storage": {
-    "package": "@quatrain/storage",
-    "adapter": "LocalAdapter",
-    "config": {
-      "path": "/data/storage"
-    }
-  },
+  "storage": null,
   "front": true,
   "models": [
     {
-      "uid": "95a70b0a-f35c-4e92-8d38-00f8443d8a16",
-      "name": "Book",
-      "collectionName": "books",
+      "uid": "dd368543-67e8-49a5-aa6a-0d6c074ebada",
+      "name": "editor",
+      "collectionName": null,
       "properties": [
         {
-          "name": "title",
+          "name": "name",
           "type": "StringProperty",
-          "options": {
-            "minLength": 3
+          "options": {},
+          "ui": {
+            "labels": {
+              "en": "Editor",
+              "fr": "Editeur"
+            }
           }
         },
         {
-          "name": "year",
-          "type": "NumberProperty",
-          "options": {
-            "minVal": 1500
-          }
-        },
-        {
-          "name": "abstract",
+          "name": "name",
           "type": "StringProperty",
-          "options": {}
-        },
-        {
-          "name": "editor",
-          "type": "ObjectProperty",
-          "options": {
-            "instanceOf": "Editor"
-          }
-        },
-        {
-          "name": "author",
-          "type": "ObjectProperty",
-          "options": {
-            "instanceOf": "Author"
-          }
-        },
-        {
-          "name": "title",
-          "type": "StringProperty",
-          "options": {
-            "minLength": 3
-          }
-        },
-        {
-          "name": "year",
-          "type": "NumberProperty",
-          "options": {
-            "minVal": 1500
-          }
-        },
-        {
-          "name": "abstract",
-          "type": "StringProperty",
-          "options": {}
-        },
-        {
-          "name": "editor",
-          "type": "ObjectProperty",
-          "options": {
-            "instanceOf": "Editor"
-          }
-        },
-        {
-          "name": "author",
-          "type": "ObjectProperty",
-          "options": {
-            "instanceOf": "Author"
+          "options": {},
+          "ui": {
+            "labels": {
+              "en": "Editor",
+              "fr": "Editeur"
+            }
           }
         }
       ]
     },
     {
-      "uid": "c4b504ed-44b7-4403-85ed-3a1c677761b6",
+      "uid": "f46632c7-0257-4bda-8e1b-9b57ed631d8b",
       "name": "Author",
-      "collectionName": "authors",
+      "collectionName": null,
       "properties": [
         {
           "name": "name",
           "type": "StringProperty",
-          "options": {}
-        },
-        {
-          "name": "birthdate",
-          "type": "DateTimeProperty",
-          "options": {}
-        },
-        {
-          "name": "name",
-          "type": "StringProperty",
-          "options": {}
-        },
-        {
-          "name": "birthdate",
-          "type": "DateTimeProperty",
-          "options": {}
-        },
-        {
-          "name": "nationality",
-          "type": "StringProperty",
-          "options": {}
+          "options": {},
+          "ui": {
+            "labels": {
+              "en": "Author",
+              "fr": "Auteur"
+            }
+          }
         },
         {
           "name": "name",
           "type": "StringProperty",
-          "options": {}
-        },
-        {
-          "name": "birthdate",
-          "type": "DateTimeProperty",
-          "options": {}
-        },
-        {
-          "name": "nationality",
-          "type": "StringProperty",
-          "options": {}
-        },
-        {
-          "name": "sex",
-          "type": "EnumProperty",
-          "options": {
-            "enumLabels": {
-              "M": "Male",
-              "F": "Female"
-            },
-            "values": [
-              "M",
-              "F"
-            ]
+          "options": {},
+          "ui": {
+            "labels": {
+              "en": "Author",
+              "fr": "Auteur"
+            }
           }
         }
       ]
     },
     {
-      "uid": "0d5777c9-d3c7-4c7a-a309-2699ccd5f19f",
-      "name": "Editor",
-      "collectionName": "editors",
+      "uid": "7bb3cd79-806c-4af3-be9e-a0a927bedfdf",
+      "name": "Book",
+      "collectionName": null,
       "properties": [
         {
           "name": "name",
           "type": "StringProperty",
-          "options": {}
+          "options": {},
+          "ui": {
+            "labels": {
+              "en": "Title",
+              "fr": "Titre"
+            }
+          }
+        },
+        {
+          "name": "editor",
+          "type": "ObjectProperty",
+          "options": {
+            "instanceOf": "editor"
+          },
+          "ui": {
+            "labels": {}
+          }
+        },
+        {
+          "name": "author",
+          "type": "ObjectProperty",
+          "options": {
+            "instanceOf": "Author"
+          },
+          "ui": {
+            "labels": {}
+          }
         },
         {
           "name": "name",
           "type": "StringProperty",
-          "options": {}
-        }
-      ]
-    },
-    {
-      "uid": "f3a19dcf-aad8-44b6-a518-278e9159b4d7",
-      "name": "Record",
-      "collectionName": "records",
-      "properties": []
-    },
-    {
-      "uid": "quatrain-builtin-user-model",
-      "name": "User",
-      "collectionName": "users",
-      "properties": [
-        {
-          "name": "name",
-          "type": "string",
-          "options": {
-            "name": "name",
-            "mandatory": true,
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100,
-            "fullSearch": true,
-            "htmlType": "name"
-          }
-        },
-        {
-          "name": "status",
-          "type": "enum",
-          "options": {
-            "name": "status",
-            "mandatory": true,
-            "type": "enum",
-            "values": [
-              "created",
-              "pending",
-              "active",
-              "deleted"
-            ],
-            "defaultValue": "created",
-            "parent": {
-              "path": "",
-              "name": null,
-              "status": "created",
-              "createdBy": null,
-              "createdAt": null,
-              "updatedBy": null,
-              "updatedAt": null,
-              "deletedBy": null,
-              "deletedAt": null,
-              "modelId": null,
-              "propertyType": null,
-              "mandatory": false,
-              "options": null,
-              "version": 1,
-              "order": null
+          "options": {},
+          "ui": {
+            "labels": {
+              "en": "Title",
+              "fr": "Titre"
             }
           }
         },
         {
-          "name": "createdBy",
-          "type": "object",
+          "name": "editor",
+          "type": "ObjectProperty",
           "options": {
-            "name": "createdBy",
-            "type": "object",
-            "instanceOf": "User",
-            "mandatory": true,
-            "protected": true,
-            "parent": {
-              "path": "",
-              "name": null,
-              "status": "created",
-              "createdBy": null,
-              "createdAt": null,
-              "updatedBy": null,
-              "updatedAt": null,
-              "deletedBy": null,
-              "deletedAt": null,
-              "modelId": null,
-              "propertyType": null,
-              "mandatory": false,
-              "options": null,
-              "version": 1,
-              "order": null
-            }
+            "instanceOf": "editor"
+          },
+          "ui": {
+            "labels": {}
           }
         },
         {
-          "name": "createdAt",
-          "type": "datetime",
+          "name": "author",
+          "type": "ObjectProperty",
           "options": {
-            "name": "createdAt",
-            "type": "datetime",
-            "mandatory": true,
-            "protected": true,
-            "parent": {
-              "path": "",
-              "name": null,
-              "status": "created",
-              "createdBy": null,
-              "createdAt": null,
-              "updatedBy": null,
-              "updatedAt": null,
-              "deletedBy": null,
-              "deletedAt": null,
-              "modelId": null,
-              "propertyType": null,
-              "mandatory": false,
-              "options": null,
-              "version": 1,
-              "order": null
-            }
-          }
-        },
-        {
-          "name": "updatedBy",
-          "type": "object",
-          "options": {
-            "name": "updatedBy",
-            "type": "object",
-            "instanceOf": "User",
-            "parent": {
-              "path": "",
-              "name": null,
-              "status": "created",
-              "createdBy": null,
-              "createdAt": null,
-              "updatedBy": null,
-              "updatedAt": null,
-              "deletedBy": null,
-              "deletedAt": null,
-              "modelId": null,
-              "propertyType": null,
-              "mandatory": false,
-              "options": null,
-              "version": 1,
-              "order": null
-            }
-          }
-        },
-        {
-          "name": "updatedAt",
-          "type": "datetime",
-          "options": {
-            "name": "updatedAt",
-            "type": "datetime",
-            "parent": {
-              "path": "",
-              "name": null,
-              "status": "created",
-              "createdBy": null,
-              "createdAt": null,
-              "updatedBy": null,
-              "updatedAt": null,
-              "deletedBy": null,
-              "deletedAt": null,
-              "modelId": null,
-              "propertyType": null,
-              "mandatory": false,
-              "options": null,
-              "version": 1,
-              "order": null
-            }
-          }
-        },
-        {
-          "name": "deletedBy",
-          "type": "object",
-          "options": {
-            "name": "deletedBy",
-            "type": "object",
-            "instanceOf": "User",
-            "protected": true,
-            "parent": {
-              "path": "",
-              "name": null,
-              "status": "created",
-              "createdBy": null,
-              "createdAt": null,
-              "updatedBy": null,
-              "updatedAt": null,
-              "deletedBy": null,
-              "deletedAt": null,
-              "modelId": null,
-              "propertyType": null,
-              "mandatory": false,
-              "options": null,
-              "version": 1,
-              "order": null
-            }
-          }
-        },
-        {
-          "name": "deletedAt",
-          "type": "datetime",
-          "options": {
-            "name": "deletedAt",
-            "type": "datetime",
-            "protected": true,
-            "parent": {
-              "path": "",
-              "name": null,
-              "status": "created",
-              "createdBy": null,
-              "createdAt": null,
-              "updatedBy": null,
-              "updatedAt": null,
-              "deletedBy": null,
-              "deletedAt": null,
-              "modelId": null,
-              "propertyType": null,
-              "mandatory": false,
-              "options": null,
-              "version": 1,
-              "order": null
-            }
-          }
-        },
-        {
-          "name": "name",
-          "type": "string",
-          "options": {
-            "name": "name",
-            "type": "string",
-            "minLength": 0,
-            "htmlType": "name"
-          }
-        },
-        {
-          "name": "firstname",
-          "type": "string",
-          "options": {
-            "name": "firstname",
-            "mandatory": true,
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100,
-            "fullSearch": true,
-            "htmlType": "given-name"
-          }
-        },
-        {
-          "name": "lastname",
-          "type": "string",
-          "options": {
-            "name": "lastname",
-            "mandatory": true,
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100,
-            "fullSearch": true,
-            "htmlType": "family-name"
-          }
-        },
-        {
-          "name": "gender",
-          "type": "enum",
-          "options": {
-            "name": "gender",
-            "mandatory": false,
-            "type": "enum",
-            "values": [
-              "male",
-              "female",
-              "nonbinary"
-            ],
-            "htmlType": "sex"
-          }
-        },
-        {
-          "name": "birthday",
-          "type": "datetime",
-          "options": {
-            "name": "birthday",
-            "mandatory": false,
-            "type": "datetime",
-            "htmlType": "bday"
-          }
-        },
-        {
-          "name": "email",
-          "type": "string",
-          "options": {
-            "name": "email",
-            "mandatory": true,
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100,
-            "fullSearch": true,
-            "htmlType": "email"
-          }
-        },
-        {
-          "name": "phone",
-          "type": "string",
-          "options": {
-            "name": "phone",
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100,
-            "htmlType": "off"
-          }
-        },
-        {
-          "name": "password",
-          "type": "hash",
-          "options": {
-            "name": "password",
-            "mandatory": true,
-            "type": "hash",
-            "algorithm": "sha256",
-            "salt": "",
-            "minLength": 5,
-            "maxLength": 20,
-            "htmlType": "password"
-          }
-        },
-        {
-          "name": "entity",
-          "type": "object",
-          "options": {
-            "name": "entity",
-            "mandatory": false,
-            "type": "object",
-            "instanceOf": "Entity"
+            "instanceOf": "Author"
+          },
+          "ui": {
+            "labels": {}
           }
         }
       ]
     }
   ],
+  "widgets": [],
   "path": "../../app"
 }

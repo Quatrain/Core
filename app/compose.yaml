@@ -13,7 +13,6 @@ services:
     volumes:
       - ./quatrain.json:/app/quatrain.json:ro
       - ./data:/app/data
-      - local_storage_data:/data/storage
   ui:
     build:
       context: ./web
@@ -25,8 +24,6 @@ services:
       - env-local-net
     depends_on:
       - engine
-volumes:
-  local_storage_data: {}
 networks:
   env-local-net:
     driver: bridge

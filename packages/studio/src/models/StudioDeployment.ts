@@ -2,8 +2,8 @@ import { PersistedBaseObject } from '@quatrain/backend'
 import { StringProperty, NumberProperty, BaseObjectProperties, BaseObjectType, htmlType } from '@quatrain/core'
 
 export interface StudioDeploymentType extends BaseObjectType {
-   modelId: string
-   backendId: string
+   studioModel: string
+   studioBackend: string
    version: number
    migrationSql: string
    [x: string]: any
@@ -12,13 +12,13 @@ export interface StudioDeploymentType extends BaseObjectType {
 export const StudioDeploymentDef: any = [
    ...BaseObjectProperties,
    {
-      name: 'modelId',
+      name: 'studioModel',
       mandatory: true,
       type: StringProperty.TYPE,
       htmlType: htmlType.HIDDEN,
    },
    {
-      name: 'backendId',
+      name: 'studioBackend',
       mandatory: true,
       type: StringProperty.TYPE,
       htmlType: htmlType.HIDDEN,

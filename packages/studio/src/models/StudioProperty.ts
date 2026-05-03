@@ -1,20 +1,21 @@
 import { PersistedBaseObject } from '@quatrain/backend'
-import { StringProperty, BooleanProperty, NumberProperty, htmlType, BaseObjectProperties, BaseObjectType } from '@quatrain/core'
+import { StringProperty, BooleanProperty, NumberProperty, MapProperty, htmlType, BaseObjectProperties, BaseObjectType } from '@quatrain/core'
 
 export interface StudioPropertyType extends BaseObjectType {
-   modelId: string
+   studioModel: string
    name: string
    propertyType: string
    mandatory: boolean
    version: number
    options?: any
+   ui?: any
    [x: string]: any
 }
 
 export const StudioPropertyDef: any = [
    ...BaseObjectProperties,
    {
-      name: 'modelId',
+      name: 'studioModel',
       mandatory: true,
       type: StringProperty.TYPE,
       htmlType: htmlType.HIDDEN,
@@ -41,6 +42,12 @@ export const StudioPropertyDef: any = [
    },
    {
       name: 'options',
+      mandatory: false,
+      type: 'map', // MapProperty.TYPE
+      htmlType: htmlType.HIDDEN,
+   },
+   {
+      name: 'ui',
       mandatory: false,
       type: 'map', // MapProperty.TYPE
       htmlType: htmlType.HIDDEN,

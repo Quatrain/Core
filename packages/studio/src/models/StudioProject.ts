@@ -1,11 +1,13 @@
 import { PersistedBaseObject } from '@quatrain/backend'
-import { StringProperty, htmlType, BaseObjectProperties, BaseObjectType, DataObjectClass } from '@quatrain/core'
+import { StringProperty, ArrayProperty, htmlType, BaseObjectProperties, BaseObjectType, DataObjectClass } from '@quatrain/core'
 
 export interface StudioProjectType extends BaseObjectType {
    name: string
    description?: string
    recipe?: string
    authMode?: string
+   defaultLanguage?: string
+   languages?: string[]
    [x: string]: any
 }
 
@@ -37,6 +39,19 @@ export const StudioProjectProperties: any = [
       mandatory: false,
       type: StringProperty.TYPE,
       defaultValue: 'none',
+   },
+   {
+      name: 'defaultLanguage',
+      mandatory: false,
+      type: StringProperty.TYPE,
+      defaultValue: 'en',
+   },
+   {
+      name: 'languages',
+      mandatory: false,
+      type: ArrayProperty.TYPE,
+      itemType: StringProperty.TYPE,
+      defaultValue: ['en', 'fr'],
    }
 ]
 

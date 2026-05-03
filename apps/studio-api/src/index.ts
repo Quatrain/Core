@@ -3,7 +3,7 @@ import fs from 'fs'
 import { Backend, InjectMetaMiddleware } from '@quatrain/backend'
 import { SQLiteAdapter } from '@quatrain/backend-sqlite'
 import { returnAs, UserProperties } from '@quatrain/core'
-import { StudioModel, StudioProperty, StudioBackend, StudioDeployment, StudioProject, StudioEnvironment, StudioStorage, StudioAuth, StudioSecret } from '@quatrain/studio'
+import { StudioModel, StudioProperty, StudioBackend, StudioDeployment, StudioProject, StudioEnvironment, StudioStorage, StudioAuth, StudioSecret, StudioWidget, StudioView } from '@quatrain/studio'
 import { ExpressAdapter, ListEndpoint, CrudEndpoint } from '@quatrain/api-server'
 import { Api } from '@quatrain/api'
 import { MigrationManager } from '@quatrain/backend-migrations'
@@ -66,6 +66,15 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
 
       server.addEndpoint(ListEndpoint(StudioEnvironment), '/environments')
       server.addEndpoint(CrudEndpoint(StudioEnvironment), '/environments', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
+
+      // ==========================================
+      // UI CONFIGURATION ENDPOINTS
+      // ==========================================
+      server.addEndpoint(ListEndpoint(StudioWidget), '/widgets')
+      server.addEndpoint(CrudEndpoint(StudioWidget), '/widgets', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
+
+      server.addEndpoint(ListEndpoint(StudioView), '/views')
+      server.addEndpoint(CrudEndpoint(StudioView), '/views', { methods: ['CREATE', 'READ', 'UPDATE', 'DELETE'] })
 
       // ==========================================
       // CUSTOM STATS ENDPOINT
@@ -137,7 +146,7 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
 
             // 1. Fetch properties for this version
             const propsResult = await StudioProperty.query()
-               .where('modelId', modelId)
+               .where('studioModel', modelId)
                .where('version', version)
                .execute(returnAs.AS_DATAOBJECTS)
             const properties = propsResult.items.filter((p: any) => p.val('status') !== 'deleted')
@@ -152,8 +161,8 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                      const depModelId = options.instanceOf
                      // Find if depModelId is deployed on this backend
                      const depDeploysResult = await StudioDeployment.query()
-                        .where('modelId', depModelId)
-                        .where('backendId', backendId)
+                        .where('studioModel', depModelId)
+                        .where('studioBackend', backendId)
                         .execute(returnAs.AS_DATAOBJECTS)
                      const depDeploys = depDeploysResult.items
                      if (!Array.isArray(depDeploys) || depDeploys.length === 0) {
@@ -211,8 +220,8 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
 
             // 5. Update/Create StudioDeployment
             const existDeploysResult = await StudioDeployment.query()
-               .where('modelId', modelId)
-               .where('backendId', backendId)
+               .where('studioModel', modelId)
+               .where('studioBackend', backendId)
                .execute(returnAs.AS_INSTANCES)
             const existDeploys = existDeploysResult.items
             if (Array.isArray(existDeploys) && existDeploys.length > 0) {
@@ -222,8 +231,8 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                await (deploy as any).save()
             } else {
                const deploy = await StudioDeployment.factory()
-               deploy.set('modelId', modelId)
-               deploy.set('backendId', backendId)
+               deploy.set('studioModel', modelId)
+               deploy.set('studioBackend', backendId)
                deploy.set('version', version)
                deploy.set('migrationSql', createSql)
                await (deploy as any).save()
@@ -249,7 +258,7 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
             const environment = await StudioEnvironment.fromBackend<StudioEnvironment>(envId)
             if (!environment) return res.status(404).json({ error: 'Environment not found' })
 
-            const backendId = environment.val('backendId')
+            const backendId = environment.val('studioBackend')
             let backendConfig = null
             if (backendId) {
                const b = await StudioBackend.fromBackend<StudioBackend>(backendId)
@@ -280,7 +289,7 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                }
             }
 
-            const storageId = environment.val('storageId')
+            const storageId = environment.val('studioStorage')
             let storageConfig = null
             if (storageId) {
                const s = await StudioStorage.fromBackend<StudioStorage>(storageId)
@@ -305,7 +314,7 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                // Exclure les modèles brouillons (version === 0 ou undefined)
                if ((model.val('version') || 0) === 0) continue
                
-               const propsResult = await StudioProperty.query().where('modelId', model.uid).execute(returnAs.AS_INSTANCES)
+               const propsResult = await StudioProperty.query().where('studioModel', model.uid).execute(returnAs.AS_INSTANCES)
                const properties = propsResult.items
                   .filter(p => (p as StudioProperty).val('status') !== 'deleted')
                   .map(p => {
@@ -323,7 +332,8 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                      return {
                         name: prop.val('name'),
                         type: prop.val('propertyType'),
-                        options
+                        options,
+                        ui: prop.val('ui') || {}
                      }
                   })
 
@@ -352,6 +362,22 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                }
             }
 
+            // Export widgets
+            const widgetsResult = await StudioWidget.query().execute(returnAs.AS_INSTANCES)
+            const widgets = widgetsResult.items
+               .filter(w => (w as StudioWidget).val('status') !== 'deleted')
+               .map(w => {
+                  const widget = w as StudioWidget
+                  const targetModel = modelsResult.items.find(m => (m as StudioModel).uid === widget.val('studioModel')) as StudioModel
+                  return {
+                     uid: widget.uid,
+                     name: widget.val('name'),
+                     widgetType: widget.val('widgetType'),
+                     modelName: targetModel ? targetModel.val('name') : widget.val('studioModel'),
+                     layout: widget.val('layout')
+                  }
+               })
+
             // Create quatrain.json content
             const quatrainConfig: Record<string, any> = {
                name: `Env-${environment.val('name')}`,
@@ -360,7 +386,8 @@ const sqlitePath = path.resolve(process.cwd(), '../../.quatrain-studio.sqlite')
                backend: backendConfig,
                storage: storageConfig,
                front: recipe === 'crud' ? true : false,
-               models
+               models,
+               widgets
             }
 
             // Write quatrain.json to app/

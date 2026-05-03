@@ -27,7 +27,7 @@ export const api = {
   },
 
   getModelProperties: async (id: string, version?: number) => {
-    const filters: any = { modelId: id }
+    const filters: any = { studioModel: id }
     if (version !== undefined) {
        filters.version = version
     }
@@ -35,8 +35,8 @@ export const api = {
     return (res.data || []).filter((p: any) => p.status !== 'deleted')
   },
 
-  addProperty: async (modelId: string, propertyData: any) => {
-    const res = await apiClient.post(`properties`, { ...propertyData, modelId })
+  addProperty: async (studioModel: string, propertyData: any) => {
+    const res = await apiClient.post(`properties`, { ...propertyData, studioModel })
     return (Array.isArray(res.data) ? res.data[0] : res.data) || null
   },
 
@@ -63,18 +63,18 @@ export const api = {
     await apiClient.delete(`backends/${id}`, {})
   },
 
-  getDeployments: async (backendId: string) => {
-    const res = await apiClient.get('deployments', { backendId })
+  getDeployments: async (studioBackend: string) => {
+    const res = await apiClient.get('deployments', { studioBackend })
     return res.data || []
   },
 
-  getModelStats: async (modelId: string, backendId: string) => {
-    const res = await apiClient.get(`models/${modelId}/stats`, { backendId })
+  getModelStats: async (studioModel: string, studioBackend: string) => {
+    const res = await apiClient.get(`models/${studioModel}/stats`, { studioBackend })
     return res
   },
 
-  deployModel: async (modelId: string, version: number, backendId: string) => {
-    const res = await apiClient.post(`models/${modelId}/deploy`, { version, backendId })
+  deployModel: async (studioModel: string, version: number, studioBackend: string) => {
+    const res = await apiClient.post(`models/${studioModel}/deploy`, { version, studioBackend })
     return res.data
   },
 
@@ -92,8 +92,8 @@ export const api = {
     return (Array.isArray(res.data) ? res.data[0] : res.data) || null
   },
 
-  getEnvironments: async (projectId: string) => {
-    const res = await apiClient.get('environments', { projectId })
+  getEnvironments: async (studioProject: string) => {
+    const res = await apiClient.get('environments', { studioProject })
     return res.data || []
   },
   createEnvironment: async (data: any) => {
@@ -143,8 +143,8 @@ export const api = {
   },
 
   // Secrets
-  getSecrets: async (environmentId?: string) => {
-    const res = await apiClient.get('secrets', environmentId ? { environmentId } : {})
+  getSecrets: async (studioEnvironment?: string) => {
+    const res = await apiClient.get('secrets', studioEnvironment ? { studioEnvironment } : {})
     return res.data || []
   },
   createSecret: async (data: any) => {
@@ -157,5 +157,23 @@ export const api = {
   },
   deleteSecret: async (id: string) => {
     await apiClient.delete(`secrets/${id}`, {})
+  },
+
+  // Widgets
+  getWidgets: async () => {
+    const res = await apiClient.get('widgets')
+    return res.data || []
+  },
+  createWidget: async (name: string, widgetType: string, studioModel?: string) => {
+    const res = await apiClient.post('widgets', { name, widgetType, studioModel, isPersisted: true })
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
+  },
+  getWidget: async (id: string) => {
+    const res = await apiClient.get(`widgets/${id}`)
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
+  },
+  updateWidget: async (id: string, data: any) => {
+    const res = await apiClient.put(`widgets/${id}`, data)
+    return (Array.isArray(res.data) ? res.data[0] : res.data) || null
   }
 }

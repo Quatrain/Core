@@ -1,7 +1,7 @@
 import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Button } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 
-export function Dashboard({ models, backends }: { models: any[], backends: any[] }) {
+export function Dashboard({ models, backends, widgets }: { models: any[], backends: any[], widgets: any[] }) {
   const { t } = useTranslation()
 
   // For this mock step, we assume Storages and Auth adapters are just lengths, 
@@ -20,6 +20,7 @@ export function Dashboard({ models, backends }: { models: any[], backends: any[]
         </div>
       </Group>
 
+      <Title order={4} mb="sm" mt="lg">Architecture</Title>
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
         {/* MODELS METRIC */}
         <Card shadow="sm" padding="lg" radius={0} withBorder>
@@ -56,6 +57,29 @@ export function Dashboard({ models, backends }: { models: any[], backends: any[]
             {t('dashboard.manageBackends', 'Gérer les Backends')}
           </Button>
         </Card>
+
+      </SimpleGrid>
+
+      <Title order={4} mb="sm" mt="xl">Interfaces</Title>
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
+        {/* WIDGETS METRIC */}
+        <Card shadow="sm" padding="lg" radius={0} withBorder>
+          <Group justify="space-between" mb="xs">
+            <Text fw={700} size="lg">Widgets</Text>
+            <ThemeIcon size={40} radius="xl" variant="light" color="orange">
+              <span style={{ fontSize: '20px' }}>🧩</span>
+            </ThemeIcon>
+          </Group>
+          <Text size="3xl" fw={700} style={{ fontSize: '2.5rem', marginBottom: '10px' }}>{widgets.length}</Text>
+          <Text size="sm" c="dimmed" mb="md">Composants d'interface (Formulaires, Listes...)</Text>
+          <Button fullWidth variant="gradient" gradient={{ from: 'orange', to: 'yellow', deg: 90 }} radius="md" onClick={() => window.location.hash = '/widgets'}>
+            Gérer les Widgets
+          </Button>
+        </Card>
+      </SimpleGrid>
+
+      <Title order={4} mb="sm" mt="xl">Données & Fichiers</Title>
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
 
         {/* STORAGES METRIC */}
         <Card shadow="sm" padding="lg" radius={0} withBorder>

@@ -133,6 +133,8 @@
     "desc": "Configurez les informations globales de votre application.",
     "appName": "Nom de l'application",
     "appDesc": "Description",
+    "languages": "Langues supportées",
+    "defaultLanguage": "Langue par défaut",
     "recipeLabel": "Recette (Template) de l'application",
     "recipeCrud": "CRUD App (Moteur unifié)",
     "saveApp": "Sauvegarder",
@@ -157,6 +159,7 @@
     "deployEnv": "Lancer le déploiement",
     "deploying": "Déploiement en cours... (PoC)",
     "deploySuccess": "Déploiement réussi dans le dossier app/ !",
-    "deployError": "Erreur lors du déploiement :"
+    "deployError": "Erreur lors du déploiement :",
+    "notConfiguredAlert": "Veuillez créer votre application en premier lieu, vous pourrez y revenir plus tard pour affiner sa configuration"
   }
 }

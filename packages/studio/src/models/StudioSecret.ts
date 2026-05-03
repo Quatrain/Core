@@ -4,7 +4,7 @@ import { StringProperty, MapProperty, BaseObjectProperties, BaseObjectType, html
 export interface StudioSecretType extends BaseObjectType {
    name: string
    values: Record<string, any>
-   environmentId: string
+   studioEnvironment: string
 }
 
 export const StudioSecretProperties: any = [
@@ -24,7 +24,7 @@ export const StudioSecretProperties: any = [
       type: MapProperty.TYPE,
    },
    {
-      name: 'environmentId',
+      name: 'studioEnvironment',
       mandatory: true,
       type: StringProperty.TYPE,
    }

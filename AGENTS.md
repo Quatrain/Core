@@ -88,6 +88,12 @@ By default, Quatrain uses a "soft delete" system via the `status` property inher
 - **CRITICAL:** Always prefer `PATCH` over `PUT` when updating objects via API endpoints.
 - `PATCH` optimizes processing, especially since Quatrain's models track modified properties using a `hasChanged` flag, allowing only the modified properties to be pushed and processed.
 
+### H. Relational Properties Naming Convention
+
+- **CRITICAL:** Properties that reference other models must be named exactly as the camelCase version of the model class name they reference, without any "Id" suffix.
+- ✅ **GOOD:** `studioModel` (references `StudioModel`), `studioProject` (references `StudioProject`).
+- ❌ **BAD:** `modelId`, `projectId`, `model`, `project`.
+
 ---
 
 ## 2. Monorepo & Production Workflow Skills

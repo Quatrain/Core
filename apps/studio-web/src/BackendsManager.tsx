@@ -180,7 +180,7 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
               {deployments[b.uid] && deployments[b.uid].length > 0 ? (
                 <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
                   {deployments[b.uid].map((dep: any) => {
-                    const modelName = models.find(m => m.uid === dep.modelId)?.name || dep.modelId
+                    const modelName = models.find(m => m.uid === dep.studioModel)?.name || dep.studioModel
                     return (
                       <Badge key={dep.uid} size="sm" variant="dot" color="blue">
                         {modelName} (v{dep.version})

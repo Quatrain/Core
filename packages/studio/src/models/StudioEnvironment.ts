@@ -2,18 +2,21 @@ import { PersistedBaseObject } from '@quatrain/backend'
 import { StringProperty, EnumProperty, BaseObjectProperties, BaseObjectType, htmlType } from '@quatrain/core'
 
 export interface StudioEnvironmentType extends BaseObjectType {
-   projectId: string
+   studioProject: string
    name: string
-   backendId?: string
-   storageId?: string
-   authId?: string
+   studioBackend?: string
+   studioStorage?: string
+   studioAuth?: string
    environment?: string
+   backendStudioSecret?: string
+   storageStudioSecret?: string
+   authStudioSecret?: string
 }
 
 export const StudioEnvironmentProperties: any = [
    ...BaseObjectProperties,
    {
-      name: 'projectId',
+      name: 'studioProject',
       mandatory: true,
       type: StringProperty.TYPE,
    },
@@ -26,17 +29,32 @@ export const StudioEnvironmentProperties: any = [
       htmlType: htmlType.TEXT,
    },
    {
-      name: 'backendId',
+      name: 'studioBackend',
       mandatory: false,
       type: StringProperty.TYPE,
    },
    {
-      name: 'storageId',
+      name: 'studioStorage',
       mandatory: false,
       type: StringProperty.TYPE,
    },
    {
-      name: 'authId',
+      name: 'studioAuth',
+      mandatory: false,
+      type: StringProperty.TYPE,
+   },
+   {
+      name: 'backendStudioSecret',
+      mandatory: false,
+      type: StringProperty.TYPE,
+   },
+   {
+      name: 'storageStudioSecret',
+      mandatory: false,
+      type: StringProperty.TYPE,
+   },
+   {
+      name: 'authStudioSecret',
       mandatory: false,
       type: StringProperty.TYPE,
    },

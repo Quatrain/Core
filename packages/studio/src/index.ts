@@ -25,5 +25,21 @@ export type { StudioSecretType, StudioSecretProperties } from './models/StudioSe
 export { StudioEnvironment } from './models/StudioEnvironment'
 export type { StudioEnvironmentType, StudioEnvironmentProperties } from './models/StudioEnvironment'
 
+export { StudioWidget } from './models/StudioWidget'
+export type { StudioWidgetType, StudioWidgetDef } from './models/StudioWidget'
+
+export { StudioView } from './models/StudioView'
+export type { StudioViewType, StudioViewDef } from './models/StudioView'
+
 export { CodeGenerator } from './generator'
 export { StudioAgent } from './agent'
+
+export { StudioProjectRepository } from './repositories/StudioProjectRepository'
+export { StudioModelRepository } from './repositories/StudioModelRepository'
+export { StudioPropertyRepository } from './repositories/StudioPropertyRepository'
+export { StudioBackendRepository } from './repositories/StudioBackendRepository'
+export { StudioDeploymentRepository } from './repositories/StudioDeploymentRepository'
+export { StudioEnvironmentRepository } from './repositories/StudioEnvironmentRepository'
+export { StudioSecretRepository } from './repositories/StudioSecretRepository'
+export { StudioWidgetRepository } from './repositories/StudioWidgetRepository'
+export { StudioViewRepository } from './repositories/StudioViewRepository'

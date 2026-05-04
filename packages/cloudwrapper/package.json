@@ -20,7 +20,7 @@
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "peerDependencies": {
-    "@quatrain/backend": "^1.2.2",
+    "@quatrain/backend": "^1.2.3",
     "@quatrain/core": "^1.2.3"
   },
   "devDependencies": {
@@ -42,7 +42,7 @@
     "bump-to": "yarn version"
   },
   "dependencies": {
-    "@quatrain/backend": "^1.2.2",
+    "@quatrain/backend": "^1.2.3",
     "@quatrain/core": "^1.2.3",
     "@quatrain/storage": "^1.1"
   },

@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/cache",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Base cache interfaces and generic middlewares for Quatrain Core",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

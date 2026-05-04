@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/backend-postgres",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "license": "AGPL-3.0-only",
   "description": "Backend adapter for Postgres",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
-    "@quatrain/backend": "^1.2.2",
+    "@quatrain/backend": "^1.2.3",
     "@quatrain/core": "workspace:*",
     "pg": "^8.11.3",
     "postgres": "^3.4.4"

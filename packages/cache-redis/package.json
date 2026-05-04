@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/cache-redis",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Redis cache integration and middleware for Quatrain Core",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

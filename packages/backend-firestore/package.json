@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/backend-firestore",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "license": "AGPL-3.0-only",
   "description": "Backend adapter for Firestore",
   "main": "dist/index.js",
@@ -23,7 +23,7 @@
     "@quatrain/core": "^1.2.3"
   },
   "dependencies": {
-    "@quatrain/backend": "^1.2.2",
+    "@quatrain/backend": "^1.2.3",
     "@quatrain/core": "^1.2.3",
     "firebase-admin": "^13.4.0"
   },

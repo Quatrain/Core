@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/api-client",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Isomorphic API client for Quatrain based on native fetch",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

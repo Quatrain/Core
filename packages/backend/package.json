@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/backend",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "license": "AGPL-3.0-only",
   "description": "Backend adapters commons",
   "main": "dist/index.js",

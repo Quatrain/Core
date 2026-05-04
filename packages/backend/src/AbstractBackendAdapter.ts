@@ -137,10 +137,21 @@ export abstract class AbstractBackendAdapter implements BackendInterface {
    async executeMiddlewares(
       dataObject: DataObjectClass<any>,
       action: BackendAction,
+      timing: 'before' | 'after' = 'before',
       params?: MiddlewareParams
    ) {
       for (const middleware of this._middlewares) {
-         await middleware.execute(dataObject, action, params)
+         if (timing === 'before') {
+            if (middleware.beforeExecute) {
+               await middleware.beforeExecute(dataObject, action, params)
+            } else if (middleware.execute) {
+               await middleware.execute(dataObject, action, params)
+            }
+         } else if (timing === 'after') {
+            if (middleware.afterExecute) {
+               await middleware.afterExecute(dataObject, action, params)
+            }
+         }
       }
 
       return dataObject

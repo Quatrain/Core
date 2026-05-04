@@ -15,7 +15,7 @@ export class InjectMetaMiddleware implements BackendMiddleware {
       this._user = params?.user
    }
 
-   execute(
+   beforeExecute(
       dataObject: DataObjectClass<any>,
       action: BackendAction,
       params?: MiddlewareParams

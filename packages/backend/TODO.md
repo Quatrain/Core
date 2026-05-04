@@ -1,4 +1,4 @@
-# TODO: Middleware Execution Timing Refactoring
+# [DONE] TODO: Middleware Execution Timing Refactoring
 
 - **Goal:** Allow middlewares to explicitly declare if they run BEFORE or AFTER a database action. Currently, `executeMiddlewares` runs all middlewares right before the `INSERT`/`UPDATE`/`DELETE` operation.
 - **Changes required:**

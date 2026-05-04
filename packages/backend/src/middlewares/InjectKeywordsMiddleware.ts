@@ -5,7 +5,7 @@ import BackendMiddleware from './Middleware'
 export interface InjectKeywordsMiddlewareParams {}
 
 export class InjectKeywordsMiddleware implements BackendMiddleware {
-   execute(dataObject: DataObjectClass<any>, action: BackendAction) {
+   beforeExecute(dataObject: DataObjectClass<any>, action: BackendAction) {
       if (!dataObject.has('keywords')) {
          dataObject.addProperty(new ArrayProperty({ name: 'keywords' }))
       }

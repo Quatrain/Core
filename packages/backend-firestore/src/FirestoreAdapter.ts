@@ -105,7 +105,7 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
             const path = this._buildPath(dataObject, desiredUid)
 
             // execute middlewares
-            await this.executeMiddlewares(dataObject, BackendAction.CREATE)
+            await this.executeMiddlewares(dataObject, BackendAction.CREATE, 'before')
 
             const data = dataObject.toJSON(true)
 
@@ -116,6 +116,7 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
 
             Backend.log(`[FSA] Saved object "${data.name}" at path ${path}`)
 
+            await this.executeMiddlewares(dataObject, BackendAction.CREATE, 'after')
             resolve(dataObject)
          } catch (err) {
             console.log(err)
@@ -145,7 +146,7 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
 
       dataObject.populate(snapshot.data())
 
-      this.executeMiddlewares(dataObject, BackendAction.READ)
+      await this.executeMiddlewares(dataObject, BackendAction.READ, 'after')
 
       return dataObject
    }
@@ -178,12 +179,13 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
       Backend.log(`[FSA] updating document ${fullPath}`)
 
       // execute middlewares
-      await this.executeMiddlewares(dataObject, BackendAction.UPDATE)
+      await this.executeMiddlewares(dataObject, BackendAction.UPDATE, 'before')
 
       const { uid, ...data } = dataObject.toJSON()
 
       await getFirestore().doc(dataObject.path).update(data)
 
+      await this.executeMiddlewares(dataObject, BackendAction.UPDATE, 'after')
       return dataObject
    }
 
@@ -196,7 +198,7 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
       }
 
       // execute middlewares
-      await this.executeMiddlewares(dataObject, BackendAction.DELETE)
+      await this.executeMiddlewares(dataObject, BackendAction.DELETE, 'before')
 
       if (this._params.softDelete === true && hardDelete === false) {
          dataObject.set('status', statuses.DELETED)
@@ -207,6 +209,7 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
 
       dataObject.uri = new ObjectUri()
 
+      await this.executeMiddlewares(dataObject, BackendAction.DELETE, 'after')
       return dataObject
    }
 
@@ -415,7 +418,7 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
                newDataObjectUri,
                newDataObject.val('name')
             )
-            this.executeMiddlewares(newDataObject, BackendAction.READ)
+            this.executeMiddlewares(newDataObject, BackendAction.READ, 'after')
 
             items.push(newDataObject)
          }

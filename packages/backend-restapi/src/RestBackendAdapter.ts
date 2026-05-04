@@ -82,12 +82,16 @@ export class RestBackendAdapter extends AbstractBackendAdapter {
       const client = this.getClient()
       const url = this.buildUrl(dataObject.uri.collection as string)
       
+      await this.executeMiddlewares(dataObject, BackendAction.CREATE, 'before')
+
       const payload = await dataObject.toJSON()
       const response = await client.post(url, payload)
       
       if (response.data && response.data.uid) {
          dataObject.uid = response.data.uid
       }
+      
+      await this.executeMiddlewares(dataObject, BackendAction.CREATE, 'after')
       return dataObject
    }
 
@@ -100,6 +104,8 @@ export class RestBackendAdapter extends AbstractBackendAdapter {
       if (response.data) {
          dataObject.populate(response.data)
       }
+      
+      await this.executeMiddlewares(dataObject, BackendAction.READ, 'after')
       return dataObject
    }
 
@@ -108,8 +114,12 @@ export class RestBackendAdapter extends AbstractBackendAdapter {
       const client = this.getClient()
       const url = this.buildUrl(dataObject.uri.collection as string, dataObject.uid)
       
+      await this.executeMiddlewares(dataObject, BackendAction.UPDATE, 'before')
+
       const payload = await dataObject.toJSON()
       await client.patch(url, payload)
+      
+      await this.executeMiddlewares(dataObject, BackendAction.UPDATE, 'after')
       return dataObject
    }
 
@@ -118,7 +128,11 @@ export class RestBackendAdapter extends AbstractBackendAdapter {
       const client = this.getClient()
       const url = this.buildUrl(dataObject.uri.collection as string, dataObject.uid)
       
+      await this.executeMiddlewares(dataObject, BackendAction.DELETE, 'before')
+
       await client.delete(url, {})
+      
+      await this.executeMiddlewares(dataObject, BackendAction.DELETE, 'after')
       return dataObject
    }
 

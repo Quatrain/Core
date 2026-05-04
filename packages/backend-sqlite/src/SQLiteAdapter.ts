@@ -231,7 +231,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
             dataObject.uri.path = this._buildPath(dataObject, uid)
 
             // execute middlewares
-            await this.executeMiddlewares(dataObject, BackendAction.CREATE, {
+            await this.executeMiddlewares(dataObject, BackendAction.CREATE, 'before', {
                useDateFormat: true,
             })
 
@@ -283,6 +283,10 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
             Backend.info(
                `[SQLA] Saved object "${data.name}" at path ${dataObject.path}`
             )
+
+            await this.executeMiddlewares(dataObject, BackendAction.CREATE, 'after', {
+               useDateFormat: true,
+            })
 
             resolve(dataObject)
          } catch (err) {
@@ -376,6 +380,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
       }
 
       dataObject.populate(result)
+      await this.executeMiddlewares(dataObject, BackendAction.READ, 'after')
       return dataObject
    }
 
@@ -389,7 +394,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
       Backend.info(`[SQLA] Updating document ${dataObject.path}`)
 
       // execute middlewares
-      await this.executeMiddlewares(dataObject, BackendAction.UPDATE)
+      await this.executeMiddlewares(dataObject, BackendAction.UPDATE, 'before')
 
       const data = dataObject.toJSON({
          withoutURIData: true,
@@ -442,6 +447,8 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
       Backend.debug(`[SQLA] Values ${JSON.stringify(values)}`)
 
       await db.run(query, values)
+      
+      await this.executeMiddlewares(dataObject, BackendAction.UPDATE, 'after')
       return dataObject
    }
 
@@ -459,7 +466,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
       }
 
       // execute middlewares
-      await this.executeMiddlewares(dataObject, BackendAction.DELETE, {
+      await this.executeMiddlewares(dataObject, BackendAction.DELETE, 'before', {
          useDateFormat: true,
       })
 
@@ -478,6 +485,11 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
       }
 
       dataObject.uri = new ObjectUri()
+
+      await this.executeMiddlewares(dataObject, BackendAction.DELETE, 'after', {
+         useDateFormat: true,
+      })
+
       return dataObject
    }
 

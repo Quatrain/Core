@@ -49,7 +49,7 @@ The application is entirely configured via these variables:
 
 ### Docker Deployment (Podman / Compose)
 
-The component exposes its own multi-stage `Dockerfile` based on `oven/bun:alpine`.
+The component exposes its own multi-stage `ContainerFile` based on `oven/bun:alpine`.
 
 Example of integration in `compose.yaml` (with Traefik):
 ```yaml

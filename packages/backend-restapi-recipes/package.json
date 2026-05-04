@@ -1,0 +1,26 @@
+{
+  "name": "@quatrain/backend-restapi-recipes",
+  "version": "1.0.0",
+  "description": "Community recipes for Quatrain REST API Backend Adapter",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/backend-restapi-recipes"
+  },
+  "dependencies": {
+    "@quatrain/backend": "workspace:*",
+    "@quatrain/backend-restapi": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  }
+}

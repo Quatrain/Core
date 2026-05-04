@@ -138,3 +138,7 @@ These skills define the expected workflow for modifying packages, managing depen
     "directory": "packages/<package-name>"
   }
   ```
+
+### F. Package Documentation (README & HOWTO)
+- **CRITICAL:** Every time a new package is created in the monorepo, it **MUST** include a comprehensive `README.md` file at its root.
+- The README must clearly explain the purpose of the package, provide basic usage examples (HOWTO), and list any important technical details or conventions. This is mandatory for maintainability and community contributions.

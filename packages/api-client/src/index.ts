@@ -1,2 +1,5 @@
 export * from './ApiClient'
 export * from './auth/AuthProvider'
+export * from './auth/BasicAuthProvider'
+export * from './auth/BearerAuthProvider'
+export * from './auth/OAuthProvider'

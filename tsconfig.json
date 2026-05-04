@@ -20,5 +20,6 @@
          "@quatrain/*": ["packages/*/src/index.ts", "apps/*/src/index.ts"]
       }
    },
+   "files": [],
    "exclude": ["node_modules", "**/dist", "**/lib"]
 }

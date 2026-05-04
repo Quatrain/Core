@@ -3186,9 +3186,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/api-gateway@workspace:apps/api-gateway":
+"@quatrain/api-gateway@workspace:containers/api-gateway":
   version: 0.0.0-use.local
-  resolution: "@quatrain/api-gateway@workspace:apps/api-gateway"
+  resolution: "@quatrain/api-gateway@workspace:containers/api-gateway"
   dependencies:
     "@quatrain/api": "workspace:*"
     "@types/bun": "npm:latest"

@@ -11,7 +11,7 @@ import { Persisted } from './types/Persisted'
  * This is what backends and objects manipulate, oblivious of the other.
  */
 export class PersistedDataObject extends CoreDO implements Persisted {
-   protected _proxied: any
+   protected declare _proxied: any
 
    protected _persisted: boolean = false
 

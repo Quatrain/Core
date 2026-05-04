@@ -1,7 +1,7 @@
 {
   "name": "@quatrain/api-gateway",
-  "version": "1.0.0",
-  "description": "API Gateway and Cache Proxy for Quatrain based on Bun",
+  "version": "1.0.1",
+  "description": "API Gateway and Cache Proxy for Core",
   "main": "src/index.ts",
   "scripts": {
     "start": "bun run src/index.ts",

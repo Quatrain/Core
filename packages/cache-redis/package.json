@@ -14,8 +14,8 @@
     "directory": "packages/cache-redis"
   },
   "dependencies": {
-    "@quatrain/cache": "workspace:*",
     "@quatrain/backend": "workspace:*",
+    "@quatrain/cache": "workspace:*",
     "@quatrain/core": "workspace:*",
     "@quatrain/log": "workspace:*",
     "@quatrain/storage": "workspace:*",

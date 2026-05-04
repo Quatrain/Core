@@ -33,7 +33,7 @@ export class OpenWeatherMapRecipe implements RestApiRecipe {
       return params
    }
 
-   public getOptions(overrides?: Partial<RestAdapterOptions>): RestAdapterOptions {
+   public getOptions(apiKey?: string, overrides?: Partial<RestAdapterOptions>): RestAdapterOptions {
       return {
          baseUrl: this.defaultBaseUrl,
          querySerializer: this.querySerializer,

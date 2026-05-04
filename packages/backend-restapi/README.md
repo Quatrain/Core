@@ -48,3 +48,8 @@ class CustomRestAdapter extends RestBackendAdapter {
 
 ## Recipes
 See the `@quatrain/backend-restapi-recipes` package for community-maintained query serializers for famous APIs (OpenWeatherMap, CoinGecko, etc.).
+
+## TODO
+- [ ] **Multi-Format Parsing**: Evolve `ApiClient` to respect the `responseType` parameter (avoiding forced `.json()`) to allow ingesting `CSV` or `XML` payloads.
+- [ ] **Custom Response Parsers**: Introduce a `responseParser?: (rawResponse: any) => Record<string, any>[]` in `RestAdapterOptions` to parse exotic formats into Quatrain-compatible objects.
+- [ ] **Hypertext API Navigation**: Support HTML-based APIs by utilizing `@quatrain/ai` within the `responseParser` to extract JSON from unstructured web pages.

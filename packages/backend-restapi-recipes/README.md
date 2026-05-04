@@ -7,6 +7,7 @@ REST APIs have wildly different standards for pagination, filtering, and authent
 
 ## Available Recipes
 - **OpenWeatherMap**: Maps `city`, `lat`, and `lon` filters to the appropriate query strings (`q`, `lat`, `lon`), and automatically injects the `appid` key.
+- **AccuWeather**: Translates location searches (`q`, `city`, `locationKey`) and automatically injects `apikey`, `language`, and `details=true`.
 - **CoinGecko**: Translates standard Quatrain pagination into CoinGecko's `page` and `per_page` query parameters.
 
 ## Basic Usage

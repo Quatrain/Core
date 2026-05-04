@@ -1,0 +1,23 @@
+{
+  "name": "@quatrain/api-gateway",
+  "version": "1.0.0",
+  "description": "API Gateway and Cache Proxy for Quatrain based on Bun",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "apps/api-gateway"
+  },
+  "dependencies": {
+    "@quatrain/api": "workspace:*",
+    "ioredis": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

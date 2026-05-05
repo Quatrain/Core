@@ -100,14 +100,14 @@
     "last_published": "2026-04-22T19:52:49.433Z"
   },
   "@quatrain/storage-s3": {
-    "version": "1.1.25",
-    "hash": "XiNhJzm7TiXoaMDGg69orwtLh9s=-81f5484d1a60f6b15fd4bcb42719437f9a30fc014d8a5d94c9e8f52ad3c44eb0",
-    "last_published": "2026-04-22T19:52:54.843Z"
+    "version": "1.2.1",
+    "hash": "3MSAuZ+fMXuruv0saToHohTxmtE=-81f5484d1a60f6b15fd4bcb42719437f9a30fc014d8a5d94c9e8f52ad3c44eb0",
+    "last_published": "2026-05-05T09:19:40.963Z"
   },
   "@quatrain/storage-supabase": {
-    "version": "1.1.29",
-    "hash": "OT81erIOTgbCWSmL+CMnrSWPV/o=-1f4242c56a4bcfa8d3573ed02603600a96ffe9db6d98ec8d02771b61ca38daaa",
-    "last_published": "2026-04-22T19:53:00.679Z"
+    "version": "1.2.1",
+    "hash": "FGx1imAjMFMOF/sbIDtwxdn6Nls=-1f4242c56a4bcfa8d3573ed02603600a96ffe9db6d98ec8d02771b61ca38daaa",
+    "last_published": "2026-05-05T09:19:52.017Z"
   },
   "@quatrain/worker": {
     "version": "1.1.55",

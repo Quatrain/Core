@@ -94,6 +94,19 @@ By default, Quatrain uses a "soft delete" system via the `status` property inher
 - ✅ **GOOD:** `studioModel` (references `StudioModel`), `studioProject` (references `StudioProject`).
 - ❌ **BAD:** `modelId`, `projectId`, `model`, `project`.
 
+### I. DRY Principle (Don't Repeat Yourself)
+
+- **CRITICAL:** Constantly look out for duplicate logic, scripts, or UI components.
+- If you find yourself copying and pasting code (e.g., hash generation scripts in `bin/` or Mantine layout code in `studio-web`), you MUST extract it into a reusable function, class, or component.
+- The monorepo aims for maximal factorisation to keep the codebase maintainable.
+
+### J. Secure Process Execution (`shell: false`)
+
+- **CRITICAL:** When using Node.js `child_process` methods (`spawn`, `exec`, `spawnSync`, etc.), you MUST explicitly disable the shell to prevent shell injection vulnerabilities.
+- ❌ **BAD:** Using `exec('yarn build')` (uses a shell by default) or `spawn('docker', args, { shell: true })`.
+- ✅ **GOOD:** Using `spawn('podman', ['compose', 'up'], { shell: false })` or `spawnSync('yarn', ['build'], { shell: false })`.
+- If an external command relies heavily on shell features, find an equivalent cross-platform Node.js native API (e.g., using `fs.unlinkSync` instead of `rm -f`).
+
 ---
 
 ## 2. Monorepo & Production Workflow Skills

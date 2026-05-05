@@ -1,7 +1,16 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const { computePackageHash, getDepsHash } = require('./hashUtils');
+
+function runSync(command, args, options = {}) {
+    const result = spawnSync(command, args, { ...options, shell: false });
+    if (result.error) throw result.error;
+    if (result.status !== 0) {
+        throw new Error(`Command failed: ${command} ${args.join(' ')}\n${result.stderr ? result.stderr.toString() : ''}`);
+    }
+    return result.stdout ? result.stdout.toString() : '';
+}
 const packagesDir = path.join(__dirname, '../packages');
 const registryFile = path.join(__dirname, '../.version_hashes.json');
 const registry = JSON.parse(fs.readFileSync(registryFile, 'utf8'));
@@ -73,9 +82,8 @@ async function publishAll() {
     // previous Yarn Berry PnP setup (.yarn/berry/cache/...) that are invalid
     // under nodeLinker: node-modules, causing TS2307 errors on incremental builds.
     console.log('[PREPARE] Cleaning stale tsconfig.tsbuildinfo files...');
-    const { execSync: execSyncClean } = require('child_process');
     try {
-        execSyncClean(`find ${packagesDir} -name "tsconfig.tsbuildinfo" -delete`, { stdio: 'inherit' });
+        runSync('find', [packagesDir, '-name', 'tsconfig.tsbuildinfo', '-delete'], { stdio: 'inherit' });
     } catch (e) {
         // Non-fatal: proceed even if find/delete fails
     }
@@ -122,7 +130,7 @@ async function publishAll() {
             continue;
         }
         console.log(`[BUILD] Building ${pkg}...`);
-        execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
+        runSync('yarn', ['build'], { cwd: pkgDir, stdio: 'inherit' });
     }
     // Build anything not listed in BUILD_ORDER last (no guaranteed order)
     const allPkgs = fs.readdirSync(packagesDir).filter(p =>
@@ -133,7 +141,7 @@ async function publishAll() {
             const pkgDir = path.join(packagesDir, pkg);
             if (!fs.existsSync(path.join(pkgDir, 'package.json'))) continue;
             console.log(`[BUILD] Building ${pkg} (unlisted)...`);
-            execSync('yarn build', { cwd: pkgDir, stdio: 'inherit' });
+            runSync('yarn', ['build'], { cwd: pkgDir, stdio: 'inherit' });
         }
     }
 
@@ -155,7 +163,7 @@ async function publishAll() {
             
             try {
                 // Execute standard release pipeline
-                execSync('yarn version patch', { cwd: pkgDir, stdio: 'inherit' });
+                runSync('yarn', ['version', 'patch'], { cwd: pkgDir, stdio: 'inherit' });
                 
                 // Read new version and keep original content
                 const originalPkgContent = fs.readFileSync(pkgJsonPath, 'utf8');
@@ -185,17 +193,19 @@ async function publishAll() {
                     // Provide explicit .npmignore so yarn pack doesn't use .gitignore (which ignores lib and dist)
                     fs.writeFileSync(path.join(pkgDir, '.npmignore'), 'node_modules\ncoverage\n.git\n', 'utf8');
                     
-                    execSync('yarn pack --out package.tgz', { cwd: pkgDir, stdio: 'inherit' });
+                    runSync('yarn', ['pack', '--out', 'package.tgz'], { cwd: pkgDir, stdio: 'inherit' });
                     
                     // Publish to npmjs.org
                     let existsNpmjs = false;
                     try {
-                        const out = execSync(`npm view ${pkgName}@${newVersion} version --registry https://registry.npmjs.org/`, { cwd: pkgDir, stdio: 'pipe' }).toString().trim();
+                        const out = runSync('npm', ['view', `${pkgName}@${newVersion}`, 'version', '--registry', 'https://registry.npmjs.org/'], { cwd: pkgDir, stdio: 'pipe' }).trim();
                         if (out === newVersion) existsNpmjs = true;
                     } catch (e) { /* ignores 404 */ }
 
                     if (!existsNpmjs) {
-                        execSync(`npm publish package.tgz --registry https://registry.npmjs.org/ --access public --provenance ${tagString}`, { cwd: pkgDir, stdio: 'inherit' });
+                        let publishArgsNpm = ['publish', 'package.tgz', '--registry', 'https://registry.npmjs.org/', '--access', 'public', '--provenance'];
+                        if (npmTag) publishArgsNpm.push('--tag', npmTag);
+                        runSync('npm', publishArgsNpm, { cwd: pkgDir, stdio: 'inherit' });
                     } else {
                         console.log(`[PUBLISH] ${pkgName}@${newVersion} already exists on npmjs, skipping.`);
                     }
@@ -203,20 +213,22 @@ async function publishAll() {
                     // Publish to GitHub Packages
                     let existsGithub = false;
                     try {
-                        const out = execSync(`npm view ${pkgName}@${newVersion} version --registry https://npm.pkg.github.com/`, { cwd: pkgDir, stdio: 'pipe' }).toString().trim();
+                        const out = runSync('npm', ['view', `${pkgName}@${newVersion}`, 'version', '--registry', 'https://npm.pkg.github.com/'], { cwd: pkgDir, stdio: 'pipe' }).trim();
                         if (out === newVersion) existsGithub = true;
                     } catch (e) { /* ignores 404 */ }
 
                     if (!existsGithub) {
-                        execSync(`npm publish package.tgz --registry https://npm.pkg.github.com/ ${tagString}`, { cwd: pkgDir, stdio: 'inherit' });
+                        let publishArgsGh = ['publish', 'package.tgz', '--registry', 'https://npm.pkg.github.com/'];
+                        if (npmTag) publishArgsGh.push('--tag', npmTag);
+                        runSync('npm', publishArgsGh, { cwd: pkgDir, stdio: 'inherit' });
                     } else {
                         console.log(`[PUBLISH] ${pkgName}@${newVersion} already exists on GitHub Packages, skipping.`);
                     }
                 } finally {
                     // Restore the package.json to retain workspace: protocols but keep the version bump
                     fs.writeFileSync(pkgJsonPath, originalPkgContent, 'utf8');
-                    execSync('rm -f package.tgz', { cwd: pkgDir, stdio: 'inherit' });
-                    execSync('rm -f .npmignore', { cwd: pkgDir, stdio: 'inherit' });
+                    if (fs.existsSync(path.join(pkgDir, 'package.tgz'))) fs.unlinkSync(path.join(pkgDir, 'package.tgz'));
+                    if (fs.existsSync(path.join(pkgDir, '.npmignore'))) fs.unlinkSync(path.join(pkgDir, '.npmignore'));
                 }
                 
                 // Keep registry updated with the stable hash
@@ -237,8 +249,8 @@ async function publishAll() {
             console.log(`[SKIP] No changes in ${pkgName}. Version remains ${previousData.version}`);
             if (npmTag && npmTag !== 'latest') {
                 try {
-                    execSync(`npm dist-tag add ${pkgName}@${previousData.version} ${npmTag} --registry https://registry.npmjs.org/`, { stdio: 'ignore' });
-                    execSync(`npm dist-tag add ${pkgName}@${previousData.version} ${npmTag} --registry https://npm.pkg.github.com/`, { stdio: 'ignore' });
+                    runSync('npm', ['dist-tag', 'add', `${pkgName}@${previousData.version}`, npmTag, '--registry', 'https://registry.npmjs.org/'], { stdio: 'ignore' });
+                    runSync('npm', ['dist-tag', 'add', `${pkgName}@${previousData.version}`, npmTag, '--registry', 'https://npm.pkg.github.com/'], { stdio: 'ignore' });
                     console.log(`[PUBLISH] Tagged existing version ${pkgName}@${previousData.version} with ${npmTag}`);
                 } catch (e) {
                     // Ignore if already tagged or unauthorized

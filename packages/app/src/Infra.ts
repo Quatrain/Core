@@ -1,4 +1,4 @@
-import { exec } from 'child_process'
+import { spawn } from 'child_process'
 import path from 'path'
 import { Log } from '@quatrain/log'
 import fs from 'fs'
@@ -66,8 +66,8 @@ export class AppInfra {
    }
 
    private static getComposeCommand(): string {
-      // Prioritize podman compose if working 'modern', otherwise fallback to docker compose
-      return 'podman compose'
+      // Prioritize podman if working 'modern', otherwise fallback to docker
+      return 'podman'
    }
 
    private static async runCompose(action: string, composeFile: string, onProgress?: (event: { step: string; status: 'running' | 'success' | 'error'; message: string }) => void): Promise<void> {
@@ -77,48 +77,48 @@ export class AppInfra {
             return reject(new Error(`Compose file not found: ${composeFile}`))
          }
 
-         const cmd = `${this.getComposeCommand()} -f ${composeFile} ${action}`
-         Log.info(`[Infra] Executing: ${cmd}`)
+         const args = ['compose', '-f', composeFile, ...action.split(' ')]
+         Log.info(`[Infra] Executing: ${this.getComposeCommand()} ${args.join(' ')}`)
 
-         const child = exec(cmd, (error, stdout, stderr) => {
-            if (error) {
-               // Fallback to docker-compose if podman-compose is not installed
-               if (error.message.includes('command not found')) {
-                  Log.warn(`[Infra] podman compose not found, falling back to docker compose...`)
-                  exec(`docker compose -f ${composeFile} ${action}`, (err2, out2, errOut2) => {
-                     if (err2) {
-                        Log.error(`[Infra] Failed to run infrastructure: ${err2.message}`)
-                        return reject(err2)
-                     }
-                     if (out2) Log.debug(`[Infra] ${out2}`)
-                     if (errOut2) Log.debug(`[Infra] ${errOut2}`)
-                     resolve()
-                  })
-                  return
+         const child = spawn(this.getComposeCommand(), args, { shell: false })
+
+         const handleChild = (proc: ReturnType<typeof spawn>, isFallback: boolean) => {
+            proc.on('error', (error: any) => {
+               // Fallback to docker if podman is not installed
+               if (!isFallback && error.code === 'ENOENT') {
+                  Log.warn(`[Infra] podman not found, falling back to docker...`)
+                  const fallbackChild = spawn('docker', args, { shell: false })
+                  handleChild(fallbackChild, true)
+               } else {
+                  Log.error(`[Infra] Failed to run infrastructure: ${error.message}`)
+                  reject(error)
                }
-               Log.error(`[Infra] Failed to run infrastructure: ${error.message}`)
-               return reject(error)
-            }
-            if (stdout) Log.debug(`[Infra] ${stdout}`)
-            if (stderr) Log.debug(`[Infra] ${stderr}`)
-            resolve()
-         })
+            })
 
-         // Stream output to console and emit progress events
-         if (child.stdout) {
-            child.stdout.on('data', (data) => {
-               const text = data.toString().trim()
-               console.log(text)
-               // Could emit sub-steps here if desired:
-               // onProgress?.({ step: 'compose', status: 'running', message: text })
+            proc.on('close', (code) => {
+               if (code !== 0) {
+                  Log.error(`[Infra] Command failed with exit code ${code}`)
+                  return reject(new Error(`Command failed with exit code ${code}`))
+               }
+               resolve()
             })
+
+            // Stream output to console
+            if (proc.stdout) {
+               proc.stdout.on('data', (data) => {
+                  const text = data.toString().trim()
+                  if (text) console.log(text)
+               })
+            }
+            if (proc.stderr) {
+               proc.stderr.on('data', (data) => {
+                  const text = data.toString().trim()
+                  if (text) console.error(text)
+               })
+            }
          }
-         if (child.stderr) {
-            child.stderr.on('data', (data) => {
-               const text = data.toString().trim()
-               console.error(text)
-            })
-         }
+
+         handleChild(child, false)
       })
    }
 }

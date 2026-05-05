@@ -4,13 +4,14 @@ import { MigrationManager } from './src/MigrationManager'
 import * as path from 'path'
 import * as fs from 'fs'
 
+import * as os from 'os'
+
 async function run() {
    const dbPath = path.resolve(__dirname, 'test.sqlite')
    const adapter = new SQLiteAdapter({ config: { database: dbPath }, alias: 'default' })
    Backend.addBackend(adapter, 'default', true)
 
-   const migrationsPath = '/tmp/migrations-test'
-   if (!fs.existsSync(migrationsPath)) fs.mkdirSync(migrationsPath, { recursive: true })
+   const migrationsPath = fs.mkdtempSync(path.join(os.tmpdir(), 'migrations-test-'))
 
    const manager = new MigrationManager(adapter, { migrationsPath })
 

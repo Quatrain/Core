@@ -8,6 +8,7 @@ export class ExpressAdapter implements ServerAdapter {
    ) {
       if ('listen' in this.appOrRouter && typeof this.appOrRouter.listen === 'function') {
          // Default global middlewares for top-level application
+         (this.appOrRouter as express.Application).disable('x-powered-by')
          this.appOrRouter.use(express.json())
          this.appOrRouter.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', '*')

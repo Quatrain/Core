@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/worker",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Container Worker helpers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -34,7 +34,7 @@
     "typescript": "^5.1.5"
   },
   "dependencies": {
-    "@quatrain/core": "^1.2.3",
+    "@quatrain/core": "^1.2.4",
     "@quatrain/queue": "^1.2.1",
     "@quatrain/storage": "^1.2.1",
     "axios": "^1.7.7",

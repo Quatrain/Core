@@ -4,7 +4,7 @@ import { RestApiRecipe } from './RestApiRecipe'
 
 export class AccuweatherRecipe implements RestApiRecipe {
    public name = 'AccuWeather'
-   public defaultBaseUrl = 'http://dataservice.accuweather.com'
+   public defaultBaseUrl = 'https://dataservice.accuweather.com'
 
    private apiKey: string
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Card, Text, Badge, Group, SimpleGrid, Title, Center, ThemeIcon, ActionIcon } from '@mantine/core'
+import { Text, Badge, Group, Card } from '@mantine/core'
+import { ManagerHeader, ManagerGrid, ManagerAddCard, ManagerItemCard } from './components/ManagerUI'
 import { api } from './api'
 import { useTranslation } from 'react-i18next'
 
@@ -28,80 +29,26 @@ export function ModelsManager({ models, backends, onNavigateToNewModel }: { mode
 
   return (
     <div style={{ padding: '20px' }}>
-      <Group justify="space-between" align="flex-start" mb="xl">
-        <div>
-          <Title order={2} mb="xs">{t('modelsManager.title') || "Gestion des Modèles"}</Title>
-          <Text c="dimmed">{t('modelsManager.desc') || "Gérez les schémas de données de votre application."}</Text>
-        </div>
-      </Group>
+      <ManagerHeader title={t('modelsManager.title') || "Gestion des Modèles"} description={t('modelsManager.desc') || "Gérez les schémas de données de votre application."} />
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="lg">
-        {/* BIG ADD MODEL CARD */}
-        <Card 
-          shadow="sm" 
-          padding="lg" 
-          radius={0} 
-          withBorder
+      <ManagerGrid>
+        <ManagerAddCard 
+          label={t('dashboard.addModel')}
+          color="blue"
           onClick={onNavigateToNewModel}
-          style={{ 
-            cursor: 'pointer', 
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease', 
-            minHeight: '200px',
-            backgroundColor: 'var(--mantine-color-default)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderStyle: 'dashed',
-            borderWidth: '2px',
-            borderColor: 'var(--mantine-color-dimmed)'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)'
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-md)'
-            e.currentTarget.style.borderColor = 'var(--mantine-color-blue-filled)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-sm)'
-            e.currentTarget.style.borderColor = 'var(--mantine-color-dimmed)'
-          }}
-        >
-          <Center style={{ flexDirection: 'column', gap: '15px' }}>
-            <ThemeIcon size={60} radius="xl" variant="light" color="blue">
-              <span style={{ fontSize: '30px' }}>+</span>
-            </ThemeIcon>
-            <Text fw={600} size="lg">{t('dashboard.addModel')}</Text>
-          </Center>
-        </Card>
+        />
 
         {/* EXISTING MODELS */}
         {models.map(m => (
-          <Card 
-            key={m.uid} 
-            shadow="sm" 
-            padding="lg" 
-            radius={0} 
-            withBorder
-            style={{ 
-              transition: 'transform 0.2s ease', 
-              display: 'flex', 
-              flexDirection: 'column',
-              minHeight: '200px'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          <ManagerItemCard
+            key={m.uid}
+            title={
+              <a href={`#/models/${m.name}`} style={{textDecoration: 'none'}}>
+                <Text fw={700} size="lg" className="hover:underline">{m.name}</Text>
+              </a>
+            }
+            onEdit={() => window.location.href = `#/models/${m.name}`}
           >
-            <Card.Section withBorder inheritPadding py="xs">
-              <Group justify="space-between">
-                <a href={`#/models/${m.name}`} style={{textDecoration: 'none'}}>
-                  <Text fw={700} size="lg" className="hover:underline">{m.name}</Text>
-                </a>
-                <ActionIcon component="a" href={`#/models/${m.name}`} variant="light" color="blue" aria-label="Edit">
-                  ✎
-                </ActionIcon>
-              </Group>
-            </Card.Section>
-
             <Group mt="md" mb="xs">
               <Badge color="gray" variant="light">
                 {m.collectionName || m.name.toLowerCase()}
@@ -143,9 +90,9 @@ export function ModelsManager({ models, backends, onNavigateToNewModel }: { mode
                 <Text size="sm" c="dimmed">...</Text>
               )}
             </Card.Section>
-          </Card>
+          </ManagerItemCard>
         ))}
-      </SimpleGrid>
+      </ManagerGrid>
     </div>
   )
 }

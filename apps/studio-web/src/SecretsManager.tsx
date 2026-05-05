@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Modal, TextInput, Select, Button, Stack, ActionIcon, Badge, Table, Center } from '@mantine/core'
+import { Text, Group, ThemeIcon, Modal, TextInput, Select, Button, Stack, ActionIcon, Badge, Table, Center, Card } from '@mantine/core'
+import { ManagerHeader, ManagerGrid, ManagerAddCard, ManagerItemCard } from './components/ManagerUI'
 import { api } from './api'
 
 export function SecretsManager() {
@@ -101,12 +102,7 @@ export function SecretsManager() {
 
   return (
     <div style={{ padding: '20px' }}>
-      <Group justify="space-between" align="flex-start" mb="xl">
-        <div>
-          <Title order={2} mb="xs">Gestion des Secrets</Title>
-          <Text c="dimmed">Stockage sécurisé de vos variables d'environnement (clés API, mots de passe).</Text>
-        </div>
-      </Group>
+      <ManagerHeader title="Gestion des Secrets" description="Stockage sécurisé de vos variables d'environnement (clés API, mots de passe)." />
 
       {environments.length > 0 ? (
         <Group mb="xl" align="center">
@@ -124,69 +120,27 @@ export function SecretsManager() {
       )}
 
       {activeEnvId && (
-        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-          {/* ADD KEYCHAIN CARD */}
-          <Card 
-            shadow="sm" 
-            padding="lg" 
-            radius="md" 
-            withBorder
+        <ManagerGrid>
+          <ManagerAddCard 
+            label="Nouveau Trousseau"
+            color="violet"
             onClick={() => setIsAddKeychainModalOpen(true)}
-            style={{ 
-              cursor: 'pointer', 
-              transition: 'transform 0.2s ease, box-shadow 0.2s ease', 
-              minHeight: '200px',
-              backgroundColor: 'var(--mantine-color-default)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderStyle: 'dashed',
-              borderWidth: '2px',
-              borderColor: 'var(--mantine-color-dimmed)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)'
-              e.currentTarget.style.boxShadow = 'var(--mantine-shadow-md)'
-              e.currentTarget.style.borderColor = 'var(--mantine-color-violet-filled)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = 'var(--mantine-shadow-sm)'
-              e.currentTarget.style.borderColor = 'var(--mantine-color-dimmed)'
-            }}
-          >
-            <Stack align="center" gap="xs">
-              <ThemeIcon size={60} radius="xl" variant="light" color="violet">
-                <span style={{ fontSize: '30px' }}>+</span>
-              </ThemeIcon>
-              <Text fw={600} size="lg" mt="md" c="dimmed">
-                Nouveau Trousseau
-              </Text>
-            </Stack>
-          </Card>
+          />
 
           {/* KEYCHAINS CARDS */}
           {activeSecrets.map(keychain => {
             const varCount = Object.keys(keychain.values || {}).length
             return (
-              <Card 
-                key={keychain.uid} 
-                shadow="sm" 
-                padding="lg" 
-                radius="md" 
-                withBorder
-                style={{ display: 'flex', flexDirection: 'column' }}
-              >
-                <Group justify="space-between" mb="md">
-                  <Group>
+              <ManagerItemCard
+                key={keychain.uid}
+                title={
+                  <Group gap="xs">
                     <ThemeIcon color="violet" variant="light"><span style={{fontSize: '18px'}}>🔐</span></ThemeIcon>
                     <Text fw={700} size="lg">{keychain.name}</Text>
                   </Group>
-                  <ActionIcon variant="subtle" color="red" onClick={() => handleDeleteKeychain(keychain.uid)}>
-                    ✖
-                  </ActionIcon>
-                </Group>
-                
+                }
+                onDelete={() => handleDeleteKeychain(keychain.uid)}
+              >
                 <Text size="sm" c="dimmed" mb="xl">
                   Ce trousseau contient {varCount} variable{varCount !== 1 ? 's' : ''}.
                 </Text>
@@ -194,10 +148,10 @@ export function SecretsManager() {
                 <Button variant="light" color="violet" mt="auto" onClick={() => setActiveKeychain(keychain)}>
                   Gérer les variables
                 </Button>
-              </Card>
+              </ManagerItemCard>
             )
           })}
-        </SimpleGrid>
+        </ManagerGrid>
       )}
 
       {/* Add Keychain Modal */}

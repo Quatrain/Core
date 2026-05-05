@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack, ActionIcon, Badge } from '@mantine/core'
+import { Card, Text, Group, SimpleGrid, Center, Modal, TextInput, Button, Checkbox, Stack, Badge } from '@mantine/core'
+import { ManagerHeader, ManagerGrid, ManagerAddCard, ManagerItemCard } from './components/ManagerUI'
 import { useTranslation } from 'react-i18next'
 import { api } from './api'
 
@@ -70,77 +71,21 @@ export function AuthManager() {
 
   return (
     <div style={{ padding: '20px' }}>
-      <Group justify="space-between" align="flex-start" mb="xl">
-        <div>
-          <Title order={2} mb="xs">{t('auth.title')}</Title>
-          <Text c="dimmed">{t('auth.desc')}</Text>
-        </div>
-      </Group>
+      <ManagerHeader title={t('auth.title')} description={t('auth.desc')} />
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-        {/* BIG ADD AUTH CARD */}
-        <Card 
-          shadow="sm" 
-          padding="lg" 
-          radius={0} 
-          withBorder
+      <ManagerGrid>
+        <ManagerAddCard 
+          label={t('auth.add')}
+          color="violet"
           onClick={() => setIsAddModalOpen(true)}
-          style={{ 
-            cursor: 'pointer', 
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease', 
-            minHeight: '200px',
-            backgroundColor: 'var(--mantine-color-default)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderStyle: 'dashed',
-            borderWidth: '2px',
-            borderColor: 'var(--mantine-color-dimmed)'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)'
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-md)'
-            e.currentTarget.style.borderColor = 'var(--mantine-color-violet-filled)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-sm)'
-            e.currentTarget.style.borderColor = 'var(--mantine-color-dimmed)'
-          }}
-        >
-          <Stack align="center" gap="xs">
-            <ThemeIcon size={60} radius="xl" variant="light" color="violet">
-              <span style={{ fontSize: '30px' }}>+</span>
-            </ThemeIcon>
-            <Text fw={600} size="lg" mt="md" c="dimmed">
-              {t('auth.add')}
-            </Text>
-          </Stack>
-        </Card>
+        />
 
         {auths.map(a => (
-          <Card 
-            key={a.uid} 
-            shadow="sm" 
-            padding="lg" 
-            radius={0} 
-            withBorder
-            style={{ 
-              transition: 'transform 0.2s ease', 
-              minHeight: '200px',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
+          <ManagerItemCard
+            key={a.uid}
+            title={a.name}
+            onDelete={() => handleDelete(a.uid)}
           >
-            <Card.Section withBorder inheritPadding py="xs">
-              <Group justify="space-between">
-                <Text fw={700} size="lg">{a.name}</Text>
-                <ActionIcon variant="light" color="red" onClick={() => handleDelete(a.uid)} title="Supprimer">
-                  ✖
-                </ActionIcon>
-              </Group>
-            </Card.Section>
-            
             <Stack gap="xs" mt="md" style={{ flex: 1 }}>
               <Badge color={a.provider === 'pocketbase' ? 'teal' : a.provider === 'supabase' ? 'green' : a.provider === 'quatrain-oidc' ? 'violet' : 'orange'} variant="light" style={{ alignSelf: 'flex-start' }}>
                 {a.provider.toUpperCase()}
@@ -155,9 +100,9 @@ export function AuthManager() {
             {a.isDefault && (
               <Badge color="green" mt="md" fullWidth>Adaptateur par défaut</Badge>
             )}
-          </Card>
+          </ManagerItemCard>
         ))}
-      </SimpleGrid>
+      </ManagerGrid>
 
       <Modal opened={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title={t('auth.addAuth')}>
         <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>

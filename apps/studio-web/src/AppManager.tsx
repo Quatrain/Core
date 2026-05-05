@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Modal, TextInput, Textarea, Button, Stack, ActionIcon, Select, TagsInput, Loader, Badge, Alert } from '@mantine/core'
+import { Card, Text, Group, Modal, TextInput, Textarea, Button, Stack, Select, TagsInput, Loader, Badge, Alert, Title, ThemeIcon } from '@mantine/core'
+import { ManagerHeader, ManagerGrid, ManagerAddCard, ManagerItemCard } from './components/ManagerUI'
 import { useTranslation } from 'react-i18next'
 import { api, API_BASE_URL } from './api'
 
@@ -201,12 +202,7 @@ export function AppManager({ onSaved }: { onSaved?: () => void }) {
 
   return (
     <div style={{ padding: '20px' }}>
-      <Group justify="space-between" align="flex-start" mb="xl">
-        <div>
-          <Title order={2} mb="xs">{t('appManager.title')}</Title>
-          <Text c="dimmed">{t('appManager.desc')}</Text>
-        </div>
-      </Group>
+      <ManagerHeader title={t('appManager.title')} description={t('appManager.desc')} />
 
       {!project && (
         <Alert title="Attention" color="yellow" mb="xl">
@@ -276,77 +272,28 @@ export function AppManager({ onSaved }: { onSaved?: () => void }) {
 
       <Title order={3} mb="lg">{t('appManager.environments')}</Title>
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-        {/* BIG ADD ENV CARD */}
-        <Card 
-          shadow="sm" 
-          padding="lg" 
-          radius={0} 
-          withBorder
+      <ManagerGrid>
+        <ManagerAddCard 
+          label={t('appManager.addEnv')}
+          color="green"
           onClick={() => setIsEnvModalOpen(true)}
-          style={{ 
-            cursor: 'pointer', 
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease', 
-            minHeight: '200px',
-            backgroundColor: 'var(--mantine-color-default)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderStyle: 'dashed',
-            borderWidth: '2px',
-            borderColor: 'var(--mantine-color-dimmed)'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)'
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-md)'
-            e.currentTarget.style.borderColor = 'var(--mantine-color-green-filled)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-sm)'
-            e.currentTarget.style.borderColor = 'var(--mantine-color-dimmed)'
-          }}
-        >
-          <Stack align="center" gap="xs">
-            <ThemeIcon size={60} radius="xl" variant="light" color="green">
-              <span style={{ fontSize: '30px' }}>+</span>
-            </ThemeIcon>
-            <Text fw={600} size="lg" mt="md" c="dimmed">
-              {t('appManager.addEnv')}
-            </Text>
-          </Stack>
-        </Card>
+        />
 
         {environments.map(env => (
-          <Card 
-            key={env.uid} 
-            shadow="sm" 
-            padding="lg" 
-            radius={0} 
-            withBorder
-            style={{ 
-              transition: 'transform 0.2s ease', 
-              minHeight: '200px',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
-            <Card.Section withBorder inheritPadding py="xs">
-              <Group justify="space-between">
-                <Group gap="xs">
-                  <Text fw={700} size="lg">{env.name}</Text>
-                  {env.environment && (
-                    <Badge color={env.environment === 'production' ? 'red' : env.environment === 'staging' ? 'yellow' : 'green'} variant="light">
-                      {env.environment}
-                    </Badge>
-                  )}
-                </Group>
-                <ActionIcon variant="light" color="red" onClick={() => handleDeleteEnv(env.uid)}>
-                  ✖
-                </ActionIcon>
+          <ManagerItemCard
+            key={env.uid}
+            title={
+              <Group gap="xs">
+                <Text fw={700} size="lg">{env.name}</Text>
+                {env.environment && (
+                  <Badge color={env.environment === 'production' ? 'red' : env.environment === 'staging' ? 'yellow' : 'green'} variant="light">
+                    {env.environment}
+                  </Badge>
+                )}
               </Group>
-            </Card.Section>
-            
+            }
+            onDelete={() => handleDeleteEnv(env.uid)}
+          >
             <Stack gap="sm" mt="md" style={{ flex: 1 }}>
               <Select
                 label={t('appManager.backend')}
@@ -401,9 +348,9 @@ export function AppManager({ onSaved }: { onSaved?: () => void }) {
                 Déployer l'environnement
               </Button>
             </Stack>
-          </Card>
+          </ManagerItemCard>
         ))}
-      </SimpleGrid>
+      </ManagerGrid>
 
       {/* Add Environment Modal */}
       <Modal opened={isEnvModalOpen} onClose={() => setIsEnvModalOpen(false)} title={t('appManager.addEnv')}>

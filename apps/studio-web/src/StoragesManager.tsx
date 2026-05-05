@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, Modal, TextInput, Button, Checkbox, Stack, ActionIcon, Badge, Select } from '@mantine/core'
+import { Card, Text, Group, Center, Modal, TextInput, Button, Checkbox, Stack, Badge, Select, SimpleGrid } from '@mantine/core'
+import { ManagerHeader, ManagerGrid, ManagerAddCard, ManagerItemCard } from './components/ManagerUI'
 import { useTranslation } from 'react-i18next'
 import { api } from './api'
 
@@ -118,82 +119,22 @@ export function StoragesManager() {
 
   return (
     <div style={{ padding: '20px' }}>
-      <Group justify="space-between" align="flex-start" mb="xl">
-        <div>
-          <Title order={2} mb="xs">{t('storages.title')}</Title>
-          <Text c="dimmed">{t('storages.desc')}</Text>
-        </div>
-      </Group>
+      <ManagerHeader title={t('storages.title')} description={t('storages.desc')} />
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-        {/* BIG ADD STORAGE CARD */}
-        <Card 
-          shadow="sm" 
-          padding="lg" 
-          radius={0} 
-          withBorder
+      <ManagerGrid>
+        <ManagerAddCard 
+          label={t('storages.addStorage')}
+          color="blue"
           onClick={() => setIsAddModalOpen(true)}
-          style={{ 
-            cursor: 'pointer', 
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease', 
-            minHeight: '200px',
-            backgroundColor: 'var(--mantine-color-default)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderStyle: 'dashed',
-            borderWidth: '2px',
-            borderColor: 'var(--mantine-color-dimmed)'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)'
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-md)'
-            e.currentTarget.style.borderColor = 'var(--mantine-color-blue-filled)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-sm)'
-            e.currentTarget.style.borderColor = 'var(--mantine-color-dimmed)'
-          }}
-        >
-          <Stack align="center" gap="xs">
-            <ThemeIcon size={60} radius="xl" variant="light" color="blue">
-              <span style={{ fontSize: '30px' }}>+</span>
-            </ThemeIcon>
-            <Text fw={600} size="lg" mt="md" c="dimmed">
-              {t('storages.addStorage')}
-            </Text>
-          </Stack>
-        </Card>
+        />
 
         {storages.map(s => (
-          <Card 
-            key={s.uid} 
-            shadow="sm" 
-            padding="lg" 
-            radius={0} 
-            withBorder
-            style={{ 
-              transition: 'transform 0.2s ease', 
-              minHeight: '200px',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
+          <ManagerItemCard
+            key={s.uid}
+            title={s.name}
+            onEdit={() => handleEdit(s)}
+            onDelete={() => handleDelete(s.uid)}
           >
-            <Card.Section withBorder inheritPadding py="xs">
-              <Group justify="space-between">
-                <Text fw={700} size="lg">{s.name}</Text>
-                <Group gap="xs">
-                  <ActionIcon variant="light" color="blue" onClick={() => handleEdit(s)} title="Modifier">
-                    ✏️
-                  </ActionIcon>
-                  <ActionIcon variant="light" color="red" onClick={() => handleDelete(s.uid)} title="Supprimer">
-                    ✖
-                  </ActionIcon>
-                </Group>
-              </Group>
-            </Card.Section>
-            
             <Stack gap="xs" mt="md" style={{ flex: 1 }}>
               <Badge color={s.provider === 's3' ? 'orange' : s.provider === 'gcs' ? 'blue' : 'gray'} variant="light" style={{ alignSelf: 'flex-start' }}>
                 {s.provider.toUpperCase()}
@@ -206,9 +147,9 @@ export function StoragesManager() {
             {s.isDefault && (
               <Badge color="green" mt="md" fullWidth>Adaptateur par défaut</Badge>
             )}
-          </Card>
+          </ManagerItemCard>
         ))}
-      </SimpleGrid>
+      </ManagerGrid>
 
       <Modal opened={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditingStorageId(null); setName(''); setProvider(null); }} title={editingStorageId ? 'Modifier le stockage' : t('storages.addStorage')}>
         <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { api } from './api'
-import { TextInput, Button, Card, Text, Badge, Group, SimpleGrid, Title, Center, ThemeIcon, ActionIcon, Modal, Checkbox, Stack } from '@mantine/core'
+import { TextInput, Button, Text, Badge, Group, ActionIcon, Modal, Checkbox, Stack, Card, SimpleGrid, Center } from '@mantine/core'
+import { ManagerHeader, ManagerGrid, ManagerAddCard, ManagerItemCard } from './components/ManagerUI'
 import { useTranslation } from 'react-i18next'
 
 export function BackendsManager({ backends, models, onRefresh }: { backends: any[], models: any[], onRefresh: () => void }) {
@@ -85,12 +86,7 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
 
   return (
     <div style={{ padding: '20px' }}>
-      <Group justify="space-between" align="flex-start" mb="xl">
-        <div>
-          <Title order={2} mb="xs">{t('backends.title')}</Title>
-          <Text c="dimmed">{t('backends.desc')}</Text>
-        </div>
-      </Group>
+      <ManagerHeader title={t('backends.title')} description={t('backends.desc')} />
 
       {error && (
         <div style={{ padding: '15px', backgroundColor: 'rgba(255, 0, 0, 0.1)', color: '#ff6b6b', border: '1px solid #ff6b6b', borderRadius: '8px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
@@ -99,71 +95,21 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
         </div>
       )}
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-        {/* BIG ADD BACKEND CARD */}
-        <Card 
-          shadow="sm" 
-          padding="lg" 
-          radius={0} 
-          withBorder
+      <ManagerGrid>
+        <ManagerAddCard 
+          label={t('backends.addBackend')}
+          color="teal"
           onClick={() => setIsAddModalOpen(true)}
-          style={{ 
-            cursor: 'pointer', 
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease', 
-            minHeight: '200px',
-            backgroundColor: 'var(--mantine-color-default)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderStyle: 'dashed',
-            borderWidth: '2px',
-            borderColor: 'var(--mantine-color-dimmed)'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)'
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-md)'
-            e.currentTarget.style.borderColor = 'var(--mantine-color-teal-filled)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-sm)'
-            e.currentTarget.style.borderColor = 'var(--mantine-color-dimmed)'
-          }}
-        >
-          <Center style={{ flexDirection: 'column', gap: '15px' }}>
-            <ThemeIcon size={60} radius="xl" variant="light" color="teal">
-              <span style={{ fontSize: '30px' }}>+</span>
-            </ThemeIcon>
-            <Text fw={600} size="lg">{t('backends.addBackend')}</Text>
-          </Center>
-        </Card>
+        />
 
         {/* EXISTING BACKENDS */}
         {backends.map(b => (
-          <Card 
-            key={b.uid} 
-            shadow="sm" 
-            padding="lg" 
-            radius={0} 
-            withBorder
-            style={{ 
-              transition: 'transform 0.2s ease', 
-              display: 'flex', 
-              flexDirection: 'column',
-              minHeight: '200px'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          <ManagerItemCard
+            key={b.uid}
+            title={b.name}
+            onDelete={() => handleDelete(b.uid)}
+            deleteLabel={t('backends.delete')}
           >
-            <Card.Section withBorder inheritPadding py="xs">
-              <Group justify="space-between">
-                <Text fw={700} size="lg">{b.name}</Text>
-                <ActionIcon variant="light" color="red" onClick={() => handleDelete(b.uid)} title={t('backends.delete')}>
-                  ✖
-                </ActionIcon>
-              </Group>
-            </Card.Section>
-
             <Group mt="md" mb="xs">
               <Badge color="teal" variant="light">{b.engine}</Badge>
               {b.isDefault && <Badge color="yellow" variant="outline">{t('backends.default')}</Badge>}
@@ -192,9 +138,9 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
                 <Text size="sm" c="dimmed" fs="italic">{t('backends.noDeployments')}</Text>
               )}
             </Card.Section>
-          </Card>
+          </ManagerItemCard>
         ))}
-      </SimpleGrid>
+      </ManagerGrid>
 
       <Modal opened={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title={t('backends.addBackend')}>
         <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>

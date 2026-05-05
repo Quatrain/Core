@@ -1,4 +1,5 @@
 import { spawn } from 'child_process'
+import { Core } from '@quatrain/core'
 import path from 'path'
 import { Log } from '@quatrain/log'
 import fs from 'fs'
@@ -65,30 +66,46 @@ export class AppInfra {
       }
    }
 
-   private static getComposeCommand(): string {
-      // Prioritize podman if working 'modern', otherwise fallback to docker
-      return 'podman'
+   private static async getPodmanCommand(): Promise<string> {
+      const cmd = process.env.PODMAN_BIN_PATH || 'podman'
+      try {
+         return await Core.getSystemCommandPath(cmd)
+      } catch (e) {
+         return cmd
+      }
+   }
+
+   private static async getDockerCommand(): Promise<string> {
+      const cmd = process.env.DOCKER_BIN_PATH || 'docker'
+      try {
+         return await Core.getSystemCommandPath(cmd)
+      } catch (e) {
+         return cmd
+      }
    }
 
    private static async runCompose(action: string, composeFile: string, onProgress?: (event: { step: string; status: 'running' | 'success' | 'error'; message: string }) => void): Promise<void> {
+      if (!fs.existsSync(composeFile)) {
+         Log.error(`[Infra] Compose file not found at: ${composeFile}`)
+         throw new Error(`Compose file not found: ${composeFile}`)
+      }
+
+      const args = ['compose', '-f', composeFile, ...action.split(' ')]
+      const podmanCmd = await this.getPodmanCommand()
+      Log.info(`[Infra] Executing: ${podmanCmd} ${args.join(' ')}`)
+
       return new Promise((resolve, reject) => {
-         if (!fs.existsSync(composeFile)) {
-            Log.error(`[Infra] Compose file not found at: ${composeFile}`)
-            return reject(new Error(`Compose file not found: ${composeFile}`))
-         }
-
-         const args = ['compose', '-f', composeFile, ...action.split(' ')]
-         Log.info(`[Infra] Executing: ${this.getComposeCommand()} ${args.join(' ')}`)
-
-         const child = spawn(this.getComposeCommand(), args, { shell: false })
+         const child = spawn(podmanCmd, args, { shell: false })
 
          const handleChild = (proc: ReturnType<typeof spawn>, isFallback: boolean) => {
             proc.on('error', (error: any) => {
                // Fallback to docker if podman is not installed
                if (!isFallback && error.code === 'ENOENT') {
                   Log.warn(`[Infra] podman not found, falling back to docker...`)
-                  const fallbackChild = spawn('docker', args, { shell: false })
-                  handleChild(fallbackChild, true)
+                  this.getDockerCommand().then(dockerCmd => {
+                     const fallbackChild = spawn(dockerCmd, args, { shell: false })
+                     handleChild(fallbackChild, true)
+                  }).catch(reject)
                } else {
                   Log.error(`[Infra] Failed to run infrastructure: ${error.message}`)
                   reject(error)

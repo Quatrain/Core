@@ -1,8 +1,7 @@
 import { getMediaBuffer, setMediaBuffer } from './cache'
 import { Api } from '@quatrain/api'
 
-const API_UPSTREAM_URL = process.env.API_UPSTREAM_URL || 'http://api-express:8080'
-const MAX_CACHE_SIZE_MB = parseInt(process.env.MAX_CACHE_SIZE_MB || '5', 10)
+import { API_UPSTREAM_URL, MAX_CACHE_SIZE_MB } from './config'
 
 /**
  * Handles incoming HTTP requests for media files (e.g. /api/medias/:uid/file).

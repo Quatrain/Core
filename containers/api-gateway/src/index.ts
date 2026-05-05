@@ -3,8 +3,7 @@ import { getCachedPayload, setCachedPayload } from './cache'
 import { handleMediaRequest } from './media'
 import { Api } from '@quatrain/api'
 
-const PORT = process.env.PORT || 3000
-const API_UPSTREAM_URL = process.env.API_UPSTREAM_URL || 'http://api-express:8080'
+import { PORT, API_UPSTREAM_URL } from './config'
 
 // Endpoints that bypass JSON caching entirely (can be expanded)
 const BYPASS_CACHE_PATHS = [

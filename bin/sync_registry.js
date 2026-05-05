@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { hashElement } = require('folder-hash');
-
+const { computePackageHash } = require('./hashUtils');
 const packagesDir = path.join(__dirname, '../packages');
 const registryFile = path.join(__dirname, '../.version_hashes.json');
 
@@ -28,23 +27,7 @@ async function syncRegistry() {
         const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
         const pkgName = pkgJson.name;
 
-        // Same options as publish_all.js
-        const hashOptions = {
-            folders: { exclude: ['.*', 'node_modules', 'dist', 'lib'] },
-            files: { include: ['*.js', '*.ts', '*.json', '*.md'], exclude: ['package.json', 'tsconfig.tsbuildinfo'] }
-        };
-
-        const { hash: rawHash } = await hashElement(pkgDir, hashOptions);
-        
-        // NEW Hashing logic (excluding devDependencies)
-        const depsHash = require('crypto').createHash('sha256').update(JSON.stringify({
-            dependencies: pkgJson.dependencies || {},
-            peerDependencies: pkgJson.peerDependencies || {},
-            scripts: pkgJson.scripts || {},
-            bin: pkgJson.bin || {}
-        })).digest('hex');
-
-        const newHash = `${rawHash}-${depsHash}`;
+        const newHash = await computePackageHash(pkgDir, pkgJson);
 
         if (registry[pkgName]) {
             if (registry[pkgName].hash !== newHash) {

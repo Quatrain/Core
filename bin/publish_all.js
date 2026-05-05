@@ -1,8 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const { hashElement } = require('folder-hash');
-
+const { computePackageHash, getDepsHash } = require('./hashUtils');
 const packagesDir = path.join(__dirname, '../packages');
 const registryFile = path.join(__dirname, '../.version_hashes.json');
 const registry = JSON.parse(fs.readFileSync(registryFile, 'utf8'));
@@ -97,21 +96,7 @@ async function publishAll() {
         const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
         const pkgName = pkgJson.name;
         
-        // Exclude package.json from raw file hash to avoid formatting/version bump mismatches
-        const hashOptions = {
-            folders: { exclude: ['.*', 'node_modules', 'dist', 'lib'] },
-            files: { include: ['*.js', '*.ts', '*.json', '*.md'], exclude: ['package.json', 'tsconfig.tsbuildinfo'] }
-        };
-        const { hash: rawHash } = await hashElement(pkgDir, hashOptions);
-        
-        // Include relevant package.json fields deterministically
-        const depsHash = require('crypto').createHash('sha256').update(JSON.stringify({
-            dependencies: pkgJson.dependencies || {},
-            peerDependencies: pkgJson.peerDependencies || {},
-            scripts: pkgJson.scripts || {},
-            bin: pkgJson.bin || {}
-        })).digest('hex');
-        computedHashes[pkgName] = `${rawHash}-${depsHash}`;
+        computedHashes[pkgName] = await computePackageHash(pkgDir, pkgJson);
         previousDataMap[pkgName] = registry[pkgName] || {};
         
         const hasDist = fs.existsSync(path.join(pkgDir, 'dist')) || fs.existsSync(path.join(pkgDir, 'lib'));
@@ -280,12 +265,7 @@ async function publishAll() {
             const pkgName = pkgJson.name;
             
             if (registry[pkgName] && registry[pkgName].hash) {
-                const depsHash = require('crypto').createHash('sha256').update(JSON.stringify({
-                    dependencies: pkgJson.dependencies || {},
-                    peerDependencies: pkgJson.peerDependencies || {},
-                    scripts: pkgJson.scripts || {},
-                    bin: pkgJson.bin || {}
-                })).digest('hex');
+                const depsHash = getDepsHash(pkgJson);
                 
                 const oldRawHash = registry[pkgName].hash.split('-')[0];
                 registry[pkgName].hash = `${oldRawHash}-${depsHash}`;

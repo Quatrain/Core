@@ -140,9 +140,9 @@
     "last_published": "2026-05-04T13:37:42.112Z"
   },
   "@quatrain/api-server": {
-    "version": "1.1.4",
-    "hash": "p58y2benTkarToeRtSEnkk5H+ps=-a93ec6ae9c12e4be208167ed6395dae851c1d5742fbe1673319fa3dbb499a2c3",
-    "last_published": "2026-05-03T20:02:44.438Z"
+    "version": "1.1.5",
+    "hash": "PC+fphf4UkKrsMZI47AuOdWiMac=-a93ec6ae9c12e4be208167ed6395dae851c1d5742fbe1673319fa3dbb499a2c3",
+    "last_published": "2026-05-05T12:59:01.842Z"
   },
   "@quatrain/app": {
     "version": "1.1.9",
@@ -160,9 +160,9 @@
     "last_published": "2026-04-29T19:40:44.719Z"
   },
   "@quatrain/backend-migrations": {
-    "version": "1.1.1",
-    "hash": "StYL8Sh4nYfobFM5yVk9WySPKJI=-68436f89b90bbfe430be4d5a508994101420c7eb874d6589faecb55276bb4068",
-    "last_published": "2026-04-29T19:41:19.814Z"
+    "version": "1.1.2",
+    "hash": "j+86ZVH1RRcFXeSluMG9x21uGUg=-68436f89b90bbfe430be4d5a508994101420c7eb874d6589faecb55276bb4068",
+    "last_published": "2026-05-05T12:59:22.830Z"
   },
   "@quatrain/code": {
     "version": "1.1.1",
@@ -205,14 +205,14 @@
     "last_published": "2026-04-29T19:44:32.956Z"
   },
   "@quatrain/backend-restapi": {
-    "version": "1.0.1",
-    "hash": "YcDko2ejCiQ7q2z/UT2REO4YIuE=-2cbab5719ee8dee03c34bdea351ddf77e5cf5c6d83e2dacaa15f54bea5b863f4",
-    "last_published": "2026-05-04T13:38:42.233Z"
+    "version": "1.0.2",
+    "hash": "/MVYtz136HOkE/AREq4umFjW8eE=-2cbab5719ee8dee03c34bdea351ddf77e5cf5c6d83e2dacaa15f54bea5b863f4",
+    "last_published": "2026-05-05T12:59:30.142Z"
   },
   "@quatrain/backend-restapi-recipes": {
-    "version": "1.0.1",
-    "hash": "tZ1eMvq3qd/TKv/wk9Na5NEOPIo=-124faa71fd0656191a430ced2114ae7de38dcbe7b8d06baf8244714e4b044a7b",
-    "last_published": "2026-05-04T13:38:56.520Z"
+    "version": "1.0.2",
+    "hash": "auI7FFhVjMKT5AyyhvB/raEqM9M=-124faa71fd0656191a430ced2114ae7de38dcbe7b8d06baf8244714e4b044a7b",
+    "last_published": "2026-05-05T12:59:43.395Z"
   },
   "@quatrain/cache": {
     "version": "1.0.1",

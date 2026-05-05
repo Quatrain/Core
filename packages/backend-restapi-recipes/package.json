@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/backend-restapi-recipes",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Community recipes for Quatrain REST API Backend Adapter",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

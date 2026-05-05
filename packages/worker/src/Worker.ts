@@ -25,7 +25,7 @@ export class Worker extends Core {
          Worker.info(`Executing command ${command} in ${cwd} with arguments:`)
          args.forEach((arg) => console.log(`\t${arg}`))
          return new Promise((resolve, reject) => {
-            const child = spawn(command, args, { cwd })
+            const child = spawn(command, args, { cwd, shell: false })
 
             child.stdout.on('data', (data: Buffer) =>
                Worker.debug(data.toString())

@@ -34,44 +34,7 @@ When the Gateway detects a media request (e.g., `/api/medias/123/file`), it appl
 
 ---
 
-## HOWTO: Configuration and Deployment
+## Documentation
 
-### Prerequisites
-- An accessible **Redis** instance.
-- The `api-express` backend configured to provide the media authentication endpoint (`GET /api/medias/:uid/auth`).
-
-### Configuration (Environment Variables)
-The application is entirely configured via these variables:
-- `PORT`: Listening port for the Bun server (Default: `3000`).
-- `API_UPSTREAM_URL`: Target Node.js API URL (e.g., `http://api-express:8080`).
-- `REDIS_URL`: Redis connection string (e.g., `redis://redis:6379`).
-- `MAX_CACHE_SIZE_MB`: Maximum size in MB for image caching (Default: `5`).
-
-### Docker Deployment (Podman / Compose)
-
-The component exposes its own multi-stage `ContainerFile` based on `oven/bun:alpine`.
-
-Example of integration in `compose.yaml` (with Traefik):
-```yaml
-services:
-  api-gateway:
-    container_name: api-gateway
-    image: ghcr.io/quatrain/api-gateway:latest
-    restart: always
-    environment:
-      - PORT=3000
-      - API_UPSTREAM_URL=http://api:80
-      - REDIS_URL=redis://redis:6379
-      - MAX_CACHE_SIZE_MB=5
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api_gateway.rule=Host(`api.myproject.com`)"
-      - "traefik.http.services.api_gateway.loadbalancer.server.port=3000"
-```
-
-*Note: Do not forget to disable the public Traefik labels on your `api-express`, as it should only be accessible via the Gateway (internal Docker network).*
-
-### Cache Opt-Out
-If you develop an endpoint in the API that returns highly volatile data that should never be cached (e.g., real-time data), simply return the following header:
-`Cache-Control: no-cache`
-The Bun Gateway will intercept this header and ensure that the payload is never stored in Redis.
+For full configuration variables and practical usage instructions, please refer to the [HOWTO.md](./HOWTO.md) file.
+You can also find all supported environment variables with their descriptions in the [.env.dist](./.env.dist) file.

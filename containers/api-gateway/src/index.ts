@@ -5,7 +5,7 @@ import { Api } from '@quatrain/api'
 import { readFileSync } from 'fs'
 import pkg from '../package.json'
 
-import { PORT, API_UPSTREAM_URL } from './config'
+import { PORT, API_UPSTREAM_URL, GATEWAY_CACHE_API_BY_USER } from './config'
 
 // Endpoints that bypass JSON caching entirely (can be expanded)
 const BYPASS_CACHE_PATHS = [
@@ -36,8 +36,9 @@ Bun.serve({
       const authHeader = req.headers.get('authorization')
       const userId = extractUserIdFromAuthHeader(authHeader)
       
-      // cache key format: api:cache:<userId>:<pathAndQuery>
-      cacheKey = `api:cache:${userId}:${url.pathname}${url.search}`
+      // cache key format: api:cache:<userIdOrGlobal>:<pathAndQuery>
+      const cacheScope = GATEWAY_CACHE_API_BY_USER ? userId : 'global'
+      cacheKey = `api:cache:${cacheScope}:${url.pathname}${url.search}`
       
       const cached = await getCachedPayload(cacheKey)
       if (cached) {

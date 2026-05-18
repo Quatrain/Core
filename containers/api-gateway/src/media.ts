@@ -1,7 +1,8 @@
 import { getMediaBuffer, setMediaBuffer } from './cache'
 import { Api } from '@quatrain/api'
+import { extractUserIdFromAuthHeader } from './jwt'
 
-import { API_UPSTREAM_URL, MAX_CACHE_SIZE_MB, GATEWAY_EXCLUDED_MIMES, GATEWAY_MAXSIZE, GATEWAY_CACHE_MAX_AGE } from './config'
+import { API_UPSTREAM_URL, MAX_CACHE_SIZE_MB, GATEWAY_EXCLUDED_MIMES, GATEWAY_MAXSIZE, GATEWAY_CACHE_MAX_AGE, GATEWAY_CACHE_MEDIA_BY_USER } from './config'
 
 /**
  * Handles incoming HTTP requests for media files (e.g. /api/medias/:uid/file).
@@ -117,7 +118,12 @@ export async function handleMediaRequest(req: Request, url: URL): Promise<Respon
   responseHeaders.set('Content-Type', mimeType)
 
   // 2. Fetch from Storage (with Redis cache if applicable)
-  const cacheKey = `media:${uid}:${action}`
+  let cacheKey = `media:${uid}:${action}`
+  
+  if (GATEWAY_CACHE_MEDIA_BY_USER) {
+    const userId = extractUserIdFromAuthHeader(finalAuthHeader) || 'anonymous'
+    cacheKey = `media:${userId}:${uid}:${action}`
+  }
 
   if (shouldCache) {
     // Try to get from Redis

@@ -16,3 +16,6 @@ export const GATEWAY_EXCLUDED_MIMES = process.env.GATEWAY_EXCLUDED_MIMES
 
 const envMaxAge = process.env.GATEWAY_CACHE_MAX_AGE ? Number.parseInt(process.env.GATEWAY_CACHE_MAX_AGE, 10) : 31536000
 export const GATEWAY_CACHE_MAX_AGE = Math.max(envMaxAge, 2592000) // Minimum 1 month
+
+export const GATEWAY_CACHE_API_BY_USER = process.env.GATEWAY_CACHE_API_BY_USER === 'true'
+export const GATEWAY_CACHE_MEDIA_BY_USER = process.env.GATEWAY_CACHE_MEDIA_BY_USER === 'true'

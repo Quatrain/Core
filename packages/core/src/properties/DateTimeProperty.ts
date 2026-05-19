@@ -63,7 +63,7 @@ export class DateTimeProperty extends BaseProperty {
             let utcString = value.trim()
             if (
                !utcString.endsWith('Z') &&
-               !/[+-]\d{2}:\d{2}$/.test(utcString)
+               !/[+-]\d{2}(:?\d{2})?$/.test(utcString)
             ) {
                // Replace space with T for ISO format and append Z for UTC
                utcString = utcString.replace(' ', 'T') + 'Z'

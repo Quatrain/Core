@@ -33,8 +33,8 @@
     "typescript": "^5.1.5"
   },
   "dependencies": {
-    "@quatrain/core": "^1.2.7",
-    "@quatrain/storage": "^1.2.6",
+    "@quatrain/core": "^1.2.8",
+    "@quatrain/storage": "^1.2.7",
     "firebase-admin": "^12.4.0",
     "fs-extra": "^11.2.0"
   },

@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream'
 import { FileType } from './types/FileType'
 import { DownloadFileMetaType } from './types/DownloadFileMetaType'
+import { BucketStatsType } from './types/BucketStatsType'
 
 /**
  * These are the public functions that any storage adapter must expose
@@ -25,4 +26,5 @@ export interface StorageAdapterInterface {
    generateThumbnail(file: FileType, sizes: number[]): Promise<any>
    generateImageThumbnail(file: FileType, sizes: number[]): Promise<any>
    generateVideoThumbnail(file: FileType, sizes: number[]): Promise<any>
+   getBucketStats(bucket?: string): Promise<BucketStatsType>
 }

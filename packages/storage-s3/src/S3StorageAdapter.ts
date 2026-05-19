@@ -5,6 +5,7 @@ import {
    FileResponseLinkType,
    StorageParameters,
    DownloadFileMetaType,
+   BucketStatsType,
 } from '@quatrain/storage'
 import { Readable, Stream } from 'node:stream'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
@@ -17,6 +18,9 @@ import {
    CopyObjectCommand,
    HeadObjectCommand,
    ListBucketsCommand,
+   ListObjectsV2Command,
+   ListObjectsV2CommandInput,
+   ListObjectsV2CommandOutput,
 } from '@aws-sdk/client-s3'
 
 /**
@@ -329,6 +333,72 @@ export class S3StorageAdapter extends AbstractStorageAdapter {
          method: 'PUT',
          accept: file.contentType || 'application/octet-stream',
          expiresIn,
+      }
+   }
+
+   /**
+    * Computes statistics for a given bucket in S3.
+    * Iterates over all objects in the bucket to compute total count and size.
+    * 
+    * @param bucket - Target bucket name.
+    * @returns A promise resolving to bucket statistics.
+    */
+   async getBucketStats(bucket?: string): Promise<BucketStatsType> {
+      const targetBucket = bucket || this._params.config.bucket
+      let totalObjects = 0
+      let totalSize = 0
+      let isTruncated = true
+      let continuationToken: string | undefined = undefined
+      const folders: Record<string, any> = {}
+
+      Storage.info(`Fetching bucket stats for ${targetBucket}`)
+
+      while (isTruncated) {
+         const input: ListObjectsV2CommandInput = {
+            Bucket: targetBucket,
+            ContinuationToken: continuationToken,
+         }
+         const command = new ListObjectsV2Command(input)
+         const res: ListObjectsV2CommandOutput = await this._client.send(command)
+         if (res.Contents) {
+            for (const item of res.Contents) {
+               const size = item.Size || 0
+               totalObjects++
+               totalSize += size
+
+               if (item.Key) {
+                  const parts = item.Key.split('/')
+                  parts.pop() // remove file name to get exact folder
+                  const folderPath = parts.length > 0 ? parts.join('/') : '/'
+                  const folderName = parts.length > 0 ? parts[parts.length - 1] : '/'
+                  
+                  if (!folders[folderPath]) {
+                     folders[folderPath] = { 
+                        name: folderName,
+                        path: folderPath,
+                        totalObjects: 0, 
+                        totalSize: 0,
+                        lastModified: item.LastModified
+                     }
+                  } else if (item.LastModified) {
+                     if (!folders[folderPath].lastModified || item.LastModified > folders[folderPath].lastModified) {
+                        folders[folderPath].lastModified = item.LastModified
+                     }
+                  }
+                  folders[folderPath].totalObjects++
+                  folders[folderPath].totalSize += size
+               }
+            }
+         }
+         isTruncated = res.IsTruncated ?? false
+         continuationToken = res.NextContinuationToken
+      }
+
+      return {
+         bucket: targetBucket,
+         totalObjects,
+         totalSize,
+         folders,
       }
    }
 }

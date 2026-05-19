@@ -4,6 +4,7 @@ import type { BlobMediaType } from './types/BlobMediaType'
 import type { FileResponseLinkType } from './types/FileResponseLinkType'
 import type { FileResponseUrlType } from './types/FileResponseUrlType'
 import type { DownloadFileMetaType } from './types/DownloadFileMetaType'
+import type { BucketStatsType } from './types/BucketStatsType'
 import type { StorageAdapterInterface } from './StorageAdapterInterface'
 import { AbstractStorageAdapter } from './AbstractStorageAdapter'
 import { Storage } from './Storage'
@@ -23,6 +24,7 @@ export type {
    FileResponseLinkType,
    FileResponseUrlType,
    DownloadFileMetaType,
+   BucketStatsType,
    StorageAdapterInterface,
    StorageParameters,
    StorageParametersKeys,

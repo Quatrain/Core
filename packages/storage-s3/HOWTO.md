@@ -5,6 +5,7 @@ This guide provides practical examples for interacting with S3 buckets.
 ## Table of Contents
 1. [Fetching Files](#1-fetching-files)
 2. [Deleting Files](#2-deleting-files)
+3. [Querying Storage Stats with S3 Prefixes](#3-querying-storage-stats-with-s3-prefixes)
 
 ---
 
@@ -42,5 +43,24 @@ async function removeOldAvatar(userId: string) {
     } catch (err) {
         console.error('Failed to delete file', err)
     }
+}
+```
+
+## 3. Querying Storage Stats with S3 Prefixes
+
+You can query metadata, total file counts, aggregate sizes, and last modified timestamps of objects matching a prefix directly from the AWS S3 adapter.
+
+```typescript
+import { Storage } from '@quatrain/storage'
+
+async function logBucketStats(companyId: string) {
+    const storage = Storage.getAdapter('s3')
+    
+    // getBucketStats(bucket, prefix)
+    const stats = await storage.getBucketStats('my-documents-bucket', `companies/${companyId}`)
+    
+    console.log(`Matching objects count: ${stats.totalObjects}`)
+    console.log(`Aggregate size in bytes: ${stats.totalSize}`)
+    console.log(`Raw objects:`, stats.objects)
 }
 ```

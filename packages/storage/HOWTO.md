@@ -6,6 +6,7 @@ This guide covers the basic operations for managing files via the Quatrain stora
 1. [Registering a Storage Adapter](#1-registering-a-storage-adapter)
 2. [Uploading Files](#2-uploading-files)
 3. [Retrieving Files and URLs](#3-retrieving-files-and-urls)
+4. [Fetching Bucket Statistics](#4-fetching-bucket-statistics)
 
 ---
 
@@ -66,5 +67,25 @@ async function getAvatarUrl(userId: string) {
         console.error('File not found')
         return null
     }
+}
+```
+
+## 4. Fetching Bucket Statistics
+
+You can fetch summary statistics for a bucket, optionally filtering by a key prefix (which allows analyzing a specific subdirectory hierarchy).
+
+```typescript
+import { Storage } from '@quatrain/storage'
+
+async function getCompanyStorageStats(companyId: string) {
+    const storage = Storage.getAdapter()
+    
+    // getBucketStats(bucket, prefix)
+    const stats = await storage.getBucketStats('company-documents', `companies/${companyId}`)
+    
+    console.log(`Total objects under prefix: ${stats.totalObjects}`)
+    console.log(`Total storage size: ${stats.totalSize} bytes`)
+    console.log(`Last modified timestamp: ${stats.lastModified}`)
+    console.log(`Raw objects list:`, stats.objects)
 }
 ```

@@ -26,5 +26,5 @@ export interface StorageAdapterInterface {
    generateThumbnail(file: FileType, sizes: number[]): Promise<any>
    generateImageThumbnail(file: FileType, sizes: number[]): Promise<any>
    generateVideoThumbnail(file: FileType, sizes: number[]): Promise<any>
-   getBucketStats(bucket?: string): Promise<BucketStatsType>
+   getBucketStats(bucket?: string, prefix?: string): Promise<BucketStatsType>
 }

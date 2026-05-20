@@ -161,45 +161,51 @@ export class MockAdapter extends AbstractStorageAdapter {
       }
    }
 
-   /**
-    * Computes statistics for a given bucket (mock implementation).
-    * 
-    * @param bucket - Target bucket name.
-    * @returns A promise resolving to bucket statistics.
-    */
-   async getBucketStats(bucket?: string): Promise<BucketStatsType> {
-      let totalObjects = 0
-      let totalSize = 0
-      const folders: Record<string, any> = {}
+    /**
+     * Computes statistics for a given bucket (mock implementation).
+     * 
+     * @param bucket - Target bucket name.
+     * @param prefix - Optional directory prefix.
+     * @returns A promise resolving to bucket statistics.
+     */
+    async getBucketStats(bucket?: string, prefix?: string): Promise<BucketStatsType> {
+       let totalObjects = 0
+       let totalSize = 0
+       const folders: Record<string, any> = {}
 
-      for (const [key, buffer] of this._files.entries()) {
-         totalObjects++
-         totalSize += buffer.length
-         
-         const parts = key.split('/')
-         parts.pop() // remove file name
-         const folderPath = parts.length > 0 ? parts.join('/') : '/'
-         const folderName = parts.length > 0 ? parts[parts.length - 1] : '/'
-         
-         const mockDate = new Date()
-         if (!folders[folderPath]) {
-            folders[folderPath] = { 
-               name: folderName,
-               path: folderPath,
-               totalObjects: 0, 
-               totalSize: 0,
-               lastModified: mockDate
-            }
-         }
-         folders[folderPath].totalObjects++
-         folders[folderPath].totalSize += buffer.length
-      }
+       const normPrefix = prefix ? (prefix.endsWith('/') ? prefix : prefix + '/') : ''
 
-      return {
-         bucket: bucket || 'mock-bucket',
-         totalObjects,
-         totalSize,
-         folders
-      }
-   }
+       for (const [key, buffer] of this._files.entries()) {
+          if (normPrefix && !key.startsWith(normPrefix)) {
+             continue
+          }
+          totalObjects++
+          totalSize += buffer.length
+          
+          const parts = key.split('/')
+          parts.pop() // remove file name
+          const folderPath = parts.length > 0 ? parts.join('/') : '/'
+          const folderName = parts.length > 0 ? parts[parts.length - 1] : '/'
+          
+          const mockDate = new Date()
+          if (!folders[folderPath]) {
+             folders[folderPath] = { 
+                name: folderName,
+                path: folderPath,
+                totalObjects: 0, 
+                totalSize: 0,
+                lastModified: mockDate
+             }
+          }
+          folders[folderPath].totalObjects++
+          folders[folderPath].totalSize += buffer.length
+       }
+
+       return {
+          bucket: bucket || 'mock-bucket',
+          totalObjects,
+          totalSize,
+          folders
+       }
+    }
 }

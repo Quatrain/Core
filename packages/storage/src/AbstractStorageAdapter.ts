@@ -137,15 +137,16 @@ export abstract class AbstractStorageAdapter
     */
    abstract getMetaData(file: FileType): Promise<FileType>
 
-   /**
-    * Computes statistics for a given bucket.
-    * 
-    * @param bucket - Target bucket name.
-    * @returns A promise resolving to bucket statistics.
-    */
-   async getBucketStats(bucket?: string): Promise<BucketStatsType> {
-      throw new Error(`getBucketStats is not implemented in ${this.constructor.name}`)
-   }
+    /**
+     * Computes statistics for a given bucket.
+     * 
+     * @param bucket - Target bucket name.
+     * @param prefix - Optional directory prefix.
+     * @returns A promise resolving to bucket statistics.
+     */
+    async getBucketStats(bucket?: string, prefix?: string): Promise<BucketStatsType> {
+       throw new Error(`getBucketStats is not implemented in ${this.constructor.name}`)
+    }
 
    protected async _setupThumbnailWorkspace(
       workingDirName: string

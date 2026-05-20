@@ -343,7 +343,7 @@ export class S3StorageAdapter extends AbstractStorageAdapter {
     * @param bucket - Target bucket name.
     * @returns A promise resolving to bucket statistics.
     */
-   async getBucketStats(bucket?: string): Promise<BucketStatsType> {
+   async getBucketStats(bucket?: string, prefix?: string): Promise<BucketStatsType> {
       const targetBucket = bucket || this._params.config.bucket
       let totalObjects = 0
       let totalSize = 0
@@ -351,12 +351,15 @@ export class S3StorageAdapter extends AbstractStorageAdapter {
       let continuationToken: string | undefined = undefined
       const folders: Record<string, any> = {}
 
-      Storage.info(`Fetching bucket stats for ${targetBucket}`)
+      Storage.info(`Fetching bucket stats for ${targetBucket} (prefix: ${prefix || 'none'})`)
+
+      const s3Prefix = prefix ? (prefix.endsWith('/') ? prefix : prefix + '/') : undefined
 
       while (isTruncated) {
          const input: ListObjectsV2CommandInput = {
             Bucket: targetBucket,
             ContinuationToken: continuationToken,
+            Prefix: s3Prefix,
          }
          const command = new ListObjectsV2Command(input)
          const res: ListObjectsV2CommandOutput = await this._client.send(command)

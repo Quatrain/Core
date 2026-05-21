@@ -31,6 +31,9 @@ jobs:
         with:
           fetch-depth: 0 # Disable shallow clone for accurate SonarQube blame/authorship
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -41,9 +44,6 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-
-      - name: Enable Corepack
-        run: corepack enable
 
       - name: Install dependencies
         run: YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install

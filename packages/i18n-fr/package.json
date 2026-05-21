@@ -1,0 +1,20 @@
+{
+  "name": "@quatrain/i18n-fr",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "@quatrain/i18n": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/i18n-fr"
+  }
+}

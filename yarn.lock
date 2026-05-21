@@ -3701,6 +3701,32 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/i18n-en@workspace:*, @quatrain/i18n-en@workspace:packages/i18n-en":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/i18n-en@workspace:packages/i18n-en"
+  dependencies:
+    "@quatrain/i18n": "workspace:*"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/i18n-fr@workspace:*, @quatrain/i18n-fr@workspace:packages/i18n-fr":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/i18n-fr@workspace:packages/i18n-fr"
+  dependencies:
+    "@quatrain/i18n": "workspace:*"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/i18n@workspace:*, @quatrain/i18n@workspace:packages/i18n":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/i18n@workspace:packages/i18n"
+  dependencies:
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/log@workspace:*, @quatrain/log@workspace:packages/log":
   version: 0.0.0-use.local
   resolution: "@quatrain/log@workspace:packages/log"
@@ -4083,11 +4109,23 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/ui-list-react@workspace:packages/ui-list-react"
   dependencies:
+    "@quatrain/i18n": "workspace:*"
+    "@quatrain/i18n-en": "workspace:*"
+    "@quatrain/i18n-fr": "workspace:*"
     "@quatrain/ui": "workspace:*"
+    "@quatrain/ui-list": "workspace:*"
     typescript: "npm:^5.2.2"
   peerDependencies:
     react: ^18.3.1
     react-dom: ^18.3.1
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/ui-list@workspace:*, @quatrain/ui-list@workspace:packages/ui-list":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/ui-list@workspace:packages/ui-list"
+  dependencies:
+    typescript: "npm:^5.2.2"
   languageName: unknown
   linkType: soft
 

@@ -208,18 +208,78 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          if (resolvedClass && resolvedClass.COLLECTION) {
             return resolvedClass.COLLECTION
          }
+         if (instanceOf === 'Entity') {
+            return 'entities'
+         }
+         if (instanceOf === 'User') {
+            return 'user'
+         }
          return instanceOf
       }
       return instanceOf.COLLECTION || ''
    }
 
    /**
+    * Dynamically ensures that a table exists with the correct columns derived from properties.
+    * 
+    * @param tableName - The name of the table to verify/create.
+    * @param properties - The schema properties mapping to columns.
+    */
+   protected async _ensureTableByName(tableName: string, properties: any): Promise<void> {
+      const tableLower = tableName.toLowerCase()
+      const tableCheck = await this._query(
+         `SELECT 1 FROM information_schema.tables WHERE table_name = $1 LIMIT 1`,
+         [tableLower]
+      )
+
+      if (tableCheck.rowCount === 0) {
+         let query = `CREATE TABLE IF NOT EXISTS "${tableLower}" (\n    id VARCHAR(255) PRIMARY KEY`
+
+         const propsArray: any[] = Array.isArray(properties)
+            ? properties
+            : Object.entries(properties).map(([name, def]: [string, any]) => ({
+                 name,
+                 type: def.type || (def.constructor && def.constructor.name),
+                 constructor: def.constructor,
+              }))
+
+         propsArray.forEach((propDef: any) => {
+            if (propDef.name === 'id') {
+               return
+            }
+            const propName = propDef.name.toLowerCase()
+            let columnType = 'TEXT'
+
+            const type = propDef.type || (propDef.constructor && propDef.constructor.name)
+            if (type === 'NumberProperty' || type === 'number') {
+               columnType = 'NUMERIC'
+            } else if (type === 'BooleanProperty' || type === 'boolean') {
+               columnType = 'BOOLEAN'
+            } else if (type === 'DateTimeProperty' || type === 'datetime') {
+               columnType = 'TIMESTAMP'
+            } else if (type === 'ArrayProperty' || type === 'array') {
+               columnType = 'JSONB'
+            } else if (type === 'ObjectProperty' || type === 'object') {
+               columnType = 'VARCHAR(255)'
+            }
+
+            query += `,\n    "${propName}" ${columnType}`
+         })
+
+         query += `\n)`
+         await this._query(query)
+         Backend.info(`[PGA] Created table "${tableLower}"`)
+      }
+   }
+
+   /**
     * Ensures that the database table for the given DataObject's collection exists.
-    * If the table does not exist, it automatically creates it, mapping the property
-    * types of the DataObject to standard PostgreSQL database types.
+    * If the table does not exist, it automatically creates it.
+    * Additionally, ensures that any related join tables for ObjectProperty references
+    * are also created so that LEFT JOIN queries do not crash on non-existent tables.
     * 
     * @param dataObject - The DataObject payload defining properties and collection.
-    * @returns A promise resolving when the table existence is guaranteed.
+    * @returns A promise resolving when the table and relation tables exist.
     */
    protected async _ensureTable(dataObject: DataObjectClass<any>): Promise<void> {
       const collection = this.getCollection(dataObject)
@@ -227,43 +287,32 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          throw new BackendError(`[PGA] Cannot determine collection name`)
       }
 
-      const tableLower = collection.toLowerCase()
-      // Check if table exists in PostgreSQL using standard information_schema
-      const tableCheck = await this._query(
-         `SELECT 1 FROM information_schema.tables WHERE table_name = $1 LIMIT 1`,
-         [tableLower]
-      )
+      await this._ensureTableByName(collection, dataObject.properties)
 
-      if (tableCheck.rowCount === 0) {
-         // Table doesn't exist, create it
-         let query = `CREATE TABLE IF NOT EXISTS "${tableLower}" (\n    id VARCHAR(255) PRIMARY KEY`
+      // Automatically guarantee existence of joined relation tables to prevent SQL relation failures
+      for (const prop of Object.keys(dataObject.properties)) {
+         const propDef = dataObject.properties[prop]
+         if (
+            propDef.constructor.name === 'ObjectProperty' &&
+            propDef.instanceOf
+         ) {
+            const table = this._resolveTable(propDef.instanceOf)
+            if (table) {
+               const resolvedClass =
+                  typeof propDef.instanceOf === 'string'
+                     ? Core.getClass(propDef.instanceOf)
+                     : propDef.instanceOf
 
-         // Add columns based on dataObject properties
-         Object.entries(dataObject.properties).forEach(
-            ([prop, propDef]: [prop: string, propDef: any]) => {
-               const propName = prop.toLowerCase()
-               let columnType = 'TEXT'
-
-               // Map property types to PostgreSQL column types
-               if (propDef.constructor.name === 'NumberProperty') {
-                  columnType = 'NUMERIC'
-               } else if (propDef.constructor.name === 'BooleanProperty') {
-                  columnType = 'BOOLEAN'
-               } else if (propDef.constructor.name === 'DateTimeProperty') {
-                  columnType = 'TIMESTAMP'
-               } else if (propDef.constructor.name === 'ArrayProperty') {
-                  columnType = 'JSONB'
-               } else if (propDef.constructor.name === 'ObjectProperty') {
-                  columnType = 'VARCHAR(255)'
+               if (resolvedClass && resolvedClass.PROPS_DEFINITION) {
+                  await this._ensureTableByName(table, resolvedClass.PROPS_DEFINITION)
+               } else {
+                  // Fallback to bare relation table schema required for successful join logic
+                  await this._ensureTableByName(table, [
+                     { name: 'name', type: 'StringProperty' }
+                  ])
                }
-
-               query += `,\n    "${propName}" ${columnType}`
             }
-         )
-
-         query += `\n)`
-         await this._query(query)
-         Backend.info(`[PGA] Created table "${tableLower}"`)
+         }
       }
    }
 

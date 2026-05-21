@@ -1,6 +1,10 @@
 import { Backend } from '@quatrain/backend'
+import { Core } from '@quatrain/core'
+import { Entity } from '@quatrain/testing'
 import { PostgresAdapter } from '../PostgresAdapter'
 export { Entity, createUser, createEntity, createUsers } from '@quatrain/testing'
+
+Core.addClass('Entity', Entity)
 
 export const setup = () => {
    Backend.addBackend(

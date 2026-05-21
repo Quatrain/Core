@@ -13,5 +13,8 @@
     "type": "git",
     "url": "git+https://github.com/Quatrain/Core.git",
     "directory": "packages/i18n"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -36,3 +36,4 @@ packages/**/.*.txt
 
 .turbo/
 **/.turbo/
+firestore-debug.log

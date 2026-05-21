@@ -221,9 +221,12 @@ export class PostgresAdapter extends AbstractBackendAdapter {
 
    /**
     * Dynamically ensures that a table exists with the correct columns derived from properties.
+    * Deduplicates column definitions by lowercase name to prevent SQL parser errors
+    * (e.g. "column 'name' specified more than once") when child models override base properties.
     * 
     * @param tableName - The name of the table to verify/create.
     * @param properties - The schema properties mapping to columns.
+    * @returns A promise resolving when the table is successfully created or verified.
     */
    protected async _ensureTableByName(tableName: string, properties: any): Promise<void> {
       const tableLower = tableName.toLowerCase()
@@ -243,11 +246,18 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                  constructor: def.constructor,
               }))
 
+         const seen = new Set<string>()
+
          propsArray.forEach((propDef: any) => {
             if (propDef.name === 'id') {
                return
             }
             const propName = propDef.name.toLowerCase()
+            if (seen.has(propName)) {
+               return
+            }
+            seen.add(propName)
+
             let columnType = 'TEXT'
 
             const type = propDef.type || (propDef.constructor && propDef.constructor.name)

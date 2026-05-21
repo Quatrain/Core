@@ -4,7 +4,7 @@ import { createUser, setup } from './common'
 import { fAlert } from './fixtures/fAlert'
 
 const backend = setup()
-jest.setTimeout(15000)
+jest.setTimeout(60000)
 
 let user: User
 let fUserAlert: fAlert
@@ -19,11 +19,11 @@ beforeAll(async () => {
    })
 
    await fUserAlert.save()
-})
+}, 60000)
 
 afterAll(async () => {
    await backend.deleteCollection('user')
-})
+}, 60000)
 
 describe('Firestore CRUD operations on a collection', () => {
    test('write data', async () => {

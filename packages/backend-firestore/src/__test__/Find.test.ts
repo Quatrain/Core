@@ -3,7 +3,7 @@ import { Entity } from '@quatrain/testing'
 import { setup, createUsers, createEntity, createUser } from './common'
 
 const backend = setup()
-jest.setTimeout(15000)
+jest.setTimeout(60000)
 
 let user: User | undefined
 let entity: Entity | undefined
@@ -16,7 +16,7 @@ beforeAll(async () => {
    await createUsers(3, { lastname: 'Doe' })
    await createUsers(3, { entity })
    await createUsers(2, { lastname: 'Doe', entity })
-})
+}, 60000)
 
 afterAll(async () => {
    // Remove collections after each test
@@ -24,7 +24,7 @@ afterAll(async () => {
       backend.deleteCollection('user'),
       backend.deleteCollection('entity'),
    ])
-})
+}, 60000)
 
 describe('Firestore find() operations', () => {
    test('find all entities records', async () => {

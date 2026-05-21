@@ -20,9 +20,9 @@
     "last_published": "2026-05-11T13:54:18.853Z"
   },
   "@quatrain/backend-firestore": {
-    "version": "1.2.7",
-    "hash": "EDD8ye1o3whjGzjxvE1NhCVc2vs=-42e3b5e17f33e1c8707a98caf2601204707541f81e3654ed69aa60be28dca303",
-    "last_published": "2026-05-21T13:10:40.099Z"
+    "version": "1.2.8",
+    "hash": "Uofx4fwhmTRsYOKpG/D8w/7+l2Q=-42e3b5e17f33e1c8707a98caf2601204707541f81e3654ed69aa60be28dca303",
+    "last_published": "2026-05-21T13:20:31.618Z"
   },
   "@quatrain/backend-postgres": {
     "version": "1.2.6",

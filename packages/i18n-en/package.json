@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/i18n-en",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/index.ts",
   "license": "AGPL-3.0-only",
   "dependencies": {

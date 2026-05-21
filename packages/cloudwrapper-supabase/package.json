@@ -26,7 +26,7 @@
     "@quatrain/backend": "^1.2.7",
     "@quatrain/cloudwrapper": "^1.2.1",
     "@quatrain/core": "^1.2.8",
-    "@quatrain/storage": "^1.2.7",
+    "@quatrain/storage": "^1.2.8",
     "@supabase/supabase-js": "^2.87.3",
     "ws": "^8.18.3"
   },

@@ -1,17 +1,20 @@
+import dns from 'node:dns'
+dns.setDefaultResultOrder('ipv4first')
+
 import { Core } from '@quatrain/core'
 import { Entity } from '@quatrain/testing'
 import { FirestoreAdapter } from '../FirestoreAdapter'
 import { CollectionHierarchy, Backend, User } from '@quatrain/backend'
 import { faker } from '@faker-js/faker'
 
-process.env.FIRESTORE_EMULATOR_HOST = 'localhost:4141'
+process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:4141'
 
 export const setup = () => {
    Backend.addBackend(
       new FirestoreAdapter({
          config: {
             projectId: 'quatrain-core-firestore-admin-adapter-test',
-            databaseURL: 'http://localhost:4141',
+            databaseURL: 'http://127.0.0.1:4141',
          },
          hierarchy: { alerts: CollectionHierarchy.SUBCOLLECTION },
       }),

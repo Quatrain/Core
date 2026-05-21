@@ -25,9 +25,9 @@
     "last_published": "2026-05-21T15:12:37.668Z"
   },
   "@quatrain/backend-postgres": {
-    "version": "1.2.7",
-    "hash": "8dBYT+sd8IZWcDoaIrRE2y0sJZk=-daee5b9eec8892c73df47577594582789217153d51ecfa6f3c487bcda6aa2546",
-    "last_published": "2026-05-21T16:03:54.862Z"
+    "version": "1.2.8",
+    "hash": "vddsPCr24oFD4yrV/x9Ivp1TEPg=-daee5b9eec8892c73df47577594582789217153d51ecfa6f3c487bcda6aa2546",
+    "last_published": "2026-05-21T16:14:15.108Z"
   },
   "@quatrain/backend-sqlite": {
     "version": "1.1.7",

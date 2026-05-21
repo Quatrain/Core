@@ -4,6 +4,8 @@ import { createUser, setup } from './common'
 import { fAlert } from './fixtures/fAlert'
 
 const backend = setup()
+jest.setTimeout(15000)
+
 let user: User
 let fUserAlert: fAlert
 

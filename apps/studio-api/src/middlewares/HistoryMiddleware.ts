@@ -3,7 +3,7 @@ import { DataObjectClass, statuses } from '@quatrain/core'
 import { StudioHistory } from '@quatrain/studio'
 
 export class HistoryMiddleware implements BackendMiddleware {
-   async execute(dataObject: DataObjectClass<any>, action: BackendAction, params?: any): Promise<void> {
+   async afterExecute(dataObject: DataObjectClass<any>, action: BackendAction, params?: any): Promise<void> {
       try {
          const entityType = dataObject.uri.class ? dataObject.uri.class.name : dataObject.uri.collection
          

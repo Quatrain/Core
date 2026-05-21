@@ -27,8 +27,8 @@ export class ExpressAdapter implements ServerAdapter {
    }
 
    private wrapHandler(handler: ApiHandler): express.RequestHandler {
-      return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-         try {
+      return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+         void (async () => {
             const apiReq: ApiRequest = {
                body: req.body,
                params: req.params,
@@ -59,9 +59,7 @@ export class ExpressAdapter implements ServerAdapter {
             }
 
             await handler(apiReq, apiRes)
-         } catch (err) {
-            next(err)
-         }
+         })().catch(next)
       }
    }
 
@@ -120,44 +118,42 @@ export class ExpressAdapter implements ServerAdapter {
     * @param middleware - The Quatrain ApiMiddleware function.
     */
    addMiddleware(middleware: ApiMiddleware): void {
-      const expressMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-         const apiReq: ApiRequest = {
-            body: req.body,
-            params: req.params,
-            query: req.query,
-            headers: req.headers as Record<string, string | string[] | undefined>
-         }
-
-         const apiRes: ApiResponse = {
-            status: (code: number) => {
-               res.status(code)
-               return apiRes
-            },
-            json: (data: any) => {
-               res.json(data)
-            },
-            send: (data: string) => {
-               res.send(data)
-            },
-            setHeader: (name: string, value: string) => {
-               res.setHeader(name, value)
-            },
-            write: (data: string) => {
-               res.write(data)
-            },
-            end: () => {
-               res.end()
+      const expressMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+         void (async () => {
+            const apiReq: ApiRequest = {
+               body: req.body,
+               params: req.params,
+               query: req.query,
+               headers: req.headers as Record<string, string | string[] | undefined>
             }
-         }
 
-         try {
+            const apiRes: ApiResponse = {
+               status: (code: number) => {
+                  res.status(code)
+                  return apiRes
+               },
+               json: (data: any) => {
+                  res.json(data)
+               },
+               send: (data: string) => {
+                  res.send(data)
+               },
+               setHeader: (name: string, value: string) => {
+                  res.setHeader(name, value)
+               },
+               write: (data: string) => {
+                  res.write(data)
+               },
+               end: () => {
+                  res.end()
+               }
+            }
+
             const shouldContinue = await middleware(apiReq, apiRes)
             if (shouldContinue) {
                next()
             }
-         } catch (err) {
-            next(err)
-         }
+         })().catch(next)
       }
       (this.appOrRouter as express.Router).use(expressMiddleware)
    }

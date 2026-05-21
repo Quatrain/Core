@@ -230,9 +230,9 @@
     "last_published": "2026-05-15T13:36:43.943Z"
   },
   "@quatrain/api-server-express": {
-    "version": "1.1.10",
-    "hash": "rAcTTMwFdVlW6rzZLzfRmFg1MoA=-4e6c2fe5448b92cc9e27c7705b0713e302926d4dd06c95557f9b358cfef1e71d",
-    "last_published": "2026-05-11T13:53:23.273Z"
+    "version": "1.1.11",
+    "hash": "d35VEau3Tl0dqiJZ2OyqcvfRh9U=-4e6c2fe5448b92cc9e27c7705b0713e302926d4dd06c95557f9b358cfef1e71d",
+    "last_published": "2026-05-21T21:53:02.455Z"
   },
   "@quatrain/auth-basic": {
     "version": "1.0.2",
@@ -240,19 +240,19 @@
     "last_published": "2026-05-11T13:53:43.452Z"
   },
   "@quatrain/studio-api": {
-    "version": "1.1.2",
-    "hash": "ujFf+h6bKw7oDA7DDw3HrAyNH9E=-0e462df585ca49feaac0212dc1d7639fabac479177fcbbd1c0402b9c99e8f74b",
-    "last_published": "2026-05-08T10:50:30.673Z"
+    "version": "1.1.3",
+    "hash": "ZEJjslpuQvdIABxTIE97Q3oIDYc=-0e462df585ca49feaac0212dc1d7639fabac479177fcbbd1c0402b9c99e8f74b",
+    "last_published": "2026-05-21T21:53:09.573Z"
   },
   "@quatrain/studio-cli": {
-    "version": "1.1.1",
-    "hash": "c/p1DgoAD9/zcaUCaGBkZfED0S0=-30714dd4f1fa7ebae41dfff242f4363a7d00d6abdfc1838c5777522d3baa38aa",
-    "last_published": "2026-05-08T10:15:53.518Z"
+    "version": "1.1.2",
+    "hash": "IDP1/UAbRteVjFNmcklRT8UFK3Y=-30714dd4f1fa7ebae41dfff242f4363a7d00d6abdfc1838c5777522d3baa38aa",
+    "last_published": "2026-05-21T21:53:17.219Z"
   },
   "@quatrain/studio-web": {
-    "version": "1.1.2",
-    "hash": "uT/7W6J3zXigBXLSojCUeFPEfxE=-b4f947e321a6d6b209b2bec0bb8075022ee719b3ba5ee4fcc16a734308d683e6",
-    "last_published": "2026-05-21T19:44:38.894Z"
+    "version": "1.1.3",
+    "hash": "Di/gKv1Z5JaS4K13PhoD6rXMnWg=-b4f947e321a6d6b209b2bec0bb8075022ee719b3ba5ee4fcc16a734308d683e6",
+    "last_published": "2026-05-21T21:53:25.122Z"
   },
   "@quatrain/i18n": {
     "version": "1.0.3",

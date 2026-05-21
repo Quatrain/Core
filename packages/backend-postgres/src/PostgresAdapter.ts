@@ -3,6 +3,7 @@ import {
    NotFoundError,
    statuses,
    StringProperty,
+   Core,
 } from '@quatrain/core'
 import {
    DataObjectClass,
@@ -189,6 +190,30 @@ export class PostgresAdapter extends AbstractBackendAdapter {
    }
 
    /**
+    * Resolves the table/collection name for a given model or relation reference.
+    * Accounts for mapping definitions, class constructors, or raw string types.
+    * 
+    * @param instanceOf - The relation constructor, class, or collection name string.
+    * @returns The resolved table/collection name.
+    */
+   protected _resolveTable(instanceOf: any): string {
+      if (!instanceOf) {
+         return ''
+      }
+      if (this._params.mapping && this._params.mapping[instanceOf]) {
+         return this._params.mapping[instanceOf]
+      }
+      if (typeof instanceOf === 'string') {
+         const resolvedClass = Core.getClass(instanceOf)
+         if (resolvedClass && resolvedClass.COLLECTION) {
+            return resolvedClass.COLLECTION
+         }
+         return instanceOf
+      }
+      return instanceOf.COLLECTION || ''
+   }
+
+   /**
     * Ensures that the database table for the given DataObject's collection exists.
     * If the table does not exist, it automatically creates it, mapping the property
     * types of the DataObject to standard PostgreSQL database types.
@@ -364,11 +389,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
 
             const joinAlias = `${prop.toLowerCase()}_table`
 
-            const table =
-               this._params.mapping &&
-               this._params.mapping[dataObject.properties[prop].instanceOf]
-                  ? this._params.mapping[dataObject.properties[prop].instanceOf]
-                  : dataObject.properties[prop].instanceOf.COLLECTION
+            const table = this._resolveTable(dataObject.properties[prop].instanceOf)
 
             query.push(
                `LEFT JOIN "${table.toLowerCase()}" AS ${joinAlias} ON ${joinAlias}.id = coll.${prop.toLowerCase()}`
@@ -635,13 +656,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
 
                const joinAlias = `${prop.toLowerCase()}_table`
 
-               const table =
-                  this._params.mapping &&
-                  this._params.mapping[dataObject.properties[prop].instanceOf]
-                     ? this._params.mapping[
-                          dataObject.properties[prop].instanceOf
-                       ]
-                     : dataObject.properties[prop].instanceOf.COLLECTION
+               const table = this._resolveTable(dataObject.properties[prop].instanceOf)
 
                query.push(
                   `LEFT JOIN "${table.toLowerCase()}" AS ${joinAlias} ON ${joinAlias}.id = coll.${prop.toLowerCase()}`
@@ -728,16 +743,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                      ) {
                         realValue = filter.value.ref.split('/')[1]
                      } else if (typeof filter.value === 'string') {
-                        const collectionName =
-                           this._params.mapping &&
-                           this._params.mapping[
-                              dataObject.properties[filter.prop].instanceOf
-                           ]
-                              ? this._params.mapping[
-                                   dataObject.properties[filter.prop].instanceOf
-                                ]
-                              : dataObject.properties[filter.prop].instanceOf
-                                   .COLLECTION
+                         const collectionName = this._resolveTable(dataObject.properties[filter.prop].instanceOf)
                         realValue = filter.value.replace(
                            `${collectionName}/`,
                            ''

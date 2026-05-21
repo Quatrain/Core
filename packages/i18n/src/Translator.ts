@@ -29,19 +29,82 @@ export class Translator {
 
     /**
      * Translates a specific text label key inside a given dictionary scope.
+     * Supports both standard (scope, key) calls and dotted key path (e.g. "backends.title") notation.
      * 
-     * @param scope - The dictionary scope key (e.g. 'table').
-     * @param key - The specific term key inside the selected scope.
+     * @param scope - The dictionary scope key (e.g. 'table') or a dotted key path (e.g. 'app.title').
+     * @param keyOrLang - The specific term key inside the selected scope, or the language code if scope is a dotted key.
      * @param lang - The target language code to extract from (falls back to default language).
      * @returns The localized translation string, or the raw key string if no match was found.
      */
-    public translate(scope: keyof QuatrainDictionary, key: string, lang: string = this.defaultLang): string {
-        const dict: QuatrainDictionary | undefined = this.dictionaries[lang] || this.dictionaries[this.defaultLang]
-        if (!dict) {
-            return key
+    public translate(scope: string, keyOrLang?: string, lang?: string): string {
+        let resolvedLang = lang || this.defaultLang
+        let resolvedScope = scope
+        let resolvedKey = keyOrLang
+
+        // Support dotted key notation (e.g. "backends.title")
+        if (!keyOrLang || keyOrLang === 'en' || keyOrLang === 'fr') {
+            if (scope.includes('.')) {
+                const parts = scope.split('.')
+                resolvedScope = parts[0]
+                resolvedKey = parts.slice(1).join('.')
+                resolvedLang = keyOrLang || lang || this.defaultLang
+            }
         }
-        
-        const scopeObj = dict[scope] as unknown as Record<string, string> | undefined
-        return scopeObj?.[key] ?? key
+
+        const dict: QuatrainDictionary | undefined = this.dictionaries[resolvedLang] || this.dictionaries[this.defaultLang]
+        if (!dict) {
+            return resolvedKey || scope
+        }
+
+        // Handle nested dotted keys inside resolvedKey
+        let current: any = dict[resolvedScope]
+        if (resolvedKey) {
+            const keyParts = resolvedKey.split('.')
+            for (const part of keyParts) {
+                if (current && typeof current === 'object') {
+                    current = current[part]
+                } else {
+                    current = undefined
+                    break
+                }
+            }
+        }
+
+        return typeof current === 'string' ? current : (resolvedKey || scope)
+    }
+
+    /**
+     * Dynamically extends and merges an existing dictionary for a given language.
+     * This allows consuming applications to register their specific UI translations at runtime.
+     * 
+     * @param lang - The language key code (e.g. 'en', 'fr').
+     * @param customDict - The custom dictionary object containing terms to merge.
+     */
+    public extend(lang: string, customDict: Record<string, any>): void {
+        if (!this.dictionaries[lang]) {
+            this.dictionaries[lang] = { table: {} as any }
+        }
+        this.dictionaries[lang] = this.deepMerge(this.dictionaries[lang], customDict)
+    }
+
+    /**
+     * A helper method to perform recursive deep-merging of two dictionary objects.
+     * 
+     * @param target - The base target object.
+     * @param source - The source object containing updates to merge.
+     * @returns The deep-merged dictionary object.
+     */
+    protected deepMerge(target: any, source: any): any {
+        if (!source) return target
+        const output = { ...target }
+
+        for (const key of Object.keys(source)) {
+            if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                output[key] = this.deepMerge(target[key] || {}, source[key])
+            } else {
+                output[key] = source[key]
+            }
+        }
+        return output
     }
 }

@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import { Text, Badge, Group, Card } from '@mantine/core'
 import { ManagerHeader, ManagerGrid, ManagerAddCard, ManagerItemCard } from './components/ManagerUI'
 import { api } from './api'
-import { useTranslation } from 'react-i18next'
+import { useI18n } from './i18nContext'
 
 export function ModelsManager({ models, backends, onNavigateToNewModel }: { models: any[], backends: any[], onNavigateToNewModel: () => void }) {
-  const { t } = useTranslation()
+  const { t } = useI18n()
   const [stats, setStats] = useState<Record<string, {count: number, status: string}>>({})
 
   useEffect(() => {

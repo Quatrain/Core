@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import { api } from './api'
 import { TextInput, Button, Text, Badge, Group, ActionIcon, Modal, Checkbox, Stack, Card, SimpleGrid, Center } from '@mantine/core'
 import { ManagerHeader, ManagerGrid, ManagerAddCard, ManagerItemCard } from './components/ManagerUI'
-import { useTranslation } from 'react-i18next'
+import { useI18n } from './i18nContext'
 
 export function BackendsManager({ backends, models, onRefresh }: { backends: any[], models: any[], onRefresh: () => void }) {
-  const { t } = useTranslation()
+  const { t } = useI18n()
   const [name, setName] = useState('')
   const [engine, setEngine] = useState<string | null>('sqlite')
   const [filePath, setFilePath] = useState('../app/data.sqlite')

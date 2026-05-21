@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TextInput, Button, Title, Text, Group, Stack, Paper, Center } from '@mantine/core';
-import { useTranslation } from 'react-i18next';
+import { useI18n } from './i18nContext';
 
 interface CreateModelProps {
   onCreate: (modelName: string, collectionName: string) => Promise<void>;
@@ -9,7 +9,7 @@ interface CreateModelProps {
 }
 
 export function CreateModel({ onCreate, onCancel, error }: CreateModelProps) {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [modelName, setModelName] = useState('');
   const [collectionName, setCollectionName] = useState('');
   const [isLoading, setIsLoading] = useState(false);

@@ -12,8 +12,8 @@ import { SecretsManager } from './SecretsManager'
 import { CreateModel } from './CreateModel'
 import { WidgetBuilder } from './WidgetBuilder'
 import { WidgetsManager } from './WidgetsManager'
-import { I18nextProvider, useTranslation } from 'react-i18next'
-import i18n from './i18n'
+import { I18nProvider, useI18n } from './i18nContext'
+import { DataExplorer } from './DataExplorer'
 
 // Import Logo
 import logoUrl from '../../../assets/quatrain-logo.png'
@@ -56,7 +56,7 @@ const getPropertyTypeIcon = (type: string) => {
 }
 
 function AppContent() {
-  const { t } = useTranslation()
+  const { t, locale, changeLanguage } = useI18n()
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
   const [models, setModels] = useState<any[]>([])
   const [backends, setBackends] = useState<any[]>([])
@@ -66,7 +66,7 @@ function AppContent() {
   const [currentModel, setCurrentModel] = useState<any>(null)
   const [widgets, setWidgets] = useState<any[]>([])
   const [currentWidget, setCurrentWidget] = useState<any>(null)
-  const [currentView, setCurrentView] = useState<'dashboard' | 'app' | 'backends' | 'storages' | 'auth' | 'secrets' | 'model' | 'models' | 'new-model' | 'widgets' | 'widget'>('dashboard')
+  const [currentView, setCurrentView] = useState<'dashboard' | 'app' | 'backends' | 'storages' | 'auth' | 'secrets' | 'model' | 'models' | 'new-model' | 'widgets' | 'widget' | 'data'>('dashboard')
   const [modelTab, setModelTab] = useState<string | null>('schema')
   const [selectedVersion, setSelectedVersion] = useState<number | null>(null)
 
@@ -142,6 +142,13 @@ function AppContent() {
           loadModelDetails(foundModel.uid)
         }
         setCurrentView('model')
+      } else if (hash && hash.startsWith('/data/')) {
+        const name = hash.split('/data/')[1]
+        const foundModel = models.find((m: any) => m.name === name)
+        if (foundModel) {
+          loadModelDetails(foundModel.uid)
+        }
+        setCurrentView('data')
       } else if (hash === '/app') {
         setCurrentModel(null)
         setCurrentView('app')
@@ -479,11 +486,10 @@ function AppContent() {
           </Group>
           <Group>
             <MantineSelect 
-              value={i18n.language}
+              value={locale}
               onChange={(val) => {
                 if (val) {
-                  i18n.changeLanguage(val);
-                  localStorage.setItem('coreStudioLang', val);
+                  changeLanguage(val);
                 }
               }}
               data={[
@@ -565,6 +571,25 @@ function AppContent() {
             leftSection={<span style={{fontSize: '16px'}}>🔑</span>}
           />
 
+          <Text size="xs" fw={700} c="dimmed" mt="md" mb="sm" style={{ paddingLeft: '16px', textTransform: 'uppercase' }}>{t('model.modelData') || "Données"}</Text>
+          {models.filter(m => m.isPersisted).map(m => (
+            <NavLink 
+              key={m.uid}
+              label={m.name}
+              active={currentView === 'data' && currentModel?.uid === m.uid} 
+              onClick={() => { window.location.hash = `/data/${m.name}`; setError(null); }} 
+              variant="light"
+              color="teal"
+              style={{ borderRadius: '8px' }}
+              leftSection={<span style={{fontSize: '16px'}}>📊</span>}
+            />
+          ))}
+          {models.filter(m => m.isPersisted).length === 0 && (
+            <Text size="xs" c="dimmed" style={{ paddingLeft: '16px', fontStyle: 'italic' }}>
+              {t('dashboard.noModels') || "Aucune donnée disponible"}
+            </Text>
+          )}
+
           <Text size="xs" fw={700} c="dimmed" mt="md" mb="sm" style={{ paddingLeft: '16px', textTransform: 'uppercase' }}>Interfaces</Text>
           <NavLink 
             label="Widgets"
@@ -601,6 +626,12 @@ function AppContent() {
         {/* Views */}
         {currentView === 'new-model' ? (
           <CreateModel onCreate={handleCreateModel} onCancel={() => window.location.hash = '/models'} error={error} />
+        ) : currentView === 'data' && currentModel ? (
+          <DataExplorer 
+            model={currentModel} 
+            properties={properties} 
+            onBack={() => window.location.hash = '/models'} 
+          />
         ) : !currentModel ? (
           currentView === 'backends' ? (
             <BackendsManager backends={backends} models={models} onRefresh={loadModels} />
@@ -923,9 +954,9 @@ function AppContent() {
 
 function App() {
   return (
-    <I18nextProvider i18n={i18n}>
+    <I18nProvider>
       <AppContent />
-    </I18nextProvider>
+    </I18nProvider>
   )
 }
 

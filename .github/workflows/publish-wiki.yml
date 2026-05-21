@@ -38,46 +38,103 @@ jobs:
           # Define Categories and Descriptions
           declare -A categories
           categories=(
-            ["Foundations"]="core log worker"
-            ["Storage & Data"]="backend backend-firestore backend-postgres backend-sqlite storage storage-firebase storage-s3 storage-supabase"
-            ["Queue & Messaging"]="queue queue-amqp queue-aws queue-gcp messaging messaging-firebase"
-            ["Auth & Cloud"]="auth auth-firebase auth-supabase cloudwrapper cloudwrapper-firebase cloudwrapper-supabase"
+            ["Foundations"]="core log worker i18n i18n-en i18n-fr testing"
+            ["Storage Data Cache"]="backend backend-firestore backend-postgres backend-sqlite backend-migrations storage storage-firebase storage-s3 storage-supabase storage-local cache cache-redis"
+            ["Queue Messaging"]="queue queue-amqp queue-aws queue-gcp messaging messaging-firebase"
+            ["Auth Cloud"]="auth auth-basic auth-firebase auth-supabase auth-oidc auth-pocketbase cloudwrapper cloudwrapper-firebase cloudwrapper-supabase"
+            ["APIs Web Servers"]="api api-client api-server api-server-express gateway-upstream-express backend-restapi backend-restapi-recipes"
+            ["AI Intelligent Agents"]="ai ai-gemini"
+            ["Developer Tools Studio"]="app core-cli studio code code-github"
+            ["User Interface UI"]="ui ui-form ui-form-react ui-list ui-list-react"
+          )
+          
+          declare -A category_titles
+          category_titles=(
+            ["Foundations"]="Foundations"
+            ["Storage Data Cache"]="Storage, Data & Cache"
+            ["Queue Messaging"]="Queue & Messaging"
+            ["Auth Cloud"]="Auth & Cloud"
+            ["APIs Web Servers"]="APIs & Web Servers"
+            ["AI Intelligent Agents"]="AI & Intelligent Agents"
+            ["Developer Tools Studio"]="Developer Tools & Studio"
+            ["User Interface UI"]="User Interface (UI)"
           )
           
           # Category descriptions
           declare -A family_desc
-          family_desc["Foundations"]="Base packages handling memory objects, logging, and background worker structures."
-          family_desc["Storage & Data"]="Tools to interact with databases and blob storage seamlessly."
-          family_desc["Queue & Messaging"]="Asynchronous communication packages to dispatch jobs and notifications."
-          family_desc["Auth & Cloud"]="Authentication and wrappers to initialize entire ecosystems easily."
-
+          family_desc["Foundations"]="Base packages handling memory objects, logging, localization, testing, and background worker structures."
+          family_desc["Storage Data Cache"]="Adapters for relational databases, NoSQL databases, distributed cache, and blob storage."
+          family_desc["Queue Messaging"]="Asynchronous message queuing, broker integrations, and multi-channel notifications."
+          family_desc["Auth Cloud"]="Centralized identity management, authentication systems, and cloud ecosystem bootstrapping wrappers."
+          family_desc["APIs Web Servers"]="Framework for developing RESTful APIs, HTTP controllers, and web routing gateways."
+          family_desc["AI Intelligent Agents"]="Natural language processing interface supporting generative AI models and embeddings."
+          family_desc["Developer Tools Studio"]="Toolkits for local command line execution, live modeling environments, and GitHub automation."
+          family_desc["User Interface UI"]="Reusable component architectures, dynamic validation layouts, and React list components."
+          
           # Package descriptions
           declare -A pkg_desc
           pkg_desc["core"]="The foundation of the framework providing in-memory business objects."
           pkg_desc["log"]="Centralized, flexible logging system with custom adapters."
           pkg_desc["worker"]="Toolkit for building daemon processes and reporting progress."
+          pkg_desc["i18n"]="Multi-language internationalization registry."
+          pkg_desc["i18n-en"]="English language definitions and dictionary pack."
+          pkg_desc["i18n-fr"]="French language definitions and dictionary pack."
+          pkg_desc["testing"]="Comprehensive test suite helpers and object mocking utilities."
+          
           pkg_desc["backend"]="Persistence layer abstracting database operations."
           pkg_desc["backend-firestore"]="Google Cloud Firestore database adapter."
           pkg_desc["backend-postgres"]="PostgreSQL database adapter (Supabase & RDS)."
           pkg_desc["backend-sqlite"]="Local SQLite database adapter for testing."
+          pkg_desc["backend-migrations"]="Database schema version control and migration runner."
           pkg_desc["storage"]="Unified file and blob storage abstraction."
           pkg_desc["storage-firebase"]="Firebase Cloud Storage adapter."
           pkg_desc["storage-s3"]="AWS S3 and S3-compatible storage adapter."
           pkg_desc["storage-supabase"]="Supabase Storage adapter."
+          pkg_desc["storage-local"]="Local filesystem storage adapter."
+          pkg_desc["cache"]="Centralized interface for high-performance memory caching."
+          pkg_desc["cache-redis"]="Redis adapter for shared memory caching."
+          
           pkg_desc["queue"]="Central queue and message broker abstraction."
           pkg_desc["queue-amqp"]="AMQP 0-9-1 adapter for RabbitMQ integration."
           pkg_desc["queue-aws"]="Amazon SQS adapter for serverless queueing."
           pkg_desc["queue-gcp"]="Google Cloud Pub/Sub adapter for global messaging."
           pkg_desc["messaging"]="Unified abstraction for sending emails, SMS, and pushes."
           pkg_desc["messaging-firebase"]="Firebase Cloud Messaging adapter."
+          
           pkg_desc["auth"]="Centralized identity and authentication abstraction."
+          pkg_desc["auth-basic"]="Basic and API-key identity adapter."
           pkg_desc["auth-firebase"]="Firebase Authentication adapter."
           pkg_desc["auth-supabase"]="Supabase Authentication adapter."
+          pkg_desc["auth-oidc"]="OpenID Connect (OIDC) identity provider adapter."
+          pkg_desc["auth-pocketbase"]="PocketBase authentication and database adapter."
           pkg_desc["cloudwrapper"]="Unified entry point to initialize multiple cloud adapters."
           pkg_desc["cloudwrapper-firebase"]="Firebase ecosystem wrapper."
           pkg_desc["cloudwrapper-supabase"]="Supabase ecosystem wrapper."
           
-          category_order=("Foundations" "Storage & Data" "Queue & Messaging" "Auth & Cloud")
+          pkg_desc["api"]="Modern API request/response structures and standard handlers."
+          pkg_desc["api-client"]="Centralized HTTP API client for consuming Quatrain services."
+          pkg_desc["api-server"]="Abstract web server controller and router engine."
+          pkg_desc["api-server-express"]="Express.js adapter for Quatrain API servers."
+          pkg_desc["gateway-upstream-express"]="Express middleware routing to upstream service instances."
+          pkg_desc["backend-restapi"]="REST API-backed data persistence adapter."
+          pkg_desc["backend-restapi-recipes"]="Reusable pre-packaged backend endpoints and logic recipes."
+          
+          pkg_desc["ai"]="Unified AI abstraction for text generation, embeddings, and chat."
+          pkg_desc["ai-gemini"]="Google Gemini adapter for the Quatrain AI system."
+          
+          pkg_desc["app"]="Unified application container and startup lifecycle runner."
+          pkg_desc["core-cli"]="Developer command-line tool suite for project management."
+          pkg_desc["studio"]="Local developer visual environment and modeling dashboard."
+          pkg_desc["code"]="Dynamic code compilation and script execution engine."
+          pkg_desc["code-github"]="GitHub API adapter for workspace integration."
+          
+          pkg_desc["ui"]="Shared visual tokens and user interface abstractions."
+          pkg_desc["ui-form"]="Dynamic form structure, validation, and layout engine."
+          pkg_desc["ui-form-react"]="React components for building and rendering dynamic forms."
+          pkg_desc["ui-list"]="Dynamic list, grid, and data-table layout models."
+          pkg_desc["ui-list-react"]="React components for building and rendering lists and data grids."
+          
+          category_order=("Foundations" "Storage Data Cache" "Queue Messaging" "Auth Cloud" "APIs Web Servers" "AI Intelligent Agents" "Developer Tools Studio" "User Interface UI")
           
           # Copy assets if they exist
           if [ -d "assets" ]; then
@@ -103,26 +160,59 @@ jobs:
               classDef data fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px,color:#000
               classDef queue fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
               classDef cloud fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+              classDef api fill:#e0f7fa,stroke:#006064,stroke-width:2px,color:#000
+              classDef ai fill:#fffde7,stroke:#f57f17,stroke-width:2px,color:#000
+              classDef ui fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:#000
               classDef abstraction fill:#fff,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5,color:#000
+              classDef foundation fill:#eceff1,stroke:#37474f,stroke-width:2px,color:#000
           
-              subgraph Cloud ["☁️ Auth & Cloud"]
+              subgraph AI_Ecosystem ["🧠 AI & Intelligent Agents"]
+                  ai([🧩 ai]):::abstraction
+                  ai_gemini[✨ ai-gemini]:::ai
+                  ai --- ai_gemini
+              end
+          
+              subgraph UI_Ecosystem ["🎨 User Interface (UI)"]
+                  ui_pkg([🧩 ui]):::abstraction
+                  ui_form[📝 ui-form]:::ui
+                  ui_form_react[⚛️ ui-form-react]:::ui
+                  ui_list[📊 ui-list]:::ui
+                  ui_list_react[⚛️ ui-list-react]:::ui
+                  
+                  ui_pkg --- ui_form & ui_list
+                  ui_form --- ui_form_react
+                  ui_list --- ui_list_react
+              end
+          
+              subgraph API_Ecosystem ["🌐 APIs & Web Servers"]
+                  api_pkg([🧩 api]):::abstraction
+                  api_client[📡 api-client]:::api
+                  api_server[🖥️ api-server]:::api
+                  api_server_express[🚀 api-server-express]:::api
+                  backend_rest[🔌 backend-restapi]:::api
+                  gateway_upstream[🔀 gateway-upstream-express]:::api
+                  
+                  api_pkg --- api_client & api_server & backend_rest
+                  api_server --- api_server_express
+                  api_server --- gateway_upstream
+              end
+          
+              subgraph Cloud_Ecosystem ["☁️ Auth & Cloud"]
                   cloudwrapper([🧩 cloudwrapper]):::abstraction
                   auth([🧩 auth]):::abstraction
                   cloudwrapper_fb[🔥 cloudwrapper-firebase]:::cloud
                   cloudwrapper_sb[⚡ cloudwrapper-supabase]:::cloud
                   auth_fb[🔥 auth-firebase]:::cloud
                   auth_sb[⚡ auth-supabase]:::cloud
+                  auth_basic[🔑 auth-basic]:::cloud
+                  auth_oidc[🆔 auth-oidc]:::cloud
+                  auth_pocket[📦 auth-pocketbase]:::cloud
                   
-                  cloudwrapper --- cloudwrapper_fb
-                  cloudwrapper --- cloudwrapper_sb
-                  cloudwrapper_fb ~~~ cloudwrapper_sb
-                  
-                  auth --- auth_fb
-                  auth --- auth_sb
-                  auth_fb ~~~ auth_sb
+                  cloudwrapper --- cloudwrapper_fb & cloudwrapper_sb
+                  auth --- auth_fb & auth_sb & auth_basic & auth_oidc & auth_pocket
               end
           
-              subgraph Messaging ["📨 Queue & Messaging"]
+              subgraph Messaging_Ecosystem ["📨 Queue & Messaging"]
                   queue([🧩 queue]):::abstraction
                   messaging([🧩 messaging]):::abstraction
                   queue_amqp[🐇 queue-amqp]:::queue
@@ -130,60 +220,54 @@ jobs:
                   queue_gcp[🌐 queue-gcp]:::queue
                   messaging_fb[🔥 messaging-firebase]:::queue
                   
-                  queue --- queue_amqp
-                  queue --- queue_aws
-                  queue --- queue_gcp
-                  queue_amqp ~~~ queue_aws
-                  queue_aws ~~~ queue_gcp
-                  
+                  queue --- queue_amqp & queue_aws & queue_gcp
                   messaging --- messaging_fb
               end
           
-              subgraph Data ["🗄️ Storage & Data"]
+              subgraph Data_Ecosystem ["🗄️ Storage, Data & Cache"]
                   backend([🧩 backend]):::abstraction
                   storage([🧩 storage]):::abstraction
+                  cache([🧩 cache]):::abstraction
+                  
                   backend_fs[🔥 backend-firestore]:::data
                   backend_pg[🐘 backend-postgres]:::data
                   backend_sq[🗃️ backend-sqlite]:::data
+                  backend_mig[📦 backend-migrations]:::data
                   storage_fb[🔥 storage-firebase]:::data
                   storage_s3[☁️ storage-s3]:::data
                   storage_sb[⚡ storage-supabase]:::data
+                  storage_loc[📁 storage-local]:::data
+                  cache_redis[❤️ cache-redis]:::data
                   
-                  backend --- backend_fs
-                  backend --- backend_pg
-                  backend --- backend_sq
-                  backend_fs ~~~ backend_pg
-                  backend_pg ~~~ backend_sq
-                  
-                  storage --- storage_fb
-                  storage --- storage_s3
-                  storage --- storage_sb
-                  storage_fb ~~~ storage_s3
-                  storage_s3 ~~~ storage_sb
+                  backend --- backend_fs & backend_pg & backend_sq & backend_mig
+                  storage --- storage_fb & storage_s3 & storage_sb & storage_loc
+                  cache --- cache_redis
               end
           
-              subgraph Foundations ["🏗️ Foundations"]
-                  core([⚙️ core]):::abstraction
-                  log([⚙️ log]):::abstraction
-                  worker([⚙️ worker]):::abstraction
-                  
-                  core ~~~ log
-                  log ~~~ worker
+              subgraph Foundations_Ecosystem ["🏗️ Foundations"]
+                  core([⚙️ core]):::foundation
+                  log([⚙️ log]):::foundation
+                  worker([⚙️ worker]):::foundation
+                  i18n([⚙️ i18n]):::foundation
+                  testing([⚙️ testing]):::foundation
               end
           
-              worker -. "listens to" .-> queue
-              backend -. "persists" .-> core
-              cloudwrapper -. "initializes" .-> backend & storage & auth
+              worker -. "polls" .-> queue
+              backend -. "maps" .-> core
+              api_client -. "requests" .-> api_server
+              cloudwrapper -. "bootstraps" .-> backend & storage & auth
+              ui_form_react -. "renders" .-> core
           ```
           
           EOF
           
           for category in "${category_order[@]}"; do
+            title=${category_titles[$category]}
             # Build Sidebar
-            echo "### $category" >> wiki/_Sidebar.md
+            echo "### $title" >> wiki/_Sidebar.md
             
             # Build Home section
-            echo "## $category" >> wiki/Home.md
+            echo "## $title" >> wiki/Home.md
             echo "_${family_desc[$category]}_" >> wiki/Home.md
             echo "" >> wiki/Home.md
             echo "| Package | Description | Links |" >> wiki/Home.md

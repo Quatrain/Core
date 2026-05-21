@@ -45,10 +45,10 @@ export interface SystemTableLabels {
     loading: string
 }
 
-/**
- * Standard Quatrain translation dictionary mapping containing generic UI groups.
- */
 export interface QuatrainDictionary {
     /** Table/List specific labels */
     table: SystemTableLabels
+
+    /** Additional dynamic namespaces and scopes */
+    [key: string]: any
 }

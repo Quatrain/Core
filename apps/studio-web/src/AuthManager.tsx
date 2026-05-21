@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Text, Group, SimpleGrid, Center, Modal, TextInput, Button, Checkbox, Stack, Badge } from '@mantine/core'
 import { ManagerHeader, ManagerGrid, ManagerAddCard, ManagerItemCard } from './components/ManagerUI'
-import { useTranslation } from 'react-i18next'
+import { useI18n } from './i18nContext'
 import { api } from './api'
 
 export function AuthManager() {
-  const { t } = useTranslation()
+  const { t } = useI18n()
   const [auths, setAuths] = useState<any[]>([])
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [name, setName] = useState('')

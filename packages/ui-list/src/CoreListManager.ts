@@ -193,7 +193,7 @@ export class CoreListManager {
                         const formattedData = res.data.map((item: any) => {
                             let label: string = item.name || item.value
                             if (pattern) {
-                                label = pattern.replaceAll(/\$\{([^}]+)\}/g, (match: string, prop: string) => {
+                                label = pattern.replace(/\$\{([^}]+)\}/g, (match: string, prop: string) => {
                                     return item[prop] !== undefined ? String(item[prop]) : match
                                 })
                             }

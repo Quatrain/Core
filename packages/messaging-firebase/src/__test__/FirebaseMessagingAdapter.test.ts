@@ -89,7 +89,7 @@ describe('FirebaseMessagingAdapter', () => {
       })
 
       test('should handle empty body gracefully', async () => {
-         const messageWithoutBody = { ...mockMessage, body: undefined }
+         const messageWithoutBody = { ...mockMessage, body: undefined } as unknown as NotificationMessage
          
          const result = await adapter.sendNotification(mockRecipient, messageWithoutBody)
          expect(result).toBe('message-id-123')

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Card, Text, Group, Modal, TextInput, Textarea, Button, Stack, Select, TagsInput, Loader, Badge, Alert, Title, ThemeIcon } from '@mantine/core'
 import { ManagerHeader, ManagerGrid, ManagerAddCard, ManagerItemCard } from './components/ManagerUI'
-import { useTranslation } from 'react-i18next'
+import { useI18n } from './i18nContext'
 import { api, API_BASE_URL } from './api'
 
 export function AppManager({ onSaved }: { onSaved?: () => void }) {
-  const { t } = useTranslation()
+  const { t } = useI18n()
   const [project, setProject] = useState<any>(null)
   const [environments, setEnvironments] = useState<any[]>([])
   const [backends, setBackends] = useState<any[]>([])

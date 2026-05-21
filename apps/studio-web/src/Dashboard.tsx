@@ -1,8 +1,8 @@
 import { Card, Text, Group, SimpleGrid, Title, ThemeIcon, Button } from '@mantine/core'
-import { useTranslation } from 'react-i18next'
+import { useI18n } from './i18nContext'
 
 export function Dashboard({ models, backends, widgets }: { models: any[], backends: any[], widgets: any[] }) {
-  const { t } = useTranslation()
+  const { t } = useI18n()
 
   // For this mock step, we assume Storages and Auth adapters are just lengths, 
   // but since we don't have them in props yet, we'll display placeholders or count 0.

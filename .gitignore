@@ -17,6 +17,7 @@ packages/**/.*.txt
 .env
 .env.*
 !.env.example
+!.env.dist
 
 # Databases
 *.sqlite

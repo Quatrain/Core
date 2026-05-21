@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/studio-image",
-  "version": "1.1.37",
+  "version": "1.1.38",
   "private": true,
   "description": "Container image for Quatrain Studio",
   "repository": {

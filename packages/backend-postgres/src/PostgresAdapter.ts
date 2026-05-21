@@ -189,6 +189,60 @@ export class PostgresAdapter extends AbstractBackendAdapter {
    }
 
    /**
+    * Ensures that the database table for the given DataObject's collection exists.
+    * If the table does not exist, it automatically creates it, mapping the property
+    * types of the DataObject to standard PostgreSQL database types.
+    * 
+    * @param dataObject - The DataObject payload defining properties and collection.
+    * @returns A promise resolving when the table existence is guaranteed.
+    */
+   protected async _ensureTable(dataObject: DataObjectClass<any>): Promise<void> {
+      const collection = this.getCollection(dataObject)
+      if (!collection) {
+         throw new BackendError(`[PGA] Cannot determine collection name`)
+      }
+
+      const tableLower = collection.toLowerCase()
+      // Check if table exists in PostgreSQL using standard information_schema
+      const tableCheck = await this._query(
+         `SELECT 1 FROM information_schema.tables WHERE table_name = $1 LIMIT 1`,
+         [tableLower]
+      )
+
+      if (tableCheck.rowCount === 0) {
+         // Table doesn't exist, create it
+         let query = `CREATE TABLE IF NOT EXISTS "${tableLower}" (\n    id VARCHAR(255) PRIMARY KEY`
+
+         // Add columns based on dataObject properties
+         Object.entries(dataObject.properties).forEach(
+            ([prop, propDef]: [prop: string, propDef: any]) => {
+               const propName = prop.toLowerCase()
+               let columnType = 'TEXT'
+
+               // Map property types to PostgreSQL column types
+               if (propDef.constructor.name === 'NumberProperty') {
+                  columnType = 'NUMERIC'
+               } else if (propDef.constructor.name === 'BooleanProperty') {
+                  columnType = 'BOOLEAN'
+               } else if (propDef.constructor.name === 'DateTimeProperty') {
+                  columnType = 'TIMESTAMP'
+               } else if (propDef.constructor.name === 'ArrayProperty') {
+                  columnType = 'JSONB'
+               } else if (propDef.constructor.name === 'ObjectProperty') {
+                  columnType = 'VARCHAR(255)'
+               }
+
+               query += `,\n    "${propName}" ${columnType}`
+            }
+         )
+
+         query += `\n)`
+         await this._query(query)
+         Backend.info(`[PGA] Created table "${tableLower}"`)
+      }
+   }
+
+   /**
     * Translates a DataObject creation request into an `INSERT INTO` SQL query.
     * Generates a UUID automatically if none is requested.
     * 
@@ -209,6 +263,8 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          }
 
          const uid = desiredUid || randomUUID()
+
+         await this._ensureTable(dataObject)
 
          // execute middlewares
          await this.executeMiddlewares(dataObject, BackendAction.CREATE, 'before', {
@@ -276,6 +332,8 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             `[PGA] path parts number should be even, received: '${path}'`
          )
       }
+
+      await this._ensureTable(dataObject)
 
       Backend.debug(`[PGA] Getting document ${path}`)
 
@@ -363,6 +421,8 @@ export class PostgresAdapter extends AbstractBackendAdapter {
       if (dataObject.uid === undefined) {
          throw new Error('DataObject has no uid')
       }
+
+      await this._ensureTable(dataObject)
 
       Backend.debug(`[PGA] Updating document ${dataObject.path}`)
 
@@ -456,6 +516,8 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          throw new BackendError('Dataobject has no uid')
       }
 
+      await this._ensureTable(dataObject)
+
       // execute middlewares
       await this.executeMiddlewares(dataObject, BackendAction.DELETE, 'before', {
          useDateFormat: true,
@@ -489,7 +551,14 @@ export class PostgresAdapter extends AbstractBackendAdapter {
     */
    async deleteCollection(collection: string, batchSize = 500): Promise<void> {
       Backend.debug(`Deleting all records from collection '${collection}'`)
-      await this._query(`TRUNCATE TABLE "${collection.toLowerCase()}"`)
+      const tableLower = collection.toLowerCase()
+      const tableCheck = await this._query(
+         `SELECT 1 FROM information_schema.tables WHERE table_name = $1 LIMIT 1`,
+         [tableLower]
+      )
+      if (tableCheck.rowCount && tableCheck.rowCount > 0) {
+         await this._query(`TRUNCATE TABLE "${tableLower}"`)
+      }
    }
 
    /**
@@ -538,6 +607,8 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                `[PGA] Can't find collection matching object to query`
             )
          }
+
+         await this._ensureTable(dataObject)
 
          Backend.debug(`[PGA] Preparing query on '${collection}'`)
 

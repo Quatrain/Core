@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/cloudwrapper-supabase",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "license": "AGPL-3.0-only",
   "description": "Cloud Wrapper adapter for Supabase",
   "repository": {
@@ -20,12 +20,12 @@
   ],
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "peerDependencies": {
-    "@quatrain/core": "^1.2.8"
+    "@quatrain/core": "^1.2.9"
   },
   "dependencies": {
     "@quatrain/backend": "^1.2.7",
     "@quatrain/cloudwrapper": "^1.2.1",
-    "@quatrain/core": "^1.2.8",
+    "@quatrain/core": "^1.2.9",
     "@quatrain/storage": "^1.2.8",
     "@supabase/supabase-js": "^2.87.3",
     "ws": "^8.18.3"

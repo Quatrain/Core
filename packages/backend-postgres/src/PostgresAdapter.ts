@@ -222,7 +222,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             },
          })
 
-         let query = `INSERT INTO ${dataObject.uri.collection?.toLowerCase()} (id`
+         let query = `INSERT INTO "${dataObject.uri.collection?.toLowerCase()}" (id`
          let values = `VALUES ($1`
          Object.keys(data).forEach((key, i) => {
             query += `, ${key.toLowerCase()}`
@@ -290,7 +290,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
       const fields: string[] = [`${alias}.id`]
       const caseMap = {}
 
-      query.push(`SELECT * FROM ${collection.toLowerCase()} AS coll`)
+      query.push(`SELECT * FROM "${collection.toLowerCase()}" AS coll`)
 
       // prepare joins
       Object.keys(dataObject.properties).forEach((prop) => {
@@ -311,8 +311,9 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                this._params.mapping[dataObject.properties[prop].instanceOf]
                   ? this._params.mapping[dataObject.properties[prop].instanceOf]
                   : dataObject.properties[prop].instanceOf.COLLECTION
+
             query.push(
-               `LEFT JOIN ${table} AS ${joinAlias} ON ${joinAlias}.id = coll.${prop.toLowerCase()}`
+               `LEFT JOIN "${table.toLowerCase()}" AS ${joinAlias} ON ${joinAlias}.id = coll.${prop.toLowerCase()}`
             )
             fields.push(
                `CASE WHEN ${alias}.${lcProp} IS NOT NULL THEN json_build_object('ref', CONCAT('${table}/', ${alias}.${lcProp}), 'path', CONCAT('${table}/', ${alias}.${lcProp}), 'label', ${joinAlias}.name || '') ELSE NULL  END AS ${prop} `
@@ -424,7 +425,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
       })
 
       if (updates.length > 0) {
-         const query = `UPDATE ${dataObject.uri.collection?.toLowerCase()} SET ${updates.join(', ')} WHERE id = '${dataObject.uid}'`
+         const query = `UPDATE "${dataObject.uri.collection?.toLowerCase()}" SET ${updates.join(', ')} WHERE id = '${dataObject.uid}'`
 
          Backend.debug(`[PGA] ${query}`)
          Backend.debug(`[PGA] Values ${JSON.stringify(values)}`)
@@ -462,11 +463,11 @@ export class PostgresAdapter extends AbstractBackendAdapter {
 
       if (hardDelete === false) {
          dataObject.set('status', statuses.DELETED)
-         let query = `UPDATE ${dataObject.uri.collection} SET status = $1 WHERE id = $2`
+         let query = `UPDATE "${dataObject.uri.collection?.toLowerCase()}" SET status = $1 WHERE id = $2`
          await this._query(query, [statuses.DELETED, dataObject.uid])
       } else {
          await this._query(
-            `DELETE FROM ${dataObject.uri.collection} WHERE id = $1`,
+            `DELETE FROM "${dataObject.uri.collection?.toLowerCase()}" WHERE id = $1`,
             [dataObject.uid]
          )
       }
@@ -488,7 +489,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
     */
    async deleteCollection(collection: string, batchSize = 500): Promise<void> {
       Backend.debug(`Deleting all records from collection '${collection}'`)
-      await this._query(`TRUNCATE TABLE ${collection}`)
+      await this._query(`TRUNCATE TABLE "${collection.toLowerCase()}"`)
    }
 
    /**
@@ -546,7 +547,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          const fields: string[] = [`${alias}.id`]
          const caseMap = {}
 
-         query.push(`SELECT * FROM ${collection.toLowerCase()} AS coll`)
+         query.push(`SELECT * FROM "${collection.toLowerCase()}" AS coll`)
 
          // prepare joins
          Object.keys(dataObject.properties).forEach((prop) => {
@@ -572,7 +573,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                      : dataObject.properties[prop].instanceOf.COLLECTION
 
                query.push(
-                  `LEFT JOIN ${table} AS ${joinAlias} ON ${joinAlias}.id = coll.${prop.toLowerCase()}`
+                  `LEFT JOIN "${table.toLowerCase()}" AS ${joinAlias} ON ${joinAlias}.id = coll.${prop.toLowerCase()}`
                )
                fields.push(
                   `CASE WHEN ${alias}.${lcProp} IS NOT NULL THEN json_build_object('ref', CONCAT('${table}/', ${alias}.${lcProp}), 'path', CONCAT('${table}/', ${alias}.${lcProp}), 'label', ${joinAlias}.name || '') ELSE NULL  END AS ${prop} `

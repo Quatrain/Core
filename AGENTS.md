@@ -114,6 +114,33 @@ By default, Quatrain uses a "soft delete" system via the `status` property inher
 - ✅ **GOOD:** `let target: StudioTarget` or `let target: any` (if absolutely necessary to bypass the compiler).
 - ❌ **BAD:** `let target`
 
+### L. Test File Organization & NPM Publishing Cleanliness (for Bun/Deno)
+
+- **CRITICAL:** To support native Bun and Deno environments, we deliver both the compiled `dist/` directory and the raw TypeScript source `src/` directory. However, we MUST prevent test files, mock data, and test configurations from bloating the published package bundle.
+- **Co-locate unit tests:** Place unit tests (`*.test.ts` or `*.spec.ts`) directly next to their corresponding source files inside the `src/` directory (e.g., `src/MyService.test.ts`).
+- **Group integration tests:** Place integration or system-wide functional tests in dedicated directories outside `src/` (such as `tests/` or `__tests__/` at the package root).
+- **Exclude tests on publish:** Every package MUST explicitly exclude test-related files from its published NPM tarball.
+  - In `package.json`, specify:
+    ```json
+    "files": [
+      "dist",
+      "src"
+    ]
+    ```
+  - Ensure all package-level or root-level `.npmignore` files explicitly list exclusions:
+    ```ignore
+    **/*.test.ts
+    **/*.test.js
+    **/*.spec.ts
+    **/*.spec.js
+    **/__tests__/
+    **/tests/
+    **/mocks/
+    jest.config.js
+    tsconfig.tsbuildinfo
+    ```
+  - This guarantees ultra-lightweight published packages, prevents IDE autocomplete pollution for consumers, and avoids false flags during security audits of consumer applications.
+
 ---
 
 ## 2. Monorepo & Production Workflow Skills

@@ -22,7 +22,9 @@
   "scripts": {
     "prepare": "husky",
     "build": "turbo run build",
-    "publish:all": "node bin/publish_all.js"
+    "publish:all": "node bin/publish_all.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "private": true,
   "workspaces": [

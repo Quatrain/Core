@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/backend-postgres",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "license": "AGPL-3.0-only",
   "description": "Backend adapter for Postgres",
   "main": "dist/index.js",

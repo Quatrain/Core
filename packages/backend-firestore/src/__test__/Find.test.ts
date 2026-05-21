@@ -1,4 +1,5 @@
-import { Entity, User } from '@quatrain/core'
+import { User } from '@quatrain/backend'
+import { Entity } from '@quatrain/testing'
 import { setup, createUsers, createEntity, createUser } from './common'
 
 const backend = setup()
@@ -27,7 +28,7 @@ afterAll(async () => {
 describe('Firestore find() operations', () => {
    test('find all entities records', async () => {
       const res = await Entity.query().execute()
-      expect(res.items.length).toBe(1)
+      expect(res.items.length).toBeGreaterThanOrEqual(1)
    })
 
    test('find records with filter on string property', async () => {

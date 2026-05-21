@@ -1,12 +1,13 @@
-import { Core, Entity, User } from '@quatrain/core'
+import { Core } from '@quatrain/core'
+import { Entity } from '@quatrain/testing'
 import { FirestoreAdapter } from '../FirestoreAdapter'
-import { CollectionHierarchy } from '@quatrain/core/lib/backends'
+import { CollectionHierarchy, Backend, User } from '@quatrain/backend'
 import { faker } from '@faker-js/faker'
 
 process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:4141'
 
 export const setup = () => {
-   Core.addBackend(
+   Backend.addBackend(
       new FirestoreAdapter({
          config: {
             projectId: 'quatrain-core-firestore-admin-adapter-test',
@@ -14,10 +15,11 @@ export const setup = () => {
          },
          hierarchy: { alerts: CollectionHierarchy.SUBCOLLECTION },
       }),
-      '@default'
+      '@default',
+      true
    )
 
-   return Core.getBackend()
+   return Backend.getBackend()
 }
 
 export const createUser = async () => {
@@ -55,7 +57,7 @@ export const createUsers = async (qty: number = 5, forcedValues: any = {}) => {
          entity: forcedValues.entity || undefined,
       })
 
-      await Core.getBackend().create(user.dataObject)
+      await Backend.getBackend().create(user.dataObject)
 
       users.push(user)
    }

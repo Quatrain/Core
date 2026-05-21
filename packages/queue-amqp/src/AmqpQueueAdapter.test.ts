@@ -1,40 +1,36 @@
 import { AmqpQueueAdapter } from './AmqpQueueAdapter'
-import { AMQPClient, AMQPMessage } from '@cloudamqp/amqp-client'
+import amqplib from 'amqplib'
 import { Queue } from '@quatrain/queue'
 
-// Mock the @cloudamqp/amqp-client library
-jest.mock('@cloudamqp/amqp-client')
+// Mock the amqplib library
+jest.mock('amqplib')
 
-// Mock @quatrain/queue to spy on Queue.info
-jest.mock('@quatrain/queue', () => ({
-   ...jest.requireActual('@quatrain/queue'),
-   Queue: {
-      info: jest.fn(),
-   },
-}))
+const mockSendToQueue = jest.fn()
+const mockAck = jest.fn()
+const mockNack = jest.fn()
+const mockAssertQueue = jest.fn().mockResolvedValue({})
+const mockPrefetch = jest.fn().mockResolvedValue({})
+const mockConsume = jest.fn().mockResolvedValue({})
+const mockCloseChannel = jest.fn().mockResolvedValue({})
 
-const mockPublish = jest
-   .fn()
-   .mockResolvedValue({ confirmId: 'mock-confirm-id' })
-const mockSubscribe = jest.fn()
-const mockQueue = jest.fn().mockResolvedValue({
-   publish: mockPublish,
-   subscribe: mockSubscribe,
+const mockCreateChannel = jest.fn().mockResolvedValue({
+   sendToQueue: mockSendToQueue,
+   assertQueue: mockAssertQueue,
+   prefetch: mockPrefetch,
+   consume: mockConsume,
+   ack: mockAck,
+   nack: mockNack,
+   close: mockCloseChannel,
 })
-const mockChannel = jest.fn().mockResolvedValue({
-   queue: mockQueue,
-})
+
+const mockCloseConnection = jest.fn().mockResolvedValue({})
+
 const mockConnect = jest.fn().mockResolvedValue({
-   channel: mockChannel,
+   createChannel: mockCreateChannel,
+   close: mockCloseConnection,
 })
 
-const AMQPClientMock = AMQPClient as jest.Mock
-
-AMQPClientMock.mockImplementation(() => {
-   return {
-      connect: mockConnect,
-   }
-})
+;(amqplib.connect as jest.Mock).mockImplementation(mockConnect)
 
 describe('AmqpQueueAdapter', () => {
    const params = {
@@ -47,27 +43,53 @@ describe('AmqpQueueAdapter', () => {
       topic: 'default-topic',
    }
 
-   beforeEach(() => {
-      // Clear all instances and calls to constructor and all methods:
-      AMQPClientMock.mockClear()
-      mockConnect.mockClear()
-      mockChannel.mockClear()
-      mockQueue.mockClear()
-      mockPublish.mockClear()
-      mockSubscribe.mockClear()
-      ;(Queue.info as jest.Mock).mockClear()
+   let mockProcessExit: jest.SpyInstance
+   let mockLogger: any
+
+   beforeAll(() => {
+      mockLogger = {
+         info: jest.fn(),
+         debug: jest.fn(),
+         warn: jest.fn(),
+         error: jest.fn(),
+      }
+      jest.spyOn(Queue.logger, 'clone').mockReturnValue(mockLogger)
    })
 
-   it('should construct with default and custom parameters', () => {
-      new AmqpQueueAdapter({ config: {} })
-      expect(AMQPClientMock).toHaveBeenCalledWith(
-         'amqp://guest:guest@localhost:5672?frameMax=0'
-      )
+   beforeEach(() => {
+      mockProcessExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+      mockConnect.mockClear()
+      mockCreateChannel.mockClear()
+      mockCloseConnection.mockClear()
+      mockSendToQueue.mockClear()
+      mockAssertQueue.mockClear()
+      mockPrefetch.mockClear()
+      mockConsume.mockClear()
+      mockAck.mockClear()
+      mockNack.mockClear()
+      mockCloseChannel.mockClear()
+      mockLogger.info.mockClear()
+      mockLogger.debug.mockClear()
+      mockLogger.warn.mockClear()
+      mockLogger.error.mockClear()
+   })
 
-      new AmqpQueueAdapter(params)
-      expect(AMQPClientMock).toHaveBeenCalledWith(
-         'amqp://test-user:test-password@test-host:1234?frameMax=0'
-      )
+   afterEach(() => {
+      mockProcessExit.mockRestore()
+   })
+
+   describe('connection parameters', () => {
+      it('should connect with default parameters', async () => {
+         const adapter = new AmqpQueueAdapter({ config: {} })
+         await (adapter as any)._connect()
+         expect(mockConnect).toHaveBeenCalledWith('amqp://guest:guest@localhost:5672')
+      })
+
+      it('should connect with custom parameters', async () => {
+         const adapter = new AmqpQueueAdapter(params)
+         await (adapter as any)._connect()
+         expect(mockConnect).toHaveBeenCalledWith('amqp://test-user:test-password@test-host:1234')
+      })
    })
 
    describe('send', () => {
@@ -79,19 +101,16 @@ describe('AmqpQueueAdapter', () => {
          const confirmId = await adapter.send(data, topic)
 
          expect(mockConnect).toHaveBeenCalledTimes(1)
-         expect(mockChannel).toHaveBeenCalledTimes(1)
-         expect(mockQueue).toHaveBeenCalledWith(topic)
-         expect(mockPublish).toHaveBeenCalledWith(
-            Buffer.from(JSON.stringify(data)),
-            { deliveryMode: 2 }
+         expect(mockCreateChannel).toHaveBeenCalledTimes(1)
+         expect(mockSendToQueue).toHaveBeenCalledWith(
+            topic,
+            Buffer.from(JSON.stringify(data))
          )
-         expect(Queue.info).toHaveBeenCalledWith(
-            `[AMQP] Sending message to ${topic}`
+         expect(mockCloseChannel).toHaveBeenCalledTimes(1)
+         expect(mockLogger.info).toHaveBeenCalledWith(
+            `Sending message to ${topic}`
          )
-         expect(Queue.info).toHaveBeenCalledWith(
-            `[AMQP] Message send with id mock-confirm-id`
-         )
-         expect(confirmId).toBe('mock-confirm-id')
+         expect(confirmId).toBeDefined()
       })
    })
 
@@ -103,11 +122,13 @@ describe('AmqpQueueAdapter', () => {
          await adapter.listen(undefined, handler)
 
          expect(mockConnect).toHaveBeenCalledTimes(1)
-         expect(mockChannel).toHaveBeenCalledTimes(1)
-         expect(mockQueue).toHaveBeenCalledWith(params.topic)
-         expect(mockSubscribe).toHaveBeenCalledWith(
-            { noAck: true },
-            expect.any(Function)
+         expect(mockCreateChannel).toHaveBeenCalledTimes(1)
+         expect(mockAssertQueue).toHaveBeenCalledWith(params.topic, { durable: true, autoDelete: false })
+         expect(mockPrefetch).toHaveBeenCalledWith(0)
+         expect(mockConsume).toHaveBeenCalledWith(
+            params.topic,
+            expect.any(Function),
+            { noAck: false }
          )
       })
 
@@ -118,7 +139,7 @@ describe('AmqpQueueAdapter', () => {
 
          await adapter.listen(topic, handler)
 
-         expect(mockQueue).toHaveBeenCalledWith(topic)
+         expect(mockAssertQueue).toHaveBeenCalledWith(topic, { durable: true, autoDelete: false })
       })
 
       it('should throw an error if no topic is available', async () => {
@@ -135,16 +156,20 @@ describe('AmqpQueueAdapter', () => {
          const handler = jest.fn()
          const messageContent = { data: 'test message' }
          const message = {
-            bodyToString: () => JSON.stringify(messageContent),
-         } as AMQPMessage
+            content: Buffer.from(JSON.stringify(messageContent)),
+         } as any
 
-         mockSubscribe.mockImplementation(async (options, callback) => {
+         mockConsume.mockImplementation(async (topic, callback, options) => {
             await callback(message)
          })
 
          await adapter.listen('any-topic', handler)
 
-         expect(handler).toHaveBeenCalledWith(JSON.stringify(messageContent))
+         expect(handler).toHaveBeenCalledWith(
+            JSON.stringify(messageContent),
+            undefined
+         )
+         expect(mockAck).toHaveBeenCalledWith(message)
       })
    })
 })

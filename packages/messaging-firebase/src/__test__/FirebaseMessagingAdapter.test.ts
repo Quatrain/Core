@@ -2,6 +2,12 @@ import { FirebaseMessagingAdapter } from '../FirebaseMessagingAdapter'
 import { MessagingRecipient, NotificationMessage } from '@quatrain/messaging'
 
 // Mock Firebase Admin SDK
+jest.mock('firebase-admin', () => ({
+   credential: {
+      cert: jest.fn(() => ({})),
+   },
+}))
+
 jest.mock('firebase-admin/app', () => ({
    getApps: jest.fn(() => []),
    initializeApp: jest.fn()
@@ -90,7 +96,7 @@ describe('FirebaseMessagingAdapter', () => {
       })
    })
 
-   describe('sendMulticast', () => {
+    describe('sendNotifications', () => {
       const mockRecipients: MessagingRecipient[] = [
          {
             firstname: 'John',
@@ -112,7 +118,7 @@ describe('FirebaseMessagingAdapter', () => {
       }
 
       test('should send multicast notification successfully', async () => {
-         const result = await adapter.sendMulticast(mockRecipients, mockMessage)
+         const result = await adapter.sendNotifications(mockRecipients, mockMessage)
          
          expect(result.successCount).toBe(2)
          expect(result.failureCount).toBe(0)
@@ -130,7 +136,7 @@ describe('FirebaseMessagingAdapter', () => {
             }
          ]
 
-         const result = await adapter.sendMulticast(recipientsWithMissingTokens, mockMessage)
+         const result = await adapter.sendNotifications(recipientsWithMissingTokens, mockMessage)
          expect(result.successCount).toBe(2)
       })
 
@@ -141,7 +147,7 @@ describe('FirebaseMessagingAdapter', () => {
          }))
 
          await expect(
-            adapter.sendMulticast(recipientsWithoutTokens, mockMessage)
+            adapter.sendNotifications(recipientsWithoutTokens, mockMessage)
          ).rejects.toThrow('No valid message tokens found')
       })
    })

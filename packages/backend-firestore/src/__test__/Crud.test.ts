@@ -1,4 +1,5 @@
-import { User, DataObject } from '@quatrain/core'
+import { DataObject } from '@quatrain/core'
+import { User } from '@quatrain/backend'
 import { createUser, setup } from './common'
 import { fAlert } from './fixtures/fAlert'
 
@@ -8,14 +9,14 @@ let fUserAlert: fAlert
 
 beforeAll(async () => {
    user = await createUser()
-   await backend.create(user.dataObject)
+   await user.save()
 
    fUserAlert = await fAlert.factory({
       name: 'user alert',
       user: user.uri,
    })
 
-   await backend.create(fUserAlert.dataObject)
+   await fUserAlert.save()
 })
 
 afterAll(async () => {

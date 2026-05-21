@@ -176,10 +176,13 @@ export class ObjectUri {
     * @returns Rendered URI block.
     */
    toJSON() {
-      return {
-         backend: this._backend,
+      const res: any = {
          ref: this.path,
          label: this._label || '',
       }
+      if (this._backend !== undefined) {
+         res.backend = this._backend
+      }
+      return res
    }
 }

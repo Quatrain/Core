@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process'
 
 // Mock dependencies
 jest.mock('axios')
-jest.mock('child_process')
+jest.mock('node:child_process')
 
 const mockedAxios = axios as jest.Mocked<typeof axios>
 const mockedSpawn = spawn as jest.MockedFunction<typeof spawn>
@@ -209,6 +209,7 @@ describe('Worker', () => {
 
          expect(mockedSpawn).toHaveBeenCalledWith('ls', ['-la'], {
             cwd: '/tmp',
+            shell: false,
          })
       })
 
@@ -256,6 +257,7 @@ describe('Worker', () => {
 
          expect(mockedSpawn).toHaveBeenCalledWith('echo', ['test'], {
             cwd: process.cwd(),
+            shell: false,
          })
       })
 
@@ -277,6 +279,7 @@ describe('Worker', () => {
 
          expect(mockedSpawn).toHaveBeenCalledWith('command', args, {
             cwd: '/custom/path',
+            shell: false,
          })
       })
    })

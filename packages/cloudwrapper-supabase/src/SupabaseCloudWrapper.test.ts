@@ -132,8 +132,7 @@ describe('SupabaseCloudWrapper', () => {
       })
 
       it('should handle "timeout" status', () => {
-         // Should not throw or exit
-         expect(() => heartbeatCallback('timeout')).not.toThrow()
+         expect(() => heartbeatCallback('timeout')).toThrow('process.exit called')
       })
 
       it('should reconnect on "disconnected" when exitOnDisconnect is false', () => {

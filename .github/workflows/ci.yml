@@ -4,8 +4,22 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'packages/**'
+      - 'apps/**'
+      - 'bin/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/ci.yml'
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - 'packages/**'
+      - 'apps/**'
+      - 'bin/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/ci.yml'
 
 jobs:
   sonarcloud:
@@ -21,6 +35,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'yarn'
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -33,6 +48,14 @@ jobs:
       - name: Install dependencies
         run: YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
 
+      - name: Cache Turborepo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
       - name: Build monorepo packages
         run: yarn build
 
@@ -44,3 +67,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+

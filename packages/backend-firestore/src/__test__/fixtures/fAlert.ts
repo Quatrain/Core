@@ -1,9 +1,9 @@
 import {
    BaseObject,
-   BaseObjectCore,
    BaseObjectProperties,
    ObjectUri,
 } from '@quatrain/core'
+import { PersistedBaseObject } from '@quatrain/backend'
 
 export interface fAlertType extends BaseObject {
    name: string
@@ -22,7 +22,7 @@ export const fAlertProperties: any = [
 /**
  * Mock alert entity for Firestore testing.
  */
-export class fAlert extends BaseObjectCore {
+export class fAlert extends PersistedBaseObject {
    /** Schema properties definition for the test alert. */
    static PROPS_DEFINITION = fAlertProperties
    /** Mock collection name. */

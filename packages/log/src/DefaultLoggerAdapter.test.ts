@@ -13,18 +13,19 @@ jest.mock('loglevel', () => ({
    log: jest.fn(),
 }))
 
-const mockBold = jest.fn((s) => s)
-const mockWhite = { bold: mockBold }
-const mockBgRed = { white: mockWhite }
-
-jest.mock('chalk', () => ({
-   level: 1,
-   grey: jest.fn((s) => s),
-   yellow: jest.fn((s) => s),
-   green: jest.fn((s) => s),
-   red: jest.fn((s) => s),
-   bgRed: mockBgRed,
-}))
+jest.mock('chalk', () => {
+   const mockBold = jest.fn((s) => s)
+   const mockWhite = { bold: mockBold }
+   const mockBgRed = { white: mockWhite }
+   return {
+      level: 1,
+      grey: jest.fn((s) => s),
+      yellow: jest.fn((s) => s),
+      green: jest.fn((s) => s),
+      red: jest.fn((s) => s),
+      bgRed: mockBgRed,
+   }
+})
 
 describe('DefaultLoggerAdapter', () => {
    let adapter: DefaultLoggerAdapter

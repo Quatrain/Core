@@ -59,6 +59,7 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
       if (getApps().length === 0) {
          initializeApp(params.config)
       }
+      getFirestore().settings({ ignoreUndefinedProperties: true })
    }
 
    protected _buildPath(dataObject: DataObjectClass<any>, uid?: string) {
@@ -118,6 +119,9 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
 
          dataObject.uri.path = path
          dataObject.uri.label = data && Reflect.get(data, 'name')
+         if (typeof (dataObject as any).isPersisted === 'function') {
+            (dataObject as any).isPersisted(true)
+         }
 
          Backend.log(`[FSA] Saved object "${data.name}" at path ${path}`)
 
@@ -157,6 +161,9 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
       }
 
       dataObject.populate(snapshot.data())
+      if (typeof (dataObject as any).isPersisted === 'function') {
+         (dataObject as any).isPersisted(true)
+      }
 
       await this.executeMiddlewares(dataObject, BackendAction.READ, 'after')
 
@@ -204,6 +211,9 @@ export class FirestoreAdapter extends AbstractBackendAdapter {
       const { uid, ...data } = dataObject.toJSON()
 
       await getFirestore().doc(dataObject.path).update(data)
+      if (typeof (dataObject as any).isPersisted === 'function') {
+         (dataObject as any).isPersisted(true)
+      }
 
       await this.executeMiddlewares(dataObject, BackendAction.UPDATE, 'after')
       return dataObject

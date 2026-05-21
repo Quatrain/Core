@@ -6,6 +6,7 @@
   "emulators": {
     "singleProjectMode": false,
     "firestore": {
+      "host": "127.0.0.1",
       "port": "4141"
     },
     "ui": {
@@ -13,6 +14,7 @@
     },
     "auth": {
       "enabled": false,
+      "host": "127.0.0.1",
       "port": "9099"
     }
   }

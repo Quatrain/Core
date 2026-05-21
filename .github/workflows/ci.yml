@@ -25,6 +25,20 @@ jobs:
   sonarcloud:
     name: SonarCloud Scan & Quality Gate
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: quatrain_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,6 +54,12 @@ jobs:
           node-version: 22
           cache: 'yarn'
 
+      - name: Setup Java (required for Firebase Emulator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -47,6 +67,12 @@ jobs:
 
       - name: Install dependencies
         run: YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
+
+      - name: Cache Firebase Emulators
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: ${{ runner.os }}-firebase-emulators-${{ hashFiles('packages/backend-firestore/firebase.json') }}
 
       - name: Cache Turborepo
         uses: actions/cache@v4
@@ -60,7 +86,7 @@ jobs:
         run: yarn build
 
       - name: Run unit tests with coverage
-        run: yarn test:coverage
+        run: npx firebase-tools emulators:exec --config packages/backend-firestore/firebase.json --only firestore "yarn test:coverage --runInBand"
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master

@@ -326,4 +326,28 @@ describe('CoreListManager', () => {
       await manager4.init()
       expect((manager4 as any).state.items[0].relationId).toBe('nonexistent-value') // preserved
    })
+
+   it('should cover the fallback to empty array when relationOptions is undefined/missing', async () => {
+      const testApiClient = {
+         get: jest.fn().mockImplementation((url: string) => {
+            if (url.endsWith('/values')) {
+               return Promise.reject(new Error('Failed to load relations'))
+            }
+            return Promise.resolve({
+               items: [{ uid: 'r1', name: 'Row 1', relationId: '1' }]
+            })
+         })
+      }
+
+      const manager = new CoreListManager({
+         apiClient: testApiClient,
+         modelSchema: mockSchema
+      })
+
+      await manager.init()
+      expect((manager as any).state.relationOptions.relationId).toBeUndefined()
+      expect((manager as any).state.items).toEqual([
+         { uid: 'r1', name: 'Row 1', relationId: '1' }
+      ])
+   })
 })

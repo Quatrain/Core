@@ -385,4 +385,108 @@ describe('CoreList Component', () => {
       pagination.props.onChange(3)
       expect(mockOperations.setPage).toHaveBeenCalledWith(3)
    })
+
+   it('should cover all additional edge cases for branch coverage', () => {
+      // 1. Line 84: meta is undefined/null (falls back to items.length)
+      mockOperations.state.meta = undefined
+      mockOperations.state.items = [{ uid: 'item1' }, { uid: 'item2' }]
+      let element = CoreList({ options: { endpoint: 'users' }, title: 'My Title' })
+      const titleBlock = findElement(element, isTitleBlock)
+      expect(titleBlock.props.count).toBe(2)
+
+      // 2. Line 94: column label language fallback (translation missing, falls back to en)
+      mockConfig.columns = {
+         testCol: { label: { en: 'Default English' }, sortable: true }
+      }
+      element = CoreList({ options: { endpoint: 'users' }, lang: 'fr' })
+      let ths = findAllElements(element, (el) => el && el.type === Table.Th)
+      expect(ths.length).toBeGreaterThan(0)
+
+      // 3. Line 103: modelSchema branch with properties and empty fallback
+      // 3a. schema with properties instead of PROPS_DEFINITION
+      delete mockConfig.columns
+      mockConfig.modelSchema = {
+         name: 'PropModel',
+         properties: [{ name: 'name', ui: { label: 'Prop Label' } }]
+      }
+      element = CoreList({ options: { endpoint: 'users' } })
+      expect(element).toBeDefined()
+
+      // 3b. schema without properties and without PROPS_DEFINITION
+      mockConfig.modelSchema = { name: 'EmptyModel' }
+      element = CoreList({ options: { endpoint: 'users' } })
+      expect(element).toBeDefined()
+
+      // 4. Line 173: date string in column name not ending with 'At' and not 'birthday'
+      mockConfig.columns = {
+         customDate: { label: 'Custom Date', sortable: false }
+      }
+      mockOperations.state.items = [{ customDate: '2026-05-21' }]
+      element = CoreList({ options: { endpoint: 'users' } })
+      let tds = findAllElements(element, (el) => el && el.type === Table.Td)
+      expect(tds.length).toBeGreaterThan(0)
+
+      // 5. Line 207: title falls back to 'List View' when title and modelSchema name are missing
+      mockConfig.modelSchema = {}
+      element = CoreList({ options: { endpoint: 'users' } })
+      let tb = findElement(element, isTitleBlock)
+      expect(tb.props.title).toBe('List View')
+
+      // 6. Line 243-253: uid and id headers custom translation mapping
+      ;(React as any)._resetState()
+      mockForceShowMeta = true
+      mockConfig.columns = {
+         uid: { label: 'UID', sortable: true },
+         id: { label: 'ID', sortable: true }
+      }
+      element = CoreList({ options: { endpoint: 'users' }, lang: 'fr' })
+      ths = findAllElements(element, (el) => el && el.type === Table.Th)
+      expect(ths.length).toBeGreaterThan(1)
+
+      // 7. Line 267: reloading state where status = 'loading' but items.length > 0
+      mockOperations.state.status = 'loading'
+      mockOperations.state.items = [{ uid: '1', name: 'Bob' }]
+      element = CoreList({ options: { endpoint: 'users' } })
+      let trs = findAllElements(element, (el) => el && el.type === Table.Tr)
+      expect(trs.length).toBeGreaterThan(1)
+
+      // 8. Line 276: empty state colSpan with undefined config.buttons
+      mockOperations.state.status = 'idle'
+      mockOperations.state.items = []
+      delete mockConfig.buttons
+      mockConfig.columns = { name: { label: 'Name' } }
+      element = CoreList({ options: { endpoint: 'users' } })
+      const emptyTd = findElement(element, (el) => el && el.type === Table.Td)
+      expect(emptyTd.props.colSpan).toBe(1)
+
+      // 9. Line 306: action button label translation fallback to en when missing target
+      mockConfig.buttons = {
+         edit: {
+            label: { en: 'Edit English' },
+            action: jest.fn()
+         }
+      }
+      mockOperations.state.items = [{ uid: '1', name: 'Bob' }]
+      element = CoreList({ options: { endpoint: 'users' }, lang: 'fr' })
+      const buttons = findAllElements(element, (el) => el && el.type === Button)
+      expect(buttons[0].props.children).toBe('Edit English')
+
+      // 10. Line 173: date formatting with lang = 'en' (covers 'en-US' branch of the ternary operator)
+      mockConfig.columns = {
+         createdAt: { label: 'Created At', sortable: false }
+      }
+      mockOperations.state.items = [{ createdAt: new Date('2026-05-21T12:00:00Z') }]
+      element = CoreList({ options: { endpoint: 'users' }, lang: 'en' })
+      tds = findAllElements(element, (el) => el && el.type === Table.Td)
+      expect(tds.length).toBeGreaterThan(0)
+
+      // 11. Line 267: loading state colSpan with undefined config.buttons (covers falsy branch of (config.buttons ? 1 : 0))
+      mockOperations.state.status = 'loading'
+      mockOperations.state.items = []
+      delete mockConfig.buttons
+      mockConfig.columns = { name: { label: 'Name' } }
+      element = CoreList({ options: { endpoint: 'users' } })
+      const loadingTd = findElement(element, (el) => el && el.type === Table.Td)
+      expect(loadingTd.props.colSpan).toBe(1)
+   })
 })

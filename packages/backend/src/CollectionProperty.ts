@@ -1,15 +1,12 @@
 import {
    CollectionProperty as CoreCollectionProperty,
    BasePropertyType,
-   Core,
-   ObjectUri,
    returnAs,
 } from '@quatrain/core'
 import { Backend } from './Backend'
 import { Filter } from './Filter'
 import { Query, QueryResultType } from './Query'
 import { PersistedBaseObject } from './PersistedBaseObject'
-import { DataObjectClass } from './types/DataObjectClass'
 
 /**
  * Configuration dictionary for instantiating a backend `CollectionProperty`.

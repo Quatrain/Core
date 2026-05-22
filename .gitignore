@@ -8,7 +8,7 @@ dist
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
-coverage/*
+**/coverage
 .DS_Store
 **/.DS_Store
 packages/**/.*.txt

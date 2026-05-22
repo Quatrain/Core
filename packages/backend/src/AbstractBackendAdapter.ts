@@ -251,6 +251,87 @@ export abstract class AbstractBackendAdapter implements BackendInterface {
    }
 
    /**
+    * Executes an aggregation operation (sum, avg, distinct, min, max, count) on a query.
+    * The default implementation fetches all matching records and performs in-memory aggregation.
+    * Specific database adapters should override this to perform native query aggregation.
+    * 
+    * @param query - The Query instance defining the collection and filters.
+    * @param operation - The aggregate operation.
+    * @param property - The name of the property to aggregate.
+    * @returns A promise resolving to the aggregated result.
+    */
+   async aggregate(
+      query: Query<any>,
+      operation: 'sum' | 'avg' | 'distinct' | 'min' | 'max' | 'count',
+      property?: string
+   ): Promise<any> {
+      const { items } = await this.query(query)
+
+      if (operation === 'count') {
+         return items.length
+      }
+
+      if (!property) {
+         throw new BackendError(`Property name is required for aggregation operation '${operation}'`)
+      }
+
+      const values = items
+         .map((item) => {
+            const prop = item.get(property)
+            return prop ? prop.val() : undefined
+         })
+         .filter((v) => v !== undefined)
+
+      switch (operation) {
+         case 'sum': {
+            return values.reduce((acc, val) => {
+               const num = Number(val)
+               return acc + (isNaN(num) ? 0 : num)
+            }, 0)
+         }
+         case 'avg': {
+            if (values.length === 0) return 0
+            const total = values.reduce((acc, val) => {
+               const num = Number(val)
+               return acc + (isNaN(num) ? 0 : num)
+            }, 0)
+            return total / values.length
+         }
+         case 'distinct': {
+            return Array.from(new Set(values))
+         }
+         case 'min': {
+            if (values.length === 0) return undefined
+            let minVal: number | undefined = undefined
+            values.forEach((val) => {
+               const num = Number(val)
+               if (!isNaN(num)) {
+                  if (minVal === undefined || num < minVal) {
+                     minVal = num
+                  }
+               }
+            })
+            return minVal
+         }
+         case 'max': {
+            if (values.length === 0) return undefined
+            let maxVal: number | undefined = undefined
+            values.forEach((val) => {
+               const num = Number(val)
+               if (!isNaN(num)) {
+                  if (maxVal === undefined || num > maxVal) {
+                     maxVal = num
+                  }
+               }
+            })
+            return maxVal
+         }
+         default:
+            throw new BackendError(`Unsupported aggregation operation: ${operation}`)
+      }
+   }
+
+   /**
     * Executes a raw query on the backend.
     * Only supported by SQL adapters.
     */

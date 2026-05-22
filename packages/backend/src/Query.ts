@@ -245,4 +245,86 @@ export class Query<T extends typeof PersistedBaseObject> {
          throw err
       }
    }
+
+   /**
+    * Executes a sum aggregation query on the target property.
+    * 
+    * @param property - The name of the numeric property to sum.
+    * @param backend - The backend adapter to query against. Defaults to the global default backend.
+    * @returns A promise resolving to the sum of the property values.
+    */
+   async sum(
+      property: string,
+      backend: BackendInterface = Backend.getBackend()
+   ): Promise<number> {
+      return backend.aggregate(this, 'sum', property)
+   }
+
+   /**
+    * Executes an average aggregation query on the target property.
+    * 
+    * @param property - The name of the numeric property to average.
+    * @param backend - The backend adapter to query against. Defaults to the global default backend.
+    * @returns A promise resolving to the average of the property values.
+    */
+   async average(
+      property: string,
+      backend: BackendInterface = Backend.getBackend()
+   ): Promise<number> {
+      return backend.aggregate(this, 'avg', property)
+   }
+
+   /**
+    * Executes a distinct aggregation query on the target property.
+    * 
+    * @param property - The name of the property.
+    * @param backend - The backend adapter to query against. Defaults to the global default backend.
+    * @returns A promise resolving to an array of unique values.
+    */
+   async distinct(
+      property: string,
+      backend: BackendInterface = Backend.getBackend()
+   ): Promise<any[]> {
+      return backend.aggregate(this, 'distinct', property)
+   }
+
+   /**
+    * Executes a minimum aggregation query on the target property.
+    * 
+    * @param property - The name of the property.
+    * @param backend - The backend adapter to query against. Defaults to the global default backend.
+    * @returns A promise resolving to the minimum value found, or undefined.
+    */
+   async min(
+      property: string,
+      backend: BackendInterface = Backend.getBackend()
+   ): Promise<number | undefined> {
+      return backend.aggregate(this, 'min', property)
+   }
+
+   /**
+    * Executes a maximum aggregation query on the target property.
+    * 
+    * @param property - The name of the property.
+    * @param backend - The backend adapter to query against. Defaults to the global default backend.
+    * @returns A promise resolving to the maximum value found, or undefined.
+    */
+   async max(
+      property: string,
+      backend: BackendInterface = Backend.getBackend()
+   ): Promise<number | undefined> {
+      return backend.aggregate(this, 'max', property)
+   }
+
+   /**
+    * Executes a count aggregation query.
+    * 
+    * @param backend - The backend adapter to query against. Defaults to the global default backend.
+    * @returns A promise resolving to the count of matching items.
+    */
+   async count(
+      backend: BackendInterface = Backend.getBackend()
+   ): Promise<number> {
+      return backend.aggregate(this, 'count')
+   }
 }

@@ -29,6 +29,12 @@ export interface BackendInterface {
       parent: any
    ): Promise<QueryResultType<DataObjectClass<any>>>
 
+   aggregate(
+      query: Query<any>,
+      operation: 'sum' | 'avg' | 'distinct' | 'min' | 'max' | 'count',
+      property?: string
+   ): Promise<any>
+
    generateCreateSql(collection: string, properties: any[]): { upSql: string, downSql: string }
    generateDeltaSql(collection: string, delta: SchemaDelta): { upSql: string[], downSql: string[] }
 }

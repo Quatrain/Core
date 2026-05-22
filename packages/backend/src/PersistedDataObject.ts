@@ -1,9 +1,10 @@
-import { DataObject as CoreDO } from '@quatrain/core'
+import { DataObject as CoreDO, Property } from '@quatrain/core'
 import type { PersistedBaseObject } from './PersistedBaseObject'
 import { Backend } from './Backend'
 import { DataObjectClass } from './types/DataObjectClass'
 import { DataObjectParams } from '@quatrain/core'
 import { Persisted } from './types/Persisted'
+import { CollectionProperty } from './CollectionProperty'
 
 /**
  * Data objects constitute the agnostic glue between objects and backends.
@@ -15,6 +16,17 @@ export class PersistedDataObject extends CoreDO implements Persisted {
    protected declare _proxied: any
 
    protected _persisted: boolean = false
+
+   protected _init(properties: any[]) {
+      properties.forEach((prop) => {
+         if (prop.type === CollectionProperty.TYPE) {
+            prop.parent = this
+            this._properties[prop.name] = new CollectionProperty(prop)
+         } else {
+            this._properties[prop.name] = Property.factory(prop, this)
+         }
+      })
+   }
 
    /**
     * Checks or updates the persisted state of the DataObject.

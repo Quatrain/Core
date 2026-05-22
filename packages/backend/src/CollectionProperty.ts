@@ -1,5 +1,5 @@
 import {
-   BaseProperty,
+   CollectionProperty as CoreCollectionProperty,
    BasePropertyType,
    Core,
    ObjectUri,
@@ -45,31 +45,19 @@ export interface CollectionPropertyType extends BasePropertyType {
  * console.log(results); // Array of User objects
  * ```
  */
-export class CollectionProperty extends BaseProperty {
+export class CollectionProperty extends CoreCollectionProperty {
    /** Type identifier for the property registry. */
    static TYPE = 'collection'
-   protected _value:
-      | Array<any>
-      | Array<DataObjectClass<any>>
-      | Array<ObjectUri>
-      | undefined = undefined
-   protected _instanceOf: typeof PersistedBaseObject
-   protected _parentKey: string
+   protected declare _instanceOf: typeof PersistedBaseObject
    protected _backend: any
    protected _query: Query<any>
    protected _filters: Filter[] | Filter | undefined = undefined
 
    constructor(config: CollectionPropertyType) {
       super(config)
-      this._instanceOf =
-         typeof config.instanceOf === 'string'
-            ? Core.classRegistry[config.instanceOf]
-            : config.instanceOf
       this._backend = config.backend
          ? Backend.getBackend(config.backend)
          : undefined
-      this._parentKey =
-         config.parentKey || this._parent?.uri?.collection || 'unknown'
       this._query = this._setQuery()
    }
 
@@ -105,6 +93,14 @@ export class CollectionProperty extends BaseProperty {
    get(filters: Filter[] | undefined = undefined): Query<any> {
       if (!this._query || this._filters !== filters) {
          this._query = this._setQuery(filters)
+      } else {
+         const parentUri = this._parent ? this._parent.uri : 'unknown'
+         const parentFilter = this._query.filters.find(
+            (f) => f.prop === this._parentKey
+         )
+         if (parentFilter) {
+            parentFilter.value = parentUri
+         }
       }
 
       return this._query
@@ -120,6 +116,144 @@ export class CollectionProperty extends BaseProperty {
       transform: returnAs = returnAs.AS_DATAOBJECTS
    ): Promise<QueryResultType<any>> {
       return await this.get().execute(transform, this._backend)
+   }
+
+   /**
+    * Sums the numeric values of a property across items in the collection.
+    * Delegates to database query if not hydrated.
+    * 
+    * @param property - The name of the property to sum.
+    * @returns A promise resolving to the sum of all numeric values.
+    */
+   async sum(property: string): Promise<number> {
+      if (this._value !== undefined) {
+         return super.sum(property) as number
+      }
+      return this.get().sum(property, this._backend)
+   }
+
+   /**
+    * Calculates the average of the numeric values of a property across items in the collection.
+    * Delegates to database query if not hydrated.
+    * 
+    * @param property - The name of the property to average.
+    * @returns A promise resolving to the average of all numeric values.
+    */
+   async average(property: string): Promise<number> {
+      if (this._value !== undefined) {
+         return super.average(property) as number
+      }
+      return this.get().average(property, this._backend)
+   }
+
+   /**
+    * Retrieves all distinct values of a property across the collection items.
+    * Delegates to database query if not hydrated.
+    * 
+    * @param property - The name of the property.
+    * @returns A promise resolving to an array of unique property values.
+    */
+   async distinct(property: string): Promise<any[]> {
+      if (this._value !== undefined) {
+         return super.distinct(property) as any[]
+      }
+      return this.get().distinct(property, this._backend)
+   }
+
+   /**
+    * Returns the minimum value of a numeric property across the collection items.
+    * Delegates to database query if not hydrated.
+    * 
+    * @param property - The name of the property.
+    * @returns A promise resolving to the minimum numeric value found, or undefined.
+    */
+   async min(property: string): Promise<number | undefined> {
+      if (this._value !== undefined) {
+         return super.min(property) as number | undefined
+      }
+      return this.get().min(property, this._backend)
+   }
+
+   /**
+    * Returns the maximum value of a numeric property across the collection items.
+    * Delegates to database query if not hydrated.
+    * 
+    * @param property - The name of the property.
+    * @returns A promise resolving to the maximum numeric value found, or undefined.
+    */
+   async max(property: string): Promise<number | undefined> {
+      if (this._value !== undefined) {
+         return super.max(property) as number | undefined
+      }
+      return this.get().max(property, this._backend)
+   }
+
+   /**
+    * Groups the collection items by the values of a specific property.
+    * Fetches and hydrates the collection first if not already hydrated.
+    * 
+    * @param property - The name of the property to group by.
+    * @returns A promise resolving to a dictionary object.
+    */
+   async groupBy(property: string): Promise<Record<string, any[]>> {
+      if (this._value === undefined) {
+         const { items } = await this.val(returnAs.AS_INSTANCES)
+         return super.groupBy(property, items) as Record<string, any[]>
+      }
+      return super.groupBy(property) as Record<string, any[]>
+   }
+
+   /**
+    * Plucks a specific property from each item in the collection.
+    * Fetches and hydrates the collection first if not already hydrated.
+    * 
+    * @param property - The name of the property to extract.
+    * @returns A promise resolving to an array containing the extracted property values.
+    */
+   async pluck(property: string): Promise<any[]> {
+      if (this._value === undefined) {
+         const { items } = await this.val(returnAs.AS_INSTANCES)
+         return super.pluck(property, items) as any[]
+      }
+      return super.pluck(property) as any[]
+   }
+
+   /**
+    * Returns the count of items in the collection, optionally filtered by a predicate callback.
+    * If no predicate is provided and the collection is not hydrated, it runs a fast database query.
+    * 
+    * @param predicate - An optional filter callback to run on each item.
+    * @returns A promise resolving to the count of matching items.
+    */
+   async count(predicate?: (item: any) => boolean): Promise<number> {
+      if (predicate) {
+         if (this._value === undefined) {
+            const { items } = await this.val(returnAs.AS_INSTANCES)
+            return super.count(predicate, items) as number
+         }
+         return super.count(predicate) as number
+      }
+      if (this._value !== undefined) {
+         return super.count() as number
+      }
+      return this.get().count(this._backend)
+   }
+
+   /**
+    * Applies an anonymous function to each item in the collection.
+    * Fetches fully instantiated model class instances from the database if not hydrated.
+    * 
+    * @param fn - The anonymous callback function to apply to each item.
+    * @returns A promise resolving to the results of the callback applications.
+    */
+   async apply(fn: (item: any) => any | Promise<any>): Promise<any[]> {
+      if (this._value === undefined) {
+         const { items } = await this.get().fetchAsInstances(this._backend)
+         const results = items.map((item) => fn(item))
+         return Promise.all(results)
+      }
+      const results = this._value.map((item) => fn(item))
+      return Promise.all(results)
    }
 
    /**

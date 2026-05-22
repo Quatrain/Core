@@ -222,10 +222,11 @@ export class MockAdapter
 
                      if (typeof prop === 'object') {
                         if (prop.constructor.name === 'ObjectProperty') {
+                           const valPath = val instanceof ObjectUri ? val.path : (val && typeof val === 'object' ? (val as any).ref : val);
                            if (
                               filter.value instanceof ObjectUri &&
-                              val &&
-                              val.ref !== filter.value.path
+                              valPath &&
+                              valPath !== filter.value.path
                            ) {
                               keep = false
                               return

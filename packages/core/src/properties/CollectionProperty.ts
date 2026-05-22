@@ -75,4 +75,174 @@ export class CollectionProperty extends BaseProperty {
    toJSON() {
       return this._value
    }
+
+   /**
+    * Sums the numeric values of a property across items in the collection.
+    * Can aggregate either the internal collection value or an external array.
+    * 
+    * @param property - The name of the property to sum.
+    * @param items - Optional external items array. Defaults to the internal collection array.
+    * @returns The sum of all numeric values.
+    */
+   /**
+    * Sums the numeric values of a property across items in the collection.
+    * Can aggregate either the internal collection value or an external array.
+    * 
+    * @param property - The name of the property to sum.
+    * @param items - Optional external items array. Defaults to the internal collection array.
+    * @returns The sum of all numeric values.
+    */
+   sum(property: string, items: any[] = this._value || []): number | Promise<number> {
+      return items.reduce((acc, item) => {
+         const val = typeof item.val === 'function' ? item.val(property) : item[property]
+         const num = Number(val)
+         return acc + (isNaN(num) ? 0 : num)
+      }, 0)
+   }
+
+   /**
+    * Calculates the average of the numeric values of a property across items in the collection.
+    * Can aggregate either the internal collection value or an external array.
+    * 
+    * @param property - The name of the property to average.
+    * @param items - Optional external items array. Defaults to the internal collection array.
+    * @returns The average of all numeric values, or 0 if empty.
+    */
+   average(property: string, items: any[] = this._value || []): number | Promise<number> {
+      if (items.length === 0) return 0
+      const sumVal = this.sum(property, items)
+      if (sumVal && typeof (sumVal as any).then === 'function') {
+         return (sumVal as any).then((s: number) => s / items.length)
+      }
+      return (sumVal as number) / items.length
+   }
+
+   /**
+    * Retrieves all distinct values of a property across the collection items.
+    * Can aggregate either the internal collection value or an external array.
+    * 
+    * @param property - The name of the property.
+    * @param items - Optional external items array. Defaults to the internal collection array.
+    * @returns An array of unique property values.
+    */
+   distinct(property: string, items: any[] = this._value || []): any[] | Promise<any[]> {
+      const values = items.map((item) => {
+         return typeof item.val === 'function' ? item.val(property) : item[property]
+      })
+      return Array.from(new Set(values))
+   }
+
+   /**
+    * Returns the minimum value of a numeric property across the collection items.
+    * Can aggregate either the internal collection value or an external array.
+    * 
+    * @param property - The name of the property.
+    * @param items - Optional external items array. Defaults to the internal collection array.
+    * @returns The minimum numeric value found, or undefined if no valid numbers are present.
+    */
+   min(property: string, items: any[] = this._value || []): number | undefined | Promise<number | undefined> {
+      if (items.length === 0) return undefined
+      let minVal: number | undefined = undefined
+      items.forEach((item) => {
+         const val = typeof item.val === 'function' ? item.val(property) : item[property]
+         const num = Number(val)
+         if (!isNaN(num)) {
+            if (minVal === undefined || num < minVal) {
+               minVal = num
+            }
+         }
+      })
+      return minVal
+   }
+
+   /**
+    * Returns the maximum value of a numeric property across the collection items.
+    * Can aggregate either the internal collection value or an external array.
+    * 
+    * @param property - The name of the property.
+    * @param items - Optional external items array. Defaults to the internal collection array.
+    * @returns The maximum numeric value found, or undefined if no valid numbers are present.
+    */
+   max(property: string, items: any[] = this._value || []): number | undefined | Promise<number | undefined> {
+      if (items.length === 0) return undefined
+      let maxVal: number | undefined = undefined
+      items.forEach((item) => {
+         const val = typeof item.val === 'function' ? item.val(property) : item[property]
+         const num = Number(val)
+         if (!isNaN(num)) {
+            if (maxVal === undefined || num > maxVal) {
+               maxVal = num
+            }
+         }
+      })
+      return maxVal
+   }
+
+   /**
+    * Groups the collection items by the values of a specific property.
+    * Can aggregate either the internal collection value or an external array.
+    * 
+    * @param property - The name of the property to group by.
+    * @param items - Optional external items array. Defaults to the internal collection array.
+    * @returns A dictionary object where keys are the property values and values are arrays of matching items.
+    */
+   groupBy(property: string, items: any[] = this._value || []): Record<string, any[]> | Promise<Record<string, any[]>> {
+      const groups: Record<string, any[]> = {}
+      items.forEach((item) => {
+         const val = typeof item.val === 'function' ? item.val(property) : item[property]
+         const key = String(val ?? 'undefined')
+         if (!groups[key]) {
+            groups[key] = []
+          }
+         groups[key].push(item)
+      })
+      return groups
+   }
+
+   /**
+    * Plucks a specific property from each item in the collection.
+    * Can aggregate either the internal collection value or an external array.
+    * 
+    * @param property - The name of the property to extract.
+    * @param items - Optional external items array. Defaults to the internal collection array.
+    * @returns An array containing the extracted property values.
+    */
+   pluck(property: string, items: any[] = this._value || []): any[] | Promise<any[]> {
+      return items.map((item) => {
+         return typeof item.val === 'function' ? item.val(property) : item[property]
+      })
+   }
+
+   /**
+    * Returns the count of items in the collection, optionally filtered by a predicate callback.
+    * Can aggregate either the internal collection value or an external array.
+    * 
+    * @param predicate - An optional filter callback to run on each item.
+    * @param items - Optional external items array. Defaults to the internal collection array.
+    * @returns The count of matching items.
+    */
+   count(predicate?: (item: any) => boolean, items: any[] = this._value || []): number | Promise<number> {
+      if (!predicate) return items.length
+      return items.filter(predicate).length
+   }
+
+   /**
+    * Applies an anonymous function to each item in the collection.
+    * Can execute either on the internal collection value or an external array.
+    * Supporting both synchronous and asynchronous callback functions.
+    * 
+    * @param fn - The anonymous callback function to apply to each item.
+    * @param items - Optional external items array. Defaults to the internal collection array.
+    * @returns The results of the function applications (or a Promise resolving to the results if async).
+    */
+   apply(
+      fn: (item: any) => any | Promise<any>,
+      items: any[] = this._value || []
+   ): any[] | Promise<any[]> {
+      const results = items.map((item) => fn(item))
+      if (results.some((r) => r && typeof r.then === 'function')) {
+         return Promise.all(results)
+      }
+      return results
+   }
 }

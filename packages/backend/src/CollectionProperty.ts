@@ -62,6 +62,9 @@ export class CollectionProperty extends CoreCollectionProperty {
    }
 
    protected _setQuery(filters?: Filter[]) {
+      if (typeof this._instanceOf.query !== 'function') {
+         return undefined as any
+      }
       const query = this._instanceOf.query()
       query.where(this._parentKey, this._parent ? this._parent.uri : 'unknown')
       if (filters) {

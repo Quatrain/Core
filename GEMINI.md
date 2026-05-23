@@ -1,55 +1,28 @@
-# Quatrain Core - Gemini Agent Guidelines & Workflow Rules
+# Quatrain Core - Gemini Agent Guidelines & Instruction Pointer
 
-This document serves as the dedicated instruction and compliance guidelines specifically tailored for the Gemini AI Coding Agent.
+> [!NOTE]
+> **Updated:** May 23, 2026 | **Engine:** Gemini 3.5 Flash (High) | **License:** AGPL-v3
 
-**When working on this repository, you MUST adhere to the following rules and best practices.**
+This document serves as the dedicated instruction and guidelines pointer specifically tailored for the Gemini AI Coding Agent.
 
----
-
-## 1. Architectural Standards
-
-Always refer to [AGENTS.md](file:///Users/crapougnax/CODE/QUATRAIN/Core/AGENTS.md) for full architectural guidelines. Key elements include:
-* **Instantiation**: Use `PersistedBaseObject.fromBackend(id)` for existing database loads, and `.factory(data)` for new instances.
-* **Property definitions**: Always use imported typed static definitions (like `BooleanProperty.TYPE`) in `PROPS_DEFINITION`, never raw string literals.
-* **Logging**: `Backend.log` is deprecated. Use `Backend.debug`, `Backend.info`, `Backend.warn`, or `Backend.error` in **International English**.
-* **Protected Encapsulation**: Prefer `protected` over `private` to support class inheritance unless explicitly marked as `final`.
+When executing tasks or responding to requests in this repository, you MUST load and comply with the following instructions:
 
 ---
 
-## 2. SonarQube & Code Quality Compliance Rules
+## 🧭 Guidelines & Instruction Paths
 
-To keep the codebase clean, stable, and compliant with modern static code analyzers, systematically apply the following rules:
+### 1. Building Applications with Quatrain
+If the task is to construct or design application schemas, models, repositories, and business features **using** the Quatrain ecosystem, follow the guidelines in:
+👉 [AGENTS.md (Application Development Guidelines)](./AGENTS.md)
 
-### A. Number Utilities & Strict Casting
-* **Prefer `Number.parseInt` over `parseInt`**: Global `parseInt` has implicit parsing rules. Always use `Number.parseInt(value, 10)` to explicitly specify the radix and avoid parser mismatch.
-* **Prefer `Number.isNaN` over `isNaN`**: Global `isNaN` implicitly coerces non-number types (e.g. `isNaN('abc')` is `true`). Always use `Number.isNaN` to strictly check for `NaN` values without coercion.
-
-### B. Interactive Elements & HTML5 Accessibility (typescript:S6848)
-* **Interactive handlers on non-interactive elements**: Non-interactive elements (e.g., `<div>`, `<span>`, `<p>`, `<td>`) should never have interactive event handlers like `onClick` or `onKeyDown`.
-* **The Solution**: 
-  1. Prefer native interactive HTML elements (e.g. `<button>`, `<a>`, `<input>`).
-  2. If using native HTML is not possible, add an appropriate WAI-ARIA `role` (e.g. `role="button"`), a valid `tabIndex={0}`, and ensure support for tabbing, mouse, keyboard, and touch inputs.
-
-### C. Default Parameters & Object Literals (typescript:S7737)
-* **Objects as Default Parameters**: Never use object literals directly as default parameters in function or method signatures (e.g. `params: object = {}`).
-* **Why**: An empty object literal created as a default parameter instantiates a new object reference on *every* call, causing memory overhead, unnecessary garbage collection, and breaking React memoization.
-* **The Solution**: Make the parameter optional (e.g. `params?: object` or default to `undefined`) and initialize the fallback object inside the function body:
-  ```typescript
-  // ✅ GOOD:
-  public async get(endpoint: string, params?: QueryOptions) {
-     const actualParams = params || {}
-     // ...
-  }
-  
-  // ❌ BAD:
-  public async get(endpoint: string, params: QueryOptions = {}) {
-     // ...
-  }
-  ```
+### 2. Modifying Quatrain Core Codebase
+If the task requires editing, refactoring, fixing, or extending the packages, monorepo workspaces, containers, or CI/CD pipelines of the **Quatrain Core repository itself**, follow the strict guidelines in:
+👉 [CONTRIBUTING_AGENTS.md (Monorepo Contributing Guidelines)](./CONTRIBUTING_AGENTS.md)
 
 ---
 
-## 3. Workflow Commitments
-* **Zero TypeScript Errors Policy**: A task is never complete until `yarn build` succeeds with zero warnings or errors.
-* **JSDoc Documentation**: Systematically write complete, clean JSDoc comments for all new classes, functions, and methods.
-* **Co-locate Unit Tests**: Keep unit tests next to implementation files inside `src/`. Ensure they are excluded from production NPM registry bundles via `.npmignore`.
+## 👤 Personal Rules & Custom Settings
+
+In addition to the framework-level guidelines, you MUST adhere to the user's personal coding preferences, custom shortcuts, and general development rules published in their dedicated Gist:
+👉 [Gist: Personal Gemini Rules & Instructions](https://gist.github.com/crapougnax/47971b85aa73dd702f4372a89858111c)
+

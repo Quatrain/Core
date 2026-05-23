@@ -2,6 +2,7 @@ import { Messaging, MessagingParameters } from './Messaging'
 import { MockMessagingAdapter } from './MockMessagingAdapter'
 import { MessagingRecipient } from './types/MessagingRecipient'
 import { NotificationMessage } from './types/NotificationMessage'
+import { MessageFormatter } from './MessageFormatter'
 
 describe('Messaging', () => {
    let mockAdapter1: MockMessagingAdapter
@@ -313,6 +314,47 @@ describe('Messaging', () => {
    describe('logger', () => {
       it('should have a logger instance', () => {
          expect(Messaging.logger).toBeDefined()
+      })
+   })
+
+   describe('MessageFormatter', () => {
+      describe('formatTitle', () => {
+         it('should strip single HTML tags correctly', () => {
+            const raw = 'Hello <b>World</b>!'
+            const result = MessageFormatter.formatTitle(raw)
+            expect(result).toBe('Hello World!')
+         })
+
+         it('should strip multiple nested and unclosed tags correctly', () => {
+            const raw = '<div><p>Welcome to <span>Quatrain</span></p></div>'
+            const result = MessageFormatter.formatTitle(raw)
+            expect(result).toBe('Welcome to Quatrain')
+         })
+
+         it('should return plain text unchanged', () => {
+            const raw = 'Plain text without any tags.'
+            const result = MessageFormatter.formatTitle(raw)
+            expect(result).toBe(raw)
+         })
+
+         it('should handle empty string correctly', () => {
+            expect(MessageFormatter.formatTitle('')).toBe('')
+         })
+      })
+
+      describe('formatBody', () => {
+         it('should interpolate Mustache variables correctly', () => {
+            const template = 'Hello {{firstname}} {{lastname}}!'
+            const data = { firstname: 'John', lastname: 'Doe' }
+            const result = MessageFormatter.formatBody(template, data)
+            expect(result).toBe('Hello John Doe!')
+         })
+
+         it('should render original template when no data is provided', () => {
+            const template = 'Hello {{firstname}}!'
+            const result = MessageFormatter.formatBody(template)
+            expect(result).toBe('Hello !')
+         })
       })
    })
 })

@@ -6,12 +6,26 @@ import Mustache from 'mustache'
 export class MessageFormatter {
    /**
     * Cleans all HTML tags from the title string.
+    * This uses a robust, RegExp-free state loop to prevent any risk of Regular Expression
+    * Denial of Service (ReDoS) or catastrophic backtracking, fully satisfying SonarQube security rules.
     * 
-    * @param title - The raw subject line.
-    * @returns The formatted title string.
+    * @param title - The raw subject line containing potential HTML tags.
+    * @returns The formatted title string with all HTML tags stripped out.
     */
-   static formatTitle(title: string) {
-      return title.replace(/<[^>]*>/gi, '')
+   static formatTitle(title: string): string {
+      let result = ''
+      let inTag = false
+      for (let i = 0; i < title.length; i++) {
+         const char = title[i]
+         if (char === '<') {
+            inTag = true
+         } else if (char === '>') {
+            inTag = false
+         } else if (!inTag) {
+            result += char
+         }
+      }
+      return result
    }
 
    /**
@@ -22,6 +36,6 @@ export class MessageFormatter {
     * @returns Parsed output string.
     */
    static formatBody(body: string, data?: {}) {
-      return Mustache.render(body, data)
+      return Mustache.render(body, data || {})
    }
 }

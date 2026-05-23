@@ -1,0 +1,30 @@
+{
+  "name": "@quatrain/types",
+  "version": "1.2.12",
+  "description": "Shared contracts, types, interfaces, and exceptions for Quatrain Core",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "dist/",
+    "src/",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/types"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "license": "AGPL-3.0-only",
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "wbuild": "tsc --watch"
+  }
+}

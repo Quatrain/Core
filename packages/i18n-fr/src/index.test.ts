@@ -5,4 +5,11 @@ describe('frDictionary', () => {
       expect(frDictionary.table.uid).toBe('Identifiant')
       expect(frDictionary.table.searchPlaceholder).toBe('Rechercher...')
    })
+
+   it('should contain french statuses translations', () => {
+      expect(frDictionary.statuses?.active).toBe('Actif')
+      expect(frDictionary.statuses?.draft).toBe('Brouillon')
+      expect(frDictionary.statuses?.zipping).toBe('Archivage en cours')
+   })
 })
+

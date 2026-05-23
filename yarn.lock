@@ -3493,7 +3493,7 @@ __metadata:
     "@faker-js/faker": "npm:^7.6.0"
     "@quatrain/core": "workspace:*"
     "@quatrain/log": "workspace:*"
-    "@quatrain/testing": "workspace:*"
+    "@quatrain/types": "workspace:*"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
     "@types/module-alias": "npm:^2"
@@ -3676,7 +3676,7 @@ __metadata:
   resolution: "@quatrain/core@workspace:packages/core"
   dependencies:
     "@quatrain/log": "workspace:*"
-    "@quatrain/testing": "workspace:*"
+    "@quatrain/types": "workspace:*"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
     "@types/node": "npm:^22.10.1"
@@ -4083,6 +4083,15 @@ __metadata:
     "@types/node": "npm:^22.10.1"
     jest: "npm:^29.7.0"
     ts-jest: "npm:^29.4.6"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/types@workspace:*, @quatrain/types@workspace:packages/types":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/types@workspace:packages/types"
+  dependencies:
+    "@tsconfig/recommended": "npm:^1.0.1"
     typescript: "npm:^5.2.2"
   languageName: unknown
   linkType: soft

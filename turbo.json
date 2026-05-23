@@ -6,7 +6,7 @@
       "outputs": ["dist/**", "build/**", ".next/**", "public/dist/**"]
     },
     "@quatrain/core#build": {
-      "dependsOn": ["@quatrain/log#build"],
+      "dependsOn": ["@quatrain/log#build", "@quatrain/types#build"],
       "outputs": ["dist/**"]
     },
     "@quatrain/backend#build": {

@@ -12,6 +12,7 @@ on:
       - 'package.json'
       - 'yarn.lock'
       - 'sonar-project.properties'
+      - 'turbo.json'
       - '.github/workflows/ci.yml'
   pull_request:
     types: [opened, synchronize, reopened]
@@ -22,7 +23,9 @@ on:
       - 'package.json'
       - 'yarn.lock'
       - 'sonar-project.properties'
+      - 'turbo.json'
       - '.github/workflows/ci.yml'
+
 
 
 jobs:

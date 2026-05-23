@@ -11,6 +11,7 @@ on:
       - 'bin/**'
       - 'package.json'
       - 'yarn.lock'
+      - 'sonar-project.properties'
       - '.github/workflows/ci.yml'
   pull_request:
     types: [opened, synchronize, reopened]
@@ -20,7 +21,9 @@ on:
       - 'bin/**'
       - 'package.json'
       - 'yarn.lock'
+      - 'sonar-project.properties'
       - '.github/workflows/ci.yml'
+
 
 jobs:
   sonarcloud:

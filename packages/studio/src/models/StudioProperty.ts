@@ -1,5 +1,5 @@
 import { PersistedBaseObject } from '@quatrain/backend'
-import { StringProperty, BooleanProperty, NumberProperty, MapProperty, htmlType, BaseObjectProperties, BaseObjectType } from '@quatrain/core'
+import { Core, StringProperty, BooleanProperty, NumberProperty, MapProperty, htmlType, BaseObjectProperties, BaseObjectType } from '@quatrain/core'
 
 export interface StudioPropertyType extends BaseObjectType {
    studioModel: string
@@ -43,13 +43,13 @@ export const StudioPropertyDef: any = [
    {
       name: 'options',
       mandatory: false,
-      type: 'map', // MapProperty.TYPE
+      type: MapProperty.TYPE,
       htmlType: htmlType.HIDDEN,
    },
    {
       name: 'ui',
       mandatory: false,
-      type: 'map', // MapProperty.TYPE
+      type: MapProperty.TYPE,
       htmlType: htmlType.HIDDEN,
    },
    {
@@ -87,3 +87,6 @@ export class StudioProperty extends PersistedBaseObject {
       return super.factory(src, StudioProperty)
    }
 }
+
+Core.addClass('StudioProperty', StudioProperty)
+

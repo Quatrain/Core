@@ -1,7 +1,7 @@
 import { Ai } from '@quatrain/ai'
 import { StudioModel } from './models/StudioModel'
 import { StudioProperty } from './models/StudioProperty'
-import { StringProperty, NumberProperty, BooleanProperty, DateTimeProperty } from '@quatrain/core'
+
 
 /**
  * The Studio Agent uses the configured AI adapter to translate 

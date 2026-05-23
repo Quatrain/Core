@@ -1,5 +1,5 @@
 import { PersistedBaseObject } from '@quatrain/backend'
-import { StringProperty, htmlType, BaseObjectProperties, BaseObjectType } from '@quatrain/core'
+import { Core, StringProperty, MapProperty, htmlType, BaseObjectProperties, BaseObjectType } from '@quatrain/core'
 
 export interface StudioWidgetType extends BaseObjectType {
    studioModel?: string
@@ -37,7 +37,7 @@ export const StudioWidgetDef: any = [
    {
       name: 'layout',
       mandatory: false,
-      type: 'map', // MapProperty.TYPE
+      type: MapProperty.TYPE,
       htmlType: htmlType.HIDDEN,
    }
 ]
@@ -61,3 +61,6 @@ export class StudioWidget extends PersistedBaseObject {
       return super.factory(src, StudioWidget)
    }
 }
+
+Core.addClass('StudioWidget', StudioWidget)
+

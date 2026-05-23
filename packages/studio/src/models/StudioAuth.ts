@@ -1,5 +1,5 @@
 import { PersistedBaseObject } from '@quatrain/backend'
-import { StringProperty, MapProperty, BooleanProperty, BaseObjectProperties, BaseObjectType, htmlType } from '@quatrain/core'
+import { Core, StringProperty, MapProperty, BooleanProperty, BaseObjectProperties, BaseObjectType, htmlType } from '@quatrain/core'
 
 export interface StudioAuthType extends BaseObjectType {
    name: string
@@ -60,3 +60,6 @@ export class StudioAuth extends PersistedBaseObject {
       return super.factory(src, StudioAuth)
    }
 }
+
+Core.addClass('StudioAuth', StudioAuth)
+

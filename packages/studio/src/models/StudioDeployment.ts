@@ -1,5 +1,5 @@
 import { PersistedBaseObject } from '@quatrain/backend'
-import { StringProperty, NumberProperty, BaseObjectProperties, BaseObjectType, htmlType } from '@quatrain/core'
+import { Core, StringProperty, NumberProperty, BaseObjectProperties, BaseObjectType, htmlType } from '@quatrain/core'
 
 export interface StudioDeploymentType extends BaseObjectType {
    studioModel: string
@@ -56,3 +56,6 @@ export class StudioDeployment extends PersistedBaseObject {
       return super.factory(src, StudioDeployment)
    }
 }
+
+Core.addClass('StudioDeployment', StudioDeployment)
+

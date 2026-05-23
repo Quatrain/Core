@@ -106,3 +106,49 @@ describe('Hash Property allows comparison of string and hash value', () => {
       expect(prop.set('azertyuiop').compare('qwertz')).toBe(false)
    })
 })
+
+describe('Hash Property Security Policies', () => {
+   test('defaults to SHA256 when no algorithm is provided', () => {
+      const prop = new HashProperty({
+         name: 'my_hash',
+      })
+      expect(prop.set('azertyuiop').get()).toBe(
+         'aa3d2fe4f6d301dbd6b8fb2d2fddfb7aeebf3bec53ffff4b39a0967afa88c609'
+      )
+   })
+
+   test('throws error if MD5 is used for sensitive property names', () => {
+      expect(() => {
+         new HashProperty({
+            name: 'userPassword',
+            algorithm: HashProperty.ALGORITHM_MD5,
+         })
+      }).toThrow('SecurityError: Insecure hashing algorithm')
+
+      expect(() => {
+         new HashProperty({
+            name: 'client_pwd',
+            algorithm: HashProperty.ALGORITHM_MD5,
+         })
+      }).toThrow('SecurityError: Insecure hashing algorithm')
+   })
+
+   test('throws error if SHA1 is used for sensitive property names', () => {
+      expect(() => {
+         new HashProperty({
+            name: 'secretToken',
+            algorithm: HashProperty.ALGORITHM_SHA1,
+         })
+      }).toThrow('SecurityError: Insecure hashing algorithm')
+   })
+
+   test('allows SHA256 for sensitive property names', () => {
+      const prop = new HashProperty({
+         name: 'password',
+         algorithm: HashProperty.ALGORITHM_SHA256,
+      })
+      expect(prop.set('azertyuiop').get()).toBe(
+         'aa3d2fe4f6d301dbd6b8fb2d2fddfb7aeebf3bec53ffff4b39a0967afa88c609'
+      )
+   })
+})

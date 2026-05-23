@@ -14,7 +14,7 @@ export type HashPropertyAlgos =
  *
  * | Parameter | Type | Description | Default |
  * | :--- | :--- | :--- | :--- |
- * | `algorithm` | HashPropertyAlgos | The cryptographic hashing algorithm to use. | `ALGORITHM_MD5` |
+ * | `algorithm` | HashPropertyAlgos | The cryptographic hashing algorithm to use. | `ALGORITHM_SHA256` |
  * | `salt` | string | An optional salt string appended to the value before hashing. | `""` |
  * | `prefixed` | boolean | If true, prepends the algorithm name to the output (e.g. `md5-abc...`). | `false` |
  */
@@ -60,9 +60,24 @@ export class HashProperty extends StringProperty {
 
    constructor(config: HashPropertyType) {
       super(config)
-      this._algorithm = config.algorithm || HashProperty.ALGORITHM_MD5
+      this._algorithm = config.algorithm || HashProperty.ALGORITHM_SHA256
       this._salt = config.salt || ''
       this._prefixed = config.prefixed || false
+
+      // Prevent legacy/insecure algorithms (MD5, SHA1) on sensitive properties
+      if (
+         this._algorithm === HashProperty.ALGORITHM_MD5 ||
+         this._algorithm === HashProperty.ALGORITHM_SHA1
+      ) {
+         const sensitiveTerms = ['password', 'pwd', 'secret', 'token', 'credential']
+         const nameLower = this._name.toLowerCase()
+         const isSensitive = sensitiveTerms.some((term) => nameLower.includes(term))
+         if (isSensitive) {
+            throw new Error(
+               `SecurityError: Insecure hashing algorithm "${this._algorithm}" cannot be used for sensitive property "${this._name}". Please use SHA256 or another secure algorithm.`
+            )
+         }
+      }
    }
 
    /**

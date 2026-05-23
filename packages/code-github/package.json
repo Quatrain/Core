@@ -22,7 +22,7 @@
   "dependencies": {
     "@octokit/rest": "^20.0.2",
     "@quatrain/code": "^1.1.3",
-    "@quatrain/core": "^1.2.12"
+    "@quatrain/core": "^1.2.13"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

@@ -8,6 +8,7 @@ import {
 import { Query } from './Query'
 import { DataObjectClass } from './types/DataObjectClass'
 import { PersistedDataObject } from './PersistedDataObject'
+import type { BaseRepository } from './BaseRepository'
 
 /**
  * The fundamental class for all domain models that require database persistence.
@@ -15,10 +16,48 @@ import { PersistedDataObject } from './PersistedDataObject'
  * and providing a factory to hydrate objects directly from the database.
  */
 export class PersistedBaseObject extends BaseObject {
+   /** The designated repository class for this model (defaults to BaseRepository). */
+   static REPOSITORY_CLASS: any = null
+   protected static _repositoryInstance: any = null
+
    /** The overarching property schema definition inherited and merged from `BaseObject`. */
    static PROPS_DEFINITION: any /*DataObjectProperties*/ = BaseObjectProperties
 
    protected _dataObject: DataObjectClass<any>
+
+   /**
+    * Registers an explicit repository instance for this model class.
+    * 
+    * @param repoInstance - The repository instance to register.
+    */
+   static registerRepository(repoInstance: any) {
+      this._repositoryInstance = repoInstance
+   }
+
+   /**
+    * Retrieves the pre-bound repository instance for this model class.
+    * Dynamically instantiates the default or customized BaseRepository if not already cached.
+    * 
+    * @returns The bound BaseRepository instance.
+    * @throws {Error} If the default BaseRepository class has not been loaded/configured.
+    */
+   static repository(): BaseRepository<any> {
+      if (!this._repositoryInstance) {
+         let RepoClass = this.REPOSITORY_CLASS
+         if (!RepoClass) {
+            try {
+               const resolved = require('./BaseRepository')
+               RepoClass = resolved.BaseRepository
+            } catch (err) {
+               throw new Error(
+                  `SecurityError: BaseRepository has not been initialized on PersistedBaseObject.REPOSITORY_CLASS for "${this.name}".`
+               )
+            }
+         }
+         this._repositoryInstance = new RepoClass(this)
+      }
+      return this._repositoryInstance
+   }
 
    constructor(dao: DataObjectClass<any>) {
       super(dao)
@@ -159,17 +198,13 @@ export class PersistedBaseObject extends BaseObject {
    }
 
    /**
-    * Fetches and hydrates an object directly from its backend storage path.
-    * If the path doesn't contain a collection prefix, it automatically prepends the class's default collection.
+    * Fetches and hydrates an object directly from its backend storage path via the repository facade.
     * 
     * @param path - The backend unique identifier or full URI path (e.g. "users/123" or "123").
     * @returns A promise resolving to the populated class instance.
     */
    static async fromBackend<T>(path: string): Promise<T> {
-      if (!path.includes('/')) {
-         return this.factory(`${this.COLLECTION}/${path}`)
-      }
-      return this.factory(path)
+      return await this.repository().read(path)
    }
 
    /**
@@ -224,7 +259,11 @@ export class PersistedBaseObject extends BaseObject {
     * @returns A promise resolving to the instance itself for chaining.
     */
    async save(): Promise<this> {
-      await this._dataObject.save()
+      const repo = (this.constructor as typeof PersistedBaseObject).repository()
+      const saved = this.dataObject.uid
+         ? await repo.update(this)
+         : await repo.create(this)
+      this._dataObject = saved.dataObject
       return this
    }
 
@@ -236,6 +275,7 @@ export class PersistedBaseObject extends BaseObject {
     * @returns A promise resolving to the underlying `DataObjectClass`.
     */
    async delete(hardDelete = false): Promise<DataObjectClass<any>> {
-      return await this._dataObject.delete()
+      const repo = (this.constructor as typeof PersistedBaseObject).repository()
+      return await repo.delete(this.dataObject.uid, hardDelete)
    }
 }

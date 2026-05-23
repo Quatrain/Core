@@ -47,6 +47,37 @@ Core.addClass('InvoiceLine', InvoiceLine)
 
 ---
 
+### Zero-Boilerplate CRUD Operations via `.repository()`
+
+Every model class automatically provides a dynamic, pre-bound `BaseRepository` via the static `.repository()` method. This completely eliminates custom repository boilerplate and allows instant execution of standard CRUD operations:
+
+```typescript
+// Get the dynamically generated and cached repository
+const invoiceRepo = Invoice.repository()
+
+// 1. Create a new Invoice
+const draftInvoice = await Invoice.factory({
+   number: 'INV-2026-001',
+   status: 'draft'
+})
+const savedInvoice = await invoiceRepo.create(draftInvoice)
+console.log(`Saved invoice path: ${savedInvoice.dataObject.path}`)
+
+// 2. Read an Invoice by UID
+const invoice = await invoiceRepo.read(savedInvoice.dataObject.uid)
+console.log(`Retrieved invoice status: ${invoice.val('status')}`)
+
+// 3. Update an Invoice
+invoice.set('status', 'sent')
+const updatedInvoice = await invoiceRepo.update(invoice)
+console.log(`Updated invoice status: ${updatedInvoice.val('status')}`)
+
+// 4. Delete an Invoice
+await invoiceRepo.delete(invoice.dataObject.uid, true) // hard delete
+```
+
+---
+
 ### Use Case A: Querying Database Aggregates Directly (Optimized)
 
 When fetching statistics for a dashboard, loading thousands of lines into memory is inefficient. We can query aggregates natively from the database without hydrating any entities.
@@ -153,6 +184,36 @@ export class Group extends PersistedBaseObject {
 
 Core.addClass('Group', Group)
 Core.addClass('Member', Member)
+```
+
+---
+
+### Custom Repository Class Overrides
+
+If a model requires custom domain queries or specialized operations, you can easily extend `BaseRepository` and bind the subclass to the model using the static `REPOSITORY_CLASS` property:
+
+```typescript
+import { BaseRepository, Query } from '@quatrain/backend'
+
+// 1. Define your custom repository
+export class MemberRepository extends BaseRepository<Member> {
+   async findActiveAdmins() {
+      const query = new Query(Member)
+         .filter('isActive', 'eq', true)
+         .filter('role', 'eq', 'admin')
+      return await this.query(query)
+   }
+}
+
+// 2. Bind it on your Model class
+export class Member extends PersistedBaseObject {
+   static COLLECTION = 'members'
+   static REPOSITORY_CLASS = MemberRepository
+   // ... PROPS_DEFINITION ...
+}
+
+// 3. Member.repository() now automatically returns your custom MemberRepository instance!
+const activeAdmins = await Member.repository().findActiveAdmins()
 ```
 
 ---

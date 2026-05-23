@@ -13,16 +13,19 @@ import { BackendInterface } from './types/BackendInterface'
 import { Backend, BackendAction } from './Backend'
 import { ReferenceType } from './types/ReferenceType'
 import { User } from './User'
+import type { BaseRepository } from './BaseRepository'
 
 /**
  * A service layer acting as a factory and container for retrieving specific model repositories.
  * Repositories encapsulate complex data access logic beyond basic CRUD operations.
  */
 export class Repository {
-   /** Registry matching model class names to their corresponding repository file paths. */
-   static matches: { [x: string]: string } = {
-      User: '@ttm/users/common/UserRepository.ts',
-   }
+   /** Registry matching model class names to their corresponding repository file paths (backward compatibility). */
+   static matches: { [x: string]: string } = {}
+
+   /** Central static registry matching model classes to their custom repository classes. */
+   private static _registry = new Map<any, any>()
+
    /** The authenticated user currently operating within this repository context. */
    currentUser: User | undefined
    /** Configuration flag indicating whether dates should be formatted. */
@@ -40,6 +43,32 @@ export class Repository {
    }
 
    /**
+    * Explicitly registers a custom repository class for a specific model class.
+    * 
+    * @param model - The model class (extending `PersistedBaseObject`).
+    * @param repositoryClass - The custom repository class (extending `BaseRepository`).
+    */
+   static register(
+      model: typeof PersistedBaseObject,
+      repositoryClass: any
+   ) {
+      this._registry.set(model, repositoryClass)
+      model.REPOSITORY_CLASS = repositoryClass
+   }
+
+   /**
+    * Static factory method to resolve and retrieve the repository pre-bound to a model class.
+    * 
+    * @param model - The model class to get a repository for.
+    * @returns The pre-bound repository instance.
+    */
+   static for<T extends BaseObjectType>(
+      model: typeof PersistedBaseObject
+   ): BaseRepository<T> {
+      return model.repository()
+   }
+
+   /**
     * Assigns an authenticated user to this repository context for permission/audit tracking.
     * 
     * @param user - The `User` instance performing the operations.
@@ -50,23 +79,35 @@ export class Repository {
 
    /**
     * Dynamically resolves and instantiates the specific repository class registered for a given model.
+    * Incorporates dynamic ESM registry lookups with fallback to BaseRepository.
     * 
     * @param model - The model class (extending `PersistedBaseObject`) to find a repository for.
-    * @returns An instantiated custom repository, or undefined if resolution fails.
+    * @returns An instantiated repository pre-bound to this context's adapter.
     */
-   getFor(model: typeof PersistedBaseObject) {
-      const repositoryName = Repository.matches[model.name]
+   getFor(model: typeof PersistedBaseObject): any {
+      let RepoClass = Repository._registry.get(model) || model.REPOSITORY_CLASS
 
-      Backend.info(`Trying to require ${repositoryName}`)
-      try {
-         const repository = require(repositoryName)
-         console.log('repository class', repository)
-         if (!repository) {
-            throw new Error(`Can't find any repository named: '${repositoryName}'`)
+      if (!RepoClass) {
+         const repositoryName = Repository.matches[model.name]
+         if (repositoryName) {
+            try {
+               const resolved = require(repositoryName)
+               RepoClass = resolved.default || resolved.UserRepository || resolved[model.name + 'Repository']
+            } catch (err) {
+               // Dynamic require failed, fallback silently
+            }
          }
-         return new repository.default(model, this.backendAdapter)
-      } catch (err) {
-         Backend.error(`Can't find any repository named: '${repositoryName}'`)
       }
+
+      if (!RepoClass) {
+         try {
+            const resolved = require('./BaseRepository')
+            RepoClass = resolved.BaseRepository
+         } catch (err) {
+            throw new Error(`SecurityError: BaseRepository could not be resolved.`)
+         }
+      }
+
+      return new RepoClass(model, this.backendAdapter)
    }
 }

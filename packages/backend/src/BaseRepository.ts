@@ -212,3 +212,5 @@ export class BaseRepository<T extends BaseObjectType> {
       return await query.fetchAsInstances(this.backendAdapter)
    }
 }
+
+PersistedBaseObject.REPOSITORY_CLASS = BaseRepository

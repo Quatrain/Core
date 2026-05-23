@@ -28,18 +28,20 @@ describe('PersistedBaseObject', () => {
       expect(obj.val('name')).toBe('Instance Name')
    })
 
-   it('should delegate save and delete to the underlying DAO', async () => {
+   it('should delegate save and delete to the repository facade', async () => {
       const obj = await TestObject.factory()
       obj.set('name', 'Save Test')
 
-      const saveSpy = jest.spyOn(obj.dataObject, 'save')
+      const repo = TestObject.repository()
+      const saveSpy = jest.spyOn(repo, 'create')
       await obj.save()
       expect(saveSpy).toHaveBeenCalled()
 
-      const deleteSpy = jest.spyOn(obj.dataObject, 'delete')
+      const deleteSpy = jest.spyOn(repo, 'delete')
       await obj.delete()
       expect(deleteSpy).toHaveBeenCalled()
    })
+
 
    it('should provide a query builder for the class', () => {
       const query = TestObject.query()

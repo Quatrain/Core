@@ -2,21 +2,21 @@
   <img src="./assets/logo.png" alt="Quatrain Logo" width="300" />
 </div>
 
-# Quatrain Core - A Modular BaaS Framework
+# Quatrain Core - A Modular & Universal Backend Framework
 
 > **"Business Logic outlives Infrastructure"**
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Quatrain_Core&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Quatrain_Core)
 
-Quatrain Core is a modular TypeScript framework designed to accelerate business application development with **Backend as a Service (BaaS)** solutions like Firebase and Supabase. It provides a clean separation of concerns between logic, data, and storage, using an adapter pattern to provide consistent interfaces across different BaaS providers.
+Quatrain Core is a modular TypeScript framework designed to accelerate business application development. Built upon a powerful **Adapter Pattern**, it decouples your core business logic from the underlying infrastructure, allowing you to deploy **100% on-premise** with standard open-source blocks, leverage modern **Backend as a Service (BaaS)** platforms (like Supabase and Firebase), or run a **hybrid** architecture.
 
 ## 🎯 Core Principles
 
--  **BaaS-First Architecture**: Built to leverage modern BaaS platforms like Firebase and Supabase for managed databases, authentication, storage, and serverless functions.
--  **Clean Abstraction**: Write your business logic once. The adapter pattern allows you to switch between different backend services (e.g., Firestore, PostgreSQL, Firebase Auth, Supabase Auth) with minimal code changes.
--  **Deployment Flexibility**: While optimized for SaaS, Quatrain fully supports self-hosted solutions. For example, a Supabase-powered application can be deployed via Docker, Kubernetes, or on-premise for data sovereignty, using the exact same codebase.
--  **Modular by Design**: The framework is split into scoped packages. Use only what you need, from core object modeling to authentication, storage, and message queues.
--  **Standalone Core**: The `@quatrain/core` package works entirely in-memory for defining models, validation, and business logic, without requiring any database connection.
+-  **BaaS & On-Premise Synergy**: Build modern cloud-native apps leveraging managed services like Firebase/Supabase, or target strict data-sovereign environments using traditional self-hosted infrastructure (PostgreSQL, SQLite, S3, OIDC/OAuth, RabbitMQ). The exact same codebase runs in both worlds.
+-  **Clean Abstraction**: Write your business logic once. Decouple your models and processes from transport layers, databases, file storages, or messaging brokers.
+-  **No Vendor Lock-In**: Seamlessly swap database engines (SQLite, PostgreSQL, Firestore), auth providers (Supabase Auth, Firebase Auth, OIDC/OAuth, Basic Auth), object storage backends (Local FileSystem, AWS S3, MinIO), or message queues (AMQP/RabbitMQ, AWS SQS, GCP Pub/Sub) via simple configuration changes.
+-  **Modular by Design**: The framework is split into clean, highly factorized packages. Use only the bricks you need, from core object validation to authentication, storage, and pub/sub queues.
+-  **Standalone Core**: The `@quatrain/core` package works entirely in-memory for defining models, validation, and business logic, without requiring any database or network connection.
 
 ## 🧠 Philosophy
 

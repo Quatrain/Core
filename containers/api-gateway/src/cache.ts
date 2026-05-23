@@ -121,8 +121,8 @@ async function logCacheStats(): Promise<void> {
     const maxMatch = memoryInfo.match(/maxmemory:(\d+)/)
     
     if (usedMatch) {
-      const usedMemory = parseInt(usedMatch[1], 10)
-      const maxMemory = maxMatch ? parseInt(maxMatch[1], 10) : 0
+      const usedMemory = Number.parseInt(usedMatch[1], 10)
+      const maxMemory = maxMatch ? Number.parseInt(maxMatch[1], 10) : 0
       
       const now = Date.now()
       const timeSinceLastLog = now - lastLogTime

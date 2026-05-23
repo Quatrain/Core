@@ -141,6 +141,19 @@ By default, Quatrain uses a "soft delete" system via the `status` property inher
     ```
   - This guarantees ultra-lightweight published packages, prevents IDE autocomplete pollution for consumers, and avoids false flags during security audits of consumer applications.
 
+### M. Code Quality & Linting Rules (SonarQube Compliance)
+
+To satisfy modern code analyzers like SonarQube, always enforce the following code quality rules:
+- **Explicit Conversion (`Number.parseInt`)**: Always prefer `Number.parseInt` over global `parseInt` for clarity and scope consistency.
+- **Strict Checks (`Number.isNaN`)**: Always prefer `Number.isNaN` over global `isNaN` to avoid unexpected type coercion issues (e.g. `isNaN('abc')` returning `true`).
+- **Interactive Elements & Accessibility (`typescript:S6848`)**:
+  - Non-interactive DOM elements (e.g., `<div>`, `<span>`) should never have interactive event handlers (like `onClick` or `onKeyDown`) unless they are converted to appropriate native interactive elements (like `<button>`).
+  - If a non-native interactive element must be used, add the appropriate WAI-ARIA `role`, a valid `tabIndex`, and corresponding tabbing, mouse, keyboard, and touch inputs.
+- **Avoid Object Literal Default Parameters (`typescript:S7737`)**:
+  - Never use an object literal as a default parameter value in function signatures (e.g. `params: object = {}`).
+  - *Why*: Creating a new object reference on every invocation causes memory overhead, breaks React memoization, and is flagged by static code analyzers.
+  - *The Fix*: Make the parameter optional (e.g., `params?: object`) or default to `undefined`, then initialize a fallback inside the function body (e.g. `const actualParams = params || {}`).
+
 ---
 
 ## 2. Monorepo & Production Workflow Skills

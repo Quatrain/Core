@@ -56,7 +56,7 @@ export function BackendsManager({ backends, models, onRefresh }: { backends: any
         payload.filePath = filePath
       } else if (engine === 'postgres') {
         payload.host = pgHost
-        payload.port = parseInt(pgPort, 10)
+        payload.port = Number.parseInt(pgPort, 10)
         payload.username = pgUser
         payload.password = pgPassword
         payload.database = pgDatabase

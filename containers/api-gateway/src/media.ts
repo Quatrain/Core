@@ -86,7 +86,7 @@ export async function handleMediaRequest(req: Request, url: URL): Promise<Respon
     try {
       const headRes = await fetch(storageUrl, { method: 'HEAD' })
       const cl = headRes.headers.get('content-length')
-      if (cl) size = parseInt(cl, 10)
+      if (cl) size = Number.parseInt(cl, 10)
       
       const ct = headRes.headers.get('content-type')
       if (ct) mimeType = ct

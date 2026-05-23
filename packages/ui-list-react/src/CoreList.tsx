@@ -169,7 +169,7 @@ export function CoreList({
         }
 
         // Date values formatting
-        if (val instanceof Date || (typeof val === 'string' && !isNaN(Date.parse(val)) && (col.name.endsWith('At') || col.name === 'birthday'))) {
+        if (val instanceof Date || (typeof val === 'string' && !Number.isNaN(Date.parse(val)) && (col.name.endsWith('At') || col.name === 'birthday'))) {
             return new Date(val).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {
                 year: 'numeric',
                 month: 'short',
@@ -337,7 +337,7 @@ export function CoreList({
                             <Text size="xs" c="dimmed">{translator.translate('table', 'rowsPerPage', lang)}</Text>
                             <Select 
                                 value={String(pageSize)}
-                                onChange={(val) => val && setPageSize(parseInt(val))}
+                                onChange={(val) => val && setPageSize(Number.parseInt(val, 10))}
                                 data={['10', '20', '50', '100', '500']}
                                 size="xs"
                                 style={{ width: 80 }}

@@ -807,7 +807,7 @@ function AppContent() {
                       <Text size="sm" c="dimmed">Version :</Text>
                       <MantineSelect 
                         value={String(selectedVersion || '')} 
-                        onChange={val => setSelectedVersion(parseInt(val || '1'))}
+                        onChange={val => setSelectedVersion(Number.parseInt(val || '1', 10))}
                         data={Array.from({length: currentModel.version || 1}, (_, i) => i + 1).map(v => ({
                           value: String(v), 
                           label: `v${v} ${v === (currentModel.version || 1) ? '(Brouillon)' : ''}`

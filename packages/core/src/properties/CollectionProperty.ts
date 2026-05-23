@@ -96,7 +96,7 @@ export class CollectionProperty extends BaseProperty {
       return items.reduce((acc, item) => {
          const val = typeof item.val === 'function' ? item.val(property) : item[property]
          const num = Number(val)
-         return acc + (isNaN(num) ? 0 : num)
+         return acc + (Number.isNaN(num) ? 0 : num)
       }, 0)
    }
 
@@ -146,7 +146,7 @@ export class CollectionProperty extends BaseProperty {
       items.forEach((item) => {
          const val = typeof item.val === 'function' ? item.val(property) : item[property]
          const num = Number(val)
-         if (!isNaN(num)) {
+         if (!Number.isNaN(num)) {
             if (minVal === undefined || num < minVal) {
                minVal = num
             }
@@ -169,7 +169,7 @@ export class CollectionProperty extends BaseProperty {
       items.forEach((item) => {
          const val = typeof item.val === 'function' ? item.val(property) : item[property]
          const num = Number(val)
-         if (!isNaN(num)) {
+         if (!Number.isNaN(num)) {
             if (maxVal === undefined || num > maxVal) {
                maxVal = num
             }

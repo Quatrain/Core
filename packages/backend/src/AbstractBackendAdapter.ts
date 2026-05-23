@@ -286,14 +286,14 @@ export abstract class AbstractBackendAdapter implements BackendInterface {
          case 'sum': {
             return values.reduce((acc, val) => {
                const num = Number(val)
-               return acc + (isNaN(num) ? 0 : num)
+               return acc + (Number.isNaN(num) ? 0 : num)
             }, 0)
          }
          case 'avg': {
             if (values.length === 0) return 0
             const total = values.reduce((acc, val) => {
                const num = Number(val)
-               return acc + (isNaN(num) ? 0 : num)
+               return acc + (Number.isNaN(num) ? 0 : num)
             }, 0)
             return total / values.length
          }
@@ -305,7 +305,7 @@ export abstract class AbstractBackendAdapter implements BackendInterface {
             let minVal: number | undefined = undefined
             values.forEach((val) => {
                const num = Number(val)
-               if (!isNaN(num)) {
+               if (!Number.isNaN(num)) {
                   if (minVal === undefined || num < minVal) {
                      minVal = num
                   }
@@ -318,7 +318,7 @@ export abstract class AbstractBackendAdapter implements BackendInterface {
             let maxVal: number | undefined = undefined
             values.forEach((val) => {
                const num = Number(val)
-               if (!isNaN(num)) {
+               if (!Number.isNaN(num)) {
                   if (maxVal === undefined || num > maxVal) {
                      maxVal = num
                   }

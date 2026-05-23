@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, Text, Group, SimpleGrid, Title, Center, ThemeIcon, ActionIcon } from '@mantine/core'
 
 export function ManagerHeader({ title, description, children }: { title: React.ReactNode, description: React.ReactNode, children?: React.ReactNode }) {
@@ -24,6 +23,7 @@ export function ManagerGrid({ children }: { children: React.ReactNode }) {
 export function ManagerAddCard({ label, color = 'blue', onClick }: { label: React.ReactNode, color?: string, onClick: () => void }) {
   return (
     <Card 
+      component="button"
       shadow="sm" 
       padding="lg" 
       radius={0} 
@@ -39,7 +39,8 @@ export function ManagerAddCard({ label, color = 'blue', onClick }: { label: Reac
         justifyContent: 'center',
         borderStyle: 'dashed',
         borderWidth: '2px',
-        borderColor: 'var(--mantine-color-dimmed)'
+        borderColor: 'var(--mantine-color-dimmed)',
+        width: '100%'
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)'

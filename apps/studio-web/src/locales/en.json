@@ -20,6 +20,7 @@
     "addModel": "Add a Model",
     "activeBackend": "Active Backend:",
     "deployed": "Deployed",
+    "notDeployed": "Not deployed",
     "draft": "Draft (Never deployed)",
     "pending": "Deployment pending",
     "records": "records",

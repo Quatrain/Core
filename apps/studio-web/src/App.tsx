@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Button, TextInput, Select as MantineSelect, Checkbox as MantineCheckbox, AppShell, Group, Title, ActionIcon, useMantineColorScheme, Stack, NavLink, Badge, Card, SimpleGrid, Paper, Center, Text, Tabs } from '@mantine/core'
+import { Button, TextInput, Select as MantineSelect, Checkbox as MantineCheckbox, AppShell, Group, Title, ActionIcon, useMantineColorScheme, Stack, NavLink, Badge, Card, SimpleGrid, Paper, Center, Text, Tabs, UnstyledButton } from '@mantine/core'
 import { api } from './api'
 import { PropertyOptionsEditor } from './PropertyOptionsEditor'
 import { Dashboard } from './Dashboard'
@@ -481,9 +481,11 @@ function AppContent() {
     >
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
-          <Group style={{ cursor: 'pointer' }} onClick={() => { window.location.hash = '/' }}>
-            <Title order={3} style={{ fontFamily: 'Inter, sans-serif' }}>{t('app.title')}</Title>
-          </Group>
+          <UnstyledButton onClick={() => { window.location.hash = '/' }} style={{ display: 'flex', alignItems: 'center' }}>
+            <Group>
+              <Title order={3} style={{ fontFamily: 'Inter, sans-serif' }}>{t('app.title')}</Title>
+            </Group>
+          </UnstyledButton>
           <Group>
             <MantineSelect 
               value={locale}

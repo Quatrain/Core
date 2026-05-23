@@ -20,6 +20,7 @@
     "addModel": "Ajouter un Modèle",
     "activeBackend": "Backend Actif :",
     "deployed": "Déployé",
+    "notDeployed": "Non déployé",
     "draft": "Brouillon (Jamais déployé)",
     "pending": "Déploiement en attente",
     "records": "enregistrements",

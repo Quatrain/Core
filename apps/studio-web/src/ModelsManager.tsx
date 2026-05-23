@@ -13,7 +13,7 @@ export function ModelsManager({ models, backends, onNavigateToNewModel }: { mode
     const fetchStats = async () => {
       if (backends.length === 0) return
       const defaultBackend = backends[0]
-      const newStats: any = {}
+      const newStats: Record<string, {count: number, status: string}> = {}
       for (const m of models) {
         try {
           const res = await api.getModelStats(m.uid, defaultBackend.uid)
@@ -66,15 +66,34 @@ export function ModelsManager({ models, backends, onNavigateToNewModel }: { mode
               {stats[m.uid] ? (
                 <>
                   <Group justify="space-between" mb="xs">
-                    <Group gap="xs">
-                      <div style={{
-                        width: '8px', height: '8px', borderRadius: '50%', 
-                        backgroundColor: stats[m.uid].status === 'deployed' ? 'var(--mantine-color-teal-6)' : 'var(--mantine-color-orange-6)'
-                      }} />
-                      <Text size="sm" c={stats[m.uid].status === 'deployed' ? 'teal' : 'orange'} fw={500}>
-                        {stats[m.uid].status === 'deployed' ? t('dashboard.deployed') : t('dashboard.pending')}
-                      </Text>
-                    </Group>
+                    {(() => {
+                      const status = stats[m.uid].status;
+                      let dotColor = 'var(--mantine-color-orange-6)';
+                      let textColor = 'orange';
+                      let statusText = t('dashboard.pending');
+
+                      if (status === 'deployed') {
+                        dotColor = 'var(--mantine-color-teal-6)';
+                        textColor = 'teal';
+                        statusText = t('dashboard.deployed');
+                      } else if (status === 'not_deployed') {
+                        dotColor = 'var(--mantine-color-gray-6)';
+                        textColor = 'gray';
+                        statusText = t('dashboard.notDeployed');
+                      }
+
+                      return (
+                        <Group gap="xs">
+                          <div style={{
+                            width: '8px', height: '8px', borderRadius: '50%', 
+                            backgroundColor: dotColor
+                          }} />
+                          <Text size="sm" c={textColor} fw={500}>
+                            {statusText}
+                          </Text>
+                        </Group>
+                      );
+                    })()}
                   </Group>
                   
                   {stats[m.uid].status === 'deployed' && (

@@ -23,7 +23,7 @@
     "@quatrain/core": "^1.2.14"
   },
   "dependencies": {
-    "@quatrain/backend": "^1.2.11",
+    "@quatrain/backend": "^1.2.12",
     "@quatrain/cloudwrapper": "^1.2.1",
     "@quatrain/core": "^1.2.14",
     "@quatrain/storage": "^1.2.8",

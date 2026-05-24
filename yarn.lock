@@ -3288,8 +3288,8 @@ __metadata:
   resolution: "@quatrain/auth-firebase@workspace:packages/auth-firebase"
   dependencies:
     "@quatrain/api": "workspace:*"
-    "@quatrain/auth": "npm:^1.2.2"
-    "@quatrain/backend": "npm:^1.2.11"
+    "@quatrain/auth": "npm:^1.2.3"
+    "@quatrain/backend": "npm:^1.2.12"
     "@quatrain/core": "npm:^1.2.14"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
@@ -3338,8 +3338,8 @@ __metadata:
   resolution: "@quatrain/auth-supabase@workspace:packages/auth-supabase"
   dependencies:
     "@quatrain/api": "workspace:*"
-    "@quatrain/auth": "npm:^1.2.2"
-    "@quatrain/backend": "npm:^1.2.11"
+    "@quatrain/auth": "npm:^1.2.3"
+    "@quatrain/backend": "npm:^1.2.12"
     "@supabase/supabase-js": "npm:^2.87.3"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
@@ -3355,11 +3355,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/auth@npm:^1.2.2, @quatrain/auth@workspace:*, @quatrain/auth@workspace:packages/auth":
+"@quatrain/auth@npm:^1.2.3, @quatrain/auth@workspace:*, @quatrain/auth@workspace:packages/auth":
   version: 0.0.0-use.local
   resolution: "@quatrain/auth@workspace:packages/auth"
   dependencies:
-    "@quatrain/backend": "npm:^1.2.11"
+    "@quatrain/api": "workspace:*"
+    "@quatrain/backend": "npm:^1.2.12"
     "@quatrain/core": "npm:^1.2.14"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
@@ -3379,7 +3380,7 @@ __metadata:
   resolution: "@quatrain/backend-firestore@workspace:packages/backend-firestore"
   dependencies:
     "@faker-js/faker": "npm:^7.6.0"
-    "@quatrain/backend": "npm:^1.2.11"
+    "@quatrain/backend": "npm:^1.2.12"
     "@quatrain/core": "npm:^1.2.14"
     "@quatrain/testing": "workspace:*"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -3469,7 +3470,7 @@ __metadata:
   dependencies:
     "@faker-js/faker": "npm:^7.6.0"
     "@jest/expect": "npm:^30.0.0"
-    "@quatrain/backend": "npm:^1.2.11"
+    "@quatrain/backend": "npm:^1.2.12"
     "@quatrain/core": "workspace:*"
     "@quatrain/testing": "workspace:*"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -3486,7 +3487,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/backend@npm:^1.2.11, @quatrain/backend@workspace:*, @quatrain/backend@workspace:packages/backend":
+"@quatrain/backend@npm:^1.2.12, @quatrain/backend@workspace:*, @quatrain/backend@workspace:packages/backend":
   version: 0.0.0-use.local
   resolution: "@quatrain/backend@workspace:packages/backend"
   dependencies:
@@ -3546,7 +3547,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/cloudwrapper-firebase@workspace:packages/cloudwrapper-firebase"
   dependencies:
-    "@quatrain/backend": "npm:^1.2.11"
+    "@quatrain/backend": "npm:^1.2.12"
     "@quatrain/cloudwrapper": "npm:^1.2.1"
     "@quatrain/core": "npm:^1.2.14"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -3570,7 +3571,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/cloudwrapper-supabase@workspace:packages/cloudwrapper-supabase"
   dependencies:
-    "@quatrain/backend": "npm:^1.2.11"
+    "@quatrain/backend": "npm:^1.2.12"
     "@quatrain/cloudwrapper": "npm:^1.2.1"
     "@quatrain/core": "npm:^1.2.14"
     "@quatrain/storage": "npm:^1.2.8"
@@ -3596,7 +3597,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/cloudwrapper@workspace:packages/cloudwrapper"
   dependencies:
-    "@quatrain/backend": "npm:^1.2.11"
+    "@quatrain/backend": "npm:^1.2.12"
     "@quatrain/core": "npm:^1.2.14"
     "@quatrain/storage": "npm:^1.1"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -3610,7 +3611,7 @@ __metadata:
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.2.2"
   peerDependencies:
-    "@quatrain/backend": ^1.2.11
+    "@quatrain/backend": ^1.2.12
     "@quatrain/core": ^1.2.14
   languageName: unknown
   linkType: soft

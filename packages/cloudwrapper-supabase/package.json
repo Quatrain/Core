@@ -20,12 +20,12 @@
   ],
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "peerDependencies": {
-    "@quatrain/core": "^1.2.13"
+    "@quatrain/core": "^1.2.14"
   },
   "dependencies": {
     "@quatrain/backend": "^1.2.11",
     "@quatrain/cloudwrapper": "^1.2.1",
-    "@quatrain/core": "^1.2.13",
+    "@quatrain/core": "^1.2.14",
     "@quatrain/storage": "^1.2.8",
     "@supabase/supabase-js": "^2.87.3",
     "ws": "^8.18.3"

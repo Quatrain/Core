@@ -233,6 +233,7 @@ describe('FileSystem Utilities (Worker)', () => {
          jest.spyOn(fs, 'readFileSync').mockReturnValue(Buffer.from('small content'))
 
          const meta = {
+            bucket: 'mock-bucket',
             ref: 'remote/small.mp4',
             uploadUrl: 'https://upload.com/small.mp4'
          }
@@ -259,6 +260,7 @@ describe('FileSystem Utilities (Worker)', () => {
          })
 
          const meta = {
+            bucket: 'mock-bucket',
             ref: 'remote/large.mp4',
             uploadUrl: 'https://upload.com/large.mp4'
          }
@@ -282,6 +284,7 @@ describe('FileSystem Utilities (Worker)', () => {
          (fetch as any).mockRejectedValue(new Error('Connection abort'))
 
          const meta = {
+            bucket: 'mock-bucket',
             ref: 'remote/large-fail.mp4',
             uploadUrl: 'https://upload.com/large-fail.mp4'
          }

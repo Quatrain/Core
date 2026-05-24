@@ -3574,7 +3574,7 @@ __metadata:
     "@quatrain/backend": "npm:^1.2.12"
     "@quatrain/cloudwrapper": "npm:^1.2.1"
     "@quatrain/core": "npm:^1.2.14"
-    "@quatrain/storage": "npm:^1.2.8"
+    "@quatrain/storage": "npm:^1.2.9"
     "@supabase/supabase-js": "npm:^2.87.3"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
@@ -3876,7 +3876,7 @@ __metadata:
   resolution: "@quatrain/storage-firebase@workspace:packages/storage-firebase"
   dependencies:
     "@quatrain/core": "npm:^1.2.14"
-    "@quatrain/storage": "npm:^1.2.8"
+    "@quatrain/storage": "npm:^1.2.9"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/fs-extra": "npm:^11.0.4"
     "@types/jest": "npm:^29.5.12"
@@ -3911,7 +3911,7 @@ __metadata:
   dependencies:
     "@aws-sdk/client-s3": "npm:^3.337.0"
     "@aws-sdk/s3-request-presigner": "npm:^3.342.0"
-    "@quatrain/storage": "npm:^1.2.8"
+    "@quatrain/storage": "npm:^1.2.9"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
     "@types/node": "npm:^22.10.1"
@@ -3930,7 +3930,7 @@ __metadata:
   resolution: "@quatrain/storage-supabase@workspace:packages/storage-supabase"
   dependencies:
     "@quatrain/core": "npm:^1.2.14"
-    "@quatrain/storage": "npm:^1.2.8"
+    "@quatrain/storage": "npm:^1.2.9"
     "@supabase/storage-js": "npm:^2.7.2"
     "@supabase/supabase-js": "npm:^2.87.3"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -3945,7 +3945,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/storage@npm:^1.1, @quatrain/storage@npm:^1.2.8, @quatrain/storage@workspace:*, @quatrain/storage@workspace:packages/storage":
+"@quatrain/storage@npm:^1.1, @quatrain/storage@npm:^1.2.9, @quatrain/storage@workspace:*, @quatrain/storage@workspace:packages/storage":
   version: 0.0.0-use.local
   resolution: "@quatrain/storage@workspace:packages/storage"
   dependencies:
@@ -4166,7 +4166,7 @@ __metadata:
   dependencies:
     "@quatrain/core": "npm:^1.2.14"
     "@quatrain/queue": "npm:^1.2.3"
-    "@quatrain/storage": "npm:^1.2.8"
+    "@quatrain/storage": "npm:^1.2.9"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/fluent-ffmpeg": "npm:^2"
     "@types/fs-extra": "npm:^11.0.4"

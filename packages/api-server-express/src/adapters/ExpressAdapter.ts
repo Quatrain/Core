@@ -26,38 +26,43 @@ export class ExpressAdapter implements ServerAdapter {
       }
    }
 
+   private mapRequestResponse(req: express.Request, res: express.Response): { apiReq: ApiRequest; apiRes: ApiResponse } {
+      const apiReq: ApiRequest = {
+         body: req.body,
+         params: req.params,
+         query: req.query,
+         headers: req.headers as Record<string, string | string[] | undefined>
+      }
+
+      const apiRes: ApiResponse = {
+         status: (code: number) => {
+            res.status(code)
+            return apiRes
+         },
+         json: (data: any) => {
+            res.json(data)
+         },
+         send: (data: string) => {
+            res.send(data)
+         },
+         setHeader: (name: string, value: string) => {
+            res.setHeader(name, value)
+         },
+         write: (data: string) => {
+            res.write(data)
+         },
+         end: () => {
+            res.end()
+         }
+      }
+
+      return { apiReq, apiRes }
+   }
+
    private wrapHandler(handler: ApiHandler): express.RequestHandler {
       return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
          void (async () => {
-            const apiReq: ApiRequest = {
-               body: req.body,
-               params: req.params,
-               query: req.query,
-               headers: req.headers as Record<string, string | string[] | undefined>
-            }
-
-            const apiRes: ApiResponse = {
-               status: (code: number) => {
-                  res.status(code)
-                  return apiRes
-               },
-               json: (data: any) => {
-                  res.json(data)
-               },
-               send: (data: string) => {
-                  res.send(data)
-               },
-               setHeader: (name: string, value: string) => {
-                  res.setHeader(name, value)
-               },
-               write: (data: string) => {
-                  res.write(data)
-               },
-               end: () => {
-                  res.end()
-               }
-            }
-
+            const { apiReq, apiRes } = this.mapRequestResponse(req, res)
             await handler(apiReq, apiRes)
          })().catch(next)
       }
@@ -120,35 +125,7 @@ export class ExpressAdapter implements ServerAdapter {
    addMiddleware(middleware: ApiMiddleware): void {
       const expressMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
          void (async () => {
-            const apiReq: ApiRequest = {
-               body: req.body,
-               params: req.params,
-               query: req.query,
-               headers: req.headers as Record<string, string | string[] | undefined>
-            }
-
-            const apiRes: ApiResponse = {
-               status: (code: number) => {
-                  res.status(code)
-                  return apiRes
-               },
-               json: (data: any) => {
-                  res.json(data)
-               },
-               send: (data: string) => {
-                  res.send(data)
-               },
-               setHeader: (name: string, value: string) => {
-                  res.setHeader(name, value)
-               },
-               write: (data: string) => {
-                  res.write(data)
-               },
-               end: () => {
-                  res.end()
-               }
-            }
-
+            const { apiReq, apiRes } = this.mapRequestResponse(req, res)
             const shouldContinue = await middleware(apiReq, apiRes)
             if (shouldContinue) {
                next()

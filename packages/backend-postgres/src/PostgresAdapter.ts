@@ -69,31 +69,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
       super(params)
    }
 
-   protected _buildPath(dataObject: DataObjectClass<any>, uid?: string) {
-      const collection = this.getCollection(dataObject)
-      if (!collection) {
-         throw new BackendError(
-            `[PGA] Can't define record path without a collection name`
-         )
-      }
 
-      // define document path
-      let path = `${collection}/${uid}`
-      if (
-         this._params.hierarchy &&
-         this._params.hierarchy[collection] ===
-            CollectionHierarchy.SUBCOLLECTION &&
-         dataObject.parentProp &&
-         dataObject.has(dataObject.parentProp) &&
-         dataObject.val(dataObject.parentProp)
-      ) {
-         path = `${dataObject.val(dataObject.parentProp).path}/${path}`
-      }
-
-      Backend.debug(`[PGA] Record path is '${path}'`)
-
-      return path
-   }
    protected async _connect(): Promise<PoolClient> {
       if (!this._pool) {
          const {
@@ -167,26 +143,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          data = Object.values(data)
       }
 
-      if (
-         this._params['useNativeForeignKeys'] &&
-         this._params['useNativeForeignKeys'] === true
-      ) {
-         data.forEach((el: any, key: number) => {
-            if (
-               typeof el === 'object' &&
-               el !== null &&
-               Reflect.has(el, 'ref')
-            ) {
-               const resourcePart = el.ref.split('/').pop()
-               if (resourcePart.indexOf('.') === -1) {
-                  // convert reference for database objects only
-                  data[key] = el.ref.split('/').pop()
-               }
-            }
-         })
-      }
-
-      return data
+      return this._resolveNativeForeignKeys(data)
    }
 
    /**

@@ -53,31 +53,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
       this._dbPath = (params.config?.database as string) || ':memory:'
    }
 
-   protected _buildPath(dataObject: DataObjectClass<any>, uid?: string) {
-      const collection = this.getCollection(dataObject)
-      if (!collection) {
-         throw new BackendError(
-            `[SQLA] Can't define record path without a collection name`
-         )
-      }
 
-      // define document path
-      let path = `${collection}/${uid}`
-      if (
-         this._params.hierarchy &&
-         this._params.hierarchy[collection] ===
-            CollectionHierarchy.SUBCOLLECTION &&
-         dataObject.parentProp &&
-         dataObject.has(dataObject.parentProp) &&
-         dataObject.val(dataObject.parentProp)
-      ) {
-         path = `${dataObject.val(dataObject.parentProp).path}/${path}`
-      }
-
-      Backend.info(`[SQLA] Record path is '${path}'`)
-
-      return path
-   }
 
    /**
     * Executes an arbitrary raw SQL query against the SQLite database.
@@ -137,26 +113,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
          }
       })
 
-      if (
-         this._params['useNativeForeignKeys'] &&
-         this._params['useNativeForeignKeys'] === true
-      ) {
-         data.forEach((el: any, key: number) => {
-            if (
-               typeof el === 'object' &&
-               el !== null &&
-               Reflect.has(el, 'ref')
-            ) {
-               const resourcePart = el.ref.split('/').pop()
-               if (resourcePart.indexOf('.') === -1) {
-                  // convert reference for database objects only
-                  data[key] = el.ref.split('/').pop()
-               }
-            }
-         })
-      }
-
-      return data
+      return this._resolveNativeForeignKeys(data)
    }
 
    /**

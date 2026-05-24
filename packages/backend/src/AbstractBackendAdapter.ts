@@ -14,6 +14,7 @@ import BackendMiddleware from './middlewares/Middleware'
 import { BackendError } from './BackendError'
 import { MiddlewareParams } from './middlewares/types/MiddlewareParams'
 import { SchemaDelta } from './types/SchemaDelta'
+import * as CollectionHierarchy from './types/CollectionHierarchy'
 
 interface BM extends BackendMiddleware {}
 
@@ -348,4 +349,59 @@ export abstract class AbstractBackendAdapter implements BackendInterface {
     * Generates the SQL up and down statements to apply a schema delta to a collection.
     */
    abstract generateDeltaSql(collection: string, delta: SchemaDelta): { upSql: string[], downSql: string[] }
+
+   /**
+    * Resolves the canonical database path for a record, respecting standard collection structures
+    * and hierarchical subcollection configurations.
+    */
+   protected _buildPath(dataObject: DataObjectClass<any>, uid?: string) {
+      const collection = this.getCollection(dataObject)
+      if (!collection) {
+         throw new BackendError(
+            `[${this.constructor.name}] Can't define record path without a collection name`
+         )
+      }
+
+      // define document path
+      let path = `${collection}/${uid}`
+      if (
+         this._params.hierarchy &&
+         this._params.hierarchy[collection] ===
+            CollectionHierarchy.SUBCOLLECTION &&
+         dataObject.parentProp &&
+         dataObject.has(dataObject.parentProp) &&
+         dataObject.val(dataObject.parentProp)
+      ) {
+         path = `${dataObject.val(dataObject.parentProp).path}/${path}`
+      }
+
+      Backend.debug(`[${this.constructor.name}] Record path is '${path}'`)
+
+      return path
+   }
+
+   /**
+    * Processes raw data entries to convert relational reference objects into native database foreign key IDs
+    * if the adapter has been configured with `useNativeForeignKeys = true`.
+    */
+   protected _resolveNativeForeignKeys(data: any[]): any[] {
+      if (
+         this._params['useNativeForeignKeys'] &&
+         this._params['useNativeForeignKeys'] === true
+      ) {
+         data.forEach((el: any, key: number) => {
+            if (
+               typeof el === 'object' &&
+               el !== null &&
+               Reflect.has(el, 'ref')
+            ) {
+               const resourcePart = el.ref.split('/').pop()
+               if (resourcePart.indexOf('.') === -1) {
+                  data[key] = el.ref.split('/').pop()
+               }
+            }
+         })
+      }
+      return data
+   }
 }

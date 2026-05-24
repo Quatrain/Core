@@ -1,6 +1,7 @@
-import { AuthParameters, AuthParametersKeys } from './Auth'
+import { Auth, AuthParameters, AuthParametersKeys } from './Auth'
 import { User } from '@quatrain/backend'
 import { AuthInterface } from './types/AuthInterface'
+import { ApiMiddleware, ApiRequest, ApiResponse } from '@quatrain/api'
 
 /**
  * Abstract base class that defines the contract for all authentication adapters.
@@ -15,6 +16,32 @@ export abstract class AbstractAuthAdapter implements AuthInterface {
 
    constructor(params: AuthParameters = {}) {
       this._params = params
+   }
+
+   /**
+    * Express middleware capturing Bearer JWT tokens to execute auth verification.
+    * 
+    * @returns The middleware function.
+    */
+   public middleware(): ApiMiddleware {
+      return async (req: ApiRequest, res: ApiResponse): Promise<boolean> => {
+         const bearer = ((req.headers?.authorization as string) || '').split(' ')[1] || ''
+         
+         if (bearer) {
+            try {
+               const user = await this.getAuthToken(bearer)
+               if (user) {
+                  return true // Authorized
+               }
+            } catch(e) {
+               Auth.error(`[${this.constructor.name}] Middleware token verification failed: ${(e as Error).message}`)
+            }
+         }
+
+         res.setHeader('WWW-Authenticate', 'Bearer realm="Core API"')
+         res.status(401).send('Authentication required.')
+         return false
+      }
    }
 
    /**

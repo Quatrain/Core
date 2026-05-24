@@ -27,6 +27,8 @@ export type FirebaseParams = {
    serviceAccount?: string
 }
 
+const DEFAULT_HTTPS_OPTIONS: HttpsOptions = { memory: '4GiB', timeoutSeconds: 500 }
+
 /**
  * Concrete implementation adapting Firebase / Google Cloud platform functions and triggers.
  */
@@ -50,7 +52,7 @@ export class FirebaseCloudWrapper extends AbstractCloudWrapper {
     */
    httpsTrigger(
       func: any,
-      params: HttpsOptions = { memory: '4GiB', timeoutSeconds: 500 }
+      params: HttpsOptions = DEFAULT_HTTPS_OPTIONS
    ): HttpsFunction {
       this._initialize()
       return onRequest(

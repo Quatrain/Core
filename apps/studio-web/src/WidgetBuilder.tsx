@@ -79,7 +79,7 @@ export function WidgetBuilder({ widget, properties, projectDefaultLanguage, onSa
                       if (b.name === 'name') return 1
                       return (a.order || 0) - (b.order || 0)
                    }).map(p => (
-                      <Card key={p.uid} p="xs" withBorder shadow="sm" style={{ cursor: 'grab' }} draggable onDragStart={(e) => {
+                      <Card key={p.uid} p="xs" withBorder shadow="sm" style={{ cursor: 'grab' }} draggable role="listitem" tabIndex={0} onDragStart={(e) => {
                          e.dataTransfer.setData('text/plain', JSON.stringify({ name: p.name, label: getFieldLabel(p) }))
                       }}>
                          <Text size="sm" fw={500}>{getFieldLabel(p)}</Text>
@@ -100,7 +100,7 @@ export function WidgetBuilder({ widget, properties, projectDefaultLanguage, onSa
                               { uid: 'sys-updatedAt', name: 'updatedAt' },
                               { uid: 'sys-updatedBy', name: 'updatedBy' }
                            ].map(p => (
-                              <Card key={p.uid} p="xs" withBorder shadow="sm" style={{ cursor: 'grab' }} draggable onDragStart={(e) => {
+                              <Card key={p.uid} p="xs" withBorder shadow="sm" style={{ cursor: 'grab' }} draggable role="listitem" tabIndex={0} onDragStart={(e) => {
                                  e.dataTransfer.setData('text/plain', JSON.stringify({ name: p.name, label: getFieldLabel(p) }))
                               }}>
                                  <Text size="sm" fw={500}>{getFieldLabel(p)}</Text>
@@ -114,6 +114,7 @@ export function WidgetBuilder({ widget, properties, projectDefaultLanguage, onSa
 
              {/* Canvas */}
              <div style={{ flex: 1, backgroundColor: 'var(--mantine-color-default-hover)', padding: '20px', borderRadius: '8px' }}
+                role="list"
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
                    e.preventDefault()
@@ -147,6 +148,8 @@ export function WidgetBuilder({ widget, properties, projectDefaultLanguage, onSa
                          shadow="sm" 
                          p="md"
                          draggable
+                         role="listitem"
+                         tabIndex={0}
                          onDragStart={(e) => {
                             setDraggedItemIdx(idx)
                             e.dataTransfer.setData('text/plain', 'reorder')

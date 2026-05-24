@@ -105,13 +105,14 @@ export class FileSystem {
     * @param mime
     * @returns Promise
     */
-   static uploadFile(
+   static async uploadFile(
       filename: string,
       meta: FileType,
       mime = 'video/mp4'
    ): Promise<FileType> {
       // try to get more file metadata
-      meta = { ...meta, ...FileSystem.getInfo(filename) }
+      const info = await FileSystem.getInfo(filename)
+      meta = { ...meta, ...info }
       Worker.info(`Uploading file ${filename} to ${meta.uploadUrl}`)
       const { size } = fs.statSync(filename)
 

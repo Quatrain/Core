@@ -103,7 +103,7 @@ export function PropertyOptionsEditor({ propType, options, onChange, models, inp
                 <TextInput placeholder={optDef.label} value={options[key]} onChange={e => handleChangeOption(key, e.target.value)} styles={{ input: inputStyle }} disabled={disabled} />
               )}
               {optDef.type === 'number' && (
-                <TextInput type="number" placeholder={optDef.label} value={options[key]} onChange={e => handleChangeOption(key, parseFloat(e.target.value))} styles={{ input: inputStyle }} disabled={disabled} />
+                <TextInput type="number" placeholder={optDef.label} value={options[key]} onChange={e => handleChangeOption(key, Number.parseFloat(e.target.value))} styles={{ input: inputStyle }} disabled={disabled} />
               )}
               {optDef.type === 'boolean' && (
                 <MantineCheckbox label={optDef.label} checked={!!options[key]} onChange={e => handleChangeOption(key, e.currentTarget.checked)} color="teal" disabled={disabled} />
@@ -195,7 +195,7 @@ export function PropertyOptionsEditor({ propType, options, onChange, models, inp
                   <TextInput placeholder={selectedOptDef.label} value={tempValue} onChange={e => setTempValue(e.target.value)} styles={{ input: inputStyle }} />
                 )}
                 {selectedOptDef.type === 'number' && (
-                  <TextInput type="number" placeholder={selectedOptDef.label} value={tempValue} onChange={e => setTempValue(parseFloat(e.target.value))} styles={{ input: inputStyle }} />
+                  <TextInput type="number" placeholder={selectedOptDef.label} value={tempValue} onChange={e => setTempValue(Number.parseFloat(e.target.value))} styles={{ input: inputStyle }} />
                 )}
                 {selectedOptDef.type === 'boolean' && (
                   <MantineCheckbox label={selectedOptDef.label} checked={!!tempValue} onChange={e => setTempValue(e.currentTarget.checked)} color="teal" />

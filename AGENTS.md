@@ -156,3 +156,4 @@ const repo = Repository.for(Invoice)
   - ✅ **GOOD:** `let match: string | null = null;`
 - **Class Properties:** Prefer `protected` over `private` to allow clean class inheritance and extensions.
 - **API Updates:** Always prefer `PATCH` over `PUT` for updates to optimize data payloads, since Quatrain tracks modified properties natively via a `hasChanged` flag.
+- **Clean Imports (Post-Refactoring):** Always verify and ensure that all imports are still useful and consumed after any refactoring. Proactively remove any unused imports to maintain clean compile hygiene and avoid namespace pollution.

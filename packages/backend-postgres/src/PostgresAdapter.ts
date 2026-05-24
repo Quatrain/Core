@@ -18,7 +18,6 @@ import {
    Filter,
    SortAndLimit,
    Sorting,
-   CollectionHierarchy,
 } from '@quatrain/backend'
 import { randomUUID } from 'node:crypto'
 import { Pool, PoolClient, PoolConfig, types } from 'pg'

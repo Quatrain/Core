@@ -17,7 +17,6 @@ import {
    Filter,
    SortAndLimit,
    Sorting,
-   CollectionHierarchy,
 } from '@quatrain/backend'
 import { randomUUID } from 'node:crypto'
 import sqlite3, { Statement } from 'sqlite3'

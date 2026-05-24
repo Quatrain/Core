@@ -41,7 +41,7 @@ export class MigrationManager {
       }
 
       this.umzug = new Umzug({
-         migrations: { glob: path.join(this.migrationsPath, '*.ts') },
+         migrations: { glob: path.join(this.migrationsPath, '*.migration.ts') },
          context: this.adapter,
          storage: new QuatrainMigrationStorage(this.adapter),
          logger: console,
@@ -75,7 +75,7 @@ export class MigrationManager {
     */
    async createMigration(name: string, modelOptions?: any): Promise<string> {
       const prefix = new Date().toISOString().replace('T', '').replaceAll(':', '').replaceAll('-', '').slice(0, 14)
-      const filename = `${prefix}_${name}.ts`
+      const filename = `${prefix}_${name}.migration.ts`
       const filepath = path.join(this.migrationsPath, filename)
 
       let upSql = ''
@@ -145,7 +145,7 @@ export const down = async ({ context: adapter }: { context: AbstractBackendAdapt
       }
 
       const prefix = new Date().toISOString().replace('T', '').replaceAll(':', '').replaceAll('-', '').slice(0, 14)
-      const filename = `${prefix}_${name}.ts`
+      const filename = `${prefix}_${name}.migration.ts`
       const filepath = path.join(this.migrationsPath, filename)
 
       const content = `import { AbstractBackendAdapter } from '@quatrain/backend'

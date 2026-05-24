@@ -55,8 +55,10 @@ ${interfaceProps}   [x: string]: any
          propsDef += `      name: '${p.val('name')}',\n`
          propsDef += `      mandatory: ${p.val('mandatory') ? 'true' : 'false'},\n`
          propsDef += `      type: ${p.val('propertyType')}.TYPE,\n`
-         if (p.val('minLength') !== undefined) propsDef += `      minLength: ${p.val('minLength')},\n`
-         if (p.val('maxLength') !== undefined) propsDef += `      maxLength: ${p.val('maxLength')},\n`
+         const minLength = p.val('options')?.minLength
+         const maxLength = p.val('options')?.maxLength
+         if (minLength !== undefined) propsDef += `      minLength: ${minLength},\n`
+         if (maxLength !== undefined) propsDef += `      maxLength: ${maxLength},\n`
          propsDef += `   },\n`
       })
 

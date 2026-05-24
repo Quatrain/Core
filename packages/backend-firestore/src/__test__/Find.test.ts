@@ -39,20 +39,20 @@ describe('Firestore find() operations', () => {
       expect(res.items.length).toBeGreaterThanOrEqual(5)
    })
 
-   test('find records with filter on object property', () => {
-      User.query()
+   test('find records with filter on object property', async () => {
+      const { items } = await User.query()
          .where('entity', entity)
          .execute()
-         .then(({ items }) => expect(items.length).toBeGreaterThanOrEqual(5))
+      expect(items.length).toBeGreaterThanOrEqual(5)
    })
 
-   test('find records with filters on string and object properties', () => {
+   test('find records with filters on string and object properties', async () => {
       // Query users in entity Acme Inc.
-      User.query()
+      const { items } = await User.query()
          .where('lastname', 'Doe')
          .where('entity', entity)
          .execute()
-         .then(({ items }) => expect(items.length).toBeGreaterThanOrEqual(2))
+      expect(items.length).toBeGreaterThanOrEqual(2)
    })
 
    test('find users records within batch limit', async () => {
@@ -62,11 +62,11 @@ describe('Firestore find() operations', () => {
       expect(items.length).toBeGreaterThanOrEqual(10)
    })
 
-   test('find all users records', () => {
+   test('find all users records', async () => {
       // Query all users without a batch value
-      User.query()
+      const { items } = await User.query()
          .batch(-1)
          .execute()
-         .then(({ items }) => expect(items.length).toBeGreaterThanOrEqual(13))
+      expect(items.length).toBeGreaterThanOrEqual(13)
    })
 })

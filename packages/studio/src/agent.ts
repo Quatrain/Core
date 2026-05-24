@@ -45,7 +45,7 @@ export class StudioAgent {
 
       // Create the model
       const model = await StudioModel.factory()
-      model.set('projectId', projectId)
+      model.set('studioProject', projectId)
       model.set('name', result.name)
       model.set('collectionName', result.collectionName)
       model.set('isPersisted', result.isPersisted)
@@ -55,7 +55,7 @@ export class StudioAgent {
       if (result.properties && Array.isArray(result.properties)) {
          for (const prop of result.properties) {
             const property = await StudioProperty.factory()
-            property.set('modelId', model.uid) // Assuming uid is the PK
+            property.set('studioModel', model.uid) // Assuming uid is the PK
             property.set('name', prop.name)
             property.set('propertyType', prop.type)
             property.set('mandatory', prop.mandatory)

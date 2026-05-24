@@ -5,6 +5,18 @@ import { spawn } from 'node:child_process'
 // Mock dependencies
 jest.mock('axios')
 jest.mock('node:child_process')
+jest.mock('@quatrain/queue', () => {
+   const mockQueueInstance = {
+      listen: jest.fn(),
+   }
+   return {
+      Queue: {
+         addQueue: jest.fn(),
+         getQueue: jest.fn(() => mockQueueInstance),
+         info: jest.fn(),
+      },
+   }
+}, { virtual: true })
 
 const mockedAxios = axios as jest.Mocked<typeof axios>
 const mockedSpawn = spawn as jest.MockedFunction<typeof spawn>
@@ -100,6 +112,35 @@ describe('Worker', () => {
                metadata: { size: 1024 },
             })
          )
+      })
+
+      it('should execute then block on success in pushEvent', async () => {
+         Worker.endpoint = 'https://api.example.com/events'
+
+         mockedAxios.patch.mockResolvedValue({
+            statusText: 'OK',
+            data: { success: true },
+         })
+
+         Worker.pushEvent('test-event')
+
+         // Allow microtasks to run so .then is executed
+         await new Promise((resolve) => setTimeout(resolve, 0))
+
+         expect(mockedAxios.patch).toHaveBeenCalled()
+      })
+
+      it('should handle axios error in pushEvent', async () => {
+         Worker.endpoint = 'https://api.example.com/events'
+
+         mockedAxios.patch.mockRejectedValue(new Error('Network error'))
+
+         Worker.pushEvent('test-event')
+
+         // Allow microtasks to run so .catch is executed
+         await new Promise((resolve) => setTimeout(resolve, 0))
+
+         expect(mockedAxios.patch).toHaveBeenCalled()
       })
    })
 
@@ -281,6 +322,109 @@ describe('Worker', () => {
             cwd: '/custom/path',
             shell: false,
          })
+      })
+
+      it('should throw an error when spawn itself throws', async () => {
+         mockedSpawn.mockImplementationOnce(() => {
+            throw new Error('Spawn failure')
+         })
+
+         await expect(Worker.execPromise('cmd')).rejects.toThrow('Spawn failure')
+      })
+
+      it('should throw and log when an error occurs before the promise constructor', async () => {
+         const spyInfo = jest.spyOn(Worker, 'info').mockImplementationOnce(() => {
+            throw new Error('Before promise error')
+         })
+
+         await expect(() => Worker.execPromise('cmd')).toThrow('Before promise error')
+         spyInfo.mockRestore()
+      })
+   })
+
+   describe('handler', () => {
+      let originalExit: any
+
+      beforeAll(() => {
+         originalExit = process.exit
+         process.exit = jest.fn() as any
+      })
+
+      afterAll(() => {
+         process.exit = originalExit
+      })
+
+      beforeEach(() => {
+         jest.clearAllMocks()
+         delete process.env.JSON
+      })
+
+      it('should listen to queue in queue mode', async () => {
+         const messageHandler = jest.fn()
+         const config = {
+            mode: 'queue' as const,
+            topic: 'test-topic',
+            queueAdapter: 'test-adapter' as any,
+            concurrency: 5,
+            gpu: false,
+         }
+
+         const { Queue } = require('@quatrain/queue')
+
+         await Worker.handler(messageHandler, config)
+
+         expect(Queue.addQueue).toHaveBeenCalledWith('test-adapter', 'default', true)
+         expect(Queue.getQueue().listen).toHaveBeenCalledWith('test-topic', messageHandler, {
+            concurrency: 5,
+            gpu: false,
+         })
+      })
+
+      it('should handle test mode and call messageHandler', async () => {
+         const messageHandler = jest.fn()
+         const config = {
+            mode: 'test' as const,
+         }
+
+         await Worker.handler(messageHandler, config)
+
+         expect(messageHandler).toHaveBeenCalledWith(
+            expect.objectContaining({ dummy: 'test-data' })
+         )
+      })
+
+      it('should handle cli mode with environment variable', async () => {
+         const messageHandler = jest.fn()
+         process.env.JSON = JSON.stringify({ cli: 'data' })
+         const config = {
+            mode: 'cli' as const,
+         }
+
+         await Worker.handler(messageHandler, config)
+
+         expect(messageHandler).toHaveBeenCalledWith(JSON.stringify({ cli: 'data' }))
+      })
+
+      it('should throw when cli mode has no environment variable', async () => {
+         const messageHandler = jest.fn()
+         const config = {
+            mode: 'cli' as const,
+         }
+
+         await Worker.handler(messageHandler, config)
+
+         expect(process.exit).toHaveBeenCalledWith(1)
+      })
+
+      it('should exit when mode is unknown', async () => {
+         const messageHandler = jest.fn()
+         const config = {
+            mode: 'unknown' as any,
+         }
+
+         await Worker.handler(messageHandler, config)
+
+         expect(process.exit).toHaveBeenCalledWith(1)
       })
    })
 

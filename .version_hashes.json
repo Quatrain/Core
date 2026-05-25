@@ -145,9 +145,9 @@
     "last_published": "2026-05-08T15:26:28.316Z"
   },
   "@quatrain/app": {
-    "version": "1.1.18",
-    "hash": "e4LmhJjskrngT0Z8yLF4HNThG80=-f14c5a059cc85a58ee59d3e42f1a1876730b1dedd3ab03f8b31d43289c1de8da",
-    "last_published": "2026-05-24T21:30:43.836Z"
+    "version": "1.1.19",
+    "hash": "e4LmhJjskrngT0Z8yLF4HNThG80=-cc7c4e7b4ef12c7a7c85755aa8766f75de96b88d02d3ce174cc5fa2d4fb74935",
+    "last_published": "2026-05-25T17:50:15.145Z"
   },
   "@quatrain/auth-oidc": {
     "version": "1.1.5",

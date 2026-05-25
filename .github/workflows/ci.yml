@@ -7,7 +7,6 @@ on:
       - main
     paths:
       - 'packages/**'
-      - 'apps/**'
       - 'bin/**'
       - 'package.json'
       - 'yarn.lock'
@@ -18,7 +17,6 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - 'packages/**'
-      - 'apps/**'
       - 'bin/**'
       - 'package.json'
       - 'yarn.lock'

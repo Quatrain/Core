@@ -34,7 +34,6 @@
     "@quatrain/messaging": "workspace:*",
     "@quatrain/queue": "workspace:*",
     "@quatrain/storage": "workspace:*",
-    "@quatrain/ui-form-react": "workspace:*",
     "yaml": "^2.4.0"
   },
   "devDependencies": {

@@ -12,8 +12,7 @@ function runSync(command, args, options = {}) {
     return result.stdout ? result.stdout.toString() : '';
 }
 const workspacesDirs = [
-    path.join(__dirname, '../packages'),
-    path.join(__dirname, '../apps')
+    path.join(__dirname, '../packages')
 ];
 
 function getPkgDir(pkg) {

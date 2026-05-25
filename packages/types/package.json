@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/types",
-  "version": "1.2.13",
+  "version": "1.2.14",
   "description": "Shared contracts, types, interfaces, and exceptions for Quatrain Core",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

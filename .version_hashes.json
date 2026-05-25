@@ -110,9 +110,9 @@
     "last_published": "2026-05-12T13:13:13.262Z"
   },
   "@quatrain/worker": {
-    "version": "1.2.7",
-    "hash": "taG3VXkagOOHbCRAQLyDvCcDffQ=-2dcc11fc450bebf84c91c009831c732a904f1f4ba6f3d5525d352048fa5b6d28",
-    "last_published": "2026-05-24T21:31:06.987Z"
+    "version": "1.2.8",
+    "hash": "Ckqiz9P1vqQMRgKFC7DO9PD7kIo=-2dcc11fc450bebf84c91c009831c732a904f1f4ba6f3d5525d352048fa5b6d28",
+    "last_published": "2026-05-25T08:30:03.724Z"
   },
   "@quatrain/testing": {
     "version": "1.1.4",
@@ -190,9 +190,9 @@
     "last_published": "2026-05-24T08:10:18.681Z"
   },
   "@quatrain/ui": {
-    "version": "1.1.7",
-    "hash": "UbYWl/5q36IWa6vrMP04n8XTo5o=-8e52f183f357ae778da8dcfd45689a6885b0a456feb4296b0b881a152b473dea",
-    "last_published": "2026-05-06T09:40:29.113Z"
+    "version": "1.1.8",
+    "hash": "1QMtdQZZsRyHj8h2huwMa+cI4AE=-8e52f183f357ae778da8dcfd45689a6885b0a456feb4296b0b881a152b473dea",
+    "last_published": "2026-05-25T08:29:54.649Z"
   },
   "@quatrain/ui-form-react": {
     "version": "1.1.5",

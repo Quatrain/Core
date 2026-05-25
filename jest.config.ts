@@ -10,4 +10,13 @@ export default {
       }],
    },
    testMatch: ['**/?(*.)+(spec|test).ts'],
+   collectCoverageFrom: [
+      'packages/*/src/**/*.{ts,tsx}',
+      'apps/*/src/**/*.{ts,tsx}',
+      '!**/node_modules/**',
+      '!**/dist/**',
+      '!**/*.migration.ts',
+      '!**/*.d.ts'
+   ]
 }
+

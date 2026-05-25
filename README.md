@@ -1,30 +1,36 @@
 <div align="center">
-  <img src="./assets/logo.png" alt="Quatrain Logo" width="300" />
+  <img src="./assets/logo.png" alt="Core Logo" width="300" />
 </div>
 
-# Quatrain Core - A Modular & Universal Backend Framework
+# Core - A Modular & Universal Backend Framework
 
 > **"Business Logic outlives Infrastructure"**
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Quatrain_Core&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Quatrain_Core)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Quatrain_Core&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Quatrain_Core)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Quatrain_Core&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Quatrain_Core)
 
-Quatrain Core is a modular TypeScript framework designed to accelerate business application development. Built upon a powerful **Adapter Pattern**, it decouples your core business logic from the underlying infrastructure, allowing you to deploy **100% on-premise** with standard open-source blocks, leverage modern **Backend as a Service (BaaS)** platforms (like Supabase and Firebase), or run a **hybrid** architecture.
+Core (a product of Quatrain) is a modular TypeScript framework designed to accelerate business application development. Built upon a powerful **Adapter Pattern**, it decouples your core business logic from the underlying infrastructure, allowing you to deploy **100% on-premise** with standard open-source blocks, leverage modern **Backend as a Service (BaaS)** platforms (like Supabase and Firebase), or run a **hybrid** architecture.
+
+---
 
 ## 🎯 Core Principles
 
--  **BaaS & On-Premise Synergy**: Build modern cloud-native apps leveraging managed services like Firebase/Supabase, or target strict data-sovereign environments using traditional self-hosted infrastructure (PostgreSQL, SQLite, S3, OIDC/OAuth, RabbitMQ). The exact same codebase runs in both worlds.
--  **Clean Abstraction**: Write your business logic once. Decouple your models and processes from transport layers, databases, file storages, or messaging brokers.
--  **No Vendor Lock-In**: Seamlessly swap database engines (SQLite, PostgreSQL, Firestore), auth providers (Supabase Auth, Firebase Auth, OIDC/OAuth, Basic Auth), object storage backends (Local FileSystem, AWS S3, MinIO), or message queues (AMQP/RabbitMQ, AWS SQS, GCP Pub/Sub) via simple configuration changes.
--  **Modular by Design**: The framework is split into clean, highly factorized packages. Use only the bricks you need, from core object validation to authentication, storage, and pub/sub queues.
--  **Standalone Core**: The `@quatrain/core` package works entirely in-memory for defining models, validation, and business logic, without requiring any database or network connection.
+- **BaaS & On-Premise Synergy**: Build modern cloud-native apps leveraging managed services like Firebase/Supabase, or target strict data-sovereign environments using traditional self-hosted infrastructure (PostgreSQL, SQLite, S3, OIDC/OAuth, RabbitMQ). The exact same codebase runs in both worlds.
+- **Clean Abstraction**: Write your business logic once. Decouple your models and processes from transport layers, databases, file storages, or messaging brokers.
+- **No Vendor Lock-In**: Seamlessly swap database engines (SQLite, PostgreSQL, Firestore), auth providers (Supabase Auth, Firebase Auth, OIDC/OAuth, Basic Auth), object storage backends (Local FileSystem, AWS S3, MinIO), or message queues (AMQP/RabbitMQ, AWS SQS, GCP Pub/Sub) via simple configuration changes.
+- **Modular by Design**: The framework is split into clean, highly factorized packages. Use only the bricks you need, from core object validation to authentication, storage, and pub/sub queues.
+- **Standalone Core**: The `@quatrain/core` package works entirely in-memory for defining models, validation, and business logic, without requiring any database or network connection.
+
+---
 
 ## 🧠 Philosophy
 
-Quatrain Core is built upon three foundational pillars to ensure enterprise-grade reliability and longevity:
+Core is built upon three foundational pillars to ensure enterprise-grade reliability and longevity:
 
-- **Sovereignty by Design**: Deploy anywhere, from your local laptop to the largest hyperscalers (AWS, GCP, Azure). Quatrain's adapter pattern prevents vendor lock-in, ensuring you retain total control over your data and infrastructure choices.
+- **Sovereignty by Design**: Deploy anywhere, from your local laptop to the largest hyperscalers (AWS, GCP, Azure). Core's adapter pattern prevents vendor lock-in, ensuring you retain total control over your data and infrastructure choices.
 - **Cybersecurity by Design**: We rely on rock-solid, audited, and widely adopted components. By keeping the core architecture simple and maintainable, we reduce the attack surface and make security patching straightforward.
-- **Cloud-Native Best Practices**: Designed to build robust applications that withstand the test of time. Quatrain embraces stateless execution, ephemeral environments, and seamless horizontal scaling to effortlessly adapt to technological innovations.
+- **Cloud-Native Best Practices**: Designed to build robust applications that withstand the test of time. Core embraces stateless execution, ephemeral environments, and seamless horizontal scaling to effortlessly adapt to technological innovations.
 
 ---
 
@@ -34,26 +40,12 @@ The Design phase is all about modeling your domain and laying the foundations of
 
 ### Core Ecosystem
 - **`@quatrain/core`**: Foundation package. Works standalone in-memory. Defines models, properties, validation, and serialization.
+- **`@quatrain/types`**: Shared contracts, types, interfaces, and exceptions for Core.
 - **`@quatrain/studio`**: Visual interface and meta-modeling package used by the visual studio application.
 - **`@quatrain/ui`**: Core styling and component logic (Mantine-based) for consistent frontend experiences.
 
-### Modeling Example
-Use `BaseObject` for in-memory data modeling without any database-related methods.
-
-```ts
-import { BaseObject, Property } from '@quatrain/core'
-
-export class Cat extends BaseObject {
-   static COLLECTION = 'cats'
-   static PROPERTIES = [
-      { name: 'name', type: Property.STRING, minLength: 1, maxLength: 32 },
-      { name: 'color', type: Property.STRING, minLength: 4, maxLength: 7 },
-   ]
-}
-
-const garfield = Cat.fromObject({ name: 'Garfield', color: '#ffa502' })
-console.log(garfield._.name) // > "Garfield"
-```
+> [!TIP]
+> For complete documentation, modeling details, and quick-start tutorials on these packages, please refer to the **[Core Wiki](https://github.com/Quatrain/Core/wiki)**.
 
 ---
 
@@ -69,28 +61,8 @@ During Development, you connect your business logic to services such as database
 - **AI & Automation**: `@quatrain/ai`, `@quatrain/ai-gemini`, `@quatrain/app`, `@quatrain/code`, `@quatrain/code-github`
 - **Testing**: `@quatrain/testing`
 
-### Persistence Example
-To interact with a database, models inherit from `PersistedBaseObject`. You can then use the `Backend` adapter of your choice.
-
-```ts
-import { Backend, PersistedBaseObject } from '@quatrain/backend'
-import { SqliteAdapter } from '@quatrain/backend-sqlite'
-
-export class PersistedCat extends PersistedBaseObject {
-   static COLLECTION = 'cats'
-   static PROPERTIES = [ /* ... */ ]
-}
-
-// Set up a backend adapter
-Backend.addBackend(new SqliteAdapter(), 'sqlite', true)
-
-// Instantiate and save
-const garfield = PersistedCat.fromObject({ name: 'Garfield', color: '#ffa502' })
-await garfield.save()
-
-// Retrieve
-const retrievedGarfield = await PersistedCat.fromBackend(garfield.asReference().path)
-```
+> [!TIP]
+> For full code persistence examples, dependency injection setups, and service integrations, visit the **[Core Wiki](https://github.com/Quatrain/Core/wiki)**.
 
 ---
 
@@ -102,45 +74,34 @@ Deployment covers running your code, scaffolding new environments, configuring A
 - **CLI & Code Generation**: `@quatrain/core-cli` (Scaffolds projects, configurations, and migrations)
 - **Migrations**: `@quatrain/backend-migrations` (Schema and data migration tooling)
 - **Cloud Wrappers**: `@quatrain/cloudwrapper`, `@quatrain/cloudwrapper-firebase`, `@quatrain/cloudwrapper-supabase` (Serverless/Edge functions handling)
-- **Containers & Deployments**: Pre-configured Docker/Podman setups and UI applications (such as the visual `studio` panel and the `api-gateway` routing proxy) are housed in the companion **CoreApps** repository.
 
-### Scaffolding & Migrations Example
-Use the CLI to quickly bootstrap a project or generate configurations:
+### Ready-To-Use Applications & Containers
 
-```bash
-# Scaffold a new project
-core generate scaffold my-app
+All deployable applications, live modeling portals, gateway proxies, and pre-built deployment setups are organized in the dedicated companion repository:
 
-# Generate a unified quatrain.json config
-core generate config
-```
+👉 **[CoreApps Repository](https://github.com/Quatrain/CoreApps)**
 
-Running migrations on your deployment target:
-
-```typescript
-import { MigrationManager } from '@quatrain/backend-migrations'
-
-const manager = new MigrationManager('./migrations')
-await manager.run()
-```
+Here you will find ready-to-use Docker/Podman container images and configurations:
+- **`api-gateway`**: Ultra-lightweight Express-based reverse proxy routing requests to your upstream services.
+- **`studio-image`**: Pre-configured environment hosting the Visual Developer Studio Dashboard.
 
 ---
 
 ## 🔮 Upcoming
 
-The Quatrain ecosystem is constantly evolving to empower developers and business users alike. Our roadmap includes:
+The Core ecosystem is constantly evolving to empower developers and business users alike. Our roadmap includes:
 
-- **Quatrain Studio**: A complete, visual interface to design and manage your entire application ecosystem. This studio will be driven by the user and seamlessly assisted by a Large Language Model (LLM) to accelerate scaffolding, modeling, and repetitive tasks.
+- **Studio**: A complete, visual interface to design and manage your entire application ecosystem. This studio will be driven by the user and seamlessly assisted by a Large Language Model (LLM) to accelerate scaffolding, modeling, and repetitive tasks.
 - **BPM & State Machines**: A powerful Business Process Management (BPM) engine allowing you to manage complex business logic and entity lifecycles through robust, visual "State Machines".
 
 ---
 
 ## ⚖️ License & Professional Services
 
-Quatrain Core is released under the **AGPL-3.0** (Affero General Public License). This ensures that any enhancements to the open-source core remain free and accessible to the community. If you build a SaaS or application using this framework, you must comply with the AGPL-3.0 terms.
+Core is released under the **AGPL-3.0** (Affero General Public License). This ensures that any enhancements to the open-source core remain free and accessible to the community. If you build a SaaS or application using this framework, you must comply with the AGPL-3.0 terms.
 
 **Professional Services & Commercial Licensing**  
-If your organization requires a commercial license (to integrate Quatrain Core without the AGPL-3.0 restrictions), or if you need expert assistance, the **Quatrain** team offers:
+If your organization requires a commercial license (to integrate Core without the AGPL-3.0 restrictions), or if you need expert assistance, the **Quatrain** team offers:
 - **Commercial Licensing**: Tailored licenses for proprietary software and enterprise deployments.
 - **Custom Development**: Expert engineers to help you build or migrate your backend architecture.
 - **Premium Support**: Priority SLA, architectural consulting, and code reviews.

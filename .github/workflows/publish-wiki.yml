@@ -32,13 +32,13 @@ jobs:
           echo "Compiling documentation for Wiki..."
           
           # Initialize _Sidebar.md
-          echo "## Quatrain Core Documentation" > wiki/_Sidebar.md
+          echo "## Core Documentation" > wiki/_Sidebar.md
           echo "" >> wiki/_Sidebar.md
           
           # Define Categories and Descriptions
           declare -A categories
           categories=(
-            ["Foundations"]="core log worker i18n i18n-en i18n-fr testing"
+            ["Foundations"]="core log worker i18n i18n-en i18n-fr testing types"
             ["Storage Data Cache"]="backend backend-firestore backend-postgres backend-sqlite backend-migrations storage storage-firebase storage-s3 storage-supabase storage-local cache cache-redis"
             ["Queue Messaging"]="queue queue-amqp queue-aws queue-gcp messaging messaging-firebase"
             ["Auth Cloud"]="auth auth-basic auth-firebase auth-supabase auth-oidc auth-pocketbase cloudwrapper cloudwrapper-firebase cloudwrapper-supabase"
@@ -80,6 +80,7 @@ jobs:
           pkg_desc["i18n-en"]="English language definitions and dictionary pack."
           pkg_desc["i18n-fr"]="French language definitions and dictionary pack."
           pkg_desc["testing"]="Comprehensive test suite helpers and object mocking utilities."
+          pkg_desc["types"]="Shared contracts, types, interfaces, and exceptions for Core."
           
           pkg_desc["backend"]="Persistence layer abstracting database operations."
           pkg_desc["backend-firestore"]="Google Cloud Firestore database adapter."
@@ -112,15 +113,15 @@ jobs:
           pkg_desc["cloudwrapper-supabase"]="Supabase ecosystem wrapper."
           
           pkg_desc["api"]="Modern API request/response structures and standard handlers."
-          pkg_desc["api-client"]="Centralized HTTP API client for consuming Quatrain services."
+          pkg_desc["api-client"]="Centralized HTTP API client for consuming Core services."
           pkg_desc["api-server"]="Abstract web server controller and router engine."
-          pkg_desc["api-server-express"]="Express.js adapter for Quatrain API servers."
+          pkg_desc["api-server-express"]="Express.js adapter for Core API servers."
           pkg_desc["gateway-upstream-express"]="Express middleware routing to upstream service instances."
           pkg_desc["backend-restapi"]="REST API-backed data persistence adapter."
           pkg_desc["backend-restapi-recipes"]="Reusable pre-packaged backend endpoints and logic recipes."
           
           pkg_desc["ai"]="Unified AI abstraction for text generation, embeddings, and chat."
-          pkg_desc["ai-gemini"]="Google Gemini adapter for the Quatrain AI system."
+          pkg_desc["ai-gemini"]="Google Gemini adapter for the Core AI system."
           
           pkg_desc["app"]="Unified application container and startup lifecycle runner."
           pkg_desc["core-cli"]="Developer command-line tool suite for project management."
@@ -142,13 +143,13 @@ jobs:
           fi
           
           # Initialize Home.md
-          echo "# Quatrain Core Documentation" > wiki/Home.md
+          echo "# Core Documentation" > wiki/Home.md
           echo "" >> wiki/Home.md
           if [ -f "assets/logo.png" ]; then
-            echo "![Quatrain Core Logo](assets/logo.png)" >> wiki/Home.md
+            echo "![Core Logo](assets/logo.png)" >> wiki/Home.md
             echo "" >> wiki/Home.md
           fi
-          echo "Welcome to the Quatrain Core documentation. Below is the directory of all available packages grouped by their ecosystem family." >> wiki/Home.md
+          echo "Welcome to the Core documentation. Below is the directory of all available packages grouped by their ecosystem family." >> wiki/Home.md
           echo "" >> wiki/Home.md
           
           # Append Mermaid Diagram
@@ -246,6 +247,7 @@ jobs:
           
               subgraph Foundations_Ecosystem ["🏗️ Foundations"]
                   core([⚙️ core]):::foundation
+                  types([⚙️ types]):::foundation
                   log([⚙️ log]):::foundation
                   worker([⚙️ worker]):::foundation
                   i18n([⚙️ i18n]):::foundation

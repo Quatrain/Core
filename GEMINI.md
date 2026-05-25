@@ -13,11 +13,11 @@ When executing tasks or responding to requests in this repository, you MUST load
 
 ### 1. Building Applications with Quatrain
 If the task is to construct or design application schemas, models, repositories, and business features **using** the Quatrain ecosystem, follow the guidelines in:
-👉 [AGENTS.md (Application Development Guidelines)](./AGENTS.md)
+👉 [AGENTS.md (Application Development Guidelines)](./guidelines/AGENTS.md)
 
 ### 2. Modifying Quatrain Core Codebase
 If the task requires editing, refactoring, fixing, or extending the packages, monorepo workspaces, containers, or CI/CD pipelines of the **Quatrain Core repository itself**, follow the strict guidelines in:
-👉 [CONTRIBUTING_AGENTS.md (Monorepo Contributing Guidelines)](./CONTRIBUTING_AGENTS.md)
+👉 [CONTRIBUTING_AGENTS.md (Monorepo Contributing Guidelines)](./guidelines/CONTRIBUTING_AGENTS.md)
 
 ---
 

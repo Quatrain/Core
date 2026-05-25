@@ -57,7 +57,7 @@ describe('FileSystem Utilities (Worker)', () => {
       })
 
       jest.spyOn(fs, 'existsSync').mockImplementation((p) => {
-         if (typeof p === 'string' && (p.endsWith('test.txt') || p.endsWith('small.mp4') || p.endsWith('large.mp4') || p.endsWith('large-fail.mp4'))) {
+         if (typeof p === 'string' && (p.endsWith('test.txt') || p.endsWith('small.mp4') || p.endsWith('large.mp4') || p.endsWith('large-fail.mp4') || p.endsWith('small-fail.mp4') || p.endsWith('large-sync-fail.mp4'))) {
             return true
          }
          return originalExistsSync(p)
@@ -65,10 +65,10 @@ describe('FileSystem Utilities (Worker)', () => {
 
       jest.spyOn(fs, 'statSync').mockImplementation((p) => {
          if (typeof p === 'string') {
-            if (p.endsWith('small.mp4')) {
+            if (p.endsWith('small.mp4') || p.endsWith('small-fail.mp4')) {
                return { size: 13 } as any
             }
-            if (p.endsWith('large.mp4') || p.endsWith('large-fail.mp4')) {
+            if (p.endsWith('large.mp4') || p.endsWith('large-fail.mp4') || p.endsWith('large-sync-fail.mp4')) {
                return { size: 35 * 1024 } as any
             }
          }
@@ -255,8 +255,17 @@ describe('FileSystem Utilities (Worker)', () => {
             callback(null, mockMetadata)
          });
 
-         (fetch as any).mockResolvedValue({
-            ok: true
+         (fetch as any).mockImplementation((url: string, options: any) => {
+            return new Promise((resolve) => {
+               if (options.body && typeof options.body.on === 'function') {
+                  options.body.on('data', () => {})
+                  options.body.on('end', () => {
+                     resolve({ ok: true })
+                  })
+               } else {
+                  resolve({ ok: true })
+               }
+            })
          })
 
          const meta = {
@@ -290,6 +299,54 @@ describe('FileSystem Utilities (Worker)', () => {
          }
 
          await expect(FileSystem.uploadFile(testFile, meta)).rejects.toThrow('Connection abort')
+      })
+
+      it('should reject small uploads if HTTP request fails', async () => {
+         const testFile = path.join(testBaseDir, 'small-fail.mp4')
+
+         const mockMetadata = {
+            streams: [{ width: 320, height: 240, duration: '1', bit_rate: '100', nb_frames: '10' }]
+         };
+         (ffmpeg.ffprobe as any).mockImplementation((file: string, callback: any) => {
+            callback(null, mockMetadata)
+         });
+
+         (fetch as any).mockRejectedValue(new Error('Upload failed'))
+
+         // Stub readFileSync for small content read
+         jest.spyOn(fs, 'readFileSync').mockReturnValue(Buffer.from('small content'))
+
+         const meta = {
+            bucket: 'mock-bucket',
+            ref: 'remote/small-fail.mp4',
+            uploadUrl: 'https://upload.com/small-fail.mp4'
+         }
+
+         await expect(FileSystem.uploadFile(testFile, meta)).rejects.toThrow('Upload failed')
+      })
+
+      it('should handle synchronous errors inside stream initialization', async () => {
+         const testFile = path.join(testBaseDir, 'large-sync-fail.mp4')
+
+         const mockMetadata = {
+            streams: [{ width: 1280, height: 720, duration: '5', bit_rate: '2000', nb_frames: '150' }]
+         };
+         (ffmpeg.ffprobe as any).mockImplementation((file: string, callback: any) => {
+            callback(null, mockMetadata)
+         });
+
+         // Make createReadStream throw a synchronous error
+         jest.spyOn(fs, 'createReadStream').mockImplementationOnce(() => {
+            throw new Error('Sync stream error')
+         })
+
+         const meta = {
+            bucket: 'mock-bucket',
+            ref: 'remote/large-sync-fail.mp4',
+            uploadUrl: 'https://upload.com/large-sync-fail.mp4'
+         }
+
+         await expect(FileSystem.uploadFile(testFile, meta)).rejects.toThrow('Sync stream error')
       })
    })
 })

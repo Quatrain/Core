@@ -71,4 +71,43 @@ describe('Object Uri', () => {
       uri.collection = 'collection'
       expect(uri.collection).toBe('collection')
    })
+
+   test('exceptions and error boundaries', () => {
+      // 1. Odd number of path parts (> 1) and not a file
+      expect(() => new ObjectUri('part1/part2/part3')).toThrow("Path parts number must be 1 or even")
+
+      const uri = new ObjectUri('collection/uid')
+      
+      // 2. class setter/getter
+      uri.class = { name: 'MyClass' }
+      expect(uri.collection).toBe('myclass')
+      expect(uri.class).toEqual({ name: 'MyClass' })
+
+      uri.class = null
+      expect(uri.collection).toBeUndefined()
+
+      // 3. ownPath getter
+      const parentUri = new ObjectUri('collection1/uid1/collection2/uid2')
+      expect(parentUri.ownPath).toBe('collection2/uid2')
+
+      // 4. collection setter exception
+      const lockedUri = new ObjectUri('collection/uid')
+      expect(() => { lockedUri.collection = 'new-collection' }).toThrow('Collection value already set')
+
+      // 5. toReference and toJSON
+      const refUri = new ObjectUri('@s3:collection/uid', 'my label')
+      refUri.path = 'collection/uid'
+      expect(refUri.toReference()).toEqual({
+         ref: 'collection/uid',
+         uri: '@s3:collection/uid',
+         label: 'my label'
+      })
+
+      expect(refUri.toJSON()).toEqual({
+         ref: 'collection/uid',
+         label: 'my label',
+         backend: '@s3'
+      })
+   })
 })
+

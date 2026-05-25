@@ -34,7 +34,7 @@ The Design phase is all about modeling your domain and laying the foundations of
 
 ### Core Ecosystem
 - **`@quatrain/core`**: Foundation package. Works standalone in-memory. Defines models, properties, validation, and serialization.
-- **`@quatrain/studio` & `apps/studio-web`**: Visual interface and meta-modeling tools to dynamically design and generate your application schemas.
+- **`@quatrain/studio`**: Visual interface and meta-modeling package used by the visual studio application.
 - **`@quatrain/ui`**: Core styling and component logic (Mantine-based) for consistent frontend experiences.
 
 ### Modeling Example
@@ -102,7 +102,7 @@ Deployment covers running your code, scaffolding new environments, configuring A
 - **CLI & Code Generation**: `@quatrain/core-cli` (Scaffolds projects, configurations, and migrations)
 - **Migrations**: `@quatrain/backend-migrations` (Schema and data migration tooling)
 - **Cloud Wrappers**: `@quatrain/cloudwrapper`, `@quatrain/cloudwrapper-firebase`, `@quatrain/cloudwrapper-supabase` (Serverless/Edge functions handling)
-- **Containers**: Includes pre-configured Docker/Podman setups like `api-gateway` and `studio-api`.
+- **Containers & Deployments**: Pre-configured Docker/Podman setups and UI applications (such as the visual `studio` panel and the `api-gateway` routing proxy) are housed in the companion **CoreApps** repository.
 
 ### Scaffolding & Migrations Example
 Use the CLI to quickly bootstrap a project or generate configurations:

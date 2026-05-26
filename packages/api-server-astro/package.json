@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/api-server-astro",
-  "version": "1.1.13",
+  "version": "1.1.14",
   "description": "Astro Adapter for Quatrain API Server",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

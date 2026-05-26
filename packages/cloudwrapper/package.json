@@ -20,8 +20,8 @@
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "peerDependencies": {
-    "@quatrain/backend": "^1.2.12",
-    "@quatrain/core": "^1.2.15"
+    "@quatrain/backend": "^1.2.13",
+    "@quatrain/core": "^1.2.16"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
@@ -42,8 +42,8 @@
     "bump-to": "yarn version"
   },
   "dependencies": {
-    "@quatrain/backend": "^1.2.12",
-    "@quatrain/core": "^1.2.15",
+    "@quatrain/backend": "^1.2.13",
+    "@quatrain/core": "^1.2.16",
     "@quatrain/storage": "^1.1"
   },
   "typedoc": {

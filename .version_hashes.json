@@ -255,9 +255,9 @@
     "last_published": "2026-05-23T19:25:20.948Z"
   },
   "@quatrain/i18n": {
-    "version": "1.0.4",
-    "hash": "s4OWEtAN1lFmzM97kQ11t5Ny8Go=-2022b3468e0750ad5de6b6a3fb097ae8fd5214039c92cc8ba4c55cef4dbad625",
-    "last_published": "2026-05-23T17:40:12.739Z"
+    "version": "1.0.5",
+    "hash": "s4OWEtAN1lFmzM97kQ11t5Ny8Go=-397b2919bedc6bb556bb9624d9f46a64a011ea2fd14bfceabc55721922e3648d",
+    "last_published": "2026-05-26T13:34:53.743Z"
   },
   "@quatrain/i18n-en": {
     "version": "1.0.3",

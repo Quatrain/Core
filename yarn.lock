@@ -2917,6 +2917,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/api-server-astro@workspace:packages/api-server-astro":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/api-server-astro@workspace:packages/api-server-astro"
+  dependencies:
+    "@quatrain/api": "workspace:*"
+    "@quatrain/api-server": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:^22.10.1"
+    jest: "npm:^29.7.0"
+    ts-jest: "npm:^29.4.6"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/api-server-express@workspace:*, @quatrain/api-server-express@workspace:packages/api-server-express":
   version: 0.0.0-use.local
   resolution: "@quatrain/api-server-express@workspace:packages/api-server-express"

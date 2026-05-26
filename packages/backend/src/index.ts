@@ -1,4 +1,4 @@
-import { Backend, BackendAction, BackendParameters } from './Backend'
+import { Backend, BackendAction, BackendParameters, BackendRecordType } from './Backend'
 import { AbstractBackendAdapter } from './AbstractBackendAdapter'
 import { MockAdapter } from './MockAdapter'
 import { BackendError } from './BackendError'
@@ -68,4 +68,5 @@ export type {
    InjectKeywordsMiddlewareParams,
    InjectMetaMiddlewareParams,
    BackendMiddleware,
+   BackendRecordType,
 }

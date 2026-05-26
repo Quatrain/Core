@@ -8,6 +8,7 @@ export {
    NotFoundError,
    GoneError,
    ValidationError,
+   BackendError,
 } from './exceptions'
 
 export interface BaseObjectType {

@@ -38,6 +38,9 @@ import { EntityType, Entity } from './components/Entity'
 
 import * as htmlType from './properties/types/PropertyHTMLType'
 import { DataObjectParams } from './components/types/DataObjectParams'
+import { BaseObjectClass } from './components/types/BaseObjectClass'
+import { Persisted } from './components/types/Persisted'
+import { Meta } from './components/types/Payload'
 
 // Import types, interfaces, and exceptions from the leaf package
 import {
@@ -50,6 +53,7 @@ import {
    NotFoundError,
    GoneError,
    ValidationError,
+   BackendError,
 } from '@quatrain/types'
 
 export {
@@ -84,6 +88,7 @@ export {
    NotFoundError,
    GoneError,
    ValidationError,
+   BackendError,
 }
 
 export type {
@@ -106,4 +111,7 @@ export type {
    UserType,
    Proxy,
    EntityType,
+   BaseObjectClass,
+   Persisted,
+   Meta,
 }

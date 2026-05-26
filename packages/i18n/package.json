@@ -1,13 +1,21 @@
 {
   "name": "@quatrain/i18n",
   "version": "1.0.4",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
   "license": "AGPL-3.0-only",
+  "files": [
+    "dist/",
+    "src/",
+    "README.md"
+  ],
   "devDependencies": {
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "wbuild": "tsc --watch"
   },
   "repository": {
     "type": "git",

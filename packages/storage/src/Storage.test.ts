@@ -31,8 +31,8 @@ describe('Storage Manager', () => {
       // Scans arguments for output path ending in .png and writes a dummy frame to it
       // to cleanly satisfy MockAdapter's createReadStream executions without ENOENT errors.
       jest.spyOn(Core, 'getSystemCommandPath').mockResolvedValue('/mocked/path/to/bin')
-      jest.spyOn(Core, 'execPromise').mockImplementation(async (cmd: string, args: any[]) => {
-         const outPath = args.find(arg => typeof arg === 'string' && arg.endsWith('.png'))
+      jest.spyOn(Core, 'execPromise').mockImplementation(async (cmd: string, args?: any[]) => {
+         const outPath = args?.find(arg => typeof arg === 'string' && arg.endsWith('.png'))
          if (outPath) {
             await fs.ensureFile(outPath)
             await fs.writeFile(outPath, 'mocked system CLI video/document frame')
@@ -65,7 +65,7 @@ describe('Storage Manager', () => {
       Storage.addStorage(mockAdapter, 'active', true)
 
       const fileData = Buffer.from('hello world')
-      const file = { ref: 'path/to/file.txt' }
+      const file = { bucket: 'test-bucket', ref: 'path/to/file.txt' }
 
       await Storage.getStorage().create(file, Readable.from(fileData))
 
@@ -75,7 +75,7 @@ describe('Storage Manager', () => {
 
    it('should return the URL from the adapter', async () => {
       Storage.addStorage(mockAdapter, 'active', true)
-      const url = await Storage.getStorage().getUrl({ ref: 'file.png' })
+      const url = await Storage.getStorage().getUrl({ bucket: 'test-bucket', ref: 'file.png' })
       expect(url).toBe('https://mock-storage.com/file.png')
    })
 
@@ -91,9 +91,9 @@ describe('Storage Manager', () => {
       })
 
       it('should correctly classify supported document extensions and content types', () => {
-         const pdfFile: FileType = { ref: 'file.pdf', contentType: 'application/pdf' }
-         const xlsxFile: FileType = { ref: 'spread.xlsx', contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
-         const textFile: FileType = { ref: 'notes.txt', contentType: 'text/plain' }
+         const pdfFile: FileType = { bucket: 'test-bucket', ref: 'file.pdf', contentType: 'application/pdf' }
+         const xlsxFile: FileType = { bucket: 'test-bucket', ref: 'spread.xlsx', contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
+         const textFile: FileType = { bucket: 'test-bucket', ref: 'notes.txt', contentType: 'text/plain' }
 
          expect((mockAdapter as any)._isDocumentType(pdfFile, 'pdf')).toBe(true)
          expect((mockAdapter as any)._isDocumentType(xlsxFile, 'xlsx')).toBe(true)
@@ -111,6 +111,7 @@ describe('Storage Manager', () => {
 
       it('should generate image thumbnails using sharp', async () => {
          const file: FileType = {
+            bucket: 'test-bucket',
             ref: 'assets/media.png',
             name: 'assets/media.png',
             contentType: 'image/png'
@@ -130,6 +131,7 @@ describe('Storage Manager', () => {
 
       it('should generate video thumbnails using ffmpeg CLI execution', async () => {
          const file: FileType = {
+            bucket: 'test-bucket',
             ref: 'assets/movie.mp4',
             name: 'assets/movie.mp4',
             contentType: 'video/mp4'
@@ -145,6 +147,7 @@ describe('Storage Manager', () => {
 
       it('should generate document thumbnails using magick CLI execution', async () => {
          const file: FileType = {
+            bucket: 'test-bucket',
             ref: 'assets/doc.pdf',
             name: 'assets/doc.pdf',
             contentType: 'application/pdf'
@@ -160,6 +163,7 @@ describe('Storage Manager', () => {
 
       it('should handle document thumbnails based on fallback extensions', async () => {
          const file: FileType = {
+            bucket: 'test-bucket',
             ref: 'assets/doc.pdf',
             name: 'assets/doc.pdf'
             // Missing contentType, but has PDF extension
@@ -174,6 +178,7 @@ describe('Storage Manager', () => {
       it('should process possible missed image extensions falling back to application types', async () => {
          mockAdapter.getDriver().set('assets/image.jpg', Buffer.from('mock jpg data'))
          const file: FileType = {
+            bucket: 'test-bucket',
             ref: 'assets/image.jpg',
             name: 'assets/image.jpg',
             contentType: 'application/octet-stream'
@@ -186,6 +191,7 @@ describe('Storage Manager', () => {
 
       it('should bypass unsupported types and return empty mappings gracefully', async () => {
          const file: FileType = {
+            bucket: 'test-bucket',
             ref: 'assets/archive.zip',
             name: 'assets/archive.zip',
             contentType: 'application/zip'
@@ -198,6 +204,7 @@ describe('Storage Manager', () => {
       it('should catch failures and return empty objects on thumbnail errors', async () => {
          // Force error by downloading non-existent file
          const file: FileType = {
+            bucket: 'test-bucket',
             ref: 'assets/missing.png',
             name: 'assets/missing.png',
             contentType: 'image/png'

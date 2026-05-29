@@ -241,9 +241,10 @@ export abstract class AbstractStorageAdapter
       try {
          await this.download(file, { path })
 
-         const uploadPromises = sizes.map(async (size) => {
+         const results: Array<{ [key: string]: string }> = []
+         for (const size of sizes) {
             Storage.debug(`Generating ${size} thumbnail for ${name}`)
-            return this._createAndUploadThumbnail(
+            const result = await this._createAndUploadThumbnail(
                file,
                size,
                workingDir,
@@ -251,9 +252,9 @@ export abstract class AbstractStorageAdapter
                thumbnailExtension,
                path
             )
-         })
+            results.push(result)
+         }
 
-         const results = await Promise.all(uploadPromises)
          const thumbnails = Object.assign({}, ...results)
 
          await fs.remove(workingDir)
@@ -287,7 +288,8 @@ export abstract class AbstractStorageAdapter
          await this.download(file, { path: tmpFilePath })
          const ffmpeg = await Core.getSystemCommandPath('ffmpeg')
 
-         const uploadPromises = sizes.map(async (size) => {
+         const results: Array<{ [key: string]: string }> = []
+         for (const size of sizes) {
             const localThmbFilePath = `${tmpFilePath}.thumb${size}.${thumbnailExtension}`
 
             const ffmpegParams = [
@@ -320,10 +322,9 @@ export abstract class AbstractStorageAdapter
                createReadStream(localThmbFilePath)
             )
 
-            return { [thumbName]: thumbnailRef }
-         })
+            results.push({ [thumbName]: thumbnailRef })
+         }
 
-         const results = await Promise.all(uploadPromises)
          const thumbnails = Object.assign({}, ...results)
 
          await fs.remove(workingDir)
@@ -359,7 +360,8 @@ export abstract class AbstractStorageAdapter
 
          const magickCmd = await Core.getSystemCommandPath('magick')
 
-         const uploadPromises = sizes.map(async (size) => {
+         const results: Array<{ [key: string]: string }> = []
+         for (const size of sizes) {
             const tempThumbPath = join(
                workingDir,
                `temp_thumb${size}.${thumbnailExtension}`
@@ -381,7 +383,7 @@ export abstract class AbstractStorageAdapter
             await Core.execPromise(magickCmd, convertParams)
             Storage.debug(`Generated ${size} document thumbnail for ${name}`)
 
-            return this._createAndUploadThumbnail(
+            const result = await this._createAndUploadThumbnail(
                file,
                size,
                workingDir,
@@ -389,9 +391,9 @@ export abstract class AbstractStorageAdapter
                thumbnailExtension,
                tempThumbPath
             )
-         })
+            results.push(result)
+         }
 
-         const results = await Promise.all(uploadPromises)
          const thumbnails = Object.assign({}, ...results)
 
          await fs.remove(workingDir)

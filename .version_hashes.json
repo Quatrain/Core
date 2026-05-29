@@ -46,7 +46,7 @@
   },
   "@quatrain/cloudwrapper-supabase": {
     "version": "1.2.2",
-    "hash": "m1qFgosXMT3FdwbkLGh3xzaXvAo=-39953f0d8acfefac6100e17e3cb16fed6a3e6c478633c380b5e0fd5e28dd6a05",
+    "hash": "m1qFgosXMT3FdwbkLGh3xzaXvAo=-89594a8fbe8ffce231dfe482f3180367fdfd350dc9fbd503b969ddd4a682b7f3",
     "last_published": "2026-05-21T13:10:55.915Z"
   },
   "@quatrain/core": {
@@ -90,28 +90,28 @@
     "last_published": "2026-05-11T13:57:00.598Z"
   },
   "@quatrain/storage": {
-    "version": "1.2.10",
-    "hash": "6HX39VAzJEyLdSNn7CQpiuRyfaA=-95f90a1ce5b80d8266a320ab00cc7bf8600eb520d8cab42d8369f2b5c2f25ec6",
-    "last_published": "2026-05-29T08:16:44.997Z"
+    "version": "1.2.11",
+    "hash": "+dMYh+RQylWz1HHX8j/I3xcBPG8=-95f90a1ce5b80d8266a320ab00cc7bf8600eb520d8cab42d8369f2b5c2f25ec6",
+    "last_published": "2026-05-29T08:54:01.644Z"
   },
   "@quatrain/storage-firebase": {
     "version": "1.2.3",
-    "hash": "Q4SagvuHha+5omljtVGUsXp8l8U=-8330703687bb02a255f0ab9588f8eddca5531cb56feb9110564f7f283ad7b734",
+    "hash": "Q4SagvuHha+5omljtVGUsXp8l8U=-4922cff4ab95fc5a90b2346ecbfc76e8d0bbabf0a76275ffc3b2eef46b473198",
     "last_published": "2026-05-12T07:18:47.236Z"
   },
   "@quatrain/storage-s3": {
     "version": "1.2.7",
-    "hash": "MaWI8xXQWMMyv2PSAcrKiorcMX0=-027a4882815ac8f231b740cd7f4303a658c6b46731b5fd9ff61bdc376a4d0693",
+    "hash": "MaWI8xXQWMMyv2PSAcrKiorcMX0=-55df143d2ff50110908b4594b4dc029aa557138a10e7ead66c775d0ae1a3b7b9",
     "last_published": "2026-05-21T10:12:56.996Z"
   },
   "@quatrain/storage-supabase": {
     "version": "1.2.5",
-    "hash": "cazp1TCFhsjrbvVYVeMIgoWB0ho=-dc698cb5436c7972c5e5171f834e26bc0a6f5b986f4a689faa580471b622a970",
+    "hash": "cazp1TCFhsjrbvVYVeMIgoWB0ho=-860b674801ec53891b887431727f8dc38fa8dbb8555680866065303c7127f722",
     "last_published": "2026-05-12T13:13:13.262Z"
   },
   "@quatrain/worker": {
     "version": "1.2.9",
-    "hash": "J7CuKoMPK+dkzcxvq46Y9z2gHEg=-3e27d638edc77c8f2bc758974d5833fa1046dd8691ea5e52cb27ab3cf0c5314e",
+    "hash": "J7CuKoMPK+dkzcxvq46Y9z2gHEg=-a97975a50bec548b9b369657b089311302062546a5028bc1197247a5a7a30276",
     "last_published": "2026-05-25T09:17:17.030Z"
   },
   "@quatrain/testing": {

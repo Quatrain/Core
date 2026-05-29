@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/storage",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "description": "Common types and utils for Storages Adapters",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

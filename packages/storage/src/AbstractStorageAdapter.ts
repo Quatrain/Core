@@ -7,6 +7,12 @@ import { Storage, StorageParameters } from './Storage'
 
 import { createReadStream } from 'node:fs'
 import sharp from 'sharp'
+
+// Optimize sharp for memory-constrained and Alpine Linux environments.
+// Disabling the cache and setting concurrency to 1 dramatically reduces memory usage and prevents native OOM crashes on large files.
+sharp.cache(false)
+sharp.concurrency(1)
+
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import fs from 'fs-extra'
@@ -229,7 +235,9 @@ export abstract class AbstractStorageAdapter
     * @returns A mapping of generated thumbnail identifiers to their respective storage refs.
     */
    async generateImageThumbnail(file: FileType, sizes: number[]): Promise<any> {
-      Storage.info(`Generating image thumbnail(s) for ${file.ref}`)
+      Storage.info(
+         `Generating image thumbnail(s) for ${file.ref} (sizes: [${sizes.join(', ')}])`
+      )
       const { name, bucketDir, extension } = this._getFileInfo(file)
       const thumbnailExtension = 'png'
 
@@ -275,7 +283,9 @@ export abstract class AbstractStorageAdapter
     * @returns A mapping of generated thumbnail identifiers to their respective storage refs.
     */
    async generateVideoThumbnail(file: FileType, sizes: number[]): Promise<any> {
-      Storage.info(`Generating video thumbnail(s) for ${file.ref}`)
+      Storage.info(
+         `Generating video thumbnail(s) for ${file.ref} (sizes: [${sizes.join(', ')}])`
+      )
       const { name, bucketDir, extension } = this._getFileInfo(file)
       const thumbnailExtension = 'png'
 
@@ -346,7 +356,9 @@ export abstract class AbstractStorageAdapter
       file: FileType,
       sizes: number[]
    ): Promise<any> {
-      Storage.info(`Generating document thumbnail(s) for ${file.ref}`)
+      Storage.info(
+         `Generating document thumbnail(s) for ${file.ref} (sizes: [${sizes.join(', ')}])`
+      )
       const { name, bucketDir, extension } = this._getFileInfo(file)
       const thumbnailExtension = 'png'
 

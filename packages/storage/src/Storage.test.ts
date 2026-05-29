@@ -18,7 +18,10 @@ jest.mock('sharp', () => {
          return true
       })
    }
-   return jest.fn().mockReturnValue(sharpInstance)
+   const sharpMock = jest.fn().mockReturnValue(sharpInstance) as any
+   sharpMock.cache = jest.fn().mockReturnValue(sharpMock)
+   sharpMock.concurrency = jest.fn().mockReturnValue(sharpMock)
+   return sharpMock
 })
 
 describe('Storage Manager', () => {

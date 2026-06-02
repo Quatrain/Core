@@ -42,7 +42,7 @@ The Design phase is all about modeling your domain and laying the foundations of
 - **`@quatrain/core`**: Foundation package. Works standalone in-memory. Defines models, properties, validation, and serialization.
 - **`@quatrain/types`**: Shared contracts, types, interfaces, and exceptions for Core.
 - **`@quatrain/studio`**: Visual interface and meta-modeling package used by the visual studio application.
-- **`@quatrain/ui`**: Core styling and component logic (Mantine-based) for consistent frontend experiences.
+- **`@quatrain/ux`**: Core styling and component logic (Mantine-based) for consistent frontend experiences.
 
 > [!TIP]
 > For complete documentation, modeling details, and quick-start tutorials on these packages, please refer to the **[Core Wiki](https://github.com/Quatrain/Core/wiki)**.

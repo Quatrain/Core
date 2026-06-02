@@ -420,7 +420,7 @@ export const down = async ({ context: adapter }: { context: AbstractBackendAdapt
             "@mantine/core": "^7.11.1",
             "@mantine/hooks": "^7.11.1",
             "@quatrain/api-client": "latest-dev",
-            "@quatrain/ui-form-react": "latest-dev",
+            "@quatrain/ux-form-react": "latest-dev",
             "react": "^18.3.1",
             "react-dom": "^18.3.1",
             "react-router-dom": "^6.24.1"
@@ -661,7 +661,7 @@ export function ${m}List() {
             formTsx = this.generateWidgetForm(modelConfig, formWidget)
          } else {
             // Fallback historique sur CoreForm dynamique
-            formTsx = `import { CoreForm } from '@quatrain/ui-form-react'
+            formTsx = `import { CoreForm } from '@quatrain/ux-form-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api'
 

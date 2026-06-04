@@ -25,7 +25,7 @@ export const StudioAuthProperties: any = [
       type: StringProperty.TYPE,
       htmlType: htmlType.SELECT,
       options: {
-         values: ['pocketbase', 'supabase', 'firebase']
+         values: ['pocketbase', 'supabase', 'firebase', 'quatrain-oidc']
       }
    },
    {

@@ -2,6 +2,7 @@ import { Command } from 'commander'
 import { generateConfig } from './commands/generate/config'
 import { generateMigration } from './commands/generate/migration'
 import { generateScaffold } from './commands/generate/scaffold'
+import { deployCommand } from './commands/deploy'
 
 const program = new Command()
 
@@ -9,6 +10,11 @@ program
    .name('core')
    .description('Global CLI for Quatrain Core (configuration generation, migrations...)')
    .version('1.0.0')
+
+program
+   .command('deploy')
+   .description('Manage Kubernetes installations (create, list, modify, promote, delete)')
+   .action(deployCommand)
 
 const generate = program
    .command('generate')

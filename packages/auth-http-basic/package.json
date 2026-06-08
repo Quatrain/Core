@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/auth-http-basic",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Basic Authentication Adapter for Quatrain",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@quatrain/api": "workspace:*",
-    "@quatrain/auth": "^1.2.3",
+    "@quatrain/auth": "^1.2.4",
     "@quatrain/core": "^1.2.16",
     "@quatrain/http": "workspace:*"
   },

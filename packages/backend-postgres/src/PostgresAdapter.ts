@@ -78,6 +78,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             port = 6543,
             database = 'postgres',
             max = 20, // Lower per-process default
+            ssl = undefined,
          }: PoolConfig = this._params.config
          Backend.info(
             `Creating Postgres Pool on postgresql://${host}:${port}/${database} (max: ${max})`
@@ -91,6 +92,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             max,
             connectionTimeoutMillis: 10000,
             idleTimeoutMillis: 3000,
+            ssl,
          })
       }
 

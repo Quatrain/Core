@@ -2,6 +2,7 @@ import { Auth, AuthParameters, AuthParametersKeys } from './Auth'
 import { User } from '@quatrain/backend'
 import { AuthInterface } from './types/AuthInterface'
 import { ApiMiddleware, ApiRequest, ApiResponse } from '@quatrain/api'
+import { HttpStatus, HttpHelper } from '@quatrain/http'
 
 /**
  * Abstract base class that defines the contract for all authentication adapters.
@@ -25,7 +26,7 @@ export abstract class AbstractAuthAdapter implements AuthInterface {
     */
    public middleware(): ApiMiddleware {
       return async (req: ApiRequest, res: ApiResponse): Promise<boolean> => {
-         const bearer = ((req.headers?.authorization as string) || '').split(' ')[1] || ''
+         const bearer = HttpHelper.parseBearerToken(req.headers?.authorization as string)
          
          if (bearer) {
             try {
@@ -39,7 +40,7 @@ export abstract class AbstractAuthAdapter implements AuthInterface {
          }
 
          res.setHeader('WWW-Authenticate', 'Bearer realm="Core API"')
-         res.status(401).send('Authentication required.')
+         res.status(HttpStatus.UNAUTHORIZED).send('Authentication required.')
          return false
       }
    }

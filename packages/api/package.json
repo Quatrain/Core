@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@quatrain/core": "workspace:*",
+    "@quatrain/http": "workspace:*",
     "@quatrain/log": "workspace:*"
   },
   "scripts": {

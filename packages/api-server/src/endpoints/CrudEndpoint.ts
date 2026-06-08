@@ -1,4 +1,4 @@
-import { EndpointHandler, ServerAdapter, EndpointOptions } from '@quatrain/api'
+import { EndpointHandler, ServerAdapter, EndpointOptions, HttpStatus } from '@quatrain/api'
 import { BaseObject, DataObjectClass } from '@quatrain/core'
 import { Backend } from '@quatrain/backend'
 import { ValidationError } from '@quatrain/core'
@@ -22,13 +22,13 @@ export const CrudEndpoint = (ModelClass: typeof BaseObject): EndpointHandler => 
                
                (newObj as any).validate()
                await (newObj as any).save()
-               res.status(201).json(newObj.dataObject.toJSON())
+               res.status(HttpStatus.CREATED).json(newObj.dataObject.toJSON())
             } catch (e: any) {
                if (e.name === 'ValidationError') {
-                  res.status(400).json({ error: e.message, validationErrors: e.errors })
+                  res.status(HttpStatus.BAD_REQUEST).json({ error: e.message, validationErrors: e.errors })
                } else {
                   Backend.error(`[API Error] POST: ${e.message}`)
-                  res.status(400).json({ error: e.message })
+                  res.status(HttpStatus.BAD_REQUEST).json({ error: e.message })
                }
             }
          })
@@ -41,12 +41,12 @@ export const CrudEndpoint = (ModelClass: typeof BaseObject): EndpointHandler => 
             try {
                const obj = await (ModelClass as any).fromBackend(req.params.id)
                if (!obj) {
-                  return res.status(404).json({ error: 'Object not found' })
+                  return res.status(HttpStatus.NOT_FOUND).json({ error: 'Object not found' })
                }
                res.json(obj.dataObject.toJSON())
             } catch (e) {
                Backend.error(`[API Error] GET /${req.params.id}: ${(e as Error).message}`)
-               res.status(500).json({ error: (e as Error).message })
+               res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: (e as Error).message })
             }
          })
       }
@@ -60,7 +60,7 @@ export const CrudEndpoint = (ModelClass: typeof BaseObject): EndpointHandler => 
                const obj = await (ModelClass as any).fromBackend(req.params.id)
                   
                if (!obj) {
-                  return res.status(404).json({ error: 'Object not found' })
+                  return res.status(HttpStatus.NOT_FOUND).json({ error: 'Object not found' })
                }
                
                Object.keys(data).forEach((key) => {
@@ -74,10 +74,10 @@ export const CrudEndpoint = (ModelClass: typeof BaseObject): EndpointHandler => 
                res.json(obj.dataObject.toJSON())
             } catch (e: any) {
                if (e.name === 'ValidationError') {
-                  res.status(400).json({ error: e.message, validationErrors: e.errors })
+                  res.status(HttpStatus.BAD_REQUEST).json({ error: e.message, validationErrors: e.errors })
                } else {
                   Backend.error(`[API Error] PUT /${req.params.id}: ${e.message}`)
-                  res.status(400).json({ error: e.message })
+                  res.status(HttpStatus.BAD_REQUEST).json({ error: e.message })
                }
             }
          })
@@ -91,14 +91,14 @@ export const CrudEndpoint = (ModelClass: typeof BaseObject): EndpointHandler => 
                const obj = await (ModelClass as any).fromBackend(req.params.id)
                   
                if (!obj) {
-                  return res.status(404).json({ error: 'Object not found' })
+                  return res.status(HttpStatus.NOT_FOUND).json({ error: 'Object not found' })
                }
                
                await obj.delete()
                res.json({ success: true })
             } catch (e) {
                Backend.error(`[API Error] DELETE /${req.params.id}: ${(e as Error).message}`)
-               res.status(500).json({ error: (e as Error).message })
+               res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: (e as Error).message })
             }
          })
       }

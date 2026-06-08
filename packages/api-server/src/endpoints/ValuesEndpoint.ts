@@ -1,4 +1,4 @@
-import { EndpointHandler, ServerAdapter, EndpointOptions } from '@quatrain/api'
+import { EndpointHandler, ServerAdapter, EndpointOptions, HttpStatus } from '@quatrain/api'
 import { BaseObject, DataObjectClass } from '@quatrain/core'
 import { Backend } from '@quatrain/backend'
 
@@ -59,7 +59,7 @@ export const ValuesEndpoint = (ModelClass: typeof BaseObject): EndpointHandler =
             res.json(values)
          } catch (e) {
             Backend.error(`[API Error] GET ${valuesPath}: ${(e as Error).message}`)
-            res.status(500).json({ error: (e as Error).message })
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: (e as Error).message })
          }
       })
    }

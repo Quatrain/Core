@@ -146,7 +146,7 @@ ${layoutCode}         {/* --- Fin du layout --- */}
       if (config.authMode === 'oauth') {
          packageJson.dependencies['@quatrain/auth-oidc'] = targetNpmTag
       } else if (config.authMode === 'basic') {
-         packageJson.dependencies['@quatrain/auth-basic'] = targetNpmTag
+         packageJson.dependencies['@quatrain/auth-http-basic'] = targetNpmTag
       }
       
       if (config.backend?.adapter === 'PostgresAdapter') {
@@ -260,7 +260,7 @@ import { ${adapterClass} } from '${adapterImport}'
 import { ExpressAdapter } from '@quatrain/api-server-express'
 import { MigrationManager } from '@quatrain/backend-migrations'
 import { Log, DefaultLoggerAdapter, LogLevel } from '@quatrain/log'
-${config.authMode === 'oauth' ? `import { AuthOIDC } from '@quatrain/auth-oidc'\n` : ''}${config.authMode === 'basic' ? `import { AuthBasic } from '@quatrain/auth-basic'\n` : ''}
+${config.authMode === 'oauth' ? `import { AuthOIDC } from '@quatrain/auth-oidc'\n` : ''}${config.authMode === 'basic' ? `import { AuthBasic } from '@quatrain/auth-http-basic'\n` : ''}
 ${modelImports}
 ${apiImports}
 

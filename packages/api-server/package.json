@@ -30,7 +30,8 @@
   "dependencies": {
     "@quatrain/api": "workspace:*",
     "@quatrain/backend": "workspace:*",
-    "@quatrain/core": "workspace:*"
+    "@quatrain/core": "workspace:*",
+    "@quatrain/http": "workspace:*"
   },
   "scripts": {
     "test-ci": "jest --runInBand",

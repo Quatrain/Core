@@ -1,4 +1,5 @@
 import { Log } from '@quatrain/log'
+import { HttpStatus, HttpMethod as Method } from '@quatrain/http'
 import { AuthProvider } from './auth/AuthProvider'
 
 export interface RestApi {
@@ -6,13 +7,7 @@ export interface RestApi {
    params: object
 }
 
-export enum Method {
-   GET = 'GET',
-   POST = 'POST',
-   PATCH = 'PATCH',
-   PUT = 'PUT',
-   DELETE = 'DELETE',
-}
+export { Method }
 
 export type QueryOptions = {
    url?: string
@@ -300,10 +295,14 @@ export class ApiClient implements RestApi {
       }
 
       let data: any = null
-      if (response.status !== 204 && response.status !== 205) {
-         const text = await response.text()
-         if (text && text.trim().length > 0) {
-            data = JSON.parse(text)
+      if (response.status !== HttpStatus.NO_CONTENT && response.status !== HttpStatus.RESET_CONTENT) {
+         if (typeof response.text === 'function') {
+            const text = await response.text()
+            if (text && text.trim().length > 0) {
+               data = JSON.parse(text)
+            }
+         } else if (typeof response.json === 'function') {
+            data = await response.json()
          }
       }
 

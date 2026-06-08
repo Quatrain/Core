@@ -22,7 +22,8 @@
   "dependencies": {
     "@quatrain/api": "workspace:*",
     "@quatrain/backend": "^1.2.13",
-    "@quatrain/core": "^1.2.16"
+    "@quatrain/core": "^1.2.16",
+    "@quatrain/http": "workspace:*"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

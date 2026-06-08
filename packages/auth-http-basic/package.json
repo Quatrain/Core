@@ -1,0 +1,25 @@
+{
+  "name": "@quatrain/auth-http-basic",
+  "version": "1.0.3",
+  "description": "Basic Authentication Adapter for Quatrain",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@quatrain/api": "workspace:*",
+    "@quatrain/auth": "^1.2.3",
+    "@quatrain/core": "^1.2.16",
+    "@quatrain/http": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.1.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/auth-http-basic"
+  }
+}

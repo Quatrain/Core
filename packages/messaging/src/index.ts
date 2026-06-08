@@ -5,6 +5,7 @@ import type { MessagingRecipient } from './types/MessagingRecipient'
 import type { NotificationMessage } from './types/NotificationMessage'
 import type { MessageType } from './types/MessageType'
 import type { EmailCapableAdapter } from './types/EmailCapableAdapter'
+import type { TextCapableAdapter } from './types/TextCapableAdapter'
 import type { NotificationCapableAdapter } from './types/NotificationCapableAdapter'
 import { MessageFormatter } from './MessageFormatter'
 
@@ -20,5 +21,6 @@ export type {
    NotificationMessage,
    MessageType,
    EmailCapableAdapter,
+   TextCapableAdapter,
    NotificationCapableAdapter,
 }

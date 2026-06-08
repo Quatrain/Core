@@ -159,4 +159,47 @@ export class FirebaseAuthAdapter extends AbstractAuthAdapter {
 
       return data
    }
+
+   /**
+    * Initiates password recovery/reset process for a user.
+    * 
+    * @param email - The user email.
+    * @param redirectTo - Optional redirect destination.
+    */
+   async recoverPassword(email: string, redirectTo?: string): Promise<any> {
+      if (!this._params.config || !this._params.config.apiKey) {
+         Auth.warn(`Can't recover password, no API key provided in Firebase config`)
+         throw new Error('Firebase Auth API key is not configured')
+      }
+
+      const body: any = {
+         requestType: 'PASSWORD_RESET',
+         email,
+      }
+
+      if (redirectTo) {
+         body.actionCodeSettings = {
+            url: redirectTo,
+            handleCodeInApp: true,
+         }
+      }
+
+      const response = await nativeFetch.fetch(
+         `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${this._params.config.apiKey}`,
+         {
+            method: 'POST',
+            body: JSON.stringify(body),
+            headers: { 'Content-Type': 'application/json' },
+         }
+      )
+
+      if (!response.ok) {
+         const errorData = await response.json().catch(() => ({}))
+         const message = errorData.error?.message || response.statusText
+         throw new Error(message)
+      }
+
+      const data = await response.json()
+      return data
+   }
 }

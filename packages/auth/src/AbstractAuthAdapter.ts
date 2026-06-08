@@ -147,4 +147,14 @@ export abstract class AbstractAuthAdapter implements AuthInterface {
     * @returns Action response from the provider.
     */
    abstract setCustomUserClaims(id: string, claims: any): any
+
+   /**
+    * Initiates password recovery/reset process for a user.
+    * 
+    * @param email - The user email.
+    * @param redirectTo - Optional redirect destination.
+    */
+   recoverPassword(email: string, redirectTo?: string): Promise<any> {
+      throw new Error('Password recovery not implemented for this adapter')
+   }
 }

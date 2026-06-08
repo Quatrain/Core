@@ -222,4 +222,20 @@ export class SupabaseAuthAdapter extends AbstractAuthAdapter {
          return data
       }
    }
+
+   /**
+    * Initiates password recovery/reset process for a user.
+    * 
+    * @param email - The user email.
+    * @param redirectTo - Optional redirect destination.
+    */
+   async recoverPassword(email: string, redirectTo?: string) {
+      const { data, error } = await this._client.auth.resetPasswordForEmail(email, {
+         redirectTo,
+      })
+      if (error) {
+         throw new Error(error.message)
+      }
+      return data
+   }
 }

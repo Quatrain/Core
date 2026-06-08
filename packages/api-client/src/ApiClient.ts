@@ -219,7 +219,7 @@ export class ApiClient implements RestApi {
          ApiClient.cache(ApiClient.getCacheKey(url, params).split('|')[0], ApiClient.CACHE_REMOVE)
       }
 
-      const fullUrl = url.startsWith('http') ? url : `${this.baseURL}/${url.startsWith('/') ? url.substring(1) : url}`
+      const fullUrl = (url.startsWith('http') ? url : `${this.baseURL}/${url.startsWith('/') ? url.substring(1) : url}`).replace(/([^:]\/)\/+/g, "$1")
       
       // Construct URL search params if provided
       let finalUrl = fullUrl
@@ -299,7 +299,13 @@ export class ApiClient implements RestApi {
          throw new Error(errorMessage)
       }
 
-      const data: any = await response.json()
+      let data: any = null
+      if (response.status !== 204 && response.status !== 205) {
+         const text = await response.text()
+         if (text && text.trim().length > 0) {
+            data = JSON.parse(text)
+         }
+      }
 
       if (ApiClient.debug === true) {
          console.log(`API: [${response.status}] ${config.method.toUpperCase()} ${config.url}`)

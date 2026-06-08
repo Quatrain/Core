@@ -48,7 +48,10 @@ export class BaseRepository<T extends BaseObjectType> {
       backendAdapter: BackendInterface = Backend.getBackend()
    ) {
       this._model = model
-      this.backendAdapter = backendAdapter
+      this.backendAdapter =
+         backendAdapter && (typeof backendAdapter === 'function' || (backendAdapter as any).prototype instanceof PersistedBaseObject)
+            ? Backend.getBackend()
+            : backendAdapter
    }
    protected async getDataObjectFromUid(
       uid: string

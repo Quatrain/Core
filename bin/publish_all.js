@@ -177,9 +177,14 @@ async function publishAll() {
                     } catch (e) { /* ignores 404 */ }
 
                     if (!existsNpmjs) {
-                        let publishArgsNpm = ['publish', 'package.tgz', '--registry', 'https://registry.npmjs.org/', '--access', 'public', '--provenance'];
-                        if (npmTag) publishArgsNpm.push('--tag', npmTag);
-                        runSync('npm', publishArgsNpm, { cwd: pkgDir, stdio: 'inherit' });
+                        try {
+                            let publishArgsNpm = ['publish', 'package.tgz', '--registry', 'https://registry.npmjs.org/', '--access', 'public'];
+                            if (process.env.GITHUB_ACTIONS) publishArgsNpm.push('--provenance');
+                            if (npmTag) publishArgsNpm.push('--tag', npmTag);
+                            runSync('npm', publishArgsNpm, { cwd: pkgDir, stdio: 'inherit' });
+                        } catch (err) {
+                            console.warn(`[WARNING] Failed to publish ${pkgName} to npmjs.org:`, err.message);
+                        }
                     } else {
                         console.log(`[PUBLISH] ${pkgName}@${newVersion} already exists on npmjs, skipping.`);
                     }
@@ -192,9 +197,13 @@ async function publishAll() {
                     } catch (e) { /* ignores 404 */ }
 
                     if (!existsGithub) {
-                        let publishArgsGh = ['publish', 'package.tgz', '--registry', 'https://npm.pkg.github.com/'];
-                        if (npmTag) publishArgsGh.push('--tag', npmTag);
-                        runSync('npm', publishArgsGh, { cwd: pkgDir, stdio: 'inherit' });
+                        try {
+                            let publishArgsGh = ['publish', 'package.tgz', '--registry', 'https://npm.pkg.github.com/'];
+                            if (npmTag) publishArgsGh.push('--tag', npmTag);
+                            runSync('npm', publishArgsGh, { cwd: pkgDir, stdio: 'inherit' });
+                        } catch (err) {
+                            console.warn(`[WARNING] Failed to publish ${pkgName} to GitHub Packages:`, err.message);
+                        }
                     } else {
                         console.log(`[PUBLISH] ${pkgName}@${newVersion} already exists on GitHub Packages, skipping.`);
                     }

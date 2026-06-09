@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/auth-supabase",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "license": "AGPL-3.0-only",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,8 +20,8 @@
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
     "@quatrain/api": "workspace:*",
-    "@quatrain/auth": "^1.2.5",
-    "@quatrain/backend": "^1.2.14",
+    "@quatrain/auth": "^1.2.7",
+    "@quatrain/backend": "^1.2.16",
     "@supabase/supabase-js": "^2.87.3",
     "node-fetch-native": "^1.6.4"
   },

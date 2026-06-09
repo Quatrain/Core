@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/cloudwrapper",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "license": "AGPL-3.0-only",
   "description": "Cloud wrappers commons",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "peerDependencies": {
-    "@quatrain/backend": "^1.2.14",
+    "@quatrain/backend": "^1.2.16",
     "@quatrain/core": "^1.2.16"
   },
   "devDependencies": {
@@ -42,7 +42,7 @@
     "bump-to": "yarn version"
   },
   "dependencies": {
-    "@quatrain/backend": "^1.2.14",
+    "@quatrain/backend": "^1.2.16",
     "@quatrain/core": "^1.2.16",
     "@quatrain/storage": "^1.1"
   },

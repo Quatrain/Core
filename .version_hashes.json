@@ -135,9 +135,9 @@
     "last_published": "2026-06-08T09:52:54.854Z"
   },
   "@quatrain/api-client": {
-    "version": "1.1.6",
-    "hash": "eUt0PKxGvUoAte0IgKFtgjRrT0E=-bfe410cb910a502cca39e40113ffd62959ec79fe9268decb4c70253f501b2c47",
-    "last_published": "2026-06-08T09:52:58.580Z"
+    "version": "1.1.7",
+    "hash": "/qiAY00emkeCtIFXcDSFksgr1EE=-bfe410cb910a502cca39e40113ffd62959ec79fe9268decb4c70253f501b2c47",
+    "last_published": "2026-06-09T16:20:01.286Z"
   },
   "@quatrain/api-server": {
     "version": "1.1.10",
@@ -255,19 +255,19 @@
     "last_published": "2026-05-23T19:25:20.948Z"
   },
   "@quatrain/i18n": {
-    "version": "1.0.7",
-    "hash": "BVfkcHCbPTI+Okpa1V8gA8+Lids=-397b2919bedc6bb556bb9624d9f46a64a011ea2fd14bfceabc55721922e3648d",
-    "last_published": "2026-06-09T14:49:46.597Z"
+    "version": "1.0.8",
+    "hash": "/GxovfA+hP7bXIZwChuxsJ57Xcc=-397b2919bedc6bb556bb9624d9f46a64a011ea2fd14bfceabc55721922e3648d",
+    "last_published": "2026-06-09T16:20:08.469Z"
   },
   "@quatrain/i18n-en": {
-    "version": "1.0.5",
-    "hash": "pQRk8ZN+DxRMsAikUxm3gDmmDC8=-d4a36c7a0eb0a3ed1ea5655cef01a787983c3cfdb51fade593c1851416e546fd",
-    "last_published": "2026-06-09T14:49:53.777Z"
+    "version": "1.0.6",
+    "hash": "eL1dd94QjXfEFazCooDKd3py0ww=-d4a36c7a0eb0a3ed1ea5655cef01a787983c3cfdb51fade593c1851416e546fd",
+    "last_published": "2026-06-09T16:20:15.168Z"
   },
   "@quatrain/i18n-fr": {
-    "version": "1.0.5",
-    "hash": "BMG+TimSptA3u8y97KXnDG9lphU=-d4a36c7a0eb0a3ed1ea5655cef01a787983c3cfdb51fade593c1851416e546fd",
-    "last_published": "2026-06-09T14:50:07.008Z"
+    "version": "1.0.6",
+    "hash": "VMzKbXkoDYK4YxONmoKMvDR31M8=-d4a36c7a0eb0a3ed1ea5655cef01a787983c3cfdb51fade593c1851416e546fd",
+    "last_published": "2026-06-09T16:20:28.059Z"
   },
   "@quatrain/ui-list": {
     "version": "1.0.4",
@@ -295,8 +295,8 @@
     "last_published": "2026-06-09T14:49:38.294Z"
   },
   "@quatrain/i18n-es": {
-    "version": "1.0.4",
-    "hash": "zg5f04D51caisTAPvVhSjuLo3Lg=-d4a36c7a0eb0a3ed1ea5655cef01a787983c3cfdb51fade593c1851416e546fd",
-    "last_published": "2026-06-09T14:50:00.539Z"
+    "version": "1.0.5",
+    "hash": "RWxBqWZSc/aQST9dzfiRcvl5mFw=-d4a36c7a0eb0a3ed1ea5655cef01a787983c3cfdb51fade593c1851416e546fd",
+    "last_published": "2026-06-09T16:20:21.505Z"
   }
 }

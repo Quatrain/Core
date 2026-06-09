@@ -65,6 +65,27 @@ export const frDictionary: QuatrainDictionary = {
     },
     errors: {
         weak_password: 'Le mot de passe n’est pas assez complexe',
+    },
+    passwordChange: {
+        title: 'Réinitialiser le mot de passe',
+        subtitle: 'Créez un nouveau mot de passe sécurisé pour votre compte',
+        newPasswordLabel: 'Nouveau mot de passe',
+        newPasswordPlaceholder: 'Saisissez votre nouveau mot de passe',
+        confirmPasswordLabel: 'Confirmer le mot de passe',
+        confirmPasswordPlaceholder: 'Confirmez votre nouveau mot de passe',
+        strengthLabel: 'Force :',
+        strengthWeak: 'Faible (min 8 car., mélange maj/min/chiffre/spéc.)',
+        strengthFair: 'Moyen',
+        strengthGood: 'Bon',
+        strengthStrong: 'Fort',
+        passwordsMatch: 'Les mots de passe correspondent',
+        passwordsDoNotMatch: 'Les mots de passe ne correspondent pas',
+        updateButton: 'Mettre à jour le mot de passe',
+        successHeader: 'Réinitialisation du mot de passe réussie',
+        successContent: 'Votre mot de passe a été mis à jour. Redirection vers la page de connexion...',
+        failedHeader: 'Échec de la réinitialisation du mot de passe',
+        failedGeneric: 'Une erreur est survenue lors de la mise à jour de votre mot de passe.'
     }
 }
+
 

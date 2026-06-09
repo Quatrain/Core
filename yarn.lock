@@ -3463,6 +3463,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/i18n-es@workspace:packages/i18n-es":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/i18n-es@workspace:packages/i18n-es"
+  dependencies:
+    "@quatrain/i18n": "workspace:*"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/i18n-fr@workspace:packages/i18n-fr":
   version: 0.0.0-use.local
   resolution: "@quatrain/i18n-fr@workspace:packages/i18n-fr"

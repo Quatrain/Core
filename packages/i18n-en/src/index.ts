@@ -65,6 +65,27 @@ export const enDictionary: QuatrainDictionary = {
     },
     errors: {
         weak_password: 'Password is not complex enough',
+    },
+    passwordChange: {
+        title: 'Reset Password',
+        subtitle: 'Create a secure new password for your account',
+        newPasswordLabel: 'New Password',
+        newPasswordPlaceholder: 'Type your new password',
+        confirmPasswordLabel: 'Confirm Password',
+        confirmPasswordPlaceholder: 'Confirm your new password',
+        strengthLabel: 'Strength:',
+        strengthWeak: 'Weak (min 8 chars, mix of case/num/spec)',
+        strengthFair: 'Fair',
+        strengthGood: 'Good',
+        strengthStrong: 'Strong',
+        passwordsMatch: 'Passwords match',
+        passwordsDoNotMatch: 'Passwords do not match',
+        updateButton: 'Update Password',
+        successHeader: 'Password Reset Successful',
+        successContent: 'Your password has been updated. Redirecting to the sign-in page...',
+        failedHeader: 'Password Reset Failed',
+        failedGeneric: 'An error occurred while updating your password.'
     }
 }
+
 

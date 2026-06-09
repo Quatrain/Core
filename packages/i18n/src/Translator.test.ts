@@ -147,4 +147,21 @@ describe('Translator', () => {
       translator.extend('en', null as any)
       expect((translator as any).dictionaries['en']).toEqual(initialDict)
    })
+
+   describe('getProxy', () => {
+      it('should return a callable proxy that translates for the default/target language', () => {
+         const t = translator.getProxy()
+         expect(t('app.title')).toBe('Core App')
+         expect(t('table', 'id')).toBe('ID')
+      })
+
+      it('should support dynamic language chaining overrides like t.fr', () => {
+         const t = translator.getProxy('en')
+         expect(t('app.title')).toBe('Core App')
+         expect(t.fr('app.title')).toBe('Application Core')
+         expect(t.fr('table', 'id')).toBe('Identifiant')
+         // Chain fallback
+         expect(t.es('app.title')).toBe('Core App') // Falls back to default 'en'
+      })
+   })
 })

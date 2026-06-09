@@ -1,2 +1,3 @@
-export * from './types'
-export * from './Translator'
+export type * from './types'
+export { Translator } from './Translator'
+

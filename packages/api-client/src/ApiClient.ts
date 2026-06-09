@@ -221,10 +221,11 @@ export class ApiClient implements RestApi {
       if (method === Method.GET && Object.keys(params).length > 0) {
          const searchParams = new URLSearchParams()
          for (const [key, value] of Object.entries(params)) {
-            if (value !== undefined) {
+            if (key !== 'headers' && value !== undefined) {
                searchParams.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value))
             }
          }
+
          const qs = searchParams.toString()
          if (qs) {
             finalUrl += (finalUrl.includes('?') ? '&' : '?') + qs

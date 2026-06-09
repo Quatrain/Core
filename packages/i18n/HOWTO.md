@@ -9,13 +9,14 @@ This document describes how to leverage `@quatrain/i18n` to define structured di
 You can instantiate a central `Translator` and load multilingual dictionaries dynamically:
 
 ```typescript
-import { Translator, QuatrainDictionary } from '@quatrain/i18n'
+import { Translator, CoreDictionary } from '@quatrain/i18n'
 
 // 1. Create translator instance (with fallback default language)
 const translator = new Translator('en')
 
 // 2. Define standard dictionaries
-const englishDict: QuatrainDictionary = {
+const englishDict: CoreDictionary = {
+
     table: {
         uid: 'Identifier',
         id: 'ID',

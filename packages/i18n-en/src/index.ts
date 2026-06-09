@@ -1,9 +1,9 @@
-import { QuatrainDictionary } from '@quatrain/i18n'
+import type { CoreDictionary } from '@quatrain/i18n'
 
 /**
  * English translation dictionary mapping for Quatrain table and UI components.
  */
-export const enDictionary: QuatrainDictionary = {
+export const enDictionary: CoreDictionary = {
     table: {
         uid: 'Identifier',
         id: 'ID',

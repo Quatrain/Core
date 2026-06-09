@@ -1,11 +1,11 @@
-import { QuatrainDictionary } from './types'
+import { CoreDictionary } from './types'
 
 /**
  * A standard, framework-agnostic translation manager and dictionary resolver.
  * Handles language registration and scoped key extraction with safety fallbacks.
  */
 export class Translator {
-    protected dictionaries: Record<string, QuatrainDictionary> = {}
+    protected dictionaries: Record<string, CoreDictionary> = {}
     protected defaultLang: string
 
     /**
@@ -22,17 +22,17 @@ export class Translator {
       * 
       * @param dicts - A record mapping language keys (e.g. 'en', 'fr') to dictionaries.
       */
-     public register(dicts: Record<string, QuatrainDictionary>): void
+     public register(dicts: Record<string, CoreDictionary>): void
      /**
       * Registers a specific translation language dictionary.
       * 
       * @param lang - The language key code (e.g. 'en', 'fr').
       * @param dict - The fully conforming Quatrain dictionary instance.
       */
-     public register(lang: string, dict: QuatrainDictionary): void
+     public register(lang: string, dict: CoreDictionary): void
      public register(
-         langOrDicts: string | Record<string, QuatrainDictionary>,
-         dict?: QuatrainDictionary
+         langOrDicts: string | Record<string, CoreDictionary>,
+         dict?: CoreDictionary
      ): void {
          if (typeof langOrDicts === 'string') {
              if (dict) {
@@ -69,7 +69,7 @@ export class Translator {
             }
         }
 
-        const dict: QuatrainDictionary | undefined = this.dictionaries[resolvedLang] || this.dictionaries[this.defaultLang]
+        const dict: CoreDictionary | undefined = this.dictionaries[resolvedLang] || this.dictionaries[this.defaultLang]
         if (!dict) {
             return resolvedKey || scope
         }
@@ -92,18 +92,41 @@ export class Translator {
     }
 
     /**
+     * Dynamically extends and merges existing translation dictionaries.
+     * This allows consuming applications to register their specific UI translations at runtime.
+     * 
+     * @param dicts - A record mapping language keys (e.g. 'en', 'fr') to custom dictionaries.
+     */
+    public extend(dicts: Record<string, Record<string, any>>): void
+    /**
      * Dynamically extends and merges an existing dictionary for a given language.
      * This allows consuming applications to register their specific UI translations at runtime.
      * 
      * @param lang - The language key code (e.g. 'en', 'fr').
      * @param customDict - The custom dictionary object containing terms to merge.
      */
-    public extend(lang: string, customDict: Record<string, any>): void {
-        if (!this.dictionaries[lang]) {
-            this.dictionaries[lang] = { table: {} as any }
+    public extend(lang: string, customDict: Record<string, any>): void
+    public extend(
+        langOrDicts: string | Record<string, Record<string, any>>,
+        customDict?: Record<string, any>
+    ): void {
+        if (typeof langOrDicts === 'string') {
+            if (customDict) {
+                if (!this.dictionaries[langOrDicts]) {
+                    this.dictionaries[langOrDicts] = { table: {} as any }
+                }
+                this.dictionaries[langOrDicts] = this.deepMerge(this.dictionaries[langOrDicts], customDict)
+            }
+        } else {
+            for (const [lang, dict] of Object.entries(langOrDicts)) {
+                if (!this.dictionaries[lang]) {
+                    this.dictionaries[lang] = { table: {} as any }
+                }
+                this.dictionaries[lang] = this.deepMerge(this.dictionaries[lang], dict)
+            }
         }
-        this.dictionaries[lang] = this.deepMerge(this.dictionaries[lang], customDict)
     }
+
 
     /**
      * A helper method to perform recursive deep-merging of two dictionary objects.

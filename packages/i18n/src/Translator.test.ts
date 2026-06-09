@@ -1,10 +1,10 @@
 import { Translator } from './Translator'
-import { QuatrainDictionary } from './types'
+import { CoreDictionary } from './types'
 
 describe('Translator', () => {
    let translator: Translator
 
-   const mockEnDict: QuatrainDictionary = {
+   const mockEnDict: CoreDictionary = {
       table: {
          uid: 'UID',
          id: 'ID',
@@ -29,7 +29,7 @@ describe('Translator', () => {
       }
    }
 
-   const mockFrDict: QuatrainDictionary = {
+   const mockFrDict: CoreDictionary = {
       table: {
          uid: 'UID',
          id: 'Identifiant',
@@ -146,6 +146,16 @@ describe('Translator', () => {
       const initialDict = (translator as any).dictionaries['en']
       translator.extend('en', null as any)
       expect((translator as any).dictionaries['en']).toEqual(initialDict)
+   })
+
+   it('should dynamically extend multiple dictionaries simultaneously using a map', () => {
+      translator.extend({
+         en: { app: { subtitle: 'English Subtitle' } },
+         fr: { app: { subtitle: 'Sous-titre Français' } }
+      })
+      expect(translator.translate('app.subtitle', 'en')).toBe('English Subtitle')
+      expect(translator.translate('app.subtitle', 'fr')).toBe('Sous-titre Français')
+      expect(translator.translate('app.title', 'en')).toBe('Core App')
    })
 
    describe('getProxy', () => {

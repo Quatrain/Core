@@ -130,7 +130,7 @@ export interface SystemStatusesLabels {
     zipping: string
 }
 
-export interface QuatrainDictionary {
+export interface CoreDictionary {
     /** Table/List specific labels */
     table: SystemTableLabels
 

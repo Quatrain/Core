@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/auth-firebase",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "license": "AGPL-3.0-only",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@quatrain/api": "workspace:*",
-    "@quatrain/auth": "^1.2.4",
+    "@quatrain/auth": "^1.2.5",
     "@quatrain/backend": "^1.2.14",
     "@quatrain/core": "^1.2.16",
     "firebase-admin": "^13.0.1",

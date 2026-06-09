@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@quatrain/api": "workspace:*",
-    "@quatrain/auth": "^1.2.4",
+    "@quatrain/auth": "^1.2.5",
     "@quatrain/core": "^1.2.16",
     "@quatrain/http": "workspace:*"
   },

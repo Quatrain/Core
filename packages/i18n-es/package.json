@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/i18n-es",
-  "version": "1.0.6",
+  "version": "1.0.5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bun": "src/index.ts",

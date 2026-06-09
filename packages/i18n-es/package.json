@@ -1,7 +1,13 @@
 {
   "name": "@quatrain/i18n-es",
-  "version": "1.0.5",
-  "main": "src/index.ts",
+  "version": "1.0.4",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "dist/",
+    "src/"
+  ],
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@quatrain/i18n": "workspace:*"

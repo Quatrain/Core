@@ -56,6 +56,7 @@ const options = {
 
 async function publishAll() {
     let changed = false;
+    const publishedPackages = [];
 
     // Clean stale tsconfig.tsbuildinfo files. These can contain paths from a
     // previous Yarn Berry PnP setup (.yarn/berry/cache/...) that are invalid
@@ -223,6 +224,10 @@ async function publishAll() {
                 
                 changed = true;
                 console.log(`[PUBLISH] Success for ${pkgName} v${newVersion}`);
+                publishedPackages.push({
+                    Package: pkgName,
+                    Version: newVersion
+                });
                 
             } catch (error) {
                 console.error(`[ERROR] Failed to publish ${pkgName}:`, error.message);
@@ -266,6 +271,11 @@ async function publishAll() {
         console.log(`Updated ${registryFile}`);
     } else {
         console.log('No package changes detected. Skipped publishing.');
+    }
+
+    if (publishedPackages.length > 0) {
+        console.log('\n[SUMMARY] Published packages:');
+        console.table(publishedPackages);
     }
 }
 

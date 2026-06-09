@@ -172,7 +172,7 @@ describe('ApiClient', () => {
       })
 
       expect(fetchMock).toHaveBeenCalledWith(
-         'https://other-domain.com/data?headers=%7B%22X-Custom%22%3A%22Value%22%7D',
+         'https://other-domain.com/data',
          expect.objectContaining({
             headers: expect.objectContaining({
                'Content-Type': 'application/json',

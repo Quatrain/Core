@@ -105,7 +105,13 @@ export class FirebaseAuthAdapter extends AbstractAuthAdapter {
             Auth.log(`Updating ${updatable.displayName} Auth record`)
             await getAuth().updateUser(user.uid, updatable)
          }
-      } catch (e) {}
+      } catch (e: any) {
+         Auth.error(e)
+         if (e.code === 'auth/weak-password' || e.message?.toLowerCase().includes('password')) {
+            throw new AuthenticationError(Auth.ERROR_WEAK_PASSWORD)
+         }
+         throw new AuthenticationError((e as Error).message)
+      }
    }
 
    /**

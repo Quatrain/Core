@@ -62,6 +62,9 @@ export const enDictionary: QuatrainDictionary = {
         upload_ko: 'Upload Failed',
         validated: 'Validated',
         zipping: 'Archiving'
+    },
+    errors: {
+        weak_password: 'Password is not complex enough',
     }
 }
 

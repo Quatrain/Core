@@ -17,15 +17,33 @@ export class Translator {
         this.defaultLang = defaultLang
     }
 
-    /**
-     * Registers a specific translation language dictionary.
-     * 
-     * @param lang - The language key code (e.g. 'en', 'fr').
-     * @param dict - The fully conforming Quatrain dictionary instance.
-     */
-    public register(lang: string, dict: QuatrainDictionary): void {
-        this.dictionaries[lang] = dict
-    }
+     /**
+      * Registers one or multiple translation language dictionaries.
+      * 
+      * @param dicts - A record mapping language keys (e.g. 'en', 'fr') to dictionaries.
+      */
+     public register(dicts: Record<string, QuatrainDictionary>): void
+     /**
+      * Registers a specific translation language dictionary.
+      * 
+      * @param lang - The language key code (e.g. 'en', 'fr').
+      * @param dict - The fully conforming Quatrain dictionary instance.
+      */
+     public register(lang: string, dict: QuatrainDictionary): void
+     public register(
+         langOrDicts: string | Record<string, QuatrainDictionary>,
+         dict?: QuatrainDictionary
+     ): void {
+         if (typeof langOrDicts === 'string') {
+             if (dict) {
+                 this.dictionaries[langOrDicts] = dict
+             }
+         } else {
+             for (const [lang, d] of Object.entries(langOrDicts)) {
+                 this.dictionaries[lang] = d
+             }
+         }
+     }
 
     /**
      * Translates a specific text label key inside a given dictionary scope.

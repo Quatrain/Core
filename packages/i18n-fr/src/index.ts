@@ -62,6 +62,9 @@ export const frDictionary: QuatrainDictionary = {
         upload_ko: 'Échec de l’envoi',
         validated: 'Validé',
         zipping: 'Archivage en cours'
+    },
+    errors: {
+        weak_password: 'Le mot de passe n’est pas assez complexe',
     }
 }
 

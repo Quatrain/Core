@@ -204,17 +204,28 @@ describe('FirebaseAuthAdapter', () => {
          expect(mockAuth.updateUser).not.toHaveBeenCalled()
       })
 
-      it('should silently handle errors during update', async () => {
+      it('should throw AuthenticationError on update error', async () => {
          const updatable = { displayName: 'New Name' }
 
          mockAuth.updateUser.mockRejectedValue(new Error('Update failed'))
 
-         // Should not throw
          await expect(
             adapter.update(mockUser, updatable)
-         ).resolves.toBeUndefined()
+         ).rejects.toThrow(AuthenticationError)
 
          expect(mockAuth.updateUser).toHaveBeenCalledWith('user-123', updatable)
+      })
+
+      it('should throw Auth.ERROR_WEAK_PASSWORD on weak password error', async () => {
+         const updatable = { password: '123' }
+         const weakError = new Error('Password should be stronger')
+         ;(weakError as any).code = 'auth/weak-password'
+
+         mockAuth.updateUser.mockRejectedValue(weakError)
+
+         await expect(
+            adapter.update(mockUser, updatable)
+         ).rejects.toThrow('weak_password')
       })
    })
 

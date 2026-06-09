@@ -185,12 +185,19 @@ export class SupabaseAuthAdapter extends AbstractAuthAdapter {
                updatable
             )
             if (error !== null) {
-               Auth.error(error)
+               Auth.error(error.message)
+               if (error.code === 'weak_password' || error.message?.toLowerCase().includes('password')) {
+                  throw new AuthenticationError(Auth.ERROR_WEAK_PASSWORD)
+               }
+               throw new AuthenticationError(error.message)
             }
          }
       } catch (e) {
          Auth.error(e)
-         return false
+         if (e instanceof AuthenticationError) {
+            throw e
+         }
+         throw new AuthenticationError((e as Error).message)
       }
    }
 

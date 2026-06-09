@@ -64,6 +64,16 @@ describe('Translator', () => {
       expect((translator as any).defaultLang).toBe('en')
    })
 
+   it('should register multiple dictionaries in a single call', () => {
+      const multiTranslator = new Translator('en')
+      multiTranslator.register({
+         en: mockEnDict,
+         fr: mockFrDict,
+      })
+      expect(multiTranslator.translate('table', 'id')).toBe('ID')
+      expect(multiTranslator.translate('table', 'id', 'fr')).toBe('Identifiant')
+   })
+
    it('should translate using standard scope and key', () => {
       expect(translator.translate('table', 'id')).toBe('ID')
       expect(translator.translate('table', 'id', 'fr')).toBe('Identifiant')

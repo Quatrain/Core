@@ -399,25 +399,39 @@ describe('SupabaseAuthAdapter', () => {
             error: { message: 'Update failed' },
          })
 
-         await adapter.update(mockUser, updatable)
+         await expect(adapter.update(mockUser, updatable)).rejects.toThrow(
+            AuthenticationError
+         )
 
-         // The method doesn't throw, just logs the error
          expect(mockAuthAdmin.updateUserById).toHaveBeenCalledWith(
             'user-123',
             updatable
          )
       })
 
-      it('should return false on exception', async () => {
+      it('should throw AuthenticationError on exception', async () => {
          const updatable = { displayName: 'New Name' }
 
          mockAuthAdmin.updateUserById.mockRejectedValue(
             new Error('Network error')
          )
 
-         const result = await adapter.update(mockUser, updatable)
+         await expect(adapter.update(mockUser, updatable)).rejects.toThrow(
+            AuthenticationError
+         )
+      })
 
-         expect(result).toBe(false)
+      it('should throw Auth.ERROR_WEAK_PASSWORD on weak password error', async () => {
+         const updatable = { password: '123' }
+
+         mockAuthAdmin.updateUserById.mockResolvedValue({
+            data: null,
+            error: { code: 'weak_password', message: 'Password should be stronger' },
+         })
+
+         await expect(adapter.update(mockUser, updatable)).rejects.toThrow(
+            'weak_password'
+         )
       })
    })
 

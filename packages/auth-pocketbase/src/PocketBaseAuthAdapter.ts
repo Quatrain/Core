@@ -92,7 +92,10 @@ export class PocketBaseAuthAdapter extends AbstractAuthAdapter {
          }
       } catch (e: any) {
          Auth.error(e)
-         return false
+         if (e.message?.toLowerCase().includes('password')) {
+            throw new AuthenticationError(Auth.ERROR_WEAK_PASSWORD)
+         }
+         throw new AuthenticationError(e.message || 'Error updating user')
       }
    }
 

@@ -2,6 +2,12 @@ name: Documentation Factory Pipeline
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'scripts/build-docs.ts'
   schedule:
     - cron: '0 3 * * *' # Tous les jours à 03:00 UTC
 

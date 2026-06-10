@@ -13,8 +13,6 @@ COPY .yarn ./.yarn
 
 # Copy all workspaces
 COPY packages ./packages
-COPY apps ./apps
-COPY containers ./containers
 COPY docs ./docs
 COPY scripts ./scripts
 COPY tsconfig.json ./

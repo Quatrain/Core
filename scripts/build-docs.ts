@@ -13,7 +13,7 @@ const DOCS_DIR: string = path.join(ROOT_DIR, 'docs', 'pages')
 const API_REF_DIR: string = path.join(ROOT_DIR, 'docs', 'public', 'api-reference')
 
 // Directories to scan for documentation
-const SCAN_DIRS: string[] = ['packages', 'apps', 'containers']
+const SCAN_DIRS: string[] = ['packages']
 const TARGET_FILES: string[] = ['README.md', 'HOWTO.md']
 
 /**

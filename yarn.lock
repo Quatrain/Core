@@ -3647,6 +3647,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/skills@workspace:packages/skills"
   dependencies:
+    "@quatrain/core": "workspace:*"
+    "@quatrain/log": "workspace:*"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/node": "npm:^22.10.1"
     typescript: "npm:^5.2.2"

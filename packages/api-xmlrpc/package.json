@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/api-xmlrpc",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "XML-RPC API Client for Quatrain Core",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

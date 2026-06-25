@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/skills",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Shared TypeScript CLI utilities for Quatrain Agent skills",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,8 +17,8 @@
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
-    "@quatrain/log": "workspace:*",
-    "@quatrain/core": "workspace:*"
+    "@quatrain/core": "workspace:*",
+    "@quatrain/log": "workspace:*"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

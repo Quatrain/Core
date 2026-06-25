@@ -298,5 +298,20 @@
     "version": "1.0.6",
     "hash": "RWxBqWZSc/aQST9dzfiRcvl5mFw=-d4a36c7a0eb0a3ed1ea5655cef01a787983c3cfdb51fade593c1851416e546fd",
     "last_published": "2026-06-09T19:51:49.621Z"
+  },
+  "@quatrain/api-xmlrpc": {
+    "version": "1.0.1",
+    "hash": "yzSACqFWDYSQG7Q6r0dAAVpqMe0=-6e7821c5508b10a95c0708ef9e5a8b01080d3e1a932c3d29b5f4b6a33c7534f9",
+    "last_published": "2026-06-25T10:23:40.651Z"
+  },
+  "@quatrain/cli": {
+    "version": "1.1.8",
+    "hash": "DTLz6Ia8VEDWz4s/mEGpvq3qLTE=-fcb78d11308e05b717a52bade8dc5f4f0ef8d6a64f57d779b5e4a22589b1840c",
+    "last_published": "2026-06-25T10:23:48.514Z"
+  },
+  "@quatrain/skills": {
+    "version": "1.0.1",
+    "hash": "XLDEswxNqGK8nFDTx5rb5kH9D/U=-de2b63f25a23e85de19976c8a42ed839bf094db20d1f4817a9c9db1e574c39c4",
+    "last_published": "2026-06-25T10:23:55.748Z"
   }
 }

@@ -2967,6 +2967,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/api-xmlrpc@workspace:packages/api-xmlrpc":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/api-xmlrpc@workspace:packages/api-xmlrpc"
+  dependencies:
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    "@types/xmlrpc": "npm:^1.3.10"
+    typescript: "npm:^5.2.2"
+    xmlrpc: "npm:^1.3.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/api@workspace:*, @quatrain/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@quatrain/api@workspace:packages/api"
@@ -3284,6 +3296,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/cli@workspace:packages/cli":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/cli@workspace:packages/cli"
+  dependencies:
+    "@quatrain/backend": "workspace:*"
+    "@quatrain/core": "workspace:*"
+    "@quatrain/log": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/inquirer": "npm:^9.0.7"
+    "@types/node": "npm:^22.10.1"
+    commander: "npm:^11.1.0"
+    inquirer: "npm:^9.2.12"
+    typescript: "npm:^5.2.2"
+  bin:
+    core: ./bin/core.js
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/cloudwrapper-firebase@workspace:packages/cloudwrapper-firebase":
   version: 0.0.0-use.local
   resolution: "@quatrain/cloudwrapper-firebase@workspace:packages/cloudwrapper-firebase"
@@ -3392,24 +3422,6 @@ __metadata:
     ts-jest: "npm:^29.4.6"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.1.5"
-  languageName: unknown
-  linkType: soft
-
-"@quatrain/core-cli@workspace:packages/core-cli":
-  version: 0.0.0-use.local
-  resolution: "@quatrain/core-cli@workspace:packages/core-cli"
-  dependencies:
-    "@quatrain/backend": "workspace:*"
-    "@quatrain/core": "workspace:*"
-    "@quatrain/log": "workspace:*"
-    "@tsconfig/recommended": "npm:^1.0.1"
-    "@types/inquirer": "npm:^9.0.7"
-    "@types/node": "npm:^22.10.1"
-    commander: "npm:^11.1.0"
-    inquirer: "npm:^9.2.12"
-    typescript: "npm:^5.2.2"
-  bin:
-    core: ./bin/core.js
   languageName: unknown
   linkType: soft
 
@@ -3628,6 +3640,16 @@ __metadata:
     ts-jest: "npm:^29.4.6"
     ts-node: "npm:^10.4.0"
     typescript: "npm:^5.1.5"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/skills@workspace:packages/skills":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/skills@workspace:packages/skills"
+  dependencies:
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
   languageName: unknown
   linkType: soft
 
@@ -5602,6 +5624,15 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/61aff1129143fcc4312f083bc9e9e168aa3026b7dd6e70796276dcfb2c8211c4292603f9c4864fae702f2ed86e4abd4d38aa421831c2fd7f856c931a481afbab
+  languageName: node
+  linkType: hard
+
+"@types/xmlrpc@npm:^1.3.10":
+  version: 1.3.10
+  resolution: "@types/xmlrpc@npm:1.3.10"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/8aa6634275975c4adedc85fdaa66d83cd993fa7e6de34f24ca416cda96022b4a5e68dd94153b451dfd54ad5e3f4b8c19cf18ddd34060d74ea16fb9126562fd23
   languageName: node
   linkType: hard
 
@@ -11109,6 +11140,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sax@npm:1.2.x":
+  version: 1.2.4
+  resolution: "sax@npm:1.2.4"
+  checksum: 10c0/6e9b05ff443ee5e5096ce92d31c0740a20d33002fad714ebcb8fc7a664d9ee159103ebe8f7aef0a1f7c5ecacdd01f177f510dff95611c589399baf76437d3fe3
+  languageName: node
+  linkType: hard
+
 "semver@npm:^6.0.0, semver@npm:^6.3.0, semver@npm:^6.3.1":
   version: 6.3.1
   resolution: "semver@npm:6.3.1"
@@ -12439,6 +12477,23 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10c0/956ac5f11738c914089b65878b9223692ace77337ba55379ae68e1ecbeae9b47a0c6eb9403688f609999a58c80d83d99865fe0029b229d308b08c1ef93d4ea14
+  languageName: node
+  linkType: hard
+
+"xmlbuilder@npm:8.2.x":
+  version: 8.2.2
+  resolution: "xmlbuilder@npm:8.2.2"
+  checksum: 10c0/5806a607e8c02fe6055a6b0c013e99489d74945019a8d4fdadcb9e92ffb0342987ed9f04fa46579762ad825044417e5ff019081c9d7ec058384e65b502aa7fb2
+  languageName: node
+  linkType: hard
+
+"xmlrpc@npm:^1.3.2":
+  version: 1.3.2
+  resolution: "xmlrpc@npm:1.3.2"
+  dependencies:
+    sax: "npm:1.2.x"
+    xmlbuilder: "npm:8.2.x"
+  checksum: 10c0/3c0882cd76196eb6555285710e07b743d1ae6fafbee857675c3edd612a3624cc96d7c163e2b9c20bb3c777ddeef636d2b8feb48889621bcc7d4f41d5d1be5697
   languageName: node
   linkType: hard
 

@@ -71,7 +71,7 @@ During Development, you connect your business logic to services such as database
 Deployment covers running your code, scaffolding new environments, configuring API gateways, and handling data migrations. 
 
 ### Deployment & Infrastructure Ecosystem
-- **CLI & Code Generation**: `@quatrain/core-cli` (Scaffolds projects, configurations, and migrations)
+- **CLI & Code Generation**: `@quatrain/cli` (Scaffolds projects, configurations, and migrations)
 - **Migrations**: `@quatrain/backend-migrations` (Schema and data migration tooling)
 - **Cloud Wrappers**: `@quatrain/cloudwrapper`, `@quatrain/cloudwrapper-firebase`, `@quatrain/cloudwrapper-supabase` (Serverless/Edge functions handling)
 

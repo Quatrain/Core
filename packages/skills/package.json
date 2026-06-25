@@ -1,0 +1,32 @@
+{
+  "name": "@quatrain/skills",
+  "version": "1.0.0",
+  "description": "Shared TypeScript CLI utilities for Quatrain Agent skills",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "dist/",
+    "src/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/skills"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "dependencies": {
+    "@quatrain/log": "workspace:*",
+    "@quatrain/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "wbuild": "tsc --watch"
+  }
+}

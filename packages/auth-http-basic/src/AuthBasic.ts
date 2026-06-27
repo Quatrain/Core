@@ -9,6 +9,12 @@ export class AuthBasic {
    private user: string
    private pass: string
 
+   /**
+    * Instantiates a new AuthBasic verifier with target credentials.
+    * 
+    * @param user - The expected username.
+    * @param pass - The expected password.
+    */
    constructor(user: string, pass: string) {
       this.user = user
       this.pass = pass

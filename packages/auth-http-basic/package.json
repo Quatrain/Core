@@ -4,13 +4,14 @@
   "description": "Basic Authentication Adapter for Quatrain",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "license": "AGPL-3.0-only",
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@quatrain/api": "workspace:*",
-    "@quatrain/auth": "^1.2.7",
-    "@quatrain/core": "^1.2.16",
+    "@quatrain/auth": "workspace:*",
+    "@quatrain/core": "workspace:*",
     "@quatrain/http": "workspace:*"
   },
   "devDependencies": {

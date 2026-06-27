@@ -2,6 +2,10 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { Core } from '@quatrain/core'
 
+/**
+ * Base utility container representing Agent skills logic.
+ * Extends the Quatrain Core framework functionalities.
+ */
 export class Skills extends Core {
    static logger = this.addLogger('Skills')
 
@@ -11,6 +15,7 @@ export class Skills extends Core {
     * 
     * @param data - The data payload to serialize.
     * @param filePath - The destination file path.
+    * @returns A promise that resolves when the data is written successfully.
     */
    static async writeOutput(data: any, filePath: string): Promise<void> {
       try {

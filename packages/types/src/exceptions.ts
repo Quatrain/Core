@@ -2,6 +2,11 @@
  * Global abstraction identifying Quatrain-specific execution exceptions.
  */
 export class ResourceError extends Error {
+   /**
+    * Instantiates a new ResourceError.
+    * 
+    * @param message - The error message detail.
+    */
    constructor(message: string) {
       super(message)
       this.name = this.constructor.name
@@ -30,6 +35,12 @@ export class ValidationError extends ResourceError {
    /** Detailed key-value map linking property names to specific violation causes. */
    public errors: Record<string, string>
 
+   /**
+    * Instantiates a new ValidationError with key-value map details.
+    * 
+    * @param message - General error message detail.
+    * @param errors - Map linking property keys to specific violation descriptions.
+    */
    constructor(message: string, errors: Record<string, string> = {}) {
       super(message)
       this.errors = errors
@@ -40,4 +51,3 @@ export class ValidationError extends ResourceError {
  * General exception thrown when an adapter encounters an execution, syntax, or network failure.
  */
 export class BackendError extends ResourceError {}
-

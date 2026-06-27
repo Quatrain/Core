@@ -1,6 +1,12 @@
+/**
+ * Static utility helpers for processing standard HTTP request parameters and headers.
+ */
 export class HttpHelper {
    /**
     * Extracts a bearer token from an Authorization header.
+    * 
+    * @param authorization - The raw Authorization header string (e.g. 'Bearer <token>').
+    * @returns The extracted token string, or an empty string if invalid or missing.
     */
    static parseBearerToken(authorization: string | undefined): string {
       if (!authorization) return ''
@@ -9,6 +15,9 @@ export class HttpHelper {
 
    /**
     * Extracts username and password credentials from a Basic Authorization header.
+    * 
+    * @param authorization - The raw Authorization header string (e.g. 'Basic <credentials>').
+    * @returns An object containing the user and pass properties, or null if parsing fails.
     */
    static parseBasicAuth(authorization: string | undefined): { user: string; pass: string } | null {
       if (!authorization) return null
@@ -29,3 +38,4 @@ export class HttpHelper {
       }
    }
 }
+

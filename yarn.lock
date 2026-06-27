@@ -3052,8 +3052,8 @@ __metadata:
   resolution: "@quatrain/auth-http-basic@workspace:packages/auth-http-basic"
   dependencies:
     "@quatrain/api": "workspace:*"
-    "@quatrain/auth": "npm:^1.2.7"
-    "@quatrain/core": "npm:^1.2.16"
+    "@quatrain/auth": "workspace:*"
+    "@quatrain/core": "workspace:*"
     "@quatrain/http": "workspace:*"
     "@types/node": "npm:^22.10.1"
     typescript: "npm:^5.1.5"

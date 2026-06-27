@@ -57,3 +57,5 @@ import { Command } from 'commander';
  */
 export class CliCommand extends Command {}
 
+export { Command } from './Command';
+

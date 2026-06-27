@@ -1,92 +1,98 @@
-# HOW-TO: Getting Started with `@quatrain/core-cli`
+# HOW-TO: Getting Started with `@quatrain/cli`
 
-This guide explains how to leverage the `core` CLI to build and structure your Quatrain applications effortlessly.
+This guide explains how to leverage both the programmatic library utilities and the command line commands of `@quatrain/cli`.
 
-## 1. Initializing a New Project
+---
 
-To start a new Quatrain project from scratch, use the `scaffold` command. This will generate a monorepo folder architecture ready to use.
+## 1. Scripting & Custom CLI Tools (Programmatic Usage)
 
-```bash
-npx @quatrain/core-cli scaffold MyProject
-cd MyProject
-yarn install
-```
+Use the exported APIs of `@quatrain/cli` to build custom runner scripts, sync actions, and integration workflows.
 
-**What it does:**
-- Creates a `package.json` for Yarn Workspaces.
-- Sets up alias paths in `tsconfig.json`.
-- Creates placeholder directories for `apps`, `packages`, `data`, and `config`.
+### A. Spawning Subprocesses with `Command`
+To execute external commands securely and retrieve their logs:
 
-## 2. Generating the Bootloader Configuration
+```typescript
+import { Command } from '@quatrain/cli';
 
-The `@quatrain/app` bootloader requires a `quatrain.json` file to auto-instantiate the required adapters.
+async function listKubectlNamespaces() {
+  const result = await Command.create('kubectl')
+    .args(['get', 'namespaces', '-o', 'json'])
+    .execute();
 
-Run the interactive wizard from the root of your new project:
+  if (!result.success) {
+    throw new Error(`Failed to list namespaces: ${result.stderr}`);
+  }
 
-```bash
-npx @quatrain/core-cli generate config
-```
-
-Answer the prompts to select your preferred Backend (e.g., PostgreSQL), Authentication (e.g., Supabase), Storage, and Queue systems.
-
-**Resulting `quatrain.json`:**
-The file will contain configurations mapping to environment variables:
-```json
-{
-   "backend": {
-      "adapter": "PostgresAdapter",
-      "package": "@quatrain/backend-postgres",
-      "config": {
-         "host": "env(PG_HOST)",
-         "port": "env(PG_PORT)"
-      }
-   }
+  return JSON.parse(result.stdout);
 }
 ```
 
-## 3. Creating Migrations
+### B. Requesting User Validation
+Ask for confirmations or inputs interactively in your CLI actions:
 
-To safely upgrade the database schema, generate migration files directly from the CLI.
+```typescript
+import { askConfirm, askInput } from '@quatrain/cli';
 
-```bash
-npx @quatrain/core-cli generate migration initialize_users
+const cleanDb = await askConfirm('Reset database before starting?', false);
+if (cleanDb) {
+  const dbName = await askInput('Specify DB name to reset:', 'quatrain_dev');
+  // ... run reset
+}
 ```
 
-This generates `migrations/20260427XXXXXX_initialize_users.ts`. Open this file and fill in the `up()` and `down()` functions using the Quatrain `Backend` singleton.
+---
 
-## 4. Local Development & Global CLI Setup
+## 2. Using the Global CLI Tool (`core`)
 
-When developing or modifying the CLI locally, you can run and test the tool in several ways:
+The package exposes a `core` binary to scaffold files and deploy infrastructures.
 
-### A. Run on the Fly via Yarn Workspaces
-From the root of the `Core` monorepo:
+### A. Initializing a New Project
 ```bash
-yarn workspace @quatrain/core-cli core <command>
-# Example:
-yarn workspace @quatrain/core-cli core deploy
+npx @quatrain/cli generate scaffold MyNewProject
+cd MyNewProject
+bun install
+```
+Creates folder directories (`apps/`, `packages/`, etc.) and sets up monorepo packages and `tsconfig.json`.
+
+### B. Generating Configurations
+```bash
+npx @quatrain/cli generate config
+```
+Walks through an interactive wizard to configure PostgreSQL, Redis, Queues, and outputs a resolved `quatrain.json`.
+
+### C. Creating Migrations
+```bash
+npx @quatrain/cli generate migration add_profile_fields
+```
+Scaffolds timestamped files under `migrations/` containing migration templates.
+
+### D. Managing Deployments
+```bash
+npx @quatrain/cli deploy
 ```
 
-### B. Setup a Global Command Alias (Recommended for Zsh)
-To use the `core` command directly from any directory without installing it globally, add an alias to your Zsh configuration (`~/.zshrc`):
+---
+
+## 3. Local Development & CLI Linking
+
+When making local changes to `@quatrain/cli` in the `Core` monorepo:
+
+### Running core commands on-the-fly:
 ```bash
-echo 'alias core="node /Users/crapougnax/CODE/QUATRAIN/Core/packages/core-cli/bin/core.js"' >> ~/.zshrc
-source ~/.zshrc
-```
-You can then run:
-```bash
-core deploy
+# From the root of the Core monorepo
+yarn workspace @quatrain/cli core deploy
 ```
 
-### C. Install Locally-Built Folder Globally via NPM
-Alternatively, link the package to your global Node bin directory:
+### Compiling changes:
+Make sure to re-compile TypeScript code when editing `src/` files:
 ```bash
-cd packages/core-cli
-npm install -g .
+cd packages/cli
+yarn build
+# Or watch mode:
+yarn wbuild
 ```
 
-> [!NOTE]
-> When modifying TypeScript source files, make sure to compile them with `yarn build` or keep the compiler in watch mode with `yarn wbuild` inside the `packages/core-cli` directory.
+---
 
 ## Documentation Guidelines
-
-> **Recommendation**: Ensure that all logs, commit messages, console outputs, and code comments are written in **International English**. This convention aligns with the official Quatrain standard to support a globally distributed engineering team.
+> **Recommendation:** Ensure all console outputs, instructions, logging, and codebase comments are written in **International English** to meet Quatrain standards.

@@ -26,16 +26,37 @@ export const loglevelNames = [
 ]
 
 /**
+ * Helper to resolve the log level from the environment variables LOGLEVEL or LOG_LEVEL.
+ * If not defined or invalid, falls back to the provided default level.
+ */
+export function getEnvLogLevel(defaultLevel: LogLevel): LogLevel {
+   if (typeof process === 'undefined' || !process.env) return defaultLevel
+   const envLevel = (process.env.LOGLEVEL || '').toUpperCase()
+   if (!envLevel) return defaultLevel
+   
+   switch (envLevel) {
+      case 'TRACE': return LogLevel.TRACE
+      case 'DEBUG': return LogLevel.DEBUG
+      case 'INFO': return LogLevel.INFO
+      case 'WARN': return LogLevel.WARN
+      case 'ERROR': return LogLevel.ERROR
+      case 'SILENT': return LogLevel.SILENT
+      default: return defaultLevel
+   }
+}
+
+/**
  * Base abstraction for creating custom logging adapters.
  * Ensures consistent log levels and signature formats across implementations.
  */
 export abstract class AbstractLoggerAdapter implements LoggerType {
    protected _me: string = ''
-   protected _logLevel: LogLevel = LogLevel.WARN
+   protected _logLevel: LogLevel = getEnvLogLevel(LogLevel.WARN)
    protected _logger: any = undefined
 
-   constructor(prefix = '', _level: LogLevel = LogLevel.WARN) {
+   constructor(prefix = '', _level: LogLevel = getEnvLogLevel(LogLevel.WARN)) {
       this._me = prefix
+      this._logLevel = _level
    }
 
    /**

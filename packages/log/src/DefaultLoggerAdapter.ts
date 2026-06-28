@@ -1,4 +1,4 @@
-import { AbstractLoggerAdapter, LogLevel } from './AbstractLoggerAdapter'
+import { AbstractLoggerAdapter, LogLevel, getEnvLogLevel } from './AbstractLoggerAdapter'
 import logger from 'loglevel'
 import chalk from 'chalk'
 
@@ -6,7 +6,7 @@ import chalk from 'chalk'
  * Default internal implementation relying on `loglevel` and `chalk` for colored console outputs.
  */
 export class DefaultLoggerAdapter extends AbstractLoggerAdapter {
-   constructor(prefix = '', level: LogLevel = LogLevel.DEBUG) {
+   constructor(prefix = '', level: LogLevel = getEnvLogLevel(LogLevel.DEBUG)) {
       super(prefix, level)
       this._logger = logger
       this._logger.setLevel(level)

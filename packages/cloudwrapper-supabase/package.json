@@ -27,7 +27,7 @@
     "@quatrain/cloudwrapper": "^1.2.2",
     "@quatrain/core": "^1.2.16",
     "@quatrain/storage": "^1.2.11",
-    "@supabase/supabase-js": "^2.87.3",
+    "@supabase/supabase-js": "^2.108.2",
     "ws": "^8.18.3"
   },
   "devDependencies": {

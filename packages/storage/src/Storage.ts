@@ -27,6 +27,8 @@ export type StorageBackendRegistry<T extends AbstractStorageAdapter> = {
 export class Storage extends Core {
    /** The fallback storage alias used when none is explicitly requested. */
    static defaultStorage = ''
+   /** Global configuration flag to control whether uploads overwrite existing files by default (upsert). */
+   static defaultUpsert = true
    /** Central logger scope dedicated to the Storage subsystem. */
    static logger = this.addLogger('Storage')
 

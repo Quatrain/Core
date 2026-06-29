@@ -185,7 +185,7 @@ export class SupabaseCloudWrapper extends AbstractCloudWrapper {
                realtime: {
                   transport: ws as any,
                   heartbeatIntervalMs: 5000,
-                  heartbeatCallback: (status: HeartbeatStatus) => {
+                  heartbeatCallback: (status: any) => {
                      switch (status) {
                         case 'ok':
                            if (!this._heartbeatOkReceived) {

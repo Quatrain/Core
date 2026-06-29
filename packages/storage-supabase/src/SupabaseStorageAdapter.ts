@@ -120,7 +120,7 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
          const { error } = await this._client
             .from(file.bucket)
             .upload(file.ref, new Blob([fs.readFileSync(stream)]), {
-               upsert: true,
+               upsert: Storage.defaultUpsert,
                contentType: file.contentType,
             })
          if (error !== null) {
@@ -136,7 +136,7 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
             .from(file.bucket)
             .upload(file.ref, content, {
                //   cacheControl: '3600',
-               upsert: false,
+               upsert: Storage.defaultUpsert,
                contentType: file.contentType,
             })
          if (error !== null) {
@@ -330,7 +330,7 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
    ): Promise<FileResponseLinkType> {
       const { data, error } = await this._client
          .from(file.bucket)
-         .createSignedUploadUrl(file.ref, { upsert: true })
+         .createSignedUploadUrl(file.ref, { upsert: Storage.defaultUpsert })
 
       if (error !== null) {
          throw new Error(`Unable to get signed upload url: ${error}`)

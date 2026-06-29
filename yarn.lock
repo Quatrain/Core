@@ -3027,7 +3027,7 @@ __metadata:
   resolution: "@quatrain/auth-firebase@workspace:packages/auth-firebase"
   dependencies:
     "@quatrain/api": "workspace:*"
-    "@quatrain/auth": "npm:^1.2.7"
+    "@quatrain/auth": "npm:^1.2.8"
     "@quatrain/backend": "npm:^1.2.17"
     "@quatrain/core": "npm:^1.2.16"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -3090,7 +3090,7 @@ __metadata:
   resolution: "@quatrain/auth-supabase@workspace:packages/auth-supabase"
   dependencies:
     "@quatrain/api": "workspace:*"
-    "@quatrain/auth": "npm:^1.2.7"
+    "@quatrain/auth": "npm:^1.2.8"
     "@quatrain/backend": "npm:^1.2.17"
     "@supabase/supabase-js": "npm:^2.108.2"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -3107,7 +3107,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/auth@npm:^1.2.7, @quatrain/auth@workspace:*, @quatrain/auth@workspace:packages/auth":
+"@quatrain/auth@npm:^1.2.8, @quatrain/auth@workspace:*, @quatrain/auth@workspace:packages/auth":
   version: 0.0.0-use.local
   resolution: "@quatrain/auth@workspace:packages/auth"
   dependencies:
@@ -3319,7 +3319,7 @@ __metadata:
   resolution: "@quatrain/cloudwrapper-firebase@workspace:packages/cloudwrapper-firebase"
   dependencies:
     "@quatrain/backend": "npm:^1.2.17"
-    "@quatrain/cloudwrapper": "npm:^1.2.2"
+    "@quatrain/cloudwrapper": "npm:^1.2.3"
     "@quatrain/core": "npm:^1.2.16"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
@@ -3343,7 +3343,7 @@ __metadata:
   resolution: "@quatrain/cloudwrapper-supabase@workspace:packages/cloudwrapper-supabase"
   dependencies:
     "@quatrain/backend": "npm:^1.2.17"
-    "@quatrain/cloudwrapper": "npm:^1.2.2"
+    "@quatrain/cloudwrapper": "npm:^1.2.3"
     "@quatrain/core": "npm:^1.2.16"
     "@quatrain/storage": "npm:^1.2.12"
     "@supabase/supabase-js": "npm:^2.108.2"
@@ -3364,7 +3364,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/cloudwrapper@npm:^1.2.2, @quatrain/cloudwrapper@workspace:packages/cloudwrapper":
+"@quatrain/cloudwrapper@npm:^1.2.3, @quatrain/cloudwrapper@workspace:packages/cloudwrapper":
   version: 0.0.0-use.local
   resolution: "@quatrain/cloudwrapper@workspace:packages/cloudwrapper"
   dependencies:

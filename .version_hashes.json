@@ -1,12 +1,12 @@
 {
   "@quatrain/auth-firebase": {
     "version": "1.2.8",
-    "hash": "Hpi84eAJYnZysufInhSytOBhUm0=-3528d58a95cb1850b9d698fca0afe5deff2b4baf6b165c297bdb1dccbf9637cb",
+    "hash": "Hpi84eAJYnZysufInhSytOBhUm0=-ddf8c82e0430e2061c143234c579d856d9ec9acfc63d9dd95f400d468937f086",
     "last_published": "2026-06-09T19:27:36.975Z"
   },
   "@quatrain/auth-supabase": {
     "version": "1.2.9",
-    "hash": "MxMeHc0xthgKpo/x4iOxPn8G7U8=-8997ff72a83ebd872805c55570817d34928ae300258bee26aca0e32912d508be",
+    "hash": "MxMeHc0xthgKpo/x4iOxPn8G7U8=-769ac8daf4a4d9675e8f8e1a639a3eb37db8dd79472065a462c7e8a290ecb39e",
     "last_published": "2026-06-29T08:49:15.053Z"
   },
   "@quatrain/backend": {
@@ -31,12 +31,12 @@
   },
   "@quatrain/cloudwrapper-firebase": {
     "version": "1.2.3",
-    "hash": "5SkykCLCXGhbfosOHTYGMrCTSyg=-76b1ff7a561e9b9128a56642b5ac2f9e6823326b1820f208db88a4f17cbdb0a5",
+    "hash": "5SkykCLCXGhbfosOHTYGMrCTSyg=-cb22bf9300fc95799c0b38b917441a87716f1d093b15614dc96267710ec6713f",
     "last_published": "2026-06-09T19:28:02.962Z"
   },
   "@quatrain/cloudwrapper-supabase": {
     "version": "1.2.4",
-    "hash": "YAQ9/OXq8JnCRcuthoBBB4EWo6A=-98e283a5a6479265b7321a9ecaa79d5cb9405cf4f83a2a32df42d449de94a8d4",
+    "hash": "YAQ9/OXq8JnCRcuthoBBB4EWo6A=-8a875f856e26b21eb64648961427a5829e0c2513ceade3029e6eafdca13d0413",
     "last_published": "2026-06-29T08:49:22.643Z"
   },
   "@quatrain/core": {
@@ -303,5 +303,15 @@
     "version": "1.0.2",
     "hash": "oGtn/H7BoQwQVFlFAWM9YVdyJ2E=-de2b63f25a23e85de19976c8a42ed839bf094db20d1f4817a9c9db1e574c39c4",
     "last_published": "2026-06-27T09:12:23.727Z"
+  },
+  "@quatrain/auth": {
+    "version": "1.2.8",
+    "hash": "hTKsXWHVdeXirhbgrvX6VIDNTIk=-a3e56f695edcdc051ea698acaf1cf18902e945d24eb202d1296d1c1fdacb1de0",
+    "last_published": "2026-06-29T09:34:30.868Z"
+  },
+  "@quatrain/cloudwrapper": {
+    "version": "1.2.3",
+    "hash": "L5QnyW8EKb7BOPU+6fIGh7RfJVc=-92f320da2ec68af8eecdb8112a6aa57f722e0bc26093a6752b4d10f3ccbd3dc1",
+    "last_published": "2026-06-29T09:34:37.314Z"
   }
 }

@@ -1,9 +1,4 @@
 {
-  "@quatrain/auth": {
-    "version": "1.2.7",
-    "hash": "hTKsXWHVdeXirhbgrvX6VIDNTIk=-a3e56f695edcdc051ea698acaf1cf18902e945d24eb202d1296d1c1fdacb1de0",
-    "last_published": "2026-06-09T19:27:33.430Z"
-  },
   "@quatrain/auth-firebase": {
     "version": "1.2.8",
     "hash": "Hpi84eAJYnZysufInhSytOBhUm0=-3528d58a95cb1850b9d698fca0afe5deff2b4baf6b165c297bdb1dccbf9637cb",
@@ -33,11 +28,6 @@
     "version": "1.1.9",
     "hash": "W7TZXtxU9jVWPS4Y0G3vonwanYM=-7555e1f7e19e069aab977e31ef27bcf2b4c532cb47ee644976fdd7573af94cf6",
     "last_published": "2026-06-09T19:27:55.623Z"
-  },
-  "@quatrain/cloudwrapper": {
-    "version": "1.2.2",
-    "hash": "L5QnyW8EKb7BOPU+6fIGh7RfJVc=-92f320da2ec68af8eecdb8112a6aa57f722e0bc26093a6752b4d10f3ccbd3dc1",
-    "last_published": "2026-06-09T19:27:59.436Z"
   },
   "@quatrain/cloudwrapper-firebase": {
     "version": "1.2.3",

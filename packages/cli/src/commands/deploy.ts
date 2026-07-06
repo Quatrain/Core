@@ -71,7 +71,11 @@ function generateSecurePassword(): string {
 function detectLatestStableTag(coreDeployPath: string): string {
    const fallback = '1.1.49'
    try {
-      const packageJsonPath = path.resolve(coreDeployPath, '../CoreApps/containers/studio-image/package.json')
+      const parentDir = path.resolve(coreDeployPath, '..')
+      const packageJsonPath = path.resolve(parentDir, 'CoreApps/containers/studio-image/package.json')
+      if (!packageJsonPath.startsWith(parentDir)) {
+         throw new Error('Path traversal detected')
+      }
       if (fs.existsSync(packageJsonPath)) {
          const content = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
          if (content && content.version) {
@@ -89,11 +93,22 @@ function detectLatestStableTag(coreDeployPath: string): string {
  */
 function parseMetadataFromYaml(appDir: string, namespaceName: string): AppMetadata | null {
    try {
-      const nsPath = path.join(appDir, 'namespace.yaml')
-      const ingPath = path.join(appDir, 'ingressroute.yaml')
-      const depPath = path.join(appDir, 'deployment.yaml')
-      const secPath = path.join(appDir, 'secret.yaml')
-      const pvcPath = path.join(appDir, 'pvc.yaml')
+      const resolvedAppDir = path.resolve(appDir)
+      const nsPath = path.resolve(resolvedAppDir, 'namespace.yaml')
+      const ingPath = path.resolve(resolvedAppDir, 'ingressroute.yaml')
+      const depPath = path.resolve(resolvedAppDir, 'deployment.yaml')
+      const secPath = path.resolve(resolvedAppDir, 'secret.yaml')
+      const pvcPath = path.resolve(resolvedAppDir, 'pvc.yaml')
+
+      if (
+         !nsPath.startsWith(resolvedAppDir) ||
+         !ingPath.startsWith(resolvedAppDir) ||
+         !depPath.startsWith(resolvedAppDir) ||
+         !secPath.startsWith(resolvedAppDir) ||
+         !pvcPath.startsWith(resolvedAppDir)
+      ) {
+         throw new Error('Path traversal detected')
+      }
 
       if (!fs.existsSync(nsPath) || !fs.existsSync(ingPath) || !fs.existsSync(depPath) || !fs.existsSync(secPath)) {
          return null
@@ -206,7 +221,11 @@ function parseMetadataFromYaml(appDir: string, namespaceName: string): AppMetada
       }
 
       // Write the file so we don't have to parse it next time
-      fs.writeFileSync(path.join(appDir, 'metadata.json'), JSON.stringify(meta, null, 3), 'utf8')
+      const metaPath = path.resolve(resolvedAppDir, 'metadata.json')
+      if (!metaPath.startsWith(resolvedAppDir)) {
+         throw new Error('Path traversal detected')
+      }
+      fs.writeFileSync(metaPath, JSON.stringify(meta, null, 3), 'utf8')
       return meta
    } catch (err) {
       console.error(`Failed to parse YAML configuration for ${namespaceName}:`, err)
@@ -218,19 +237,33 @@ function parseMetadataFromYaml(appDir: string, namespaceName: string): AppMetada
  * Loads all app metadata from the CoreDeploy k8s/apps directory.
  */
 function loadAllDeployments(coreDeployPath: string): AppMetadata[] {
-   const appsDir = path.join(coreDeployPath, 'k8s/apps')
+   const resolvedCoreDeploy = path.resolve(coreDeployPath)
+   const appsDir = path.resolve(resolvedCoreDeploy, 'k8s/apps')
+   if (!appsDir.startsWith(resolvedCoreDeploy)) {
+      throw new Error('Path traversal detected')
+   }
    if (!fs.existsSync(appsDir)) {
       return []
    }
 
    const directories = fs.readdirSync(appsDir).filter(name => {
-      return fs.statSync(path.join(appsDir, name)).isDirectory()
+      const itemPath = path.resolve(appsDir, name)
+      if (!itemPath.startsWith(appsDir)) {
+         throw new Error('Path traversal detected')
+      }
+      return fs.statSync(itemPath).isDirectory()
    })
 
    const deployments: AppMetadata[] = []
    for (const dir of directories) {
-      const appDir = path.join(appsDir, dir)
-      const metaPath = path.join(appDir, 'metadata.json')
+      const appDir = path.resolve(appsDir, dir)
+      if (!appDir.startsWith(appsDir)) {
+         throw new Error('Path traversal detected')
+      }
+      const metaPath = path.resolve(appDir, 'metadata.json')
+      if (!metaPath.startsWith(appDir)) {
+         throw new Error('Path traversal detected')
+      }
 
       if (fs.existsSync(metaPath)) {
          try {
@@ -258,8 +291,13 @@ function scaffoldManifests(
    coreDeployPath: string,
    meta: AppMetadata
 ) {
-   const templatesDir = path.join(coreDeployPath, 'k8s/templates')
-   const targetDir = path.join(coreDeployPath, 'k8s/apps', meta.namespace)
+   const resolvedCoreDeploy = path.resolve(coreDeployPath)
+   const templatesDir = path.resolve(resolvedCoreDeploy, 'k8s/templates')
+   const targetDir = path.resolve(resolvedCoreDeploy, 'k8s/apps', meta.namespace)
+
+   if (!templatesDir.startsWith(resolvedCoreDeploy) || !targetDir.startsWith(resolvedCoreDeploy)) {
+      throw new Error('Path traversal detected')
+   }
 
    if (!fs.existsSync(targetDir)) {
       fs.mkdirSync(targetDir, { recursive: true })
@@ -279,8 +317,12 @@ function scaffoldManifests(
    const authPassB64 = Buffer.from(meta.authPass).toString('base64')
 
    for (const file of templates) {
-      const srcFile = path.join(templatesDir, file)
-      const destFile = path.join(targetDir, file)
+      const srcFile = path.resolve(templatesDir, file)
+      const destFile = path.resolve(targetDir, file)
+
+      if (!srcFile.startsWith(templatesDir) || !destFile.startsWith(targetDir)) {
+         throw new Error('Path traversal detected')
+      }
 
       if (!fs.existsSync(srcFile)) {
          throw new Error(`Template missing: ${srcFile}`)
@@ -306,7 +348,11 @@ function scaffoldManifests(
    }
 
    // Write metadata.json
-   fs.writeFileSync(path.join(targetDir, 'metadata.json'), JSON.stringify(meta, null, 3), 'utf8')
+   const metaPath = path.resolve(targetDir, 'metadata.json')
+   if (!metaPath.startsWith(targetDir)) {
+      throw new Error('Path traversal detected')
+   }
+   fs.writeFileSync(metaPath, JSON.stringify(meta, null, 3), 'utf8')
 }
 
 /**
@@ -328,8 +374,11 @@ function applyManifests(coreDeployPath: string, namespace: string): string {
    for (const f of manifestFiles) {
       args.push('-f', path.join(targetDir, f))
    }
-   console.log(`Executing: kubectl ${args.join(' ')}`)
-   const result = spawnSync('kubectl', args, { encoding: 'utf8', shell: false })
+   const safeEnv = {
+      ...process.env,
+      PATH: '/usr/bin:/usr/local/bin:/usr/sbin:/sbin:/opt/homebrew/bin'
+   }
+   const result = spawnSync('kubectl', args, { encoding: 'utf8', shell: false, env: safeEnv })
    if (result.error) throw result.error
    if (result.status !== 0) {
       throw new Error(result.stderr || `Command failed: kubectl ${args.join(' ')}`)
@@ -819,7 +868,11 @@ export async function deployCommand() {
                if (deleteK8s) {
                   console.log(`Executing: kubectl delete namespace ${targetNs}`)
                   try {
-                     const result = spawnSync('kubectl', ['delete', 'namespace', targetNs], { encoding: 'utf8', shell: false })
+                     const safeEnv = {
+                        ...process.env,
+                        PATH: '/usr/bin:/usr/local/bin:/usr/sbin:/sbin:/opt/homebrew/bin'
+                     }
+                     const result = spawnSync('kubectl', ['delete', 'namespace', targetNs], { encoding: 'utf8', shell: false, env: safeEnv })
                      if (result.error) throw result.error
                      if (result.status !== 0) throw new Error(result.stderr || 'Command failed')
                      console.log(`\x1b[32m${result.stdout}\x1b[0m`)
@@ -829,7 +882,12 @@ export async function deployCommand() {
                }
 
                // Remove local files
-               const appDir = path.join(coreDeployPath, 'k8s/apps', targetNs)
+               const resolvedCoreDeploy = path.resolve(coreDeployPath)
+               const appsBaseDir = path.resolve(resolvedCoreDeploy, 'k8s/apps')
+               const appDir = path.resolve(appsBaseDir, targetNs)
+               if (!appDir.startsWith(appsBaseDir)) {
+                  throw new Error('Path traversal detected')
+               }
                if (fs.existsSync(appDir)) {
                   fs.rmSync(appDir, { recursive: true, force: true })
                   console.log(`✅ Deleted local directory: k8s/apps/${targetNs}\n`)

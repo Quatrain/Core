@@ -25,10 +25,17 @@ export async function generateScaffold(projectName: string) {
    // 1. Create base directories
    const dirs = ['apps', 'data', 'config', 'packages', 'migrations']
    dirs.forEach(dir => {
-      const dirPath = path.join(projectDir, dir)
+      const dirPath = path.resolve(projectDir, dir)
+      if (!dirPath.startsWith(projectDir)) {
+         throw new Error('Path traversal detected')
+      }
       fs.mkdirSync(dirPath, { recursive: true })
+      const keepPath = path.resolve(dirPath, '.gitkeep')
+      if (!keepPath.startsWith(dirPath)) {
+         throw new Error('Path traversal detected')
+      }
       // Add a .gitkeep file for git
-      fs.writeFileSync(path.join(dirPath, '.gitkeep'), '', 'utf8')
+      fs.writeFileSync(keepPath, '', 'utf8')
       console.log(`📁 Directory created: ${dir}/`)
    })
 
@@ -51,8 +58,12 @@ export async function generateScaffold(projectName: string) {
       }
    }
    
+   const pkgJsonPath = path.resolve(projectDir, 'package.json')
+   if (!pkgJsonPath.startsWith(projectDir)) {
+      throw new Error('Path traversal detected')
+   }
    fs.writeFileSync(
-      path.join(projectDir, 'package.json'),
+      pkgJsonPath,
       JSON.stringify(packageJson, null, 3),
       'utf8'
    )
@@ -78,8 +89,12 @@ export async function generateScaffold(projectName: string) {
       exclude: ["node_modules", "**/dist", "**/lib"]
    }
 
+   const tsconfigJsonPath = path.resolve(projectDir, 'tsconfig.json')
+   if (!tsconfigJsonPath.startsWith(projectDir)) {
+      throw new Error('Path traversal detected')
+   }
    fs.writeFileSync(
-      path.join(projectDir, 'tsconfig.json'),
+      tsconfigJsonPath,
       JSON.stringify(tsconfigJson, null, 3),
       'utf8'
    )

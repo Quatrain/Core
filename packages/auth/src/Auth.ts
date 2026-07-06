@@ -49,7 +49,7 @@ export class Auth extends Core {
    /** Standardized error message for duplicate email constraint violations. */
    static ERROR_EMAIL_EXISTS = `User email already exists`
    /** Standardized error message for weak password / password complexity violations. */
-   static ERROR_WEAK_PASSWORD = `weak_password`
+   static ERROR_WEAK_PASSWORD = `weak_password` // NOSONAR
 
    protected static _providers: AuthRegistry<any> = {}
 

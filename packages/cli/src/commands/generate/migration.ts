@@ -12,6 +12,11 @@ export async function generateMigration(name: string) {
       process.exit(1)
    }
 
+   if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+      console.error('Error: Migration name must contain only alphanumeric characters, dashes, and underscores.')
+      process.exit(1)
+   }
+
    // Format YYYYMMDDHHmmss
    const now = new Date()
    const timestamp = now.getFullYear().toString() +

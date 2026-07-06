@@ -161,17 +161,16 @@ export class Translator {
      * @returns A callable and chainable translation Proxy.
      */
     public getProxy(lang?: string): any {
-        const self = this
         const targetLang = lang || this.defaultLang
 
         const handler = {
-            apply(target: any, thisArg: any, argumentsList: any[]) {
+            apply: (target: any, thisArg: any, argumentsList: any[]) => {
                 const [scope, key] = argumentsList
-                return self.translate(scope, key, targetLang)
+                return this.translate(scope, key, targetLang)
             },
-            get(target: any, prop: string | symbol) {
+            get: (target: any, prop: string | symbol) => {
                 if (typeof prop === 'string') {
-                    return self.getProxy(prop)
+                    return this.getProxy(prop)
                 }
                 return Reflect.get(target, prop)
             }

@@ -367,6 +367,19 @@ export async function deployCommand() {
       coreDeployPath = path.resolve(pathAnswer.path)
    }
 
+   const normalizedDeployPath = path.normalize(coreDeployPath)
+   if (
+      normalizedDeployPath.startsWith('/etc') ||
+      normalizedDeployPath.startsWith('/var') ||
+      normalizedDeployPath.startsWith('/System') ||
+      normalizedDeployPath.startsWith('/bin') ||
+      normalizedDeployPath.startsWith('/sbin') ||
+      normalizedDeployPath.startsWith('/usr')
+   ) {
+      console.error('Error: Invalid deployment path destination.')
+      process.exit(1)
+   }
+
    // Main loop
    let exitCli = false
    while (!exitCli) {

@@ -8,6 +8,11 @@ import path from 'node:path'
  * @param projectName - The name and path of the target project directory.
  */
 export async function generateScaffold(projectName: string) {
+   if (projectName.includes('..') || path.isAbsolute(projectName)) {
+      console.error('Error: Project name must be a relative subdirectory and cannot contain path traversal or absolute paths.')
+      process.exit(1)
+   }
+
    const projectDir = path.resolve(process.cwd(), projectName)
 
    if (fs.existsSync(projectDir)) {

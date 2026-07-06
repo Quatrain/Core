@@ -142,7 +142,7 @@ export class FirebaseStorageAdapter extends AbstractStorageAdapter {
       action?: string,
       extra?: any
    ): Promise<FileResponseUrlType> {
-      var expires = new Date()
+      const expires = new Date()
       expires.setSeconds(expires.getSeconds() + expiresIn)
 
       const [file] = await getStorage()

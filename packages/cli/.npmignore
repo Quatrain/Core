@@ -1,6 +1,0 @@
-**/*.test.ts
-**/*.spec.ts
-**/__tests__/
-**/tests/
-**/mocks/
-jest.config.js

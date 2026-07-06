@@ -1,7 +1,8 @@
 import inquirer from 'inquirer'
 import fs from 'node:fs'
 import path from 'node:path'
-import { execSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
+import { randomInt, randomBytes } from 'node:crypto'
 
 interface AppMetadata {
    appName: string
@@ -58,7 +59,7 @@ function generateSecurePassword(): string {
    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#%^*()-_=+[]{}'
    let pass = ''
    for (let i = 0; i < 24; i++) {
-      const idx = Math.floor(Math.random() * chars.length)
+      const idx = randomInt(chars.length)
       pass += chars[idx]
    }
    return pass
@@ -323,12 +324,17 @@ function applyManifests(coreDeployPath: string, namespace: string): string {
       'service.yaml',
       'ingressroute.yaml'
    ]
-   const filesArgs = manifestFiles
-      .map(f => `-f "${path.join(targetDir, f)}"`)
-      .join(' ')
-   const cmd = `kubectl apply ${filesArgs}`
-   console.log(`Executing: ${cmd}`)
-   return execSync(cmd, { encoding: 'utf8' })
+   const args = ['apply']
+   for (const f of manifestFiles) {
+      args.push('-f', path.join(targetDir, f))
+   }
+   console.log(`Executing: kubectl ${args.join(' ')}`)
+   const result = spawnSync('kubectl', args, { encoding: 'utf8', shell: false })
+   if (result.error) throw result.error
+   if (result.status !== 0) {
+      throw new Error(result.stderr || `Command failed: kubectl ${args.join(' ')}`)
+   }
+   return result.stdout
 }
 
 /**
@@ -429,7 +435,7 @@ export async function deployCommand() {
                ])
 
                const appNameClean = answers.appName.toLowerCase()
-               const suffix = Math.random().toString(36).substring(2, 7) // 5 character alphanumeric string
+               const suffix = randomBytes(3).toString('hex').substring(0, 5) // 5 character alphanumeric string
                
                let defaultNamespace = `${appNameClean}-${suffix}`
                let defaultDomain = `${appNameClean}-${suffix}.quatrain.app`
@@ -800,8 +806,10 @@ export async function deployCommand() {
                if (deleteK8s) {
                   console.log(`Executing: kubectl delete namespace ${targetNs}`)
                   try {
-                     const output = execSync(`kubectl delete namespace "${targetNs}"`, { encoding: 'utf8' })
-                     console.log(`\x1b[32m${output}\x1b[0m`)
+                     const result = spawnSync('kubectl', ['delete', 'namespace', targetNs], { encoding: 'utf8', shell: false })
+                     if (result.error) throw result.error
+                     if (result.status !== 0) throw new Error(result.stderr || 'Command failed')
+                     console.log(`\x1b[32m${result.stdout}\x1b[0m`)
                   } catch (err: any) {
                      console.error(`Failed to delete namespace ${targetNs} on the cluster:`, err.message)
                   }

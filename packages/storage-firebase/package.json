@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/storage-firebase",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Storage adapter for Firebase Storage",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

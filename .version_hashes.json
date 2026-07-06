@@ -85,9 +85,9 @@
     "last_published": "2026-06-29T08:49:30.325Z"
   },
   "@quatrain/storage-firebase": {
-    "version": "1.2.3",
-    "hash": "Q4SagvuHha+5omljtVGUsXp8l8U=-f9764556108b288e56da76f1d51ddb0f0ffcdeb8493dd1d9639a57c920c2feda",
-    "last_published": "2026-05-12T07:18:47.236Z"
+    "version": "1.2.4",
+    "hash": "PYwf+gcXe6XvweIREusALauJon0=-f9764556108b288e56da76f1d51ddb0f0ffcdeb8493dd1d9639a57c920c2feda",
+    "last_published": "2026-07-06T10:17:25.143Z"
   },
   "@quatrain/storage-s3": {
     "version": "1.2.7",
@@ -245,9 +245,9 @@
     "last_published": "2026-05-23T19:25:20.948Z"
   },
   "@quatrain/i18n": {
-    "version": "1.0.10",
-    "hash": "/GxovfA+hP7bXIZwChuxsJ57Xcc=-397b2919bedc6bb556bb9624d9f46a64a011ea2fd14bfceabc55721922e3648d",
-    "last_published": "2026-06-09T19:51:35.300Z"
+    "version": "1.0.11",
+    "hash": "y+IFXxhGW9YQbH1NcPszfT9g1rA=-397b2919bedc6bb556bb9624d9f46a64a011ea2fd14bfceabc55721922e3648d",
+    "last_published": "2026-07-06T10:17:18.338Z"
   },
   "@quatrain/i18n-en": {
     "version": "1.0.7",
@@ -295,9 +295,9 @@
     "last_published": "2026-07-06T08:03:03.796Z"
   },
   "@quatrain/cli": {
-    "version": "1.1.12",
-    "hash": "ctaCwpsTvD8ts032wbrKIjj6ZBk=-fcb78d11308e05b717a52bade8dc5f4f0ef8d6a64f57d779b5e4a22589b1840c",
-    "last_published": "2026-07-06T09:15:41.100Z"
+    "version": "1.1.13",
+    "hash": "OiDAImEQl6b2XGVnvRdL5w+rGvE=-fcb78d11308e05b717a52bade8dc5f4f0ef8d6a64f57d779b5e4a22589b1840c",
+    "last_published": "2026-07-06T10:17:11.751Z"
   },
   "@quatrain/skills": {
     "version": "1.0.3",

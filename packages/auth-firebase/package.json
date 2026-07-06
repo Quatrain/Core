@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@quatrain/api": "workspace:*",
-    "@quatrain/auth": "^1.2.8",
+    "@quatrain/auth": "^1.2.9",
     "@quatrain/backend": "^1.2.17",
     "@quatrain/core": "^1.2.16",
     "firebase-admin": "^13.0.1",

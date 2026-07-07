@@ -214,9 +214,23 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
       // La variable publicCacheDuration / cacheControl n'est donc pas gérée correctement ici pour le moment.
       // Voir si le SDK de Supabase permet de la supporter dans le futur.
       
+      let download: boolean | string = false
+      if (action === 'download') {
+         download = true
+      } else if (extra.download !== undefined) {
+         download = extra.download
+      } else if (extra.responseDisposition && extra.responseDisposition.includes('attachment')) {
+         const match = extra.responseDisposition.match(/filename="([^"]+)"/)
+         if (match && match[1]) {
+            download = match[1]
+         } else {
+            download = true
+         }
+      }
+
       const { data, error } = await this._client
          .from(file.bucket)
-         .createSignedUrl(file.ref, expiresIn, { download: true })
+         .createSignedUrl(file.ref, expiresIn, { download })
 
       if (error !== null) {
          throw new Error(`Unable to get signed url: ${error}`)

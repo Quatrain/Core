@@ -241,7 +241,12 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
          throw new Error(`Unable to get signed url: ${error}`)
       }
 
-      return { url: data?.signedUrl, expiresIn }
+      let signedUrl = data?.signedUrl
+      if (signedUrl && download === false) {
+         signedUrl += '&play=true'
+      }
+
+      return { url: signedUrl, expiresIn }
    }
 
    /**

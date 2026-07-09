@@ -475,4 +475,24 @@ export abstract class AbstractStorageAdapter
 
       return {}
    }
+
+   /**
+    * Checks if the file is a video or audio stream based on its MIME type or file extension.
+    * 
+    * @param file - Target file.
+    * @returns True if the file represents a video or audio asset.
+    */
+   protected isVideoOrAudio(file: FileType): boolean {
+      const isMimeVideoOrAudio = file.contentType && (file.contentType.startsWith('video/') || file.contentType.startsWith('audio/'))
+      if (isMimeVideoOrAudio) {
+         return true
+      }
+
+      const filename = (file.ref || '').toLowerCase()
+      const videoAudioExtensions = [
+         '.mp4', '.webm', '.ogg', '.mov', '.m4v', '.avi', '.mkv', '.flv', '.3gp', '.wmv',
+         '.mp3', '.wav', '.m4a', '.aac', '.flac', '.wma'
+      ]
+      return videoAudioExtensions.some(ext => filename.endsWith(ext))
+   }
 }

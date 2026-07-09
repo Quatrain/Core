@@ -215,7 +215,7 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
       // Voir si le SDK de Supabase permet de la supporter dans le futur.
       
       let download: boolean | string = false
-      const isVideoOrAudio = file.contentType && (file.contentType.startsWith('video/') || file.contentType.startsWith('audio/'))
+      const isMediaStream = this.isVideoOrAudio(file)
 
       if (action === 'download') {
          download = true
@@ -228,7 +228,7 @@ export class SupabaseStorageAdapter extends AbstractStorageAdapter {
          } else {
             download = true
          }
-      } else if (!isVideoOrAudio) {
+      } else if (!isMediaStream) {
          // Default to download=true for non-media files (images, documents) to preserve historical behavior
          download = true
       }

@@ -95,9 +95,9 @@
     "last_published": "2026-05-21T10:12:56.996Z"
   },
   "@quatrain/storage-supabase": {
-    "version": "1.2.8",
-    "hash": "R5l1nQcAU3upMUl8CkGl7Au/f/M=-800a3902c08e322e67b789a57fb58d8cbd667fe9a0f1e0725f6cb519bddaf37b",
-    "last_published": "2026-07-07T22:44:16.993Z"
+    "version": "1.2.9",
+    "hash": "+KzutG5HZEr1WEMMORmqKXRV0X0=-800a3902c08e322e67b789a57fb58d8cbd667fe9a0f1e0725f6cb519bddaf37b",
+    "last_published": "2026-07-09T07:07:18.191Z"
   },
   "@quatrain/worker": {
     "version": "1.2.9",

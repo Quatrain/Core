@@ -20,5 +20,13 @@ export abstract class AbstractAiAdapter {
     * @param schema The expected output schema
     * @param options 
     */
-   abstract generateStructured(prompt: string, schema: any, options?: any): Promise<any>
+   abstract generateStructured(prompt: any, schema: any, options?: any): Promise<any>
+
+   /**
+    * Generate a streaming text response from a prompt.
+    * @param prompt - The instruction or query.
+    * @param options - Configuration options.
+    * @returns A promise resolving to an async iterable stream of text chunks.
+    */
+   generateTextStream?(prompt: string, options?: any): Promise<AsyncIterable<string>>
 }

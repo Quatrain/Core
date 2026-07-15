@@ -4,6 +4,7 @@ import {
    Log,
    LogLevel,
 } from '@quatrain/log'
+import persist from 'node-persist'
 import { spawn } from 'node:child_process'
 import which from 'which'
 
@@ -15,7 +16,7 @@ export class Core {
    /** Identifying namespace for this core component. */
    static readonly me = this.name
    /** Persistent key-value storage engine reference. */
-   static readonly storage = require('node-persist')
+   static readonly storage = persist
    /** Context prefix string for scoped storage keys. */
    static readonly storagePrefix = 'core'
    /** Dictionary holding registered active Quatrain models/components. */

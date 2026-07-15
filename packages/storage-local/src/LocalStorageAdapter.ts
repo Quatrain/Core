@@ -1,6 +1,7 @@
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import * as path from 'node:path';
 import { Readable } from 'node:stream';
+import { createWriteStream } from 'node:fs';
 import { 
   AbstractStorageAdapter, 
   StorageParameters, 
@@ -44,7 +45,7 @@ export class LocalStorageAdapter extends AbstractStorageAdapter {
   async create(file: FileType, stream: Readable): Promise<FileType> {
     const fullPath = this._getFullPath(file);
     await fs.ensureDir(path.dirname(fullPath));
-    const writeStream = fs.createWriteStream(fullPath);
+    const writeStream = createWriteStream(fullPath);
     return new Promise((resolve, reject) => {
       stream.pipe(writeStream)
         .on('finish', () => resolve(file))

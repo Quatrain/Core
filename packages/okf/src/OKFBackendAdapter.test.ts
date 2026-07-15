@@ -1,5 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import { parse as parseYaml } from 'yaml';
 import { OKFBackendAdapter } from './OKFBackendAdapter';
 import { Backend } from '@quatrain/backend';
 import { PersistedBaseObject } from '@quatrain/backend';
@@ -42,7 +43,7 @@ describe('OKFBackendAdapter', () => {
    test('should format relative OKF filepath correctly for regular objects', async () => {
       const obj = await OKFTestObject.factory();
       const relativePath = adapter.getOKFPath(obj.dataObject, '123-abc');
-      expect(relativePath).toBe(path.join('test_collection', '123-abc.json'));
+      expect(relativePath).toBe(path.join('test_collection', '123-abc.md'));
    });
 
    test('should format relative OKF filepath correctly for telemetry', async () => {
@@ -66,15 +67,17 @@ describe('OKFBackendAdapter', () => {
       expect(obj.dataObject.uri.uid).toBeDefined();
 
       const savedUid = obj.dataObject.uri.uid;
-      const expectedPath = path.join(testDir, 'test_collection', `${savedUid}.json`);
+      const expectedPath = path.join(testDir, 'test_collection', `${savedUid}.md`);
       const fileExists = await fs.stat(expectedPath).then(() => true).catch(() => false);
       expect(fileExists).toBe(true);
 
       // Verify file content structure
       const raw = await fs.readFile(expectedPath, 'utf-8');
-      const parsed = JSON.parse(raw);
-      expect(parsed.meta.created_by).toBe('pascal@sodav.ci');
-      expect(parsed.data.name).toBe('Poisson Tilapia');
+      expect(raw.startsWith('---')).toBe(true);
+      const parts = raw.split('---');
+      const parsed = parseYaml(parts[1].trim()) as any;
+      expect(parsed.createdBy).toBe('pascal@sodav.ci');
+      expect(parsed.name).toBe('Poisson Tilapia');
 
       // 2. Read
       const loaded = await OKFTestObject.fromBackend<OKFTestObject>(savedUid);

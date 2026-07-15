@@ -2741,7 +2741,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/rest@npm:^20.0.2":
+"@octokit/rest@npm:^20.0.2, @octokit/rest@npm:^20.1.1":
   version: 20.1.2
   resolution: "@octokit/rest@npm:20.1.2"
   dependencies:
@@ -3565,6 +3565,7 @@ __metadata:
   dependencies:
     "@quatrain/backend": "workspace:*"
     "@quatrain/log": "workspace:*"
+    "@quatrain/storage": "workspace:*"
     "@quatrain/types": "workspace:*"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
@@ -3572,6 +3573,7 @@ __metadata:
     jest: "npm:^29.7.0"
     ts-jest: "npm:^29.4.6"
     typescript: "npm:^5.2.2"
+    yaml: "npm:^2.4.0"
   languageName: unknown
   linkType: soft
 
@@ -3703,6 +3705,19 @@ __metadata:
     ts-jest: "npm:^29.4.6"
     ts-node: "npm:^10.4.0"
     typescript: "npm:^5.1.5"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/storage-git@workspace:packages/storage-git":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/storage-git@workspace:packages/storage-git"
+  dependencies:
+    "@octokit/rest": "npm:^20.1.1"
+    "@quatrain/log": "workspace:*"
+    "@quatrain/storage": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
   languageName: unknown
   linkType: soft
 

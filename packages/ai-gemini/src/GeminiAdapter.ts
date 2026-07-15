@@ -48,7 +48,7 @@ export class GeminiAdapter extends AbstractAiAdapter {
     * @returns The parsed JSON object returned by the model.
     * @throws {Error} If the API does not return valid text.
     */
-   async generateStructured(prompt: string, schema: any, options?: any): Promise<any> {
+   async generateStructured(prompt: any, schema: any, options?: any): Promise<any> {
       if (!this._ai) this.init()
 
       const model = options?.model || 'gemini-2.5-flash'
@@ -66,5 +66,30 @@ export class GeminiAdapter extends AbstractAiAdapter {
       }
 
       return JSON.parse(response.text)
+   }
+
+   /**
+    * Sends a textual prompt to the Gemini API and returns an async iterable of text chunks.
+    * 
+    * @param prompt - The instruction or query to send to the model.
+    * @param options - Configuration options including the `model` identifier.
+    * @returns An async iterable stream of text chunks.
+    */
+   async generateTextStream(prompt: string, options?: any): Promise<AsyncIterable<string>> {
+      if (!this._ai) this.init()
+
+      const model = options?.model || 'gemini-2.5-flash'
+      const responseStream = await this._ai!.models.generateContentStream({
+         model,
+         contents: prompt,
+      })
+
+      async function* makeGenerator() {
+         for await (const chunk of responseStream) {
+            yield chunk.text || ''
+         }
+      }
+
+      return makeGenerator()
    }
 }

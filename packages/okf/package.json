@@ -29,7 +29,9 @@
   "dependencies": {
     "@quatrain/backend": "workspace:*",
     "@quatrain/log": "workspace:*",
-    "@quatrain/types": "workspace:*"
+    "@quatrain/storage": "workspace:*",
+    "@quatrain/types": "workspace:*",
+    "yaml": "^2.4.0"
   },
   "scripts": {
     "test-ci": "jest --runInBand",

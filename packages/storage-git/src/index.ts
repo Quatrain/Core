@@ -1,0 +1,1 @@
+export { GitStorageAdapter } from './GitStorageAdapter';

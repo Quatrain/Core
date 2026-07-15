@@ -1,0 +1,29 @@
+{
+  "name": "@quatrain/storage-git",
+  "version": "1.0.0",
+  "description": "Git & GitHub Storage Adapter for Quatrain Core",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "dist/",
+    "src/",
+    "README.md"
+  ],
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "license": "AGPL-3.0-only",
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@octokit/rest": "^20.1.1",
+    "@quatrain/log": "workspace:*",
+    "@quatrain/storage": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}

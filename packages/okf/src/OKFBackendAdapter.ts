@@ -238,6 +238,28 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
        const relativePath = this.getOKFPath(dao, uid);
        const fullPath = path.join(this.dataDir, relativePath);
 
+       // Clean up old file if the path has changed (e.g. category changed)
+       const collection = this.getCollection(dao);
+       const suffix = collection === 'telemetry' ? `${uid}.json` : `${uid}.md`;
+       const oldRelative = collection ? await this.findFileRecursively(collection, suffix) : null;
+       if (oldRelative && oldRelative !== relativePath) {
+          if (this.storage) {
+             try {
+                await this.storage.delete(this.getFile(oldRelative) as any);
+                Backend.info(`[OKF] Attempted delete of old duplicate during create at ${oldRelative}`);
+             } catch (err: any) {
+                Backend.warn(`[OKF] Error deleting old duplicate during create at ${oldRelative}: ${err.message}`, err);
+             }
+          } else {
+             try {
+                const oldFullPath = path.join(this.dataDir, oldRelative);
+                await fs.unlink(oldFullPath);
+             } catch (err: any) {
+                Backend.warn(`[OKF] Error deleting old local duplicate during create at ${oldRelative}: ${err.message}`);
+             }
+          }
+       }
+
        const content = this.serializeContent(dao, relativePath);
        const mime = relativePath.endsWith('.md') ? 'text/markdown' : 'application/json';
 
@@ -249,7 +271,6 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
           await fs.writeFile(fullPath, content, 'utf-8');
        }
 
-       const collection = this.getCollection(dao);
        dao.uri = new ObjectUri(`${collection}/${uid}`);
        if (collection) {
           await this.rebuildIndices(collection);
@@ -377,9 +398,13 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
        const suffix = collection === 'telemetry' ? `${uid}.json` : `${uid}.md`;
 
        if (this.storage) {
+          let deleted = false;
           try {
-             await this.storage.delete(this.getFile(relativePath) as any);
+             deleted = await this.storage.delete(this.getFile(relativePath) as any);
           } catch (err) {
+             // Ignore and let fallback handle it
+          }
+          if (!deleted) {
              const foundRelative = collection ? await this.findFileRecursively(collection, suffix) : null;
              if (!foundRelative) {
                 throw new NotFoundError(`[OKF] Failed to delete record from storage: ${suffix}`);

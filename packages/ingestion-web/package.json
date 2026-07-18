@@ -1,0 +1,27 @@
+{
+  "name": "@quatrain/ingestion-web",
+  "version": "1.0.0",
+  "description": "Web crawling and HTML cleaning adapter for the @quatrain/ingestion namespace",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/ingestion-web"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "license": "AGPL-3.0-only",
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@quatrain/ai": "workspace:*",
+    "@quatrain/core": "workspace:*",
+    "@quatrain/ingestion": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}

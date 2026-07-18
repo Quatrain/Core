@@ -3296,6 +3296,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/chat@workspace:packages/chat":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/chat@workspace:packages/chat"
+  dependencies:
+    "@quatrain/ai": "workspace:*"
+    "@quatrain/backend": "workspace:*"
+    "@quatrain/core": "workspace:*"
+    "@quatrain/log": "workspace:*"
+    "@quatrain/storage": "workspace:*"
+    "@quatrain/types": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:^22.10.1"
+    jest: "npm:^29.7.0"
+    ts-jest: "npm:^29.4.6"
+    typescript: "npm:^5.2.2"
+    yaml: "npm:^2.4.0"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/cli@workspace:packages/cli":
   version: 0.0.0-use.local
   resolution: "@quatrain/cli@workspace:packages/cli"
@@ -3497,6 +3517,71 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/i18n@workspace:packages/i18n"
   dependencies:
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/ingestion-audio@workspace:packages/ingestion-audio":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/ingestion-audio@workspace:packages/ingestion-audio"
+  dependencies:
+    "@quatrain/ai": "workspace:*"
+    "@quatrain/core": "workspace:*"
+    "@quatrain/ingestion": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/ingestion-ocr@workspace:packages/ingestion-ocr":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/ingestion-ocr@workspace:packages/ingestion-ocr"
+  dependencies:
+    "@quatrain/ai": "workspace:*"
+    "@quatrain/core": "workspace:*"
+    "@quatrain/ingestion": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/pdf-parse": "npm:^1.1.4"
+    pdf-parse: "npm:^1.1.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/ingestion-video@workspace:packages/ingestion-video":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/ingestion-video@workspace:packages/ingestion-video"
+  dependencies:
+    "@quatrain/ingestion": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/ingestion-web@workspace:packages/ingestion-web":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/ingestion-web@workspace:packages/ingestion-web"
+  dependencies:
+    "@quatrain/ai": "workspace:*"
+    "@quatrain/core": "workspace:*"
+    "@quatrain/ingestion": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/ingestion@workspace:*, @quatrain/ingestion@workspace:packages/ingestion":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/ingestion@workspace:packages/ingestion"
+  dependencies:
+    "@quatrain/backend": "workspace:*"
+    "@quatrain/core": "workspace:*"
+    "@quatrain/log": "workspace:*"
+    "@quatrain/types": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:^22.10.1"
+    jest: "npm:^29.7.0"
+    ts-jest: "npm:^29.4.6"
     typescript: "npm:^5.2.2"
   languageName: unknown
   linkType: soft
@@ -5549,6 +5634,15 @@ __metadata:
   version: 3.0.6
   resolution: "@types/object-hash@npm:3.0.6"
   checksum: 10c0/a5450cafdbc33c840be2c36fb1ace96cce7aa580177cf68dbdbda80f18938207692d74c76403321c99f43460ac31981c4af7fe8b49eca1570f8e9a4c01eaf33d
+  languageName: node
+  linkType: hard
+
+"@types/pdf-parse@npm:^1.1.4":
+  version: 1.1.5
+  resolution: "@types/pdf-parse@npm:1.1.5"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/68989815ca9b6321eb5ab47437edf58d4f8291d4857b4bad0d7dedf1f4535da9918bc1113f7f59763c238f35175b080d3dfa76c5f26eeeb091ac4b6604028d2e
   languageName: node
   linkType: hard
 
@@ -10107,6 +10201,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-ensure@npm:^0.0.0":
+  version: 0.0.0
+  resolution: "node-ensure@npm:0.0.0"
+  checksum: 10c0/7af391aee024a8b7df77c239ed8b90417e3f2539824fa06b60f243ce14c75ee455766464c7c3ba9407d5b1e4d1d74ed5cf5f8af10c67b0fc05aa6e29f5d2462b
+  languageName: node
+  linkType: hard
+
 "node-fetch-native@npm:^1.6.4":
   version: 1.6.7
   resolution: "node-fetch-native@npm:1.6.7"
@@ -10553,6 +10654,15 @@ __metadata:
   version: 0.1.13
   resolution: "path-to-regexp@npm:0.1.13"
   checksum: 10c0/1cae3921739c154a8926e136185a10c916f79a249b9072a5001b266d96e193860ca03867e8e8cc808b786862d750f427ed93686bc259355442c3407a62deab1a
+  languageName: node
+  linkType: hard
+
+"pdf-parse@npm:^1.1.1":
+  version: 1.1.4
+  resolution: "pdf-parse@npm:1.1.4"
+  dependencies:
+    node-ensure: "npm:^0.0.0"
+  checksum: 10c0/43edaad7fd7d08047162ad0d40b583647c321c8f6d2c282ceca8fe75531de5233ad82e4777f18acfe891994117e3bb7646b541107d4472d0414f32ad6b2cf3f8
   languageName: node
   linkType: hard
 

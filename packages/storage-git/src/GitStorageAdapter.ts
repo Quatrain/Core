@@ -21,6 +21,7 @@ export interface GitStorageConfig {
    owner?: string;           // GitHub repo owner
    repo?: string;            // GitHub repository name
    branch?: string;          // default: 'main'
+   noPush?: boolean;         // disable push on save/delete in local mode
 }
 
 /**
@@ -107,7 +108,10 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
          await fs.writeFile(fullPath, content, 'utf-8');
 
          // Commit and push locally
-         await this.runGit(`git add "${file.ref}" && git commit -m "Update ${file.ref}" && git push`);
+         const gitCmd = this.config.noPush
+            ? `git add "${file.ref}" && git commit -m "Update ${file.ref}"`
+            : `git add "${file.ref}" && git commit -m "Update ${file.ref}" && git push`;
+         await this.runGit(gitCmd);
       }
 
       return {
@@ -168,7 +172,10 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
          const fullPath = path.join(this.config.localPath!, file.ref);
          if (await fs.pathExists(fullPath)) {
             await fs.remove(fullPath);
-            await this.runGit(`git rm "${file.ref}" && git commit -m "Delete ${file.ref}" && git push`);
+            const gitCmd = this.config.noPush
+               ? `git rm "${file.ref}" && git commit -m "Delete ${file.ref}"`
+               : `git rm "${file.ref}" && git commit -m "Delete ${file.ref}" && git push`;
+            await this.runGit(gitCmd);
             return true;
          }
          return false;

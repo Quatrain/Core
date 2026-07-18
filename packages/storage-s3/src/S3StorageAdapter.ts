@@ -87,9 +87,15 @@ export class S3StorageAdapter extends AbstractStorageAdapter {
     */
    async streamToBuffer(stream: Stream): Promise<Buffer> {
       return new Promise<Buffer>((resolve, reject) => {
-         const _buf: any[] = []
+         const _buf: Buffer[] = []
 
-         stream.on('data', (chunk) => _buf.push(chunk))
+         stream.on('data', (chunk) => {
+            if (typeof chunk === 'string') {
+               _buf.push(Buffer.from(chunk, 'utf-8'))
+            } else {
+               _buf.push(Buffer.from(chunk))
+            }
+         })
          stream.on('end', () => resolve(Buffer.concat(_buf)))
          stream.on('error', (err) => reject(err))
       })

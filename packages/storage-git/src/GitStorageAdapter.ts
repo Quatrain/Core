@@ -52,6 +52,11 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
       }
    }
 
+   /**
+    * Returns the underlying SDK or driver instance (Octokit for GitHub, fs-extra for local).
+    * 
+    * @returns The raw storage client or file system module.
+    */
    getDriver(): any {
       return this.config.mode === 'github' ? this.octokit : fs;
    }
@@ -74,6 +79,13 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
       return Buffer.concat(chunks).toString('utf-8');
    }
 
+   /**
+    * Creates a new file or updates an existing one in the git repository or GitHub.
+    * 
+    * @param file - Target file metadata.
+    * @param stream - Readable stream containing the file content.
+    * @returns A promise resolving to the created file's metadata footprint.
+    */
    async create(file: FileType, stream: Readable): Promise<FileType> {
       const content = await this.streamToString(stream);
 
@@ -120,6 +132,12 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
       };
    }
 
+   /**
+    * Retrieves the file content as a Readable stream.
+    * 
+    * @param file - Target file footprint.
+    * @returns A promise resolving to a Node Readable stream.
+    */
    async getReadable(file: FileType): Promise<Readable> {
       if (this.config.mode === 'github' && this.octokit) {
          const { data } = await this.octokit.repos.getContent({
@@ -143,6 +161,12 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
       }
    }
 
+   /**
+    * Deletes a file from the repository and commits/pushes the change.
+    * 
+    * @param file - Target file footprint.
+    * @returns A promise resolving to true if the file was deleted, false otherwise.
+    */
    async delete(file: FileType): Promise<boolean> {
       if (this.config.mode === 'github' && this.octokit) {
          try {
@@ -182,6 +206,12 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
       }
    }
 
+   /**
+    * Lists all files within the repository that match the prefix.
+    * 
+    * @param prefixOrOptions - Root prefix directory or options object.
+    * @returns A promise resolving to a list of matching file reference paths.
+    */
    async list(prefixOrOptions: any = ''): Promise<string[]> {
       const prefix = typeof prefixOrOptions === 'object' && prefixOrOptions !== null 
          ? (prefixOrOptions.prefix || '') 
@@ -228,6 +258,13 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
       }
    }
 
+   /**
+    * Downloads a stored file to a specific local path.
+    * 
+    * @param file - Target file footprint.
+    * @param destMeta - Destination file path configuration.
+    * @returns A promise resolving to the final local destination path.
+    */
    async download(file: FileType, destMeta: DownloadFileMetaType): Promise<any> {
       const stream = await this.getReadable(file);
       const content = await this.streamToString(stream);
@@ -237,18 +274,41 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
       return destPath;
    }
 
+   /**
+    * Copies a file from one repository location to another.
+    * 
+    * @param file - Source file footprint.
+    * @param destFile - Destination file footprint.
+    * @returns A promise resolving to the copied file metadata.
+    */
    async copy(file: FileType, destFile: FileType): Promise<any> {
       const stream = await this.getReadable(file);
       await this.create(destFile, stream);
       return destFile;
    }
 
+   /**
+    * Moves/renames a file natively in the repository.
+    * 
+    * @param file - Source file footprint.
+    * @param destFile - Destination file footprint.
+    * @returns A promise resolving to the relocated file footprint.
+    */
    async move(file: FileType, destFile: FileType): Promise<any> {
       await this.copy(file, destFile);
       await this.delete(file);
       return destFile;
    }
 
+   /**
+    * Generates a raw URL pointing to the raw file content in Git/GitHub.
+    * 
+    * @param file - Target file footprint.
+    * @param expiresIn - Expiry window in seconds (ignored).
+    * @param action - Action intent (ignored).
+    * @param extra - Provider specific overrides (ignored).
+    * @returns A promise resolving to the final raw public URL string.
+    */
    async getUrl(file: FileType, expiresIn?: number, action?: string, extra?: any): Promise<any> {
       if (this.config.mode === 'github') {
          return `https://raw.githubusercontent.com/${this.config.owner}/${this.config.repo}/${this.config.branch}/${file.ref}`;
@@ -256,15 +316,34 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
       return `file://${path.join(this.config.localPath!, file.ref)}`;
    }
 
+   /**
+    * Generates a direct upload URL (returns the read URL since git upload is committed directly).
+    * 
+    * @param filePath - Target file footprint.
+    * @param expiresIn - Expiry window in seconds (ignored).
+    * @returns A promise resolving to the raw URL string.
+    */
    async getUploadUrl(filePath: FileType, expiresIn?: number): Promise<any> {
       return this.getUrl(filePath);
    }
 
+   /**
+    * Pipes the file content directly into a writable stream.
+    * 
+    * @param file - Target file footprint.
+    * @param res - Target writable stream.
+    */
    async stream(file: FileType, res: any): Promise<any> {
       const stream = await this.getReadable(file);
       stream.pipe(res);
    }
 
+   /**
+    * Retrieves file metadata, specifically augmenting it with byte size.
+    * 
+    * @param file - Target file footprint.
+    * @returns A promise resolving to the file footprint containing sizes.
+    */
    async getMetaData(file: FileType): Promise<FileType> {
       if (this.config.mode === 'github' && this.octokit) {
          const { data } = await this.octokit.repos.getContent({
@@ -292,6 +371,13 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
       return file;
    }
 
+   /**
+    * Computes statistics for the Git repository storage.
+    * 
+    * @param bucket - Optional bucket name (defaults to 'default').
+    * @param prefix - Optional directory prefix to scan.
+    * @returns A promise resolving to the bucket statistics.
+    */
    async getBucketStats(bucket?: string, prefix?: string): Promise<BucketStatsType> {
       const files = await this.list(prefix || '');
       return {

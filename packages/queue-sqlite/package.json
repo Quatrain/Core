@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/queue-sqlite",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SQLite Queue Adapter for the @quatrain/queue namespace",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

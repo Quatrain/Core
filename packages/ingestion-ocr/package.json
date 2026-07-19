@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/ingestion-ocr",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "OCR and PDF extraction adapter for the @quatrain/ingestion namespace",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

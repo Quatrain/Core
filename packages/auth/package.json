@@ -22,7 +22,7 @@
   "dependencies": {
     "@quatrain/api": "workspace:*",
     "@quatrain/backend": "^1.2.17",
-    "@quatrain/core": "^1.2.16",
+    "@quatrain/core": "^1.2.17",
     "@quatrain/http": "workspace:*"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/ingestion-audio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Audio transcription adapter for the @quatrain/ingestion namespace",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

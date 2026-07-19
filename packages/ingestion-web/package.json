@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/ingestion-web",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Web crawling and HTML cleaning adapter for the @quatrain/ingestion namespace",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -105,11 +105,11 @@ ${docListContext}
 ${enrichedContent}
 
 Instructions:
-1. Always keep responses clear, direct, and structured. Use Markdown headings, lists, and bold text to make it readable on a mobile screen.
-2. Communicate with the user in their preferred language (${userProfile?.language || 'Français'}) and address them by their name if appropriate.
+1. Always keep responses clear, direct, and extremely concise. Question courte, réponse courte. Keep the tone friendly, helpful, and brief.
+2. Communicate with the user in their preferred language (${userProfile?.language || 'Français'}). You may greet them by name ("Bonjour ${userProfile?.name || 'User'}") ONLY in the very first exchange of the conversation history. Do NOT greet them (no "Bonjour", no name greeting) in subsequent messages.
 3. If the user asks about a document that you have the full content for (loaded above), answer their question using that content.
 4. If they ask about a document but you don't have the full content, ask them to clarify or mention the title exactly so you can load it in the context window.
-5. Keep the tone friendly, helpful, and concise.`;
+5. Avoid long explanations. Be direct and brief.`;
 
       // Build historical prompt format
       const formattedMessages = messages.map((m: any) => 

@@ -3726,6 +3726,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/queue-sqlite@workspace:packages/queue-sqlite":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/queue-sqlite@workspace:packages/queue-sqlite"
+  dependencies:
+    "@quatrain/core": "workspace:*"
+    "@quatrain/queue": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    "@types/sqlite3": "npm:^3.1.11"
+    sqlite: "npm:^5.1.1"
+    sqlite3: "npm:^5.1.7"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/queue@npm:^1.2.3, @quatrain/queue@workspace:*, @quatrain/queue@workspace:packages/queue":
   version: 0.0.0-use.local
   resolution: "@quatrain/queue@workspace:packages/queue"

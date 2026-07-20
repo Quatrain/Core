@@ -315,9 +315,9 @@
     "last_published": "2026-06-29T09:34:37.314Z"
   },
   "@quatrain/okf": {
-    "version": "1.0.2",
-    "hash": "xHe9jmdukNHhG6zrt9t15xGpLNw=-5279dcb8c36eda4769985e5f249225a0155abaacca2edaa2150708054efcc3d3",
-    "last_published": "2026-07-19T14:47:30.325Z"
+    "version": "1.0.3",
+    "hash": "TKSnQ1i0tAuz3IktsdJqKJU6Wqc=-5279dcb8c36eda4769985e5f249225a0155abaacca2edaa2150708054efcc3d3",
+    "last_published": "2026-07-20T12:32:32.103Z"
   },
   "@quatrain/state-machine": {
     "version": "1.0.1",
@@ -325,9 +325,9 @@
     "last_published": "2026-07-13T07:15:41.213Z"
   },
   "@quatrain/chat": {
-    "version": "1.0.1",
-    "hash": "FXh66CypbVAwKjbKYFB8ehB21JM=-e30c5166832361e32ec48031a8ef1a57f8577a6b5d304f3e22b17c4520d501ab",
-    "last_published": "2026-07-19T14:46:41.924Z"
+    "version": "1.0.2",
+    "hash": "yj0e48Vp89bIiBSxxDLyEWeUnaw=-e30c5166832361e32ec48031a8ef1a57f8577a6b5d304f3e22b17c4520d501ab",
+    "last_published": "2026-07-20T12:32:25.326Z"
   },
   "@quatrain/ingestion": {
     "version": "1.0.1",

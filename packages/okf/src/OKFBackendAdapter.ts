@@ -226,6 +226,15 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
                   data.markdown = bodyPart;
                }
             }
+
+            // Extract links dynamically from the body if not already present in the data object
+            if (bodyPart && (!data.links || (Array.isArray(data.links) && data.links.length === 0))) {
+               const extracted = this.extractLinks(bodyPart);
+               if (extracted.length > 0) {
+                  data.links = extracted;
+               }
+            }
+
             return { meta, data };
          }
       }

@@ -148,6 +148,16 @@ describe('OKFBackendAdapter', () => {
       expect(results.items.length).toBe(1);
       expect(results.items[0].uri.uid).toBe(uidA);
 
+      // 5. Verify dynamic extraction of links on files without links in frontmatter (legacy fallback)
+      const cleanRawA = rawA
+         .replace(`  - ${uidB}\n`, '')
+         .replace(`  - note-c.md\n`, '')
+         .replace('links:\n', '');
+      await fs.writeFile(pathA, cleanRawA, 'utf-8');
+      const loadedADynamic = await OKFTestObject.fromBackend<OKFTestObject>(uidA);
+      expect(loadedADynamic.val('links')).toContain(uidB);
+      expect(loadedADynamic.val('links')).toContain('note-c.md');
+
       // Clean up
       await noteA.delete();
       await noteB.delete();

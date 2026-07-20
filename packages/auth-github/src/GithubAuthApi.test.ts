@@ -86,30 +86,30 @@ describe('GithubAuthApi', () => {
       expect(res.json).toHaveBeenCalledWith({ access_token: 'token-abc' })
    })
 
-   it('should redirect to deep link for mobile platform', async () => {
-      GithubAuthApi(mockRouter as unknown as ServerAdapter, '/api/auth/github', {
-         adapter: mockAdapter,
-      })
+    it('should redirect to deep link for mobile platform', async () => {
+       GithubAuthApi(mockRouter as unknown as ServerAdapter, '/api/auth/github', {
+          adapter: mockAdapter,
+          mobileRedirectUri: 'myapp://auth/github/callback',
+       })
 
-      const req = {
-         query: {
-            code: 'code-123',
-            platform: 'mobile',
-         },
-      } as unknown as ApiRequest
+       const req = {
+          query: {
+             code: 'code-123',
+          },
+       } as unknown as ApiRequest
 
-      const res = {
-         status: jest.fn().mockReturnThis(),
-         setHeader: jest.fn().mockReturnThis(),
-         send: jest.fn(),
-      } as unknown as ApiResponse
+       const res = {
+          status: jest.fn().mockReturnThis(),
+          setHeader: jest.fn().mockReturnThis(),
+          send: jest.fn(),
+       } as unknown as ApiResponse
 
-      await routes['/callback'](req, res)
+       await routes['/callback'](req, res)
 
-      expect(res.status).toHaveBeenCalledWith(302)
-      expect(res.setHeader).toHaveBeenCalledWith(
-         'Location',
-         'modaka://auth/github/callback?token=token-abc'
-      )
-   })
+       expect(res.status).toHaveBeenCalledWith(302)
+       expect(res.setHeader).toHaveBeenCalledWith(
+          'Location',
+          'myapp://auth/github/callback?token=token-abc'
+       )
+    })
 })

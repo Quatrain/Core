@@ -158,4 +158,13 @@ export abstract class AbstractAuthAdapter implements AuthInterface {
    recoverPassword(email: string, redirectTo?: string): Promise<any> {
       throw new Error('Password recovery not implemented for this adapter')
    }
+
+   /**
+    * Returns the pluggable endpoint handler function for this adapter, if any.
+    * 
+    * @returns The EndpointHandler callback or null.
+    */
+   public getEndpointHandler(): any {
+      return null
+   }
 }

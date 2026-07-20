@@ -3047,6 +3047,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/auth-github@workspace:packages/auth-github":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/auth-github@workspace:packages/auth-github"
+  dependencies:
+    "@quatrain/api": "workspace:*"
+    "@quatrain/auth": "npm:^1.2.9"
+    "@quatrain/backend": "npm:^1.2.17"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    node-fetch-native: "npm:^1.6.4"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/auth-http-basic@workspace:*, @quatrain/auth-http-basic@workspace:packages/auth-http-basic":
   version: 0.0.0-use.local
   resolution: "@quatrain/auth-http-basic@workspace:packages/auth-http-basic"
@@ -3473,6 +3487,16 @@ __metadata:
     "@types/express": "npm:^4.17.17"
     express: "npm:^4.18.2"
     typescript: "npm:^5.0.0"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/git-client@workspace:packages/git-client":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/git-client@workspace:packages/git-client"
+  dependencies:
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
   languageName: unknown
   linkType: soft
 

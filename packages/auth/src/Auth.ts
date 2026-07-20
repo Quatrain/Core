@@ -87,4 +87,21 @@ export class Auth extends Core {
          throw new Error(`Unknown provider alias: '${alias}'`)
       }
    }
+
+    /**
+     * Scans all registered auth providers, collects their endpoint handlers,
+     * and registers them dynamically under a common routing root path.
+     * 
+     * @param server - The Quatrain ServerAdapter (Astro, Express, etc.).
+     * @param rootPath - The common authentication root segment (defaults to '/api/auth').
+     */
+    static registerEndpoints(server: any, rootPath: string = '/api/auth') {
+       for (const [alias, provider] of Object.entries(this._providers)) {
+          const handler = provider.getEndpointHandler()
+          if (handler) {
+             this.info(`Registering pluggable API endpoints for auth provider '${alias}' on '${rootPath}/${alias}'`)
+             server.addEndpoint(handler, `${rootPath}/${alias}`, { adapter: provider })
+          }
+       }
+    }
 }

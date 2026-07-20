@@ -1,0 +1,36 @@
+{
+  "name": "@quatrain/auth-github",
+  "version": "1.2.9",
+  "license": "AGPL-3.0-only",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "src/",
+    "dist/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/auth-github"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "dependencies": {
+    "@quatrain/api": "workspace:*",
+    "@quatrain/auth": "^1.2.9",
+    "@quatrain/backend": "^1.2.17",
+    "node-fetch-native": "^1.6.4"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "wbuild": "tsc --watch",
+    "bump-to": "yarn version"
+  }
+}

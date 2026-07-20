@@ -2,15 +2,17 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { OKFBackendAdapter } from './OKFBackendAdapter';
-import { Backend } from '@quatrain/backend';
-import { PersistedBaseObject } from '@quatrain/backend';
-import { StringProperty, DateTimeProperty } from '@quatrain/core';
+import { Backend, PersistedBaseObject, OperatorKeys } from '@quatrain/backend';
+import { StringProperty, DateTimeProperty, ArrayProperty } from '@quatrain/core';
 
 class OKFTestObject extends PersistedBaseObject {
    static COLLECTION = 'test_collection';
    static PROPS_DEFINITION = [
       { name: 'name', type: StringProperty.TYPE },
-      { name: 'createdBy', type: StringProperty.TYPE }
+      { name: 'createdBy', type: StringProperty.TYPE },
+      { name: 'body', type: StringProperty.TYPE },
+      { name: 'links', type: ArrayProperty.TYPE, itemType: StringProperty.TYPE },
+      { name: 'backlinks', type: ArrayProperty.TYPE }
    ];
 }
 
@@ -99,5 +101,55 @@ describe('OKFBackendAdapter', () => {
       await loaded2.delete();
       const fileExistsAfterDelete = await fs.stat(expectedPath).then(() => true).catch(() => false);
       expect(fileExistsAfterDelete).toBe(false);
+   });
+
+   test('should extract internal links and resolve backlinks', async () => {
+      // Create Note B first
+      const noteB = await OKFTestObject.factory();
+      noteB.set('name', 'Note B');
+      noteB.set('createdBy', 'pascal@sodav.ci');
+      await noteB.save();
+      const uidB = noteB.dataObject.uri.uid;
+
+      // Create Note A pointing to Note B using WikiLink and Markdown link
+      const noteA = await OKFTestObject.factory();
+      noteA.set('name', 'Note A');
+      noteA.set('createdBy', 'pascal@sodav.ci');
+      // Set the body/markdown field
+      noteA.dataObject.set('body', `Ceci est un lien vers [[${uidB}]] et un autre [Lien](note-c.md)`);
+      await noteA.save();
+      const uidA = noteA.dataObject.uri.uid;
+
+      // 1. Verify links are stored in frontmatter of Note A
+      const pathA = path.join(testDir, 'test_collection', `${uidA}.md`);
+      const rawA = await fs.readFile(pathA, 'utf-8');
+      const parts = rawA.split('---');
+      const parsedA = parseYaml(parts[1].trim()) as any;
+      expect(parsedA.links).toBeDefined();
+      expect(parsedA.links).toContain(uidB);
+      expect(parsedA.links).toContain('note-c.md');
+
+      // 2. Verify links are returned when reading Note A
+      const loadedA = await OKFTestObject.fromBackend<OKFTestObject>(uidA);
+      expect(loadedA.val('links')).toContain(uidB);
+      expect(loadedA.val('links')).toContain('note-c.md');
+
+      // 3. Verify backlinks are resolved when reading Note B
+      const loadedB = await OKFTestObject.fromBackend<OKFTestObject>(uidB);
+      const backlinksB = loadedB.val('backlinks');
+      expect(backlinksB).toBeDefined();
+      expect(backlinksB.length).toBe(1);
+      expect(backlinksB[0].id).toBe(uidA);
+      expect(backlinksB[0].title).toBe('Note A');
+
+      // 4. Verify advanced filter operator "contains" works in query
+      const query = OKFTestObject.query().where('links', uidB, OperatorKeys.contains);
+      const results = await OKFTestObject.repository().query(query);
+      expect(results.items.length).toBe(1);
+      expect(results.items[0].uri.uid).toBe(uidA);
+
+      // Clean up
+      await noteA.delete();
+      await noteB.delete();
    });
 });

@@ -92,6 +92,41 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
       return Buffer.concat(chunks).toString('utf-8');
    }
 
+   /**
+    * Parses markdown body to extract all internal hyperlinks (Obsidian-style [[WikiLinks]] or markdown [Label](internal-path) links).
+    * 
+    * @param body - The markdown text content.
+    * @returns Array of unique target slugs or paths.
+    */
+   public extractLinks(body: string): string[] {
+      if (!body || typeof body !== 'string') return [];
+      const links: Set<string> = new Set();
+      
+      // 1. Match WikiLinks: [[Target Note]] or [[Target Note|Label]]
+      const wikiRegex = /\[\[([^\]|#]+)(?:#[^\]|]+)?(?:\|[^\]]+)?\]\]/g;
+      let match;
+      while ((match = wikiRegex.exec(body)) !== null) {
+         const target = match[1].trim();
+         if (target) {
+            links.add(target);
+         }
+      }
+      
+      // 2. Match standard Markdown links: [Label](path)
+      const mdRegex = /\[[^\]]*\]\(([^)]+)\)/g;
+      while ((match = mdRegex.exec(body)) !== null) {
+         const url = match[1].trim();
+         if (url && !/^(https?:|mailto:|tel:)/i.test(url)) {
+            const cleanUrl = url.split('#')[0].trim();
+            if (cleanUrl) {
+               links.add(cleanUrl);
+            }
+         }
+      }
+      
+      return Array.from(links);
+   }
+
    protected serializeContent(dao: DataObjectClass<any>, relativePath: string): string {
       const collection = this.getCollection(dao);
       const json = dao.toJSON();
@@ -111,6 +146,12 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
       // Conforming strictly to the OKF markdown specification (flat frontmatter)
       const { body, markdown, ...restData } = json;
       
+      // Backlinks are dynamic in-memory references, exclude them from persistence
+      delete restData.backlinks;
+
+      const bodyContent = body || markdown || '';
+      const extractedLinks = this.extractLinks(bodyContent);
+
       const frontmatter: any = {
          type: dao.val('type') || dao.constructor.name || collection,
          title: dao.val('title') || undefined,
@@ -120,12 +161,18 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
          ...restData
       };
 
+      if (extractedLinks.length > 0) {
+         frontmatter.links = extractedLinks;
+      } else {
+         delete frontmatter.links;
+      }
+
       // Clean empty/null/undefined fields from frontmatter
       const cleanFrontmatter: any = {};
       for (const [key, val] of Object.entries(frontmatter)) {
          if (val !== null && val !== undefined && val !== '') {
-            // Also skip empty arrays unless they are required/recommended fields like tags
-            if (Array.isArray(val) && val.length === 0 && key !== 'tags') {
+            // Also skip empty arrays unless they are required/recommended fields like tags or links
+            if (Array.isArray(val) && val.length === 0 && key !== 'tags' && key !== 'links') {
                continue;
             }
             cleanFrontmatter[key] = val;
@@ -133,7 +180,6 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
       }
 
       const yamlHeader = stringifyYaml(cleanFrontmatter).trim();
-      const bodyContent = body || markdown || '';
       return `---\n${yamlHeader}\n---\n${bodyContent}`;
    }
 
@@ -278,6 +324,106 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
        return dao;
     }
 
+   /**
+    * Resolves incoming backlinks pointing to the target UID by scanning the collection.
+    * 
+    * @param collection - The collection name.
+    * @param targetUid - The UID of the target document.
+    * @returns Array of backlink references { id, title, category }.
+    */
+   protected async resolveBacklinks(collection: string, targetUid: string): Promise<{ id: string; title: string; category: string }[]> {
+      const backlinks: { id: string; title: string; category: string }[] = [];
+      
+      const checkContent = (content: string, itemUid: string): { id: string; title: string; category: string } | null => {
+         const parts = content.trim().split('---');
+         if (parts.length >= 3) {
+            const yamlPart = parts[1].trim();
+            try {
+               const parsed = parseYaml(yamlPart) as any;
+               if (parsed && parsed.links && Array.isArray(parsed.links)) {
+                  const normalizedLinks = parsed.links.map((link: string) => {
+                     return path.basename(link, '.md').trim();
+                  });
+                  if (normalizedLinks.includes(targetUid)) {
+                     return {
+                        id: itemUid,
+                        title: parsed.title || parsed.name || itemUid,
+                        category: parsed.category || 'inbox'
+                     };
+                  }
+               }
+            } catch (e) {
+               // ignore
+            }
+         }
+         return null;
+      };
+
+      if (this.storage && typeof (this.storage as any).list === 'function') {
+         try {
+            const files: string[] = await (this.storage as any).list(collection);
+            for (const relPath of files) {
+               const ext = path.extname(relPath);
+               if (ext === '.md') {
+                  if (path.basename(relPath) === 'index.md' || path.basename(relPath) === 'log.md') {
+                     continue;
+                  }
+                  const itemUid = path.basename(relPath, ext);
+                  if (itemUid === targetUid) continue;
+                  
+                  try {
+                     const stream = await this.storage.getReadable(this.getFile(relPath) as any);
+                     const content = await this._streamToString(stream);
+                     const linkObj = checkContent(content, itemUid);
+                     if (linkObj) backlinks.push(linkObj);
+                  } catch (e) {
+                     // ignore
+                  }
+               }
+            }
+         } catch (e) {
+            // ignore
+         }
+         return backlinks;
+      }
+
+      if (!this.dataDir) return backlinks;
+      const baseColPath = path.join(this.dataDir, collection);
+      const scanDir = async (dir: string) => {
+         try {
+            const entries = await fs.readdir(dir, { withFileTypes: true });
+            for (const entry of entries) {
+               const fullPath = path.join(dir, entry.name);
+               if (entry.isDirectory()) {
+                  await scanDir(fullPath);
+               } else if (entry.isFile() && entry.name.endsWith('.md')) {
+                  if (entry.name === 'index.md' || entry.name === 'log.md') {
+                     continue;
+                  }
+                  const ext = path.extname(entry.name);
+                  const itemUid = path.basename(entry.name, ext);
+                  if (itemUid === targetUid) {
+                     continue;
+                  }
+                  
+                  try {
+                     const content = await fs.readFile(fullPath, 'utf-8');
+                     const linkObj = checkContent(content, itemUid);
+                     if (linkObj) backlinks.push(linkObj);
+                  } catch (err) {
+                     // ignore
+                  }
+               }
+            }
+         } catch (err) {
+            // ignore
+         }
+      };
+      
+      await scanDir(baseColPath);
+      return backlinks;
+   }
+
     /**
      * Hydrates a DataObject by reading its matching flat file on disk.
      * 
@@ -310,12 +456,22 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
              content = await this._streamToString(stream);
           }
           const parsed = this.deserializeContent(content, relativePath);
-          return await dao.populate(parsed.data);
+          const result = await dao.populate(parsed.data);
+          if (collection && uid && relativePath.endsWith('.md') && dao.has('backlinks')) {
+             const backlinks = await this.resolveBacklinks(collection, uid);
+             dao.set('backlinks', backlinks);
+          }
+          return result;
        } else {
           try {
              const raw = await fs.readFile(fullPath, 'utf-8');
              const parsed = this.deserializeContent(raw, relativePath);
-             return await dao.populate(parsed.data);
+             const result = await dao.populate(parsed.data);
+             if (collection && uid && relativePath.endsWith('.md') && dao.has('backlinks')) {
+                const backlinks = await this.resolveBacklinks(collection, uid);
+                dao.set('backlinks', backlinks);
+             }
+             return result;
           } catch (err) {
              const foundRelative = collection ? await this.findFileRecursively(collection, suffix) : null;
              if (!foundRelative) {
@@ -324,7 +480,12 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
              const foundFullPath = path.join(this.dataDir, foundRelative);
              const raw = await fs.readFile(foundFullPath, 'utf-8');
              const parsed = this.deserializeContent(raw, foundRelative);
-             return await dao.populate(parsed.data);
+             const result = await dao.populate(parsed.data);
+             if (collection && uid && foundRelative.endsWith('.md') && dao.has('backlinks')) {
+                const backlinks = await this.resolveBacklinks(collection, uid);
+                dao.set('backlinks', backlinks);
+             }
+             return result;
           }
        }
     }
@@ -466,6 +627,75 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
    }
 
    /**
+    * Evaluates active query filters against a single DataObject instance in memory.
+    * Supports advanced operator comparisons (equals, contains, containsAny, etc.).
+    * 
+    * @param dao - The hydrated DataObject instance.
+    * @param filters - Active constraints.
+    * @returns true if the object matches all criteria, false otherwise.
+    */
+   protected evaluateFilters(dao: DataObjectClass<any>, filters?: Filters | Filter[]): boolean {
+      if (!filters) return true;
+      const filterArr = this._flattenFilters(filters);
+      for (const filter of filterArr) {
+         const prop = dao.get(filter.prop);
+         if (typeof prop === 'undefined') {
+            return false;
+         }
+         
+         const val = prop.val();
+         const op = filter.operator || 'equals';
+         const target = filter.value;
+         
+         let match = false;
+         if (op === 'equals') {
+            match = val === target;
+         } else if (op === 'notEquals') {
+            match = val !== target;
+         } else if (op === 'greater') {
+            match = val > target;
+         } else if (op === 'greaterOrEquals') {
+            match = val >= target;
+         } else if (op === 'lower') {
+            match = val < target;
+         } else if (op === 'lowerOrEquals') {
+            match = val <= target;
+         } else if (op === 'like') {
+            match = typeof val === 'string' && typeof target === 'string' && val.toLowerCase().includes(target.toLowerCase());
+         } else if (op === 'contains') {
+            if (Array.isArray(val)) {
+               match = val.includes(target);
+            } else if (typeof val === 'string' && typeof target === 'string') {
+               match = val.includes(target);
+            }
+         } else if (op === 'notContains') {
+            if (Array.isArray(val)) {
+               match = !val.includes(target);
+            } else if (typeof val === 'string' && typeof target === 'string') {
+               match = !val.includes(target);
+            }
+         } else if (op === 'containsAny') {
+            if (Array.isArray(val) && Array.isArray(target)) {
+               match = target.some(t => val.includes(t));
+            }
+         } else if (op === 'containsAll') {
+            if (Array.isArray(val) && Array.isArray(target)) {
+               match = target.every(t => val.includes(t));
+            }
+         } else if (op === 'isNull') {
+            match = val === null || typeof val === 'undefined';
+         } else if (op === 'isNotNull') {
+            match = val !== null && typeof val !== 'undefined';
+         }
+         
+         if (!match) {
+            return false;
+         }
+      }
+      return true;
+   }
+
+   /**
     * Queries the local files by scanning directories and evaluating conditions in-memory.
     * 
     * @param dataObject - Base template representing the target collection.
@@ -504,23 +734,7 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
                      const itemUid = path.basename(entry.name, ext);
                      dao.uri = new ObjectUri(`${collection}/${itemUid}`);
 
-                     let keep = true;
-                     if (filters) {
-                        const filterArr = this._flattenFilters(filters);
-                        for (const filter of filterArr) {
-                           const prop = dao.get(filter.prop);
-                           if (typeof prop === 'undefined') {
-                              keep = false;
-                              break;
-                           }
-                           if (prop.val() !== filter.value) {
-                              keep = false;
-                              break;
-                           }
-                        }
-                     }
-
-                     if (keep) {
+                     if (this.evaluateFilters(dao, filters)) {
                         items.push(dao);
                      }
                   }
@@ -547,23 +761,7 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
                      const itemUid = path.basename(relPath, ext);
                      dao.uri = new ObjectUri(`${collection}/${itemUid}`);
 
-                     let keep = true;
-                     if (filters) {
-                        const filterArr = this._flattenFilters(filters);
-                        for (const filter of filterArr) {
-                           const prop = dao.get(filter.prop);
-                           if (typeof prop === 'undefined') {
-                              keep = false;
-                              break;
-                           }
-                           if (prop.val() !== filter.value) {
-                              keep = false;
-                              break;
-                           }
-                        }
-                     }
-
-                     if (keep) {
+                     if (this.evaluateFilters(dao, filters)) {
                         items.push(dao);
                      }
                   }

@@ -112,4 +112,31 @@ describe('GithubAuthApi', () => {
           'myapp://auth/github/callback?token=token-abc'
        )
     })
+
+    it('should redirect to web URL if webRedirectUri is configured', async () => {
+       GithubAuthApi(mockRouter as unknown as ServerAdapter, '/api/auth/github', {
+          adapter: mockAdapter,
+          webRedirectUri: 'http://localhost:3000/settings?tab=sync',
+       })
+
+       const req = {
+          query: {
+             code: 'code-123',
+          },
+       } as unknown as ApiRequest
+
+       const res = {
+          status: jest.fn().mockReturnThis(),
+          setHeader: jest.fn().mockReturnThis(),
+          send: jest.fn(),
+       } as unknown as ApiResponse
+
+       await routes['/callback'](req, res)
+
+       expect(res.status).toHaveBeenCalledWith(302)
+       expect(res.setHeader).toHaveBeenCalledWith(
+          'Location',
+          'http://localhost:3000/settings?tab=sync&token=token-abc'
+       )
+    })
 })

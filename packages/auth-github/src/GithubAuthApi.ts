@@ -45,6 +45,16 @@ export function GithubAuthApi(router: ServerAdapter, path: string, options: any 
             return
          }
 
+         // Support standard redirect for web context if a target URI is configured
+         const webRedirectUri = req.query.web_redirect_uri as string || options.webRedirectUri
+         if (webRedirectUri) {
+            const separator = webRedirectUri.includes('?') ? '&' : '?'
+            const redirectUrl = `${webRedirectUri}${separator}token=${tokenData.access_token}`
+            res.status(302).setHeader('Location', redirectUrl)
+            res.send(`Redirecting...`)
+            return
+         }
+
          res.status(200).json(tokenData)
       } catch (err: any) {
          res.status(500).send(`OAuth error: ${err.message}`)

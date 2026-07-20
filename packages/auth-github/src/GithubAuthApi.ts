@@ -36,10 +36,10 @@ export function GithubAuthApi(router: ServerAdapter, path: string, options: any 
       try {
          const tokenData = await adapter.exchangeCodeForToken(code, redirectUri)
          
-         // Support standard deep link redirect for mobile context if a URI is provided
-         const mobileRedirectUri = req.query.mobile_redirect_uri as string || options.mobileRedirectUri
-         if (mobileRedirectUri) {
-            const redirectUrl = `${mobileRedirectUri}?token=${tokenData.access_token}`
+         // Support standard deep link redirect for mobile context if an app scheme is configured
+         const appScheme = req.query.app_scheme as string || options.appScheme
+         if (appScheme) {
+            const redirectUrl = `${appScheme}://auth/github/callback?token=${tokenData.access_token}`
             res.status(302).setHeader('Location', redirectUrl)
             res.send(`Redirecting back to app...`)
             return

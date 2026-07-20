@@ -89,7 +89,7 @@ describe('GithubAuthApi', () => {
     it('should redirect to deep link for mobile platform', async () => {
        GithubAuthApi(mockRouter as unknown as ServerAdapter, '/api/auth/github', {
           adapter: mockAdapter,
-          mobileRedirectUri: 'myapp://auth/github/callback',
+          appScheme: 'myapp',
        })
 
        const req = {

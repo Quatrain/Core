@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/okf",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Open Knowledge Format (OKF) flat file storage adapter",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

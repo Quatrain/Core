@@ -1,4 +1,5 @@
 export { ObjectUri } from './ObjectUri'
+export * from './app'
 export * as statuses from './statuses'
 export {
    ResourceError,

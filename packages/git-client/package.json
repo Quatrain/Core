@@ -1,0 +1,25 @@
+{
+  "name": "@quatrain/git-client",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/git-client"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.2.2"
+  }
+}

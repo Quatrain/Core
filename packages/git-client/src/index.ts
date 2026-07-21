@@ -1,0 +1,1 @@
+export { GithubHttpClient } from './GithubHttpClient';

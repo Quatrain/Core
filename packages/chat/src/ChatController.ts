@@ -13,6 +13,9 @@ export interface ChatSessionConfig {
    };
 }
 
+/**
+ * Controller managing chat sessions, local context extraction, and LLM message dispatching.
+ */
 export class ChatController {
    constructor(private config: ChatSessionConfig) {}
 

@@ -90,27 +90,65 @@ export abstract class AbstractOAuthAdapter extends AbstractAuthAdapter {
       return data // Access token, scopes, token_type, etc.
    }
 
-   // Implement standard AuthInterface stubs
+   /**
+    * Registers a new user account (unsupported for OAuth adapters).
+    * 
+    * @param user - Target user entity.
+    * @param clearPassword - Optional cleartext password.
+    * @returns Throws an error indicating registration is unsupported.
+    */
    async register(user: User, clearPassword?: string): Promise<any> {
       throw new Error(`register is not supported by ${this.constructor.name}`)
    }
 
+   /**
+    * Performs user signup with credentials (unsupported for OAuth adapters).
+    * 
+    * @param login - Login identifier string.
+    * @param password - Password string.
+    * @returns Throws an error indicating signup should use exchangeCodeForToken.
+    */
    async signup(login: string, password: string): Promise<any> {
       throw new Error(`signup is not supported by ${this.constructor.name}. Use exchangeCodeForToken instead.`)
    }
 
+   /**
+    * Signs out the specified user session.
+    * 
+    * @param user - Target user entity.
+    * @returns Promise resolving to true.
+    */
    async signout(user: User): Promise<any> {
       return true
    }
 
+   /**
+    * Updates user profile attributes in the auth store.
+    * 
+    * @param user - Target user entity.
+    * @param updatable - Attributes payload to update.
+    * @returns Promise resolving to true.
+    */
    async update(user: User, updatable: any): Promise<any> {
       return true
    }
 
+   /**
+    * Deletes a user account from the auth store.
+    * 
+    * @param user - Target user entity.
+    * @returns Promise resolving to true.
+    */
    async delete(user: User): Promise<any> {
       return true
    }
 
+   /**
+    * Refreshes an expired access token using a refresh token string.
+    * 
+    * @param refreshToken - Target refresh token.
+    * @returns Throws an error if refresh token logic is not implemented by the provider.
+    */
    async refreshToken(refreshToken: string): Promise<any> {
       throw new Error(`refreshToken is not implemented for ${this.constructor.name}`)
    }
@@ -134,5 +172,11 @@ export abstract class AbstractOAuthAdapter extends AbstractAuthAdapter {
       throw new Error(`setCustomUserClaims is not supported by ${this.constructor.name}`)
    }
 
+   /**
+    * Retrieves and validates an auth token payload for the given raw token string.
+    * 
+    * @param token - Raw authorization token string.
+    * @returns The resolved token payload or user claims.
+    */
    abstract getAuthToken(token: string): any
 }

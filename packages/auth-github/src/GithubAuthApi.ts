@@ -18,6 +18,13 @@ export function GithubAuthApi(router: ServerAdapter, path: string, options: any 
       const state = req.query.state as string
       
       const authUrl = adapter.getAuthorizationUrl(redirectUri, scopes, state)
+      
+      const wantsJson = req.query.json === 'true' || req.headers?.accept?.includes('application/json')
+      if (wantsJson) {
+         res.status(200).json({ url: authUrl })
+         return
+      }
+
       res.status(302).setHeader('Location', authUrl)
       res.send(`Redirecting to GitHub...`)
    })

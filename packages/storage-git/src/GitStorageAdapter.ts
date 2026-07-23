@@ -66,7 +66,10 @@ export class GitStorageAdapter extends AbstractStorageAdapter {
          try {
             await execPromise(cmd, { cwd: this.config.localPath });
          } catch (err: any) {
-            console.warn(`[GitStorage] Git command failed: ${cmd}. Error: ${err.message}`);
+            const msg = err.message || '';
+            if (!msg.includes('index.lock') && !msg.includes('EBADF')) {
+               console.warn(`[GitStorage] Git command failed: ${cmd}. Error: ${msg}`);
+            }
          }
       }
    }

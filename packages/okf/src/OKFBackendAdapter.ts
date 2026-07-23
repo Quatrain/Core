@@ -881,7 +881,7 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
              const indexPath = path.join(dirPath, 'index.md');
              await fs.writeFile(indexPath, md.trim() + '\n', 'utf-8');
              
-             if (this.storage) {
+             if (this.storage && (this.storage as any).constructor.name !== 'GitStorageAdapter') {
                 const relativeIndexPath = path.relative(this.dataDir, indexPath);
                 const fileType = this.getFile(relativeIndexPath, 'text/markdown');
                 await this.storage.create(fileType as any, Readable.from([md.trim() + '\n']));

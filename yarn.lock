@@ -3785,6 +3785,29 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/searchengine-qmd@workspace:packages/searchengine-qmd":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/searchengine-qmd@workspace:packages/searchengine-qmd"
+  dependencies:
+    "@quatrain/core": "workspace:*"
+    "@quatrain/searchengine": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/searchengine@workspace:*, @quatrain/searchengine@workspace:packages/searchengine":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/searchengine@workspace:packages/searchengine"
+  dependencies:
+    "@quatrain/core": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/skills@workspace:packages/skills":
   version: 0.0.0-use.local
   resolution: "@quatrain/skills@workspace:packages/skills"

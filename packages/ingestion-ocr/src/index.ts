@@ -35,6 +35,8 @@ export class OcrIngestionAdapter extends AbstractIngestionAdapter {
       let isScannedPdf = false;
       let mediaPart: any = null;
 
+      const isText = options.isText || options.mimeType === 'text/plain' || options.mimeType === 'text/markdown';
+
       if (isImage) {
          const base64Data = buffer.toString('base64');
          const mimeType = options.mimeType || 'image/jpeg';
@@ -44,6 +46,8 @@ export class OcrIngestionAdapter extends AbstractIngestionAdapter {
                data: base64Data
             }
          };
+      } else if (isText) {
+         rawText = typeof source === 'string' ? source : buffer.toString('utf-8');
       } else {
          // PDF handling
          let pdfText = '';

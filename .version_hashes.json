@@ -315,9 +315,9 @@
     "last_published": "2026-06-29T09:34:37.314Z"
   },
   "@quatrain/okf": {
-    "version": "1.0.4",
-    "hash": "peJ8ULmoNJVi+/FpJjB1wUUvGPA=-5279dcb8c36eda4769985e5f249225a0155abaacca2edaa2150708054efcc3d3",
-    "last_published": "2026-07-21T20:51:49.563Z"
+    "version": "1.0.5",
+    "hash": "bHe3yeGhlsxBIbpJeeBDqZqBQAQ=-5279dcb8c36eda4769985e5f249225a0155abaacca2edaa2150708054efcc3d3",
+    "last_published": "2026-07-24T13:15:42.362Z"
   },
   "@quatrain/state-machine": {
     "version": "1.0.1",
@@ -340,9 +340,9 @@
     "last_published": "2026-07-19T14:47:03.295Z"
   },
   "@quatrain/ingestion-ocr": {
-    "version": "1.0.1",
-    "hash": "xAnqHcUgxf49gfTnYA46jVw8xFk=-8a1bce8466b459ad7123d9dc8967a7c2f27dd4130e63865176842ceae6deae02",
-    "last_published": "2026-07-19T14:47:10.628Z"
+    "version": "1.0.2",
+    "hash": "kphGpHurLMemRkmEDIyXCGqxyZc=-8a1bce8466b459ad7123d9dc8967a7c2f27dd4130e63865176842ceae6deae02",
+    "last_published": "2026-07-24T13:15:31.690Z"
   },
   "@quatrain/ingestion-video": {
     "version": "1.0.1",
@@ -360,9 +360,9 @@
     "last_published": "2026-07-19T14:47:36.951Z"
   },
   "@quatrain/storage-git": {
-    "version": "1.0.1",
-    "hash": "/GfJ3Q7/J8jo134N+QlLBSE7rNk=-008d9ec986e0fec86388e47be861e1e44eb65196041908c0ca460b83a2c81a0a",
-    "last_published": "2026-07-19T14:47:42.585Z"
+    "version": "1.0.2",
+    "hash": "jSaLXTIoIeQN8Wfuxi5WEDNlszM=-008d9ec986e0fec86388e47be861e1e44eb65196041908c0ca460b83a2c81a0a",
+    "last_published": "2026-07-24T13:16:19.145Z"
   },
   "@quatrain/auth-github": {
     "version": "1.2.10",
@@ -373,5 +373,15 @@
     "version": "1.0.1",
     "hash": "4bp2FaLCJt6Z8LENCl45Fg3SrDE=-2022b3468e0750ad5de6b6a3fb097ae8fd5214039c92cc8ba4c55cef4dbad625",
     "last_published": "2026-07-21T20:51:39.637Z"
+  },
+  "@quatrain/searchengine": {
+    "version": "1.0.1",
+    "hash": "PSURGwlXIw6uIlTWfcwB7V5CuUo=-143e8b424e62322ae8743d22177e4295026eb552f89597c697ff732566dd9d77",
+    "last_published": "2026-07-24T13:15:57.337Z"
+  },
+  "@quatrain/searchengine-qmd": {
+    "version": "1.0.1",
+    "hash": "fn3znzxhHVeAAIw824KjX9OJJL0=-5bf8ccbe01954f2d71e05515d57923b8b111306f460d77bd2c38f75b0d845446",
+    "last_published": "2026-07-24T13:16:08.626Z"
   }
 }

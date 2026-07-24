@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/storage-git",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Git & GitHub Storage Adapter for Quatrain Core",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

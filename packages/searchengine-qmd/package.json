@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/searchengine-qmd",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "QMD (Query Markup Documents) Search Engine Adapter for the @quatrain/searchengine namespace",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

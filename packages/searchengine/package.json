@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/searchengine",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Base search engine abstraction and registry for the Quatrain Core ecosystem",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

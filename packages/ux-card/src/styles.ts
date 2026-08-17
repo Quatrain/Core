@@ -68,6 +68,35 @@ export const CARD_CSS = `
   text-overflow: ellipsis;
 }
 
+.q-card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.q-card-zoom-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: var(--q-card-text-secondary);
+  border-radius: 0.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.q-card-zoom-btn:hover {
+  background: var(--q-card-accent);
+  color: #ffffff;
+  border-color: var(--q-card-accent);
+  transform: scale(1.08);
+}
+
 .q-card-icon-badge {
   font-size: 1.45rem;
   line-height: 1;

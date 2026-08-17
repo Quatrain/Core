@@ -45,5 +45,7 @@ export interface SquareCardConfig {
    themeMode?: CardThemeMode
    isStacked?: boolean
    isInteractive?: boolean
+   isZoomable?: boolean
+   zoomType?: 'map' | 'chart' | 'detail'
    onClickUrl?: string
 }

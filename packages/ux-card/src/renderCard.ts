@@ -16,10 +16,14 @@ function escapeHtml(str?: string): string {
 export function renderSquareCardHtml(config: SquareCardConfig): string {
    const themeClass = config.themeMode ? `q-theme-${config.themeMode}` : ''
    const interactiveAttr = config.onClickUrl ? `data-href="${escapeHtml(config.onClickUrl)}" tabindex="0"` : ''
+   const zoomAttr = config.isZoomable ? `data-zoomable="true" data-zoom-type="${escapeHtml(config.zoomType ?? 'detail')}"` : ''
 
-   // Zone 1 & 2: Header (Title, Source & Visual Badge)
+   // Zone 1 & 2: Header (Title, Source, Visual Badge & Zoom Trigger)
    const sourceHtml = config.sourceName
       ? `<span class="q-card-source">${escapeHtml(config.sourceName)}</span>`
+      : ''
+   const zoomBtnHtml = config.isZoomable
+      ? `<button type="button" class="q-card-zoom-btn" title="Agrandir / Zoom" aria-label="Agrandir">⤢</button>`
       : ''
    const iconHtml = config.icon ? `<div class="q-card-icon-badge">${config.icon}</div>` : ''
 
@@ -76,13 +80,16 @@ export function renderSquareCardHtml(config: SquareCardConfig): string {
       : ''
 
    return `
-<article class="q-square-card ${themeClass}" id="card-${escapeHtml(config.id)}" ${interactiveAttr}>
+<article class="q-square-card ${themeClass}" id="card-${escapeHtml(config.id)}" ${interactiveAttr} ${zoomAttr}>
   <header class="q-card-header">
     <div class="q-card-title-group">
       <span class="q-card-title">${escapeHtml(config.title)}</span>
       ${sourceHtml}
     </div>
-    ${iconHtml}
+    <div class="q-card-header-actions">
+      ${zoomBtnHtml}
+      ${iconHtml}
+    </div>
   </header>
 
   <div class="q-card-body">

@@ -66,6 +66,9 @@ function matchGlob(pattern: string, uri: string): boolean {
  */
 export class RbacPolicyEngine {
   private roles: Map<string, RoleDefinition> = new Map()
+  /**
+   * Dedicated manager handling rate-limiting, anomaly detection, and intentional tarpitting latency.
+   */
   public readonly tarpitManager: TarpitManager
 
   constructor(rolesConfig: RoleDefinition[] = [], tarpitManager?: TarpitManager) {

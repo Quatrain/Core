@@ -45,6 +45,12 @@ export class AstroRbacMiddleware extends AbstractRbacMiddleware<AstroLikeContext
     this.enableTarpitSleep = options.enableTarpitSleep ?? true
   }
 
+  /**
+   * Extracts the authenticated user context from the Astro context.
+   *
+   * @param context - The Astro request context.
+   * @returns The resolved RbacUserContext or null if unauthenticated.
+   */
   public extractUser(context: AstroLikeContext): Promise<RbacUserContext | null> | RbacUserContext | null {
     if (this.userResolver) {
       return this.userResolver(context)
@@ -52,6 +58,12 @@ export class AstroRbacMiddleware extends AbstractRbacMiddleware<AstroLikeContext
     return context.locals?.user || null
   }
 
+  /**
+   * Normalizes the target URI and HTTP method from the Astro context.
+   *
+   * @param context - The Astro request context.
+   * @returns Object containing the normalized URI and HTTP method.
+   */
   public extractRoute(context: AstroLikeContext): { uri: string; method: HttpMethod } {
     return {
       uri: context.url.pathname,
@@ -59,6 +71,14 @@ export class AstroRbacMiddleware extends AbstractRbacMiddleware<AstroLikeContext
     }
   }
 
+  /**
+   * Handles access denial by returning JSON for API endpoints or a redirect Response for HTML pages.
+   *
+   * @param context - The Astro request context.
+   * @param _res - Response placeholder.
+   * @param reason - Denial rationale ('unauthenticated' | 'forbidden' | 'tarpit_blocked').
+   * @returns Astro standard Response.
+   */
   public handleAccessDenied(
     context: AstroLikeContext,
     _res: any,

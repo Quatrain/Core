@@ -55,6 +55,12 @@ export class ExpressRbacMiddleware extends AbstractRbacMiddleware<
     this.enableTarpitSleep = options.enableTarpitSleep ?? true
   }
 
+  /**
+   * Extracts the authenticated user context from the Express-like request.
+   *
+   * @param req - The Express-like request.
+   * @returns The resolved RbacUserContext or null if unauthenticated.
+   */
   public extractUser(req: ExpressLikeRequest): Promise<RbacUserContext | null> | RbacUserContext | null {
     if (this.userResolver) {
       return this.userResolver(req)
@@ -62,6 +68,12 @@ export class ExpressRbacMiddleware extends AbstractRbacMiddleware<
     return req.user || req.auth?.user || null
   }
 
+  /**
+   * Normalizes the target URI and HTTP method from the Express-like request.
+   *
+   * @param req - The Express-like request.
+   * @returns Object containing the normalized URI and HTTP method.
+   */
   public extractRoute(req: ExpressLikeRequest): { uri: string; method: HttpMethod } {
     return {
       uri: req.path || req.url || '/',
@@ -69,6 +81,13 @@ export class ExpressRbacMiddleware extends AbstractRbacMiddleware<
     }
   }
 
+  /**
+   * Generates a standard JSON response when access is denied.
+   *
+   * @param _req - The Express-like request.
+   * @param res - The Express-like response.
+   * @param reason - Denial rationale ('unauthenticated' | 'forbidden' | 'tarpit_blocked').
+   */
   public handleAccessDenied(
     _req: ExpressLikeRequest,
     res: ExpressLikeResponse,

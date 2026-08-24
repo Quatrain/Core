@@ -1,10 +1,9 @@
-name: CI & Quality Gate
-
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+      - develop
     paths:
       - 'packages/**'
       - 'bin/**'
@@ -15,6 +14,9 @@ on:
       - '.github/workflows/ci.yml'
   pull_request:
     types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - develop
     paths:
       - 'packages/**'
       - 'bin/**'
@@ -112,7 +114,7 @@ jobs:
     name: Publish Independent Packages
     needs: sonarcloud
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     permissions:
       contents: write
       packages: write
@@ -170,14 +172,20 @@ jobs:
           fi
 
       - name: Publish all changed packages
-        run: yarn publish:all
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            yarn publish:all --tag latest-dev
+          else
+            yarn publish:all
+          fi
 
       - name: Sync with remote to prevent push rejection
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git pull --rebase origin main --autostash
+          BRANCH="${GITHUB_REF_NAME:-main}"
+          git fetch origin "$BRANCH"
+          git pull --rebase origin "$BRANCH" --autostash
 
       - name: Commit version bumps & hashes
         uses: stefanzweifel/git-auto-commit-action@v5 # NOSONAR

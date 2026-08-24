@@ -81,7 +81,7 @@ export abstract class AbstractOAuthAdapter extends AbstractAuthAdapter {
          throw new Error(`[${this.constructor.name}] OAuth token exchange failed: ${response.statusText}`)
       }
 
-      const data = await response.json()
+      const data = (await response.json()) as Record<string, string | undefined>
       if (data.error) {
          throw new Error(`[${this.constructor.name}] OAuth error: ${data.error_description || data.error}`)
       }

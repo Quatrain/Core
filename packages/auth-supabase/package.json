@@ -37,6 +37,7 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
+    "test": "jest",
     "test-ci": "jest --runInBand",
     "build": "tsc",
     "wbuild": "tsc --watch",

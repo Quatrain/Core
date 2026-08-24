@@ -1,7 +1,38 @@
 /**
- * Standard HTTP methods supported in route rules.
+ * Semantic CRUD and management actions for business-level authorization.
+ * Decoupled from transport-level HTTP methods for maximum readability and business alignment.
+ */
+export type RbacAction = 'READ' | 'WRITE' | 'CREATE' | 'UPDATE' | 'DELETE' | 'EXECUTE' | 'MANAGE' | '*'
+
+/**
+ * Standard HTTP methods supported as transport-level representations.
  */
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD' | '*'
+
+/**
+ * Helper translating standard HTTP transport methods to high-level semantic RBAC actions.
+ *
+ * @param method - The HTTP method string (e.g. "GET", "POST", "PUT", "DELETE").
+ * @returns The corresponding high-level semantic RbacAction.
+ */
+export function mapHttpMethodToAction(method: string): RbacAction {
+  const m = (method || '').toUpperCase()
+  switch (m) {
+    case 'GET':
+    case 'HEAD':
+    case 'OPTIONS':
+      return 'READ'
+    case 'POST':
+      return 'WRITE'
+    case 'PUT':
+    case 'PATCH':
+      return 'UPDATE'
+    case 'DELETE':
+      return 'DELETE'
+    default:
+      return 'READ'
+  }
+}
 
 /**
  * Access decision outcome for a route evaluation.
@@ -23,13 +54,18 @@ export type FieldAccessMode = 'hidden' | 'readonly' | 'readwrite'
 export type SubjectType = 'human' | 'agent' | 'service'
 
 /**
- * Rule governing access to a specific URI route pattern and HTTP method.
+ * Rule governing access to a specific URI route pattern and semantic actions (READ, WRITE, UPDATE, DELETE).
  */
 export interface RouteRule {
   /** Glob-like URI pattern (e.g. "/api/curate/**", "/admin/*", "/**") */
   pattern: string
-  /** Targeted HTTP methods. If omitted or containing '*', applies to all methods. */
-  methods?: HttpMethod[]
+  /**
+   * Targeted semantic actions (e.g. ['READ'], ['WRITE', 'UPDATE'], ['*']).
+   * Also accepts transport HTTP methods for seamless backward compatibility.
+   */
+  actions?: (RbacAction | HttpMethod)[]
+  /** Alias for `actions` */
+  methods?: (RbacAction | HttpMethod)[]
   /** Explicit authorization decision. */
   access: AccessDecision
   /** Optional human-readable rationale or description. */
@@ -62,7 +98,7 @@ export interface RoleDefinition {
   inherits?: string[]
   /** Allowed subject types for this role (e.g. ['agent', 'service'] or ['human']) */
   subjectTypes?: SubjectType[]
-  /** Route-level access rules */
+  /** Route-level access rules with semantic actions */
   routes?: RouteRule[]
   /** Entity field-level security rules */
   entities?: Record<string, EntityFieldRules>
@@ -128,8 +164,8 @@ export interface RouteEvaluationResult {
 export interface RbacRequestContext {
   /** Current authenticated user context (null if unauthenticated) */
   user: RbacUserContext | null
-  /** Evaluates route permission for a given URI and method */
-  canAccessRoute: (uri: string, method?: HttpMethod) => boolean
+  /** Evaluates route permission for a given URI and action/method */
+  canAccessRoute: (uri: string, action?: RbacAction | HttpMethod) => boolean
   /** Returns the calculated field access mode ('hidden' | 'readonly' | 'readwrite') */
   getFieldMode: (entity: string, property: string) => FieldAccessMode
   /** Returns true if the field is editable ('readwrite') */

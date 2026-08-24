@@ -1,5 +1,5 @@
 import { RbacPolicyEngine } from '../engine/RbacPolicyEngine'
-import type { RbacUserContext, HttpMethod, RbacRequestContext } from '../types'
+import type { RbacUserContext, RbacAction, HttpMethod, RbacRequestContext } from '../types'
 
 /**
  * Abstract base class for framework-specific RBAC middlewares (Express, Astro, etc.).
@@ -53,8 +53,8 @@ export abstract class AbstractRbacMiddleware<TRequest = any, TResponse = any, TN
 
     return {
       user,
-      canAccessRoute: (uri: string, method?: HttpMethod) =>
-        this.engine.canAccessRoute(activeUser, uri, method),
+      canAccessRoute: (uri: string, action?: RbacAction | HttpMethod) =>
+        this.engine.canAccessRoute(activeUser, uri, action),
       getFieldMode: (entity: string, property: string) =>
         this.engine.getFieldAccess(activeUser, entity, property),
       isFieldEditable: (entity: string, property: string) =>

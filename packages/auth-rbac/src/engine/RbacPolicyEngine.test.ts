@@ -7,10 +7,10 @@ describe('RbacPolicyEngine', () => {
       id: 'reader',
       name: 'Reader',
       routes: [
-        { pattern: '/api/curate', methods: ['GET'], access: 'allow' },
-        { pattern: '/api/taxonomies', methods: ['GET'], access: 'allow' },
-        { pattern: '/public/**', methods: ['*'], access: 'allow' },
-        { pattern: '/**', methods: ['*'], access: 'deny' }
+        { pattern: '/api/curate', actions: ['READ'], access: 'allow' },
+        { pattern: '/api/taxonomies', actions: ['READ'], access: 'allow' },
+        { pattern: '/public/**', actions: ['*'], access: 'allow' },
+        { pattern: '/**', actions: ['*'], access: 'deny' }
       ],
       entities: {
         'okf-document': {
@@ -29,8 +29,8 @@ describe('RbacPolicyEngine', () => {
       name: 'Curator',
       inherits: ['reader'],
       routes: [
-        { pattern: '/api/curate', methods: ['POST', 'PUT'], access: 'allow' },
-        { pattern: '/api/upload', methods: ['POST'], access: 'allow' }
+        { pattern: '/api/curate', actions: ['WRITE', 'UPDATE'], access: 'allow' },
+        { pattern: '/api/upload', actions: ['WRITE'], access: 'allow' }
       ],
       entities: {
         'okf-document': {
@@ -47,7 +47,7 @@ describe('RbacPolicyEngine', () => {
       id: 'admin',
       name: 'Administrator',
       inherits: ['curator'],
-      routes: [{ pattern: '/**', methods: ['*'], access: 'allow' }],
+      routes: [{ pattern: '/**', actions: ['MANAGE'], access: 'allow' }],
       entities: {
         'okf-document': {
           defaultMode: 'readwrite',
@@ -63,7 +63,7 @@ describe('RbacPolicyEngine', () => {
       id: 'ai-agent',
       name: 'AI Agent Bot',
       subjectTypes: ['agent'],
-      routes: [{ pattern: '/api/agent/**', methods: ['POST'], access: 'allow' }],
+      routes: [{ pattern: '/api/agent/**', actions: ['WRITE', 'EXECUTE'], access: 'allow' }],
       tarpit: {
         enabled: true,
         burst: 2,
@@ -84,14 +84,28 @@ describe('RbacPolicyEngine', () => {
     const curatorUser: RbacUserContext = { id: 'u2', roles: ['curator'], subjectType: 'human' }
     const adminUser: RbacUserContext = { id: 'u3', roles: ['admin'], subjectType: 'human' }
 
-    it('allows reader to GET /api/curate but denies POST /api/curate', () => {
+    it('allows reader to READ /api/curate but denies WRITE /api/curate', () => {
+      // Direct semantic action checks
+      expect(engine.canAccessRoute(readerUser, '/api/curate', 'READ')).toBe(true)
+      expect(engine.canAccessRoute(readerUser, '/api/curate', 'WRITE')).toBe(false)
+      expect(engine.canAccessRoute(readerUser, '/api/curate', 'UPDATE')).toBe(false)
+      expect(engine.canAccessRoute(readerUser, '/api/curate', 'DELETE')).toBe(false)
+
+      // HTTP method mapped checks
       expect(engine.canAccessRoute(readerUser, '/api/curate', 'GET')).toBe(true)
       expect(engine.canAccessRoute(readerUser, '/api/curate', 'POST')).toBe(false)
     })
 
-    it('allows curator to GET and POST /api/curate via inherited permissions', () => {
+    it('allows curator to READ, WRITE and UPDATE /api/curate via inherited permissions', () => {
+      expect(engine.canAccessRoute(curatorUser, '/api/curate', 'READ')).toBe(true)
+      expect(engine.canAccessRoute(curatorUser, '/api/curate', 'WRITE')).toBe(true)
+      expect(engine.canAccessRoute(curatorUser, '/api/curate', 'UPDATE')).toBe(true)
+      expect(engine.canAccessRoute(curatorUser, '/api/curate', 'DELETE')).toBe(false)
+
+      // With HTTP verbs
       expect(engine.canAccessRoute(curatorUser, '/api/curate', 'GET')).toBe(true)
       expect(engine.canAccessRoute(curatorUser, '/api/curate', 'POST')).toBe(true)
+      expect(engine.canAccessRoute(curatorUser, '/api/curate', 'PUT')).toBe(true)
       expect(engine.canAccessRoute(curatorUser, '/api/upload', 'POST')).toBe(true)
       expect(engine.canAccessRoute(curatorUser, '/admin/settings', 'GET')).toBe(false)
     })

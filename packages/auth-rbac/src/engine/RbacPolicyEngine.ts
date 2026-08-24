@@ -1,13 +1,26 @@
 import type {
   RoleDefinition,
   RbacUserContext,
+  RbacAction,
   HttpMethod,
   FieldAccessMode,
   RouteRule,
   RouteEvaluationResult,
   SubjectType
 } from '../types'
+import { mapHttpMethodToAction } from '../types'
 import { TarpitManager } from './TarpitManager'
+
+/**
+ * Normalizes an action or HTTP method to unified semantic RbacAction.
+ */
+function normalizeAction(actionOrMethod: string): { semantic: RbacAction; raw: string } {
+  const upper = (actionOrMethod || 'READ').toUpperCase()
+  if (['READ', 'WRITE', 'CREATE', 'UPDATE', 'DELETE', 'EXECUTE', 'MANAGE', '*'].includes(upper)) {
+    return { semantic: upper as RbacAction, raw: upper }
+  }
+  return { semantic: mapHttpMethodToAction(upper), raw: upper }
+}
 
 /**
  * Normalizes an URI string for consistent glob and segment comparison.
@@ -112,20 +125,20 @@ export class RbacPolicyEngine {
   }
 
   /**
-   * Evaluates route access for a user context against a target URI and HTTP method.
+   * Evaluates route access for a user context against a target URI and semantic action (or HTTP method).
    *
    * @param user - Authenticated user context.
    * @param uri - Requested URI path.
-   * @param method - HTTP method (defaults to 'GET').
+   * @param actionOrMethod - Semantic action ('READ', 'WRITE', 'UPDATE', 'DELETE') or HTTP method ("GET", "POST"...).
    * @returns Detailed evaluation result including allow/deny decision and tarpit latency.
    */
   public evaluateRoute(
     user: RbacUserContext,
     uri: string,
-    method: HttpMethod = 'GET'
+    actionOrMethod: RbacAction | HttpMethod | string = 'READ'
   ): RouteEvaluationResult {
     const normUri = normalizeUri(uri)
-    const upperMethod = (method.toUpperCase() as HttpMethod) || 'GET'
+    const normalized = normalizeAction(actionOrMethod)
     const applicableRoles = this.getApplicableRoles(user)
 
     // 1. Tarpit Evaluation for M2M Agents and suspicious traffic
@@ -161,13 +174,16 @@ export class RbacPolicyEngine {
       if (!role.routes) continue
 
       for (const rule of role.routes) {
-        const methodMatches =
-          !rule.methods ||
-          rule.methods.length === 0 ||
-          rule.methods.includes('*') ||
-          rule.methods.includes(upperMethod)
+        const declaredActions = rule.actions || rule.methods || []
+        const actionMatches =
+          declaredActions.length === 0 ||
+          declaredActions.includes('*') ||
+          declaredActions.includes('MANAGE') ||
+          declaredActions.includes(normalized.semantic) ||
+          declaredActions.includes(normalized.raw as any) ||
+          (normalized.semantic === 'WRITE' && declaredActions.includes('CREATE' as any))
 
-        if (methodMatches && matchGlob(rule.pattern, normUri)) {
+        if (actionMatches && matchGlob(rule.pattern, normUri)) {
           // Specificity score: longer patterns have higher priority
           const score = rule.pattern.replace(/\*/g, '').length
           matchingRules.push({ rule, score })
@@ -202,8 +218,12 @@ export class RbacPolicyEngine {
   /**
    * Fast boolean check for route access.
    */
-  public canAccessRoute(user: RbacUserContext, uri: string, method: HttpMethod = 'GET'): boolean {
-    return this.evaluateRoute(user, uri, method).allowed
+  public canAccessRoute(
+    user: RbacUserContext,
+    uri: string,
+    actionOrMethod: RbacAction | HttpMethod | string = 'READ'
+  ): boolean {
+    return this.evaluateRoute(user, uri, actionOrMethod).allowed
   }
 
   /**

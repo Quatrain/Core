@@ -12,7 +12,6 @@
   "bun": "src/index.ts",
   "files": [
     "LICENSE.md",
-    "src/",
     "dist/",
     "README.md",
     "HOWTO.md",

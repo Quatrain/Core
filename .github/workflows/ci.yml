@@ -13,7 +13,7 @@ on:
       - 'turbo.json'
       - '.github/workflows/ci.yml'
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled]
     branches:
       - main
       - develop
@@ -192,5 +192,48 @@ jobs:
         with:
           commit_message: "chore: release versions & update hashes [skip ci]"
           commit_options: '--no-verify'
+
+  publish-preview:
+    name: Publish On-Demand QA Preview Packages
+    needs: sonarcloud
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'qa:preview') || contains(github.event.pull_request.labels.*.name, 'preview:publish'))
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v4
+        with:
+          path: .yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
+
+      - name: Publish Preview Packages via Shared Action
+        uses: Quatrain/actions/publish-package-preview@main
+        with:
+          pr_number: ${{ github.event.pull_request.number }}
+          npm_token: ${{ secrets.NPM_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          script_path: 'bin/publish_all.js'
 
 

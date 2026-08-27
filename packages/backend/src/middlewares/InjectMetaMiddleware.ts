@@ -32,7 +32,7 @@ export class InjectMetaMiddleware implements BackendMiddleware {
       action: BackendAction,
       params?: MiddlewareParams
    ) {
-      Backend.log(
+      Backend.debug(
          `[MDW] Executing Middleware ${this.constructor.name} for ${action} event`
       )
       

@@ -1,0 +1,45 @@
+{
+  "name": "@quatrain/queue-mqtt",
+  "version": "1.0.0",
+  "description": "MQTT (Mosquitto, EMQX, HiveMQ) queue adapter for @quatrain/queue",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "src/",
+    "dist/",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/queue-mqtt"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "@quatrain/core": "workspace:*",
+    "@quatrain/queue": "workspace:*",
+    "mqtt": "^5.10.1"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.10.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.1.5"
+  },
+  "scripts": {
+    "build": "tsc",
+    "wbuild": "tsc --watch",
+    "test": "jest",
+    "test-ci": "jest --runInBand",
+    "bump-to": "yarn version"
+  },
+  "typedoc": {
+    "entryPoint": "src/index.ts"
+  }
+}

@@ -3776,8 +3776,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/queue-mqtt@workspace:packages/queue-mqtt"
   dependencies:
-    "@quatrain/core": "workspace:*"
-    "@quatrain/queue": "workspace:*"
+    "@quatrain/core": "npm:^1.2.18"
+    "@quatrain/queue": "npm:^1.2.3"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
     "@types/node": "npm:^22.10.1"

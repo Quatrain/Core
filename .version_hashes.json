@@ -385,8 +385,13 @@
     "last_published": "2026-07-24T13:16:08.626Z"
   },
   "@quatrain/mdm": {
+    "version": "1.0.2",
+    "hash": "JkOpHANXlSwDXhAjehBqCtQ9zrk=-db9eea82f74fa5d4280e790a45c0e3b71a6bec0c18e4c2bdfd4eba008f9ad842",
+    "last_published": "2026-09-02T10:18:50.482Z"
+  },
+  "@quatrain/queue-mqtt": {
     "version": "1.0.1",
-    "hash": "aEzydtPgR9RBMznSdLl08Equk2c=-db9eea82f74fa5d4280e790a45c0e3b71a6bec0c18e4c2bdfd4eba008f9ad842",
-    "last_published": "2026-08-11T13:57:41.722Z"
+    "hash": "zCXrNUKk5GZcq8pFjLsOLcm6MZw=-6f5c7cd1ad82ce6573ef49e05175541286568d0e6d0bb208e38f6387e3659620",
+    "last_published": "2026-09-02T10:18:57.526Z"
   }
 }

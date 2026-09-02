@@ -5,6 +5,14 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bun": "src/index.ts",
+  "exports": {
+    ".": {
+      "bun": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "LICENSE.md",
     "src/",
@@ -12,6 +20,10 @@
     "README.md",
     "NOTICE.md"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Quatrain/Core.git",
@@ -20,8 +32,8 @@
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "@quatrain/core": "workspace:*",
-    "@quatrain/queue": "workspace:*",
+    "@quatrain/core": "^1.2.18",
+    "@quatrain/queue": "^1.2.3",
     "mqtt": "^5.10.1"
   },
   "devDependencies": {

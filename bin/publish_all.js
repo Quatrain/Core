@@ -97,8 +97,10 @@ async function publishAll() {
     }
 
     const forceBuild = process.argv.includes('--force');
+    const prArgIndex = process.argv.indexOf('--pr');
+    const prNum = prArgIndex !== -1 ? process.argv[prArgIndex + 1] : null;
     const tagArgIndex = process.argv.indexOf('--tag');
-    const npmTag = tagArgIndex !== -1 ? process.argv[tagArgIndex + 1] : 'latest';
+    const npmTag = tagArgIndex !== -1 ? process.argv[tagArgIndex + 1] : (prNum ? `pr${prNum}` : 'latest');
     const tagString = npmTag ? `--tag ${npmTag}` : '';
 
     if (!anyPackageChanged && !forceBuild) {
@@ -132,17 +134,26 @@ async function publishAll() {
         const hash = computedHashes[pkgName];
         const previousData = previousDataMap[pkgName];
         
-        if (previousData.hash !== hash) {
+        if (previousData.hash !== hash || prNum) {
             console.log(`[PUBLISH] Changes detected in ${pkgName}. Releasing...`);
             
             try {
-                // Execute standard release pipeline
-                runSync('yarn', ['version', 'patch'], { cwd: pkgDir, stdio: 'inherit' });
-                
-                // Read new version and keep original content
+                let newVersion;
+                let updatedPkgJson;
                 const originalPkgContent = fs.readFileSync(pkgJsonPath, 'utf8');
-                const updatedPkgJson = JSON.parse(originalPkgContent);
-                const newVersion = updatedPkgJson.version;
+
+                if (prNum) {
+                    const baseVersion = pkgJson.version.split('-')[0];
+                    newVersion = `${baseVersion}-pr${prNum}.${Date.now().toString().slice(-4)}`;
+                    updatedPkgJson = JSON.parse(originalPkgContent);
+                    updatedPkgJson.version = newVersion;
+                } else {
+                    // Execute standard release pipeline
+                    runSync('yarn', ['version', 'patch'], { cwd: pkgDir, stdio: 'inherit' });
+                    const bumpedContent = fs.readFileSync(pkgJsonPath, 'utf8');
+                    updatedPkgJson = JSON.parse(bumpedContent);
+                    newVersion = updatedPkgJson.version;
+                }
                 
                 // Strip workspace: protocol before packing
                 ['dependencies', 'devDependencies', 'peerDependencies'].forEach(deptype => {
@@ -215,18 +226,21 @@ async function publishAll() {
                     if (fs.existsSync(path.join(pkgDir, '.npmignore'))) fs.unlinkSync(path.join(pkgDir, '.npmignore'));
                 }
                 
-                // Keep registry updated with the stable hash
-                registry[pkgName] = {
-                    version: newVersion,
-                    hash: hash,
-                    last_published: new Date().toISOString()
-                };
+                // Keep registry updated with the stable hash (only for official releases)
+                if (!prNum) {
+                    registry[pkgName] = {
+                        version: newVersion,
+                        hash: hash,
+                        last_published: new Date().toISOString()
+                    };
+                    changed = true;
+                }
                 
-                changed = true;
-                console.log(`[PUBLISH] Success for ${pkgName} v${newVersion}`);
+                console.log(`[PUBLISH] Success for ${pkgName} v${newVersion} (tag: ${npmTag})`);
                 publishedPackages.push({
                     Package: pkgName,
-                    Version: newVersion
+                    Version: newVersion,
+                    Tag: npmTag
                 });
                 
             } catch (error) {

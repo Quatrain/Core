@@ -45,6 +45,13 @@ export class SupabaseAuthAdapter extends AbstractAuthAdapter {
    }
 
    /**
+    * Returns the underlying Supabase Client instance.
+    */
+   public get client(): any {
+      return this._client
+   }
+
+   /**
     * Register new user in authentication
     * @param user
     * @returns user unique id

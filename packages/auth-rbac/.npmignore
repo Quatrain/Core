@@ -1,0 +1,9 @@
+# Ignore test files and test configurations from registry bundle
+**/*.test.ts
+**/*.spec.ts
+**/__test__/
+**/__tests__/
+jest.config.ts
+tsconfig.tsbuildinfo
+*.log
+.turbo

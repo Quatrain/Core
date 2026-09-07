@@ -3097,6 +3097,25 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/auth-rbac@workspace:packages/auth-rbac":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/auth-rbac@workspace:packages/auth-rbac"
+  dependencies:
+    "@quatrain/api": "workspace:*"
+    "@quatrain/http": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:^22.10.1"
+    jest: "npm:^29.7.0"
+    jest-node-exports-resolver: "npm:^1.1.6"
+    jest-serial-runner: "npm:^1.2.1"
+    trace-unhandled: "npm:^2.0.1"
+    ts-jest: "npm:^29.4.6"
+    ts-node: "npm:^10.9.1"
+    typescript: "npm:^5.1.5"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/auth-supabase@workspace:packages/auth-supabase":
   version: 0.0.0-use.local
   resolution: "@quatrain/auth-supabase@workspace:packages/auth-supabase"

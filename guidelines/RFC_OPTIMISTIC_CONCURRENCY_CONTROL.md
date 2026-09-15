@@ -4,6 +4,7 @@
 **Scope:** `@quatrain/core`, `@quatrain/backend`, `@quatrain/backend-postgres`, `@quatrain/backend-firestore`, `@quatrain/backend-sqlite`  
 **Author:** Totalymage & Quatrain Architecture Team  
 **Date:** September 2026  
+**Companion RFC:** [RFC: Granular JSON Key-by-Key Mutations & Partial Updates](./RFC_GRANULAR_JSON_MUTATIONS.md)  
 
 ---
 

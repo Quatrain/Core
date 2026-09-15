@@ -5,6 +5,7 @@ class MockServerAdapter implements ServerAdapter {
   get(path: string, handler: any): void {}
   post(path: string, handler: any): void {}
   put(path: string, handler: any): void {}
+  patch(path: string, handler: any): void {}
   delete(path: string, handler: any): void {}
   use(middleware: any): void {}
   createRouter(path: string): ServerAdapter {

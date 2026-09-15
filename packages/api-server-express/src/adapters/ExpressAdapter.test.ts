@@ -96,6 +96,7 @@ describe('ExpressAdapter', () => {
             get: jest.fn(),
             post: jest.fn(),
             put: jest.fn(),
+            patch: jest.fn(),
             delete: jest.fn()
          }
          const ad = new ExpressAdapter(mockRouter as any)
@@ -105,11 +106,13 @@ describe('ExpressAdapter', () => {
          ad.get('/test', handler)
          ad.post('/test', handler)
          ad.put('/test', handler)
+         ad.patch('/test', handler)
          ad.delete('/test', handler)
 
          expect(mockRouter.get).toHaveBeenCalledWith('/test', expect.any(Function))
          expect(mockRouter.post).toHaveBeenCalledWith('/test', expect.any(Function))
          expect(mockRouter.put).toHaveBeenCalledWith('/test', expect.any(Function))
+         expect(mockRouter.patch).toHaveBeenCalledWith('/test', expect.any(Function))
          expect(mockRouter.delete).toHaveBeenCalledWith('/test', expect.any(Function))
       })
 

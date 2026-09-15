@@ -47,7 +47,7 @@ export class Storage extends Core {
       setDefault: boolean = false
    ) {
       this._storages[alias] = adapter
-      this.info(
+      this.debug(
          `Added storage adapter ${adapter.constructor.name} with alias '${alias}'`
       )
       if (setDefault === true) {

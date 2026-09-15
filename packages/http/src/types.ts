@@ -3,12 +3,13 @@ export interface ApiRequest {
    params: Record<string, string>
    query: Record<string, any>
    headers?: Record<string, string | string[] | undefined>
+   [key: string]: any
 }
 
 export interface ApiResponse {
    status(code: number): this
    json(data: any): void
-   send(data: string): void
+   send(data?: any): void
    setHeader(name: string, value: string): void
    write(data: string): void
    end(): void

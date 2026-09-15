@@ -27,12 +27,12 @@ export class ExpressAdapter implements ServerAdapter {
    }
 
    private mapRequestResponse(req: express.Request, res: express.Response): { apiReq: ApiRequest; apiRes: ApiResponse } {
-      const apiReq: ApiRequest = {
+      const apiReq: ApiRequest = Object.assign(req, {
          body: req.body,
          params: req.params,
          query: req.query,
          headers: req.headers as Record<string, string | string[] | undefined>
-      }
+      })
 
       const apiRes: ApiResponse = {
          status: (code: number) => {
@@ -42,7 +42,7 @@ export class ExpressAdapter implements ServerAdapter {
          json: (data: any) => {
             res.json(data)
          },
-         send: (data: string) => {
+         send: (data?: any) => {
             res.send(data)
          },
          setHeader: (name: string, value: string) => {
@@ -68,53 +68,75 @@ export class ExpressAdapter implements ServerAdapter {
       }
    }
 
+   private normalizeHandler(handler: any): express.RequestHandler {
+      if (typeof handler === 'function' && handler.length >= 3) {
+         return handler
+      }
+      return this.wrapHandler(handler)
+   }
+
    /**
     * Registers a GET endpoint.
     * 
     * @param path - The URI path.
-    * @param handler - The standard Quatrain ApiHandler.
+    * @param handlers - Standard Quatrain ApiHandlers or native Express middlewares.
     */
-   get(path: string, handler: ApiHandler): void {
-      (this.appOrRouter as express.Router).get(path, this.wrapHandler(handler))
+   get(path: string, ...handlers: (ApiHandler | any)[]): void {
+      const wrapped = handlers.map(h => this.normalizeHandler(h))
+      ;(this.appOrRouter as express.Router).get(path, ...wrapped)
    }
 
    /**
     * Registers a POST endpoint.
     * 
     * @param path - The URI path.
-    * @param handler - The standard Quatrain ApiHandler.
+    * @param handlers - Standard Quatrain ApiHandlers or native Express middlewares.
     */
-   post(path: string, handler: ApiHandler): void {
-      (this.appOrRouter as express.Router).post(path, this.wrapHandler(handler))
+   post(path: string, ...handlers: (ApiHandler | any)[]): void {
+      const wrapped = handlers.map(h => this.normalizeHandler(h))
+      ;(this.appOrRouter as express.Router).post(path, ...wrapped)
    }
 
    /**
     * Registers a PUT endpoint.
     * 
     * @param path - The URI path.
-    * @param handler - The standard Quatrain ApiHandler.
+    * @param handlers - Standard Quatrain ApiHandlers or native Express middlewares.
     */
-   put(path: string, handler: ApiHandler): void {
-      (this.appOrRouter as express.Router).put(path, this.wrapHandler(handler))
+   put(path: string, ...handlers: (ApiHandler | any)[]): void {
+      const wrapped = handlers.map(h => this.normalizeHandler(h))
+      ;(this.appOrRouter as express.Router).put(path, ...wrapped)
+   }
+
+   /**
+    * Registers a PATCH endpoint.
+    * 
+    * @param path - The URI path.
+    * @param handlers - Standard Quatrain ApiHandlers or native Express middlewares.
+    */
+   patch(path: string, ...handlers: (ApiHandler | any)[]): void {
+      const wrapped = handlers.map(h => this.normalizeHandler(h))
+      ;(this.appOrRouter as express.Router).patch(path, ...wrapped)
    }
 
    /**
     * Registers a DELETE endpoint.
     * 
     * @param path - The URI path.
-    * @param handler - The standard Quatrain ApiHandler.
+    * @param handlers - Standard Quatrain ApiHandlers or native Express middlewares.
     */
-   delete(path: string, handler: ApiHandler): void {
-      (this.appOrRouter as express.Router).delete(path, this.wrapHandler(handler))
+   delete(path: string, ...handlers: (ApiHandler | any)[]): void {
+      const wrapped = handlers.map(h => this.normalizeHandler(h))
+      ;(this.appOrRouter as express.Router).delete(path, ...wrapped)
    }
 
    /**
-    * Attaches a native Express middleware or sub-router.
+    * Attaches a native Express middleware, path prefix, or sub-router.
     * 
-    * @param middleware - The Express RequestHandler or Router.
+    * @param args - Arguments forwarded directly to express.use (e.g. path and RequestHandlers).
     */
-   use(middleware: any): void {
-      (this.appOrRouter as express.Router).use(middleware)
+   use(...args: any[]): void {
+      ;(this.appOrRouter as any).use(...args)
    }
 
    /**

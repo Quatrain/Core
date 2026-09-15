@@ -177,7 +177,7 @@ async function publishAll() {
                     // Temporarily write the versioned + stripped file
                     fs.writeFileSync(pkgJsonPath, JSON.stringify(updatedPkgJson, null, 2), 'utf8');
                     // Provide explicit .npmignore so yarn pack doesn't use .gitignore (which ignores lib and dist)
-                    fs.writeFileSync(path.join(pkgDir, '.npmignore'), 'node_modules\ncoverage\n.git\n', 'utf8');
+                    fs.writeFileSync(path.join(pkgDir, '.npmignore'), 'node_modules\ncoverage\n.git\n*.test.ts\n*.test.tsx\n*.spec.ts\ntests/\n__tests__/\n', 'utf8');
                     
                     runSync('yarn', ['pack', '--out', 'package.tgz'], { cwd: pkgDir, stdio: 'inherit' });
                     
@@ -189,14 +189,10 @@ async function publishAll() {
                     } catch (e) { /* ignores 404 */ }
 
                     if (!existsNpmjs) {
-                        try {
-                            let publishArgsNpm = ['publish', 'package.tgz', '--registry', 'https://registry.npmjs.org/', '--access', 'public'];
-                            if (process.env.GITHUB_ACTIONS) publishArgsNpm.push('--provenance');
-                            if (npmTag) publishArgsNpm.push('--tag', npmTag);
-                            runSync('npm', publishArgsNpm, { cwd: pkgDir, stdio: 'inherit' });
-                        } catch (err) {
-                            console.warn(`[WARNING] Failed to publish ${pkgName} to npmjs.org:`, err.message);
-                        }
+                        let publishArgsNpm = ['publish', 'package.tgz', '--registry', 'https://registry.npmjs.org/', '--access', 'public'];
+                        if (process.env.GITHUB_ACTIONS) publishArgsNpm.push('--provenance');
+                        if (npmTag) publishArgsNpm.push('--tag', npmTag);
+                        runSync('npm', publishArgsNpm, { cwd: pkgDir, stdio: 'inherit' });
                     } else {
                         console.log(`[PUBLISH] ${pkgName}@${newVersion} already exists on npmjs, skipping.`);
                     }
@@ -248,7 +244,58 @@ async function publishAll() {
                 process.exit(1);
             }
         } else {
-            console.log(`[SKIP] No changes in ${pkgName}. Version remains ${previousData.version}`);
+            // Check if existing version is missing on npmjs (e.g. from an earlier expired token or aborted run)
+            let existsNpmjs = false;
+            try {
+                const out = runSync('npm', ['view', `${pkgName}@${previousData.version}`, 'version', '--registry', 'https://registry.npmjs.org/'], { cwd: pkgDir, stdio: 'pipe' }).trim();
+                if (out === previousData.version) existsNpmjs = true;
+            } catch (e) { /* ignores 404 */ }
+
+            if (!existsNpmjs) {
+                console.log(`[REPAIR] Missing release detected on npmjs for ${pkgName}@${previousData.version}. Publishing...`);
+                try {
+                    const originalPkgContent = fs.readFileSync(pkgJsonPath, 'utf8');
+                    const updatedPkgJson = JSON.parse(originalPkgContent);
+
+                    ['dependencies', 'devDependencies', 'peerDependencies'].forEach(deptype => {
+                        if (updatedPkgJson[deptype]) {
+                            for (const [dep, ver] of Object.entries(updatedPkgJson[deptype])) {
+                                if (ver.startsWith('workspace:')) {
+                                    try {
+                                        const targetDir = pkgNameMap[dep];
+                                        if (targetDir) {
+                                            const otherPkgJson = JSON.parse(fs.readFileSync(path.join(targetDir, "package.json"), 'utf8'));
+                                            updatedPkgJson[deptype][dep] = `^${otherPkgJson.version}`;
+                                        }
+                                    } catch(e) {}
+                                }
+                            }
+                        }
+                    });
+
+                    try {
+                        fs.writeFileSync(pkgJsonPath, JSON.stringify(updatedPkgJson, null, 2), 'utf8');
+                        fs.writeFileSync(path.join(pkgDir, '.npmignore'), 'node_modules\ncoverage\n.git\n*.test.ts\n*.test.tsx\n*.spec.ts\ntests/\n__tests__/\n', 'utf8');
+                        runSync('yarn', ['pack', '--out', 'package.tgz'], { cwd: pkgDir, stdio: 'inherit' });
+
+                        let publishArgsNpm = ['publish', 'package.tgz', '--registry', 'https://registry.npmjs.org/', '--access', 'public'];
+                        if (process.env.GITHUB_ACTIONS) publishArgsNpm.push('--provenance');
+                        if (npmTag) publishArgsNpm.push('--tag', npmTag);
+                        runSync('npm', publishArgsNpm, { cwd: pkgDir, stdio: 'inherit' });
+                        console.log(`[REPAIR] Successfully published ${pkgName}@${previousData.version} to npmjs.org`);
+                    } finally {
+                        fs.writeFileSync(pkgJsonPath, originalPkgContent, 'utf8');
+                        if (fs.existsSync(path.join(pkgDir, 'package.tgz'))) fs.unlinkSync(path.join(pkgDir, 'package.tgz'));
+                        if (fs.existsSync(path.join(pkgDir, '.npmignore'))) fs.unlinkSync(path.join(pkgDir, '.npmignore'));
+                    }
+                } catch (repairErr) {
+                    console.error(`[ERROR] Failed to repair release for ${pkgName}@${previousData.version}:`, repairErr.message);
+                    process.exit(1);
+                }
+            } else {
+                console.log(`[SKIP] No changes in ${pkgName}. Version remains ${previousData.version}`);
+            }
+
             if (npmTag && npmTag !== 'latest') {
                 try {
                     runSync('npm', ['dist-tag', 'add', `${pkgName}@${previousData.version}`, npmTag, '--registry', 'https://registry.npmjs.org/'], { stdio: 'ignore' });

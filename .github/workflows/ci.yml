@@ -42,7 +42,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -171,6 +171,13 @@ jobs:
             exit 1
           fi
 
+      - name: Sync with remote before publish
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="${GITHUB_REF_NAME:-main}"
+          git pull --rebase origin "$BRANCH"
+
       - name: Publish all changed packages
         run: |
           if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
@@ -178,14 +185,6 @@ jobs:
           else
             yarn publish:all
           fi
-
-      - name: Sync with remote to prevent push rejection
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          BRANCH="${GITHUB_REF_NAME:-main}"
-          git fetch origin "$BRANCH"
-          git pull --rebase origin "$BRANCH" --autostash
 
       - name: Commit version bumps & hashes
         uses: stefanzweifel/git-auto-commit-action@v5 # NOSONAR

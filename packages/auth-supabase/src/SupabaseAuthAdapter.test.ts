@@ -211,6 +211,20 @@ describe('SupabaseAuthAdapter', () => {
             'Unable to retrieve auth token from Supabase'
          )
       })
+
+      it('should include error message from supabase and throw AuthenticationError when token is invalid or expired', async () => {
+         mockAuth.getUser.mockResolvedValue({
+            data: null,
+            error: { message: 'Invalid JWT: token is expired' },
+         })
+
+         await expect(adapter.getAuthToken('expired-token')).rejects.toThrow(
+            'Unable to retrieve auth token from Supabase: Invalid JWT: token is expired'
+         )
+         await expect(adapter.getAuthToken('expired-token')).rejects.toBeInstanceOf(
+            AuthenticationError
+         )
+      })
    })
 
    describe('refreshToken()', () => {

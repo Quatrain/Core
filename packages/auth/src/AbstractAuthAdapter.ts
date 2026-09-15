@@ -35,7 +35,8 @@ export abstract class AbstractAuthAdapter implements AuthInterface {
                   return true // Authorized
                }
             } catch(e) {
-               Auth.error(`[${this.constructor.name}] Middleware token verification failed: ${(e as Error).message}`)
+               Auth.warn(`[${this.constructor.name}] Middleware token verification failed: ${(e as Error).message}`)
+               Auth.debug((e as Error).stack)
             }
          }
 

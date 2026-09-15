@@ -172,40 +172,60 @@ export class AstroAdapter implements ServerAdapter {
     * Registers a handler for GET requests.
     * 
     * @param path - The relative routing path.
-    * @param handler - The route handler execution logic.
+    * @param handlers - Route handler(s) and optional middlewares.
     */
-   get(path: string, handler: ApiHandler): void {
-      this.register('GET', path, handler)
+   get(path: string, ...handlers: ApiHandler[]): void
+   get(path: string, ...handlers: any[]): void
+   get(path: string, ...handlers: (ApiHandler | any)[]): void {
+      this.register('GET', path, ...handlers)
    }
 
    /**
     * Registers a handler for POST requests.
     * 
     * @param path - The relative routing path.
-    * @param handler - The route handler execution logic.
+    * @param handlers - Route handler(s) and optional middlewares.
     */
-   post(path: string, handler: ApiHandler): void {
-      this.register('POST', path, handler)
+   post(path: string, ...handlers: ApiHandler[]): void
+   post(path: string, ...handlers: any[]): void
+   post(path: string, ...handlers: (ApiHandler | any)[]): void {
+      this.register('POST', path, ...handlers)
    }
 
    /**
     * Registers a handler for PUT requests.
     * 
     * @param path - The relative routing path.
-    * @param handler - The route handler execution logic.
+    * @param handlers - Route handler(s) and optional middlewares.
     */
-   put(path: string, handler: ApiHandler): void {
-      this.register('PUT', path, handler)
+   put(path: string, ...handlers: ApiHandler[]): void
+   put(path: string, ...handlers: any[]): void
+   put(path: string, ...handlers: (ApiHandler | any)[]): void {
+      this.register('PUT', path, ...handlers)
+   }
+
+   /**
+    * Registers a handler for PATCH requests.
+    * 
+    * @param path - The relative routing path.
+    * @param handlers - Route handler(s) and optional middlewares.
+    */
+   patch(path: string, ...handlers: ApiHandler[]): void
+   patch(path: string, ...handlers: any[]): void
+   patch(path: string, ...handlers: (ApiHandler | any)[]): void {
+      this.register('PATCH', path, ...handlers)
    }
 
    /**
     * Registers a handler for DELETE requests.
     * 
     * @param path - The relative routing path.
-    * @param handler - The route handler execution logic.
+    * @param handlers - Route handler(s) and optional middlewares.
     */
-   delete(path: string, handler: ApiHandler): void {
-      this.register('DELETE', path, handler)
+   delete(path: string, ...handlers: ApiHandler[]): void
+   delete(path: string, ...handlers: any[]): void
+   delete(path: string, ...handlers: (ApiHandler | any)[]): void {
+      this.register('DELETE', path, ...handlers)
    }
 
    /**
@@ -213,19 +233,35 @@ export class AstroAdapter implements ServerAdapter {
     * 
     * @param method - The HTTP verb.
     * @param path - The routing endpoint path.
-    * @param handler - The route action handler.
+    * @param handlers - The route action handlers and middlewares.
     */
-   private register(method: string, path: string, handler: ApiHandler): void {
+   private register(method: string, path: string, ...handlers: (ApiHandler | any)[]): void {
+      if (handlers.length === 0) return
+      const targetHandler = handlers[handlers.length - 1]
+      const routeMiddlewares = handlers.slice(0, -1)
+
       // Standardize the full path with the prefix
       const fullPath = (this.prefix + path).replace(/\/+/g, '/')
       const { regex, paramNames } = pathToRegex(fullPath)
       
+      const compositeHandler: ApiHandler = async (req: ApiRequest, res: ApiResponse) => {
+         for (const mw of routeMiddlewares) {
+            if (typeof mw === 'function') {
+               const r = await mw(req, res)
+               if (r === false || (res as any).isEnded) {
+                  return
+               }
+            }
+         }
+         await targetHandler(req, res)
+      }
+
       this.routes.push({
          method,
          path: fullPath,
          regex,
          paramNames,
-         handler
+         handler: compositeHandler
       })
    }
 

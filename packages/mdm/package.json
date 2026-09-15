@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/mdm",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Agnostic Master Data Management (MDM) core package with multi-axis capabilities matrix for Quatrain ecosystem",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

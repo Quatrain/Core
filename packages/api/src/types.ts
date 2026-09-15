@@ -3,12 +3,18 @@ import { ApiRequest, ApiResponse, ApiHandler, ApiMiddleware } from '@quatrain/ht
 export type { ApiRequest, ApiResponse, ApiHandler, ApiMiddleware }
 
 export interface ServerAdapter {
-   get(path: string, handler: ApiHandler): void
-   post(path: string, handler: ApiHandler): void
-   put(path: string, handler: ApiHandler): void
-   delete(path: string, handler: ApiHandler): void
+   get(path: string, ...handlers: ApiHandler[]): void
+   get(path: string, ...handlers: any[]): void
+   post(path: string, ...handlers: ApiHandler[]): void
+   post(path: string, ...handlers: any[]): void
+   put(path: string, ...handlers: ApiHandler[]): void
+   put(path: string, ...handlers: any[]): void
+   patch(path: string, ...handlers: ApiHandler[]): void
+   patch(path: string, ...handlers: any[]): void
+   delete(path: string, ...handlers: ApiHandler[]): void
+   delete(path: string, ...handlers: any[]): void
    
-   use(middleware: ApiMiddleware | any): void
+   use(...args: any[]): void
    addMiddleware?(middleware: ApiMiddleware): void
    createRouter(path: string): ServerAdapter
    start(port: number, callback?: () => void): void

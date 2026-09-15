@@ -22,15 +22,17 @@ describe('AstroAdapter', () => {
    })
 
    describe('Route Registration & Path Matching', () => {
-      it('should register GET, POST, PUT, DELETE routes', async () => {
+      it('should register GET, POST, PUT, PATCH, DELETE routes', async () => {
          const getHandler = jest.fn()
          const postHandler = jest.fn()
          const putHandler = jest.fn()
+         const patchHandler = jest.fn()
          const deleteHandler = jest.fn()
 
          adapter.get('/probes', getHandler)
          adapter.post('/probes', postHandler)
          adapter.put('/probes/:id', putHandler)
+         adapter.patch('/probes/:id', patchHandler)
          adapter.delete('/probes/:id', deleteHandler)
 
          const handleFn = adapter.handle()
@@ -62,6 +64,27 @@ describe('AstroAdapter', () => {
             expect.objectContaining({
                params: expect.objectContaining({ id: '123' }),
                body: expect.objectContaining({ name: 'New Name' })
+            }),
+            expect.any(Object)
+         )
+
+         // Simulate a PATCH request to /probes/123
+         const mockPatchContext = {
+            request: new Request('http://localhost/probes/123', {
+               method: 'PATCH',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ active: true })
+            }),
+            params: {},
+            url: new URL('http://localhost/probes/123')
+         }
+         
+         const patchRes = await handleFn(mockPatchContext)
+         expect(patchRes.status).toBe(200)
+         expect(patchHandler).toHaveBeenCalledWith(
+            expect.objectContaining({
+               params: expect.objectContaining({ id: '123' }),
+               body: expect.objectContaining({ active: true })
             }),
             expect.any(Object)
          )

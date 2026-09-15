@@ -92,14 +92,15 @@ export class SupabaseAuthAdapter extends AbstractAuthAdapter {
     * 
     * @param bearer - Raw JWT string.
     * @returns The decoded user object.
-    * @throws {Error} If verification fails.
+    * @throws {AuthenticationError} If verification fails.
     */
    async getAuthToken(bearer: string) {
       const token = await this._client.auth.getUser(bearer)
       if (token.data && token.data.user) {
          return token.data.user
       }
-      throw new Error('Unable to retrieve auth token from Supabase')
+      const reason = token.error?.message ? `: ${token.error.message}` : ''
+      throw new AuthenticationError(`Unable to retrieve auth token from Supabase${reason}`)
    }
 
    /**

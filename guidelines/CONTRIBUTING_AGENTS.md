@@ -101,3 +101,33 @@ To satisfy modern static code analyzers like SonarQube, always enforce the follo
   - `Backend.warn('...')`: For abnormal non-blocking events.
   - `Backend.error('...')`: For captured critical exceptions.
 - **JSDoc Requirements:** Every new class, function, or method MUST be accompanied by a comprehensive JSDoc block detailing its purpose, `@param` inputs, and `@returns` output.
+
+---
+
+## 6. GitFlow & Contribution Lifecycle (AGENTS.okf Standard)
+
+All contributions to the Quatrain Core monorepo follow the GitFlow lifecycle defined in [AGENTS.okf](file:///Users/crapougnax/CODE/CRAPOUGNAX/AGENTS.okf/content/workflow/gitflow-protocol.md):
+
+```mermaid
+flowchart TD
+    develop["develop (Staging / Integration)"] -->|Branch out| feat["feat/<issue>-<description>"]
+    feat -->|TDD & Atomic Commits| feat
+    feat -->|PR targeting develop| pr["PR #Y: Closes #X"]
+    pr -->|CI / Review & Merge| develop
+    develop -->|Staging Validation| releasePR["PR develop -> main (Release)"]
+    releasePR -->|Merge + SemVer Tag| main["main (Production)"]
+```
+
+### Protocol Summary:
+1. **Integration Branch (`develop`):** The default branch for active integration, tests, and preview releases.
+2. **Branching:** Feature and bugfix branches must branch out strictly from `develop`:
+   ```bash
+   git checkout develop && git pull origin develop
+   git checkout -b feat/<issue-number>-<short-description>
+   ```
+3. **Pull Requests:** Open PRs targeting `--base develop` with explicit metadata:
+   ```bash
+   gh pr create --base develop --head feat/<branch> --assignee @me --title "..." --body "Closes #<issue-number>"
+   ```
+4. **Production Releases (`develop` $\to$ `main`):** Formal release PRs merge from `develop` into `main` with annotated SemVer tags.
+

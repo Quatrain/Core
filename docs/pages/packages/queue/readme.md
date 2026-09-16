@@ -1,5 +1,7 @@
 # @quatrain/queue
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/queue ↗](/api-reference/modules/_quatrain_queue.html).
+
 The central queue and message broker abstraction for the Quatrain framework. This package provides a unified API for sending and listening to asynchronous messages across different queueing systems.
 
 ## Introduction

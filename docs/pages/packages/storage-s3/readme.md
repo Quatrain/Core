@@ -1,5 +1,7 @@
 # @quatrain/storage-s3
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/storage-s3 ↗](/api-reference/modules/_quatrain_storage-s3.html).
+
 The AWS S3 (and S3-compatible) adapter for `@quatrain/storage`.
 
 ## Introduction

@@ -1,5 +1,7 @@
 # @quatrain/auth-http-basic
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth-http-basic ↗](/api-reference/modules/_quatrain_auth-http-basic.html).
+
 Basic HTTP Authentication Adapter (RFC 7617) for the Quatrain API Server.
 
 ## Features

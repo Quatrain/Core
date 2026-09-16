@@ -1,5 +1,7 @@
 # @quatrain/backend-sqlite
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/backend-sqlite ↗](/api-reference/modules/_quatrain_backend-sqlite.html).
+
 The SQLite adapter for `@quatrain/backend`. This package allows Quatrain business objects to be persisted locally in a lightweight, file-based SQL database.
 
 ## Introduction

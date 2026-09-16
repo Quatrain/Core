@@ -1,5 +1,7 @@
 # @quatrain/backend-restapi
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/backend-restapi ↗](/api-reference/modules/_quatrain_backend-restapi.html).
+
 A scalable and flexible backend adapter for integrating Quatrain applications with remote REST APIs.
 
 ## Overview

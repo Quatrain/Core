@@ -1,5 +1,7 @@
 # @quatrain/skills
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/skills ↗](/api-reference/modules/_quatrain_skills.html).
+
 Shared TypeScript CLI and API client helper utilities for building and running Quatrain Agent skills.
 
 ## Features

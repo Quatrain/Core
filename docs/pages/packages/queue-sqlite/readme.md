@@ -1,5 +1,7 @@
 # @quatrain/queue-sqlite
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/queue-sqlite ↗](/api-reference/modules/_quatrain_queue-sqlite.html).
+
 SQLite Task Queue Adapter for the `@quatrain/queue` namespace.
 
 This package provides a robust local-first persistent queue adapter using SQLite. It is designed to queue tasks locally in memory or write them persistently on disk, processing them sequentially or concurrently under unprivileged user execution constraints.

@@ -1,5 +1,7 @@
 # @quatrain/app
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/app ↗](/api-reference/modules/_quatrain_app.html).
+
 Application infrastructure builder for Quatrain. Provides utilities to generate code, scaffold projects and handle core application lifecycle.
 
 ## Purpose

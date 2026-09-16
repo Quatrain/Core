@@ -1,5 +1,7 @@
 # @quatrain/chat
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/chat ↗](/api-reference/modules/_quatrain_chat.html).
+
 The core conversational engine for the Quatrain framework.
 
 This package provides a headless, UI-agnostic implementation of conversational agents, handling message history, prompt templating, context injection (RAG), and integration with LLM providers (Gemini, OpenAI, Ollama).

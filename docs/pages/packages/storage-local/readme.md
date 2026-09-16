@@ -1,5 +1,7 @@
 # @quatrain/storage-local
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/storage-local ↗](/api-reference/modules/_quatrain_storage-local.html).
+
 Local filesystem storage adapter for Quatrain.
 
 ## Purpose

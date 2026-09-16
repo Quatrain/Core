@@ -1,5 +1,7 @@
 # @quatrain/api-client
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/api-client ↗](/api-reference/modules/_quatrain_api-client.html).
+
 The `@quatrain/api-client` package provides an isomorphic, lightweight HTTP client designed specifically for Quatrain APIs. It works seamlessly in both Node.js and Browser environments.
 
 ## Features

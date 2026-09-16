@@ -1,5 +1,7 @@
 # @quatrain/studio
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/studio ↗](/api-reference/modules/_quatrain_studio.html).
+
 The `@quatrain/studio` package contains the core configuration, meta-models, and orchestrator tooling for Quatrain Core Studio. It serves as the bridge between Quatrain Core's backend mechanics and the user-facing UI tools.
 
 ## Features

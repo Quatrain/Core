@@ -1,5 +1,7 @@
 # @quatrain/api-server-astro
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/api-server-astro ↗](/api-reference/modules/_quatrain_api-server-astro.html).
+
 Astro Adapter for the Quatrain API Server. It bridges the Quatrain API server interface with the web standard Request/Response API used natively by Astro endpoints.
 
 ## Features

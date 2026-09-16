@@ -141,6 +141,29 @@ function generateApiReference(): void {
                     const pkgData = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'))
                     pkgData.main = 'src/index.ts'
                     pkgData.types = 'src/index.ts'
+                    if (pkgData.module) pkgData.module = 'src/index.ts'
+                    if (pkgData.exports) {
+                        if (typeof pkgData.exports === 'string') {
+                            pkgData.exports = {
+                                types: './src/index.ts',
+                                default: './src/index.ts'
+                            }
+                        } else if (pkgData.exports['.']) {
+                            if (typeof pkgData.exports['.'] === 'string') {
+                                pkgData.exports['.'] = {
+                                    types: './src/index.ts',
+                                    default: './src/index.ts'
+                                }
+                            } else {
+                                pkgData.exports['.'] = {
+                                    types: './src/index.ts',
+                                    import: './src/index.ts',
+                                    require: './src/index.ts',
+                                    default: './src/index.ts'
+                                }
+                            }
+                        }
+                    }
                     fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgData, null, 2))
                 }
             }

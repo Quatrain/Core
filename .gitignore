@@ -30,6 +30,8 @@ packages/**/.*.txt
 !bin/**/*.js
 !**/bin/**/*.js
 !/*.js
+!docs/*.js
+!docs/pages/_meta.js
 *.tsbuildinfo
 
 # Generated App
@@ -37,5 +39,8 @@ packages/**/.*.txt
 
 .turbo/
 **/.turbo/
+docs/.next/
+docs/out/
+docs/.yarn/
 firestore-debug.log
 firebase-debug.log

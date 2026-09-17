@@ -24,7 +24,9 @@
     "build": "turbo run build",
     "publish:all": "node bin/publish_all.js",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "docs:build": "ts-node scripts/build-docs.ts && yarn --cwd docs build",
+    "docs:dev": "yarn --cwd docs dev"
   },
   "private": true,
   "workspaces": [

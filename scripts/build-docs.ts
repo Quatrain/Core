@@ -327,11 +327,103 @@ export function generateApiReference(): void {
     console.info('[INFO] API Reference generated successfully.')
 }
 
+/**
+ * Extracts title from OKF frontmatter or falls back to formatted name
+ */
+function extractOkfTitle(filePath: string, fallback: string): string {
+    try {
+        const content = fs.readFileSync(filePath, 'utf8')
+        const match = content.match(/^title:\s*(.+)$/m)
+        if (match && match[1]) {
+            return match[1].trim().replace(/^["']|["']$/g, '')
+        }
+    } catch {
+        // Fallback
+    }
+    return fallback
+}
+
+/**
+ * Aggregates OKF knowledge base files and generates Nextra navigation metadata
+ */
+export function aggregateOkfFiles(): void {
+    const okfSourceDir = path.join(ROOT_DIR, 'okf')
+    const okfTargetDir = path.join(DOCS_DIR, 'okf')
+
+    console.info(`[INFO] Scanning ${okfSourceDir} for OKF documentation...`)
+    if (!fs.existsSync(okfSourceDir)) {
+        console.warn(`[WARN] OKF directory does not exist: ${okfSourceDir}`)
+        return
+    }
+
+    if (!fs.existsSync(okfTargetDir)) {
+        fs.mkdirSync(okfTargetDir, { recursive: true })
+    }
+
+    const rootMeta: NextraMetaRecord = {
+        index: 'Overview',
+    }
+
+    const entries = fs.readdirSync(okfSourceDir)
+    for (const entry of entries) {
+        const entryPath = path.join(okfSourceDir, entry)
+        const stat = fs.statSync(entryPath)
+
+        if (stat.isFile() && entry.endsWith('.md')) {
+            const destPath = path.join(okfTargetDir, entry)
+            fs.copyFileSync(entryPath, destPath)
+        } else if (stat.isDirectory()) {
+            const categoryTargetDir = path.join(okfTargetDir, entry)
+            if (!fs.existsSync(categoryTargetDir)) {
+                fs.mkdirSync(categoryTargetDir, { recursive: true })
+            }
+
+            const categoryFiles = fs.readdirSync(entryPath)
+            const categoryMeta: NextraMetaRecord = {
+                index: 'Category Overview',
+            }
+
+            let categoryTitle = formatTitle(entry)
+            const categoryIndexPath = path.join(entryPath, 'index.md')
+            if (fs.existsSync(categoryIndexPath)) {
+                categoryTitle = extractOkfTitle(categoryIndexPath, categoryTitle)
+            }
+            rootMeta[entry] = categoryTitle
+
+            for (const catFile of categoryFiles) {
+                if (catFile.endsWith('.md')) {
+                    const srcFile = path.join(entryPath, catFile)
+                    const destFile = path.join(categoryTargetDir, catFile)
+                    fs.copyFileSync(srcFile, destFile)
+
+                    const baseName = catFile.replace(/\.md$/, '')
+                    if (baseName !== 'index') {
+                        const fileTitle = extractOkfTitle(srcFile, formatTitle(baseName))
+                        categoryMeta[baseName] = fileTitle
+                    }
+                }
+            }
+
+            fs.writeFileSync(
+                path.join(categoryTargetDir, '_meta.js'),
+                `export default ${JSON.stringify(categoryMeta, null, 2)}\n`
+            )
+        }
+    }
+
+    fs.writeFileSync(
+        path.join(okfTargetDir, '_meta.js'),
+        `export default ${JSON.stringify(rootMeta, null, 2)}\n`
+    )
+    console.info('[INFO] OKF knowledge base integrated into Nextra docs.')
+}
+
 function main(): void {
     console.info('--- Documentation Build Start ---')
     const start = Date.now()
     generateApiReference()
     for (const dir of SCAN_DIRS) aggregateMarkdownFiles(dir)
+    aggregateOkfFiles()
     console.info(`--- Documentation Build Finished in ${((Date.now() - start) / 1000).toFixed(2)}s ---`)
 }
 

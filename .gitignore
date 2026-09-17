@@ -31,7 +31,7 @@ packages/**/.*.txt
 !**/bin/**/*.js
 !/*.js
 !docs/*.js
-!docs/pages/_meta.js
+!docs/pages/**/_meta.js
 *.tsbuildinfo
 
 # Generated App

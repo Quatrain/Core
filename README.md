@@ -33,6 +33,7 @@ Target **100% on-premise sovereign setups** or modern **Backend-as-a-Service (Ba
 - [Quick Start](#-quick-start)
 - [Ecosystem & Packages Map](#-ecosystem--packages-map)
 - [Documentation & API Reference](#-documentation--api-reference)
+- [Open Knowledge Base (OKF) & Tycho](#-open-knowledge-base-okf-v01--tycho-integration)
 - [Companion Projects](#-companion-projects)
 - [Monorepo Development](#-monorepo-development)
 - [License & Support](#-license--support)
@@ -74,10 +75,10 @@ export class Product extends PersistedBaseObject {
   static COLLECTION = 'products'
 
   static PROPS_DEFINITION = [
-    { name: 'name', type: StringProperty.TYPE, mandatory: true },
-    { name: 'sku', type: StringProperty.TYPE, mandatory: true },
-    { name: 'price', type: NumberProperty.TYPE, mandatory: true },
-    { name: 'inStock', type: BooleanProperty.TYPE, defaultValue: true }
+    { name: 'name', type: StringProperty.TYPE, required: true },
+    { name: 'sku', type: StringProperty.TYPE, required: true },
+    { name: 'price', type: NumberProperty.TYPE, required: true },
+    { name: 'inStock', type: BooleanProperty.TYPE, default: true }
   ]
 }
 ```
@@ -94,30 +95,29 @@ import { Product } from './models/Product'
 async function bootstrap() {
   // 1. Initialize and register the backend adapter
   const postgres = new PostgresAdapter({
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/quatrain'
+    config: {
+      host: process.env.PG_HOST || 'localhost',
+      port: 5432,
+      database: 'quatrain_db',
+      user: 'postgres',
+      password: process.env.PG_PASSWORD || 'secret'
+    }
   })
-  Backend.addBackend(postgres, 'default', true)
+  Backend.addBackend(postgres, 'postgres', true)
 
-  // 2. Instantiate and validate an entity
-  const item = await Product.factory()
-  item._.name = 'Mechanical Keyboard'
-  item._.sku = 'KB-4000'
-  item._.price = 129.99
-
-  if (item.isValid()) {
-    // 3. Save to database
-    await item.create()
-    console.log(`Product created with ID: ${item.id}`)
-  }
-
-  // 4. Query using the pre-bound repository
+  // 2. Instantiate and persist through dynamic repository
   const repo = Product.repository()
-  const activeProducts = await repo.find({
-    inStock: true,
-    price: { $gt: 100 }
+  const item = await Product.factory({
+    name: 'prod_900',
+    sku: 'SKU-QUATRAIN-01',
+    price: 49.99,
+    inStock: true
   })
+  await repo.create(item)
 
-  console.log(`Found ${activeProducts.length} items.`)
+  // 3. Read by UID
+  const loaded = await repo.read('prod_900')
+  console.log(`Product loaded: ${loaded?.val('sku')}`)
 }
 
 bootstrap()
@@ -149,6 +149,38 @@ The framework is organized into 7 logical architectural layers across 71 package
 * 🌐 **Documentation Portal**: Complete guides, HOWTOs, and architecture standards: [apps.quatrain.dev](https://apps.quatrain.dev)
 * 📦 **Full API Reference**: Automatically extracted TypeScript documentation (classes, interfaces, signatures): [apps.quatrain.dev/api-reference/modules.html](https://apps.quatrain.dev/api-reference/modules.html)
 * 📑 **Package Guides**: Each package maintains an `Overview` (`README.md`) and practical recipes (`HOWTO.md`) inside its folder.
+
+---
+
+## 🧠 Open Knowledge Base (OKF v0.1) & Tycho Integration
+
+Quatrain Core embeds an official knowledge base formatted according to the **Open Knowledge Format (OKF v0.1)** directly under [`okf/`](okf/index.md).
+
+Designed specifically for **AI pair-programming agents** (Gemini, Claude, Antigravity, Cursor) and human engineers, it provides authoritative, hallucination-free guidance across 8 core architectural pillars:
+* 🏛️ **Domain Modeling**: [`okf/domain-modeling/`](okf/domain-modeling/index.md) (Schemas, `.TYPE`, `._` proxy, FSM workflows)
+* 💾 **Persistence**: [`okf/persistence-adapters/`](okf/persistence-adapters/index.md) (Repositories, PostgreSQL, SQLite, Migrations)
+* 🔐 **Auth & Security**: [`okf/auth-and-security/`](okf/auth-and-security/index.md) (SSO, Supabase, RBAC, Field-Level Security)
+* 🗄️ **Object Storage**: [`okf/storage-and-assets/`](okf/storage-and-assets/index.md) (Unified S3/MinIO & Local FS storage)
+* 📬 **Queues & Streaming**: [`okf/queues-and-events/`](okf/queues-and-events/index.md) (RabbitMQ/AMQP, background workers)
+* 🌐 **API Gateways**: [`okf/api-and-gateways/`](okf/api-and-gateways/index.md) (Isomorphic fetch client, CrudEndpoint)
+* 🤖 **AI Agents**: [`okf/ai-and-agents/`](okf/ai-and-agents/index.md) (Gemini models, schema-guaranteed JSON generation)
+
+### Annexing via Tycho CLI (`tycho knowledge`)
+
+You can directly annex this knowledge base into your personal or team agent configuration (such as `AGENTS.okf`) using **Tycho**:
+
+```bash
+# 1. Register the Quatrain Core repository in Tycho
+tycho repo add quatrain Quatrain/Core
+
+# 2. Install the knowledge package
+tycho knowledge install quatrain/quatrain-core
+
+# 3. Check active knowledge packages
+tycho knowledge list
+```
+
+The automated post-install hook (`.tycho/knowledge/quatrain-core/post-install.sh`) links the `okf/` directory into your active agent knowledge router and triggers an immediate router build (`bun run build && bun run sync:local`).
 
 ---
 

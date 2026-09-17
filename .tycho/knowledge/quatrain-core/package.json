@@ -1,0 +1,7 @@
+{
+  "name": "quatrain-core",
+  "version": "1.0.0",
+  "description": "Quatrain Core architecture guidelines, OKF v0.1 knowledge base, and strongly-typed code patterns",
+  "targets": ["gemini", "claude", "cursor", "hermes"],
+  "license": "AGPL-3.0"
+}

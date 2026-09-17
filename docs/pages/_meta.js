@@ -1,9 +1,9 @@
 export default {
-  "index": "Introduction",
-  "okf": "Knowledge Base (OKF)",
-  "packages": "Packages",
+  "index": "✨ Introduction",
+  "okf": "🏛️ Architecture (OKF)",
+  "packages": "📦 Packages (71)",
   "api-reference": {
-    "title": "API Reference ↗",
+    "title": "⚡ API Reference ↗",
     "href": "/core/api-reference/modules.html",
     "newWindow": true
   }

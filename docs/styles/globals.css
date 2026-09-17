@@ -1,27 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  
   body {
-    @apply antialiased text-slate-800 dark:text-slate-200;
+    @apply antialiased text-slate-800 dark:text-slate-200 bg-white dark:bg-[#0B0F19];
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.025em;
   }
 }
 
 @layer components {
   /* Give a premium look to TypeDoc generated tables */
   table {
-    @apply w-full text-sm text-left border-collapse;
+    @apply w-full text-sm text-left border-collapse my-4 rounded-xl overflow-hidden shadow-sm;
   }
+  
   th {
-    @apply bg-slate-50 dark:bg-slate-800 font-semibold p-3 border-b border-slate-200 dark:border-slate-700;
+    @apply bg-slate-50 dark:bg-slate-900/80 font-semibold p-3.5 border-b border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100;
   }
+  
   td {
-    @apply p-3 border-b border-slate-100 dark:border-slate-800;
+    @apply p-3.5 border-b border-slate-100 dark:border-slate-800/60 bg-white/50 dark:bg-slate-950/30;
   }
   
   /* Make inline code blocks pop */
   :not(pre) > code {
-    @apply text-primary-600 dark:text-primary-500 bg-primary-50 dark:bg-primary-900/30 px-1.5 py-0.5 rounded-md font-mono text-sm font-semibold;
+    @apply text-primary-600 dark:text-sky-400 bg-primary-50 dark:bg-sky-950/40 px-1.5 py-0.5 rounded-md font-mono text-xs font-semibold border border-primary-200/50 dark:border-sky-800/40;
   }
+
+  /* Glassmorphism Card Style */
+  .glass-panel {
+    @apply bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-sm transition-all duration-200;
+  }
+
+  .glass-panel:hover {
+    @apply border-primary-500/50 dark:border-primary-500/40 shadow-md shadow-primary-500/5;
+  }
+
+  /* Gradient Glow effect for hero */
+  .glow-cyan {
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0) 70%);
+  }
+
+  .glow-indigo {
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+  }
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400 dark:bg-slate-600;
 }

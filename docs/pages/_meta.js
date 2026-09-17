@@ -4,7 +4,7 @@ export default {
   "packages": "Packages",
   "api-reference": {
     "title": "API Reference ↗",
-    "href": "/api-reference/modules.html",
+    "href": "/core/api-reference/modules.html",
     "newWindow": true
   }
 }

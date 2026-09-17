@@ -5,7 +5,10 @@ const withNextra = nextra({
   themeConfig: './theme.config.jsx'
 })
 
+const basePath = process.env.BASE_PATH !== undefined ? process.env.BASE_PATH : '/core'
+
 export default withNextra({
+  basePath,
   output: 'export',
   images: {
     unoptimized: true

@@ -11,6 +11,7 @@ const ROOT_DIR: string = path.join(__dirname, '..')
 const DOCS_DIR: string = path.join(ROOT_DIR, 'docs', 'pages')
 // TypeDoc outputs pure HTML directly into the public folder, bypassing Next.js MDX parser
 const API_REF_DIR: string = path.join(ROOT_DIR, 'docs', 'public', 'api-reference')
+const BASE_PATH: string = process.env.BASE_PATH !== undefined ? process.env.BASE_PATH : '/core'
 
 // Directories to scan for documentation
 const SCAN_DIRS: string[] = ['packages']
@@ -104,7 +105,7 @@ export function aggregateMarkdownFiles(sourceDir: string): void {
                         if (targetFile === 'README.md') {
                             hasReadme = true
                             if (hasApiRef) {
-                                const callout = `\n> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for ${pkgName} ↗](/api-reference/modules/${apiRefModuleFile}).\n`
+                                const callout = `\n> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for ${pkgName} ↗](${BASE_PATH}/api-reference/modules/${apiRefModuleFile}).\n`
                                 const titleMatch = fileContent.match(/^(#[^\n]+\n)/)
                                 if (titleMatch) {
                                     fileContent = fileContent.replace(titleMatch[1], `${titleMatch[1]}${callout}`)
@@ -123,7 +124,7 @@ export function aggregateMarkdownFiles(sourceDir: string): void {
 
                 if (!hasReadme && hasApiRef) {
                     if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true })
-                    const defaultReadme = `# ${pkgName}\n\n> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for ${pkgName} ↗](/api-reference/modules/${apiRefModuleFile}).\n\n${pkgDescription || 'Part of the Quatrain Core framework.'}\n`
+                    const defaultReadme = `# ${pkgName}\n\n> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for ${pkgName} ↗](${BASE_PATH}/api-reference/modules/${apiRefModuleFile}).\n\n${pkgDescription || 'Part of the Quatrain Core framework.'}\n`
                     fs.writeFileSync(path.join(targetDir, 'readme.md'), defaultReadme)
                     itemMeta['readme'] = 'Overview'
                     hasReadme = true
@@ -133,7 +134,7 @@ export function aggregateMarkdownFiles(sourceDir: string): void {
                 if (hasApiRef) {
                     itemMeta['api'] = {
                         title: 'API Reference ↗',
-                        href: `/api-reference/modules/${apiRefModuleFile}`,
+                        href: `${BASE_PATH}/api-reference/modules/${apiRefModuleFile}`,
                         newWindow: true
                     }
                 }
@@ -166,7 +167,7 @@ export function aggregateMarkdownFiles(sourceDir: string): void {
                 if (entry.hasOverview) docsLinks.push(`[Overview](/packages/${entry.dir}/readme)`)
                 if (entry.hasHowto) docsLinks.push(`[HOWTO](/packages/${entry.dir}/howto)`)
                 const docsCol = docsLinks.length > 0 ? docsLinks.join(' · ') : '—'
-                const apiCol = entry.apiRefFile ? `[API Reference ↗](/api-reference/modules/${entry.apiRefFile})` : '—'
+                const apiCol = entry.apiRefFile ? `[API Reference ↗](${BASE_PATH}/api-reference/modules/${entry.apiRefFile})` : '—'
                 const desc = entry.description ? entry.description.replace(/\|/g, '\\|') : '—'
                 catalogMarkdown += `| [\`${entry.name}\`](/packages/${entry.dir}/readme) | ${desc} | ${docsCol} | ${apiCol} |\n`
             }

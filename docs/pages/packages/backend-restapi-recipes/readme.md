@@ -1,6 +1,6 @@
 # @quatrain/backend-restapi-recipes
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/backend-restapi-recipes ↗](/api-reference/modules/_quatrain_backend-restapi-recipes.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/backend-restapi-recipes ↗](/core/api-reference/modules/_quatrain_backend-restapi-recipes.html).
 
 A collection of pre-configured integration recipes for the Quatrain `RestBackendAdapter`.
 

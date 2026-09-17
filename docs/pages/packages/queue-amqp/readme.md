@@ -1,6 +1,6 @@
 # @quatrain/queue-amqp
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/queue-amqp ↗](/api-reference/modules/_quatrain_queue-amqp.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/queue-amqp ↗](/core/api-reference/modules/_quatrain_queue-amqp.html).
 
 The AMQP (Advanced Message Queuing Protocol) adapter for `@quatrain/queue`. 
 

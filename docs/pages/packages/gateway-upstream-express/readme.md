@@ -1,6 +1,6 @@
 # @quatrain/gateway-upstream-express
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/gateway-upstream-express ↗](/api-reference/modules/_quatrain_gateway-upstream-express.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/gateway-upstream-express ↗](/core/api-reference/modules/_quatrain_gateway-upstream-express.html).
 
 A plug-and-play Express router designed to integrate any Express application with `@quatrain/api-gateway`.
 

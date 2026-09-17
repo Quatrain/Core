@@ -1,6 +1,6 @@
 # @quatrain/auth-firebase
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth-firebase ↗](/api-reference/modules/_quatrain_auth-firebase.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth-firebase ↗](/core/api-reference/modules/_quatrain_auth-firebase.html).
 
 The Firebase Authentication adapter for `@quatrain/auth`.
 

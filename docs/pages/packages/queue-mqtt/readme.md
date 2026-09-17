@@ -1,6 +1,6 @@
 # @quatrain/queue-mqtt
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/queue-mqtt ↗](/api-reference/modules/_quatrain_queue-mqtt.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/queue-mqtt ↗](/core/api-reference/modules/_quatrain_queue-mqtt.html).
 
 The universal MQTT message queue adapter for `@quatrain/queue`. Supports **Eclipse Mosquitto**, **EMQX**, **HiveMQ**, **VerneMQ**, **AWS IoT Core**, and **RabbitMQ MQTT**.
 

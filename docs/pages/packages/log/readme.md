@@ -1,6 +1,6 @@
 # @quatrain/log
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/log ↗](/api-reference/modules/_quatrain_log.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/log ↗](/core/api-reference/modules/_quatrain_log.html).
 
 A centralized logging system for Quatrain applications, providing flexible log levels, adapter-based outputs, and structured logging capabilities.
 

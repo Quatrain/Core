@@ -1,6 +1,6 @@
 # @quatrain/chat
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/chat ↗](/api-reference/modules/_quatrain_chat.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/chat ↗](/core/api-reference/modules/_quatrain_chat.html).
 
 The core conversational engine for the Quatrain framework.
 

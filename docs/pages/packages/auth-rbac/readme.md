@@ -1,6 +1,6 @@
 # @quatrain/auth-rbac
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth-rbac ↗](/api-reference/modules/_quatrain_auth-rbac.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth-rbac ↗](/core/api-reference/modules/_quatrain_auth-rbac.html).
 
 > **License**: AGPL-3.0-only  
 > **Isomorphic Role-Based Access Control, Field-Level Security, M2M Agent Guards & Tarpitting for Quatrain**

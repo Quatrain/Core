@@ -1,6 +1,6 @@
 # @quatrain/api-server-express
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/api-server ↗](/api-reference/modules/_quatrain_api-server.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/api-server ↗](/core/api-reference/modules/_quatrain_api-server.html).
 
 The `@quatrain/api-server-express` package provides the backend REST layer for Quatrain, exposing the underlying DataObjects and Backend engines through HTTP endpoints.
 

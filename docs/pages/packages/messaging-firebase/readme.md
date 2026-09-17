@@ -1,6 +1,6 @@
 # @quatrain/messaging-firebase
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/messaging-firebase ↗](/api-reference/modules/_quatrain_messaging-firebase.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/messaging-firebase ↗](/core/api-reference/modules/_quatrain_messaging-firebase.html).
 
 The Firebase Cloud Messaging (FCM) adapter for `@quatrain/messaging`.
 

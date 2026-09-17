@@ -1,6 +1,6 @@
 # @quatrain/backend-firestore
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/backend-firestore ↗](/api-reference/modules/_quatrain_backend-firestore.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/backend-firestore ↗](/core/api-reference/modules/_quatrain_backend-firestore.html).
 
 A backend adapter for Google Cloud Firestore. This package allows Quatrain to use Firestore as its primary NoSQL database.
 

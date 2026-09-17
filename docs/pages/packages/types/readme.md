@@ -1,6 +1,6 @@
 # @quatrain/types
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/types ↗](/api-reference/modules/_quatrain_types.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/types ↗](/core/api-reference/modules/_quatrain_types.html).
 
 Fundamental type definitions, domain exceptions, and global reference structures (URIs) for the Quatrain Core framework.
 

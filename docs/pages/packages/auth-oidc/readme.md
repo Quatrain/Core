@@ -1,6 +1,6 @@
 # @quatrain/auth-oidc
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth-oidc ↗](/api-reference/modules/_quatrain_auth-oidc.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth-oidc ↗](/core/api-reference/modules/_quatrain_auth-oidc.html).
 
 OIDC Authentication provider for Quatrain.
 

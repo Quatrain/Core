@@ -1,6 +1,6 @@
 # @quatrain/auth
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth ↗](/api-reference/modules/_quatrain_auth.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth ↗](/core/api-reference/modules/_quatrain_auth.html).
 
 The central authentication and identity abstraction for the Quatrain ecosystem. It provides a standard way to manage users, roles, and sessions across various Identity Providers (IdP).
 

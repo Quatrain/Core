@@ -1,6 +1,6 @@
 # @quatrain/okf
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/okf ↗](/api-reference/modules/_quatrain_okf.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/okf ↗](/core/api-reference/modules/_quatrain_okf.html).
 
 Open Knowledge Format (OKF) flat file storage adapter for the Quatrain Core framework.
 

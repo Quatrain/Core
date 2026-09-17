@@ -164,12 +164,12 @@ export function aggregateMarkdownFiles(sourceDir: string): void {
             catalogMarkdown += `| :--- | :--- | :--- | :--- |\n`
             for (const entry of packageCatalog) {
                 const docsLinks: string[] = []
-                if (entry.hasOverview) docsLinks.push(`[Overview](/packages/${entry.dir}/readme)`)
-                if (entry.hasHowto) docsLinks.push(`[HOWTO](/packages/${entry.dir}/howto)`)
+                if (entry.hasOverview) docsLinks.push(`[Overview](${BASE_PATH}/packages/${entry.dir}/readme)`)
+                if (entry.hasHowto) docsLinks.push(`[HOWTO](${BASE_PATH}/packages/${entry.dir}/howto)`)
                 const docsCol = docsLinks.length > 0 ? docsLinks.join(' · ') : '—'
                 const apiCol = entry.apiRefFile ? `[API Reference ↗](${BASE_PATH}/api-reference/modules/${entry.apiRefFile})` : '—'
                 const desc = entry.description ? entry.description.replace(/\|/g, '\\|') : '—'
-                catalogMarkdown += `| [\`${entry.name}\`](/packages/${entry.dir}/readme) | ${desc} | ${docsCol} | ${apiCol} |\n`
+                catalogMarkdown += `| [\`${entry.name}\`](${BASE_PATH}/packages/${entry.dir}/readme) | ${desc} | ${docsCol} | ${apiCol} |\n`
             }
             fs.writeFileSync(path.join(baseTargetDir, 'index.md'), catalogMarkdown)
             dirMeta = {

@@ -1,6 +1,6 @@
 # @quatrain/searchengine
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/searchengine ↗](/api-reference/modules/_quatrain_searchengine.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/searchengine ↗](/core/api-reference/modules/_quatrain_searchengine.html).
 
 Base search engine abstraction, contract interfaces, and singleton registry for the Quatrain Core framework.
 

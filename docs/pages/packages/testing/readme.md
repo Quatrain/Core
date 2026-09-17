@@ -1,6 +1,6 @@
 # @quatrain/testing
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/testing ↗](/api-reference/modules/_quatrain_testing.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/testing ↗](/core/api-reference/modules/_quatrain_testing.html).
 
 Common testing utilities and fixtures for Quatrain packages.
 

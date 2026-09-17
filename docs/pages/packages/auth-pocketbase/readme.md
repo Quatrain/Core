@@ -1,6 +1,6 @@
 # @quatrain/auth-pocketbase
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth-pocketbase ↗](/api-reference/modules/_quatrain_auth-pocketbase.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth-pocketbase ↗](/core/api-reference/modules/_quatrain_auth-pocketbase.html).
 
 PocketBase Authentication adapter for Quatrain.
 

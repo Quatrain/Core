@@ -1,6 +1,6 @@
 # @quatrain/code-github
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/code-github ↗](/api-reference/modules/_quatrain_code-github.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/code-github ↗](/core/api-reference/modules/_quatrain_code-github.html).
 
 GitHub API integration for Quatrain code management.
 

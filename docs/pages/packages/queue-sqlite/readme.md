@@ -1,6 +1,6 @@
 # @quatrain/queue-sqlite
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/queue-sqlite ↗](/api-reference/modules/_quatrain_queue-sqlite.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/queue-sqlite ↗](/core/api-reference/modules/_quatrain_queue-sqlite.html).
 
 SQLite Task Queue Adapter for the `@quatrain/queue` namespace.
 

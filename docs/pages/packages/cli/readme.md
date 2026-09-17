@@ -1,6 +1,6 @@
 # @quatrain/cli
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/cli ↗](/api-reference/modules/_quatrain_cli.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/cli ↗](/core/api-reference/modules/_quatrain_cli.html).
 
 The official Command Line Interface (CLI) and script utility library for the Quatrain ecosystem. 
 

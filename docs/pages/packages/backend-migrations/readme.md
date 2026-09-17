@@ -1,6 +1,6 @@
 # @quatrain/backend-migrations
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/backend-migrations ↗](/api-reference/modules/_quatrain_backend-migrations.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/backend-migrations ↗](/core/api-reference/modules/_quatrain_backend-migrations.html).
 
 Database migration management tool for Quatrain backends.
 

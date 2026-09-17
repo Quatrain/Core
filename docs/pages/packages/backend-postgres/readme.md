@@ -1,6 +1,6 @@
 # @quatrain/backend-postgres
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/backend-postgres ↗](/api-reference/modules/_quatrain_backend-postgres.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/backend-postgres ↗](/core/api-reference/modules/_quatrain_backend-postgres.html).
 
 A backend adapter for PostgreSQL. This package is optimized for use with Supabase but works with any standard PostgreSQL database.
 

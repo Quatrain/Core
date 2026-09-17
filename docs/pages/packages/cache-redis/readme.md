@@ -1,6 +1,6 @@
 # @quatrain/cache-redis
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/cache-redis ↗](/api-reference/modules/_quatrain_cache-redis.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/cache-redis ↗](/core/api-reference/modules/_quatrain_cache-redis.html).
 
 A dedicated Redis integration package for the Quatrain ecosystem. 
 

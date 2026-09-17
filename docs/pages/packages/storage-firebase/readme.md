@@ -1,6 +1,6 @@
 # @quatrain/storage-firebase
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/storage-firebase ↗](/api-reference/modules/_quatrain_storage-firebase.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/storage-firebase ↗](/core/api-reference/modules/_quatrain_storage-firebase.html).
 
 The Firebase Storage adapter for `@quatrain/storage`. 
 

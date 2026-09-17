@@ -1,6 +1,6 @@
 # @quatrain/ai-gemini
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/ai-gemini ↗](/api-reference/modules/_quatrain_ai-gemini.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/ai-gemini ↗](/core/api-reference/modules/_quatrain_ai-gemini.html).
 
 AI adapter for Google Gemini. Integrates the Gemini API into the Quatrain AI ecosystem.
 

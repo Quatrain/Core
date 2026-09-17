@@ -1,6 +1,6 @@
 # @quatrain/cloudwrapper-firebase
 
-> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/cloudwrapper-firebase ↗](/api-reference/modules/_quatrain_cloudwrapper-firebase.html).
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/cloudwrapper-firebase ↗](/core/api-reference/modules/_quatrain_cloudwrapper-firebase.html).
 
 The Firebase ecosystem wrapper for `@quatrain/cloudwrapper`.
 

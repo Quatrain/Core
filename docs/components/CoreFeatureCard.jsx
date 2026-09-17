@@ -59,7 +59,7 @@ export function CoreFeatureCard({
       </div>
 
       <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs font-semibold text-primary-600 dark:text-sky-400">
-        <span>En savoir plus</span>
+        <span>Learn more</span>
         <svg
           className="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform duration-200"
           fill="none"

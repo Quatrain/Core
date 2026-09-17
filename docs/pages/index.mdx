@@ -5,173 +5,205 @@ import { Tabs } from 'nextra/components'
 
 ---
 
-## ⚡ Démarrage Rapide
+## 🌟 At a Glance
 
-Choisissez votre gestionnaire de paquets préféré pour intégrer Quatrain Core à votre projet :
+**Quatrain Core** is an enterprise-grade, modular TypeScript framework designed to build resilient, cloud-agnostic applications. Built around the **Adapter Pattern**, it completely decouples domain modeling and business rules from the underlying infrastructure.
 
-<Tabs items={['Bun', 'Yarn 4', 'npm', 'Tycho Knowledge']}>
+Write your domain logic once, then seamlessly swap or mix:
+* **Databases**: PostgreSQL, SQLite, Firestore, or REST backends.
+* **Authentication**: Supabase Auth, Firebase Auth, OIDC / OAuth2, PocketBase, or HTTP Basic.
+* **Storage**: AWS S3, MinIO, Local Filesystem, Google Cloud Storage, or Git.
+* **Queuing & Messaging**: RabbitMQ (AMQP), MQTT, SQLite queues, AWS SQS, or GCP Pub/Sub.
+
+Target **100% on-premise sovereign setups** or modern **Backend-as-a-Service (BaaS) cloud platforms** with the exact same codebase.
+
+---
+
+## 🎯 Core Principles
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-5 my-6">
+  <CoreFeatureCard
+    icon="🏛️"
+    layer="Principle 1"
+    badge="Pure Domain"
+    badgeLevel="optimal"
+    title="Clean Domain Abstraction"
+    description="Entities, validation rules, and business logic live in @quatrain/core with zero external dependencies. They remain fully testable in-memory."
+    href="/okf/domain-modeling"
+  />
+  <CoreFeatureCard
+    icon="🛡️"
+    layer="Principle 2"
+    badge="Sovereign"
+    badgeLevel="brand"
+    title="Zero Vendor Lock-In"
+    description="Run your stack on self-hosted bare metal (PostgreSQL + RabbitMQ + S3 storage) or managed cloud platforms with a single configuration line."
+    href="/okf/persistence-adapters"
+  />
+  <CoreFeatureCard
+    icon="⚡"
+    layer="Principle 3"
+    badge="Zero Boilerplate"
+    badgeLevel="nominal"
+    title="Active Record & Repositories"
+    description="Every entity provides dynamic, strongly-typed repositories with built-in schema validation, serialization, relationships, and aggregations."
+    href="/okf/persistence-adapters"
+  />
+  <CoreFeatureCard
+    icon="📦"
+    layer="Principle 4"
+    badge="71 Packages"
+    badgeLevel="optimal"
+    title="Fine-Grained Modularity"
+    description="A factorized monorepo of 71 independent packages. Import only what your service needs to keep production bundles light and performant."
+    href="/packages"
+  />
+</div>
+
+---
+
+## 🚀 Quick Start
+
+### 1. Install Dependencies
+
+Install the core modeling engine and the backend adapter of your choice:
+
+<Tabs items={['Yarn 4', 'npm', 'Bun', 'Tycho Knowledge']}>
   <Tabs.Tab>
     ```bash
-    # Installation du socle de domaine et de l'adaptateur PostgreSQL
-    bun add @quatrain/core @quatrain/backend-postgres
+    yarn add @quatrain/core @quatrain/backend @quatrain/backend-postgres
     ```
   </Tabs.Tab>
   <Tabs.Tab>
     ```bash
-    # Installation via Yarn 4 Berry
-    yarn add @quatrain/core @quatrain/backend-postgres
+    npm install @quatrain/core @quatrain/backend @quatrain/backend-postgres
     ```
   </Tabs.Tab>
   <Tabs.Tab>
     ```bash
-    # Installation standard via npm
-    npm install @quatrain/core @quatrain/backend-postgres
+    bun add @quatrain/core @quatrain/backend @quatrain/backend-postgres
     ```
   </Tabs.Tab>
   <Tabs.Tab>
     ```bash
-    # Annexer la base de connaissances OKF v0.1 directement dans votre agent IA
+    # Annex OKF v0.1 knowledge base directly into your AI coding agent
     tycho knowledge install quatrain/quatrain-core
     ```
   </Tabs.Tab>
 </Tabs>
 
----
+### 2. Define a Domain Model
 
-## 🏛️ Les 6 Piliers Fondamentaux
-
-Quatrain structure votre code en couches orthogonales pour garantir une maintenabilité à horizon 15 ans :
-
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 my-6">
-  <CoreFeatureCard
-    icon="🏛️"
-    layer="Couche 1 · Domaine"
-    badge="Pureté 100%"
-    badgeLevel="optimal"
-    title="Architecture Hexagonale"
-    description="Entités BaseObject pures et sérialisables. Zéro dépendance d'infrastructure dans votre logique métier."
-    href="/core/okf/domain-modeling"
-  />
-  <CoreFeatureCard
-    icon="💾"
-    layer="Couche 2 · Persistance"
-    badge="Multi-Bases"
-    badgeLevel="brand"
-    title="Persistance Polyglotte"
-    description="Repository pattern dynamique. Basculez de PostgreSQL à SQLite ou Firestore sans retoucher vos modèles."
-    href="/core/okf/persistence-adapters"
-  />
-  <CoreFeatureCard
-    icon="🔐"
-    layer="Couche 3 · Sécurité"
-    badge="Zero-Trust"
-    badgeLevel="nominal"
-    title="Auth & RBAC / FLS"
-    description="Field-Level Security (FLS) déclarative et authentification multi-fournisseurs (Supabase, Firebase, OAuth)."
-    href="/core/okf/auth-and-security"
-  />
-  <CoreFeatureCard
-    icon="📨"
-    layer="Couche 4 · Messaging"
-    badge="Non-Bloquant"
-    badgeLevel="brand"
-    title="Queues & Streaming"
-    description="Workers asynchrones résilients supportant RabbitMQ, Redis Streams et SQLite Queue."
-    href="/core/okf/queues-and-events"
-  />
-  <CoreFeatureCard
-    icon="🤖"
-    layer="Couche 5 · IA & Cognition"
-    badge="Google GenAI"
-    badgeLevel="optimal"
-    title="IA Cognitive & Gemini"
-    description="Intégration Google Gemini officielle avec génération JSON structurée garantie par des schémas stricts."
-    href="/core/okf/ai-and-agents"
-  />
-  <CoreFeatureCard
-    icon="🧠"
-    layer="Couche 6 · Knowledge"
-    badge="OKF v0.1"
-    badgeLevel="brand"
-    title="Base de Connaissances OKF"
-    description="Format ouvert pour agents de codage LLM. Navigation par divulgation progressive annexable via Tycho."
-    href="/core/okf"
-  />
-</div>
-
----
-
-## 📐 Vue d'Ensemble de l'Hexagone
-
-Les entités métiers vivent au cœur du système et ne connaissent jamais les détails de leurs adaptateurs :
-
-```mermaid
-graph TD
-    subgraph CoreDomain[" 🎯 DOMAINE MÉTIER PUR (@quatrain/core) "]
-        BaseObject["BaseObject<br/><i>Entités, Propriétés Typées, FSM</i>"]
-    end
-
-    subgraph Adapters[" 🔌 ADAPTATEURS D'INFRASTRUCTURE INTERCHANGEABLES "]
-        Backend["💾 Persistance<br/><i>Postgres, SQLite, Firestore</i>"]
-        Auth["🔐 Sécurité & RBAC<br/><i>Supabase, Firebase, OAuth</i>"]
-        Storage["📁 Stockage Fichiers<br/><i>S3, MinIO, Local FS</i>"]
-        Queue["📨 Files de Tâches<br/><i>RabbitMQ, Redis, SQLite</i>"]
-        AI["🤖 IA & Agents<br/><i>Google Gemini, Function Calling</i>"]
-        API["🌐 Passerelles API<br/><i>Isomorphic Fetch, Express, Astro</i>"]
-    end
-
-    BaseObject --> Backend
-    BaseObject --> Auth
-    BaseObject --> Storage
-    BaseObject --> Queue
-    BaseObject --> AI
-    BaseObject --> API
-```
-
----
-
-## 💻 Exemple Minimaliste en 30 Secondes
-
-Déclarez une entité purement métier, puis persistez-la sans boilerplate :
+Define entity attributes, types, and validation rules declaratively:
 
 ```typescript
-import { Core, PersistedBaseObject, StringProperty, BooleanProperty } from '@quatrain/core'
+import { PersistedBaseObject } from '@quatrain/backend'
+import { StringProperty, NumberProperty, BooleanProperty } from '@quatrain/core'
+
+export class Product extends PersistedBaseObject {
+  static COLLECTION = 'products'
+
+  static PROPS_DEFINITION = [
+    { name: 'name', type: StringProperty.TYPE, required: true },
+    { name: 'sku', type: StringProperty.TYPE, required: true },
+    { name: 'price', type: NumberProperty.TYPE, required: true },
+    { name: 'inStock', type: BooleanProperty.TYPE, default: true }
+  ]
+}
+```
+
+### 3. Connect Adapter & Persist Data
+
+Configure the backend adapter and perform operations through pre-bound repositories:
+
+```typescript
 import { Backend } from '@quatrain/backend'
 import { PostgresAdapter } from '@quatrain/backend-postgres'
+import { Product } from './models/Product'
 
-// 1. Définition de l'entité avec typage strict
-export class Project extends PersistedBaseObject {
-  static override PROPS_DEFINITION = {
-    name: { type: StringProperty.TYPE, required: true },
-    isActive: { type: BooleanProperty.TYPE, default: true }
-  }
+async function bootstrap() {
+  // 1. Initialize and register the backend adapter
+  const postgres = new PostgresAdapter({
+    config: {
+      host: process.env.PG_HOST || 'localhost',
+      port: 5432,
+      database: 'quatrain_db',
+      user: 'postgres',
+      password: process.env.PG_PASSWORD || 'secret'
+    }
+  })
+  Backend.addBackend(postgres, 'postgres', true)
+
+  // 2. Instantiate and persist through dynamic repository
+  const repo = Product.repository()
+  const item = await Product.factory({
+    name: 'prod_900',
+    sku: 'SKU-QUATRAIN-01',
+    price: 49.99,
+    inStock: true
+  })
+  await repo.create(item)
+
+  // 3. Read by UID
+  const loaded = await repo.read('prod_900')
+  console.log(`Product loaded: ${loaded?.val('sku')}`)
 }
-Core.addClass('Project', Project)
 
-// 2. Enregistrement de l'adaptateur de persistance
-Backend.addBackend(new PostgresAdapter({ connectionString: process.env.DATABASE_URL }), 'default', true)
-
-// 3. Utilisation fluide via le Repository Pattern
-const repo = Project.repository()
-const project = await repo.create({ name: 'Quatrain Community Portal' })
-console.log(`Projet créé avec ID : ${project.id}`)
+bootstrap()
 ```
 
 ---
 
-## 🚀 Prêt à Explorer ?
+## 📦 Ecosystem & Packages Map
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-5 my-6">
-  <CoreFeatureCard
-    icon="📖"
-    title="Consulter la base OKF"
-    description="Accédez aux fiches conceptuelles couvrant le Repository Pattern, le FSM, le RBAC et les queues."
-    href="/core/okf"
-  />
-  <CoreFeatureCard
-    icon="📦"
-    title="Explorer les 71 Packages"
-    description="Naviguez dans le catalogue complet des modules avec liens directs vers la documentation et l'API TypeDoc."
-    href="/core/packages"
-  />
-</div>
+The framework is organized into 7 logical architectural layers across 71 packages:
+
+| Layer | Core Package | Ecosystem Adapters & Modules |
+| :--- | :--- | :--- |
+| **Domain & Entities** | [`@quatrain/core`](/packages/core/readme) | [`@quatrain/types`](/packages/types/readme) · [`@quatrain/state-machine`](/packages/state-machine/readme) · [`@quatrain/okf`](/packages/okf/readme) |
+| **Databases & Persistence** | [`@quatrain/backend`](/packages/backend/readme) | [`backend-postgres`](/packages/backend-postgres/readme) · [`backend-sqlite`](/packages/backend-sqlite/readme) · [`backend-firestore`](/packages/backend-firestore/readme) · [`backend-restapi`](/packages/backend-restapi/readme) · [`backend-migrations`](/packages/backend-migrations/readme) |
+| **Authentication & RBAC** | [`@quatrain/auth`](/packages/auth/readme) | [`auth-rbac`](/packages/auth-rbac/readme) · [`auth-supabase`](/packages/auth-supabase/readme) · [`auth-firebase`](/packages/auth-firebase/readme) · [`auth-oidc`](/packages/auth-oidc/readme) · [`auth-pocketbase`](/packages/auth-pocketbase/readme) · [`auth-http-basic`](/packages/auth-http-basic/readme) |
+| **Object Storage** | [`@quatrain/storage`](/packages/storage/readme) | [`storage-s3`](/packages/storage-s3/readme) · [`storage-local`](/packages/storage-local/readme) · [`storage-supabase`](/packages/storage-supabase/readme) · [`storage-firebase`](/packages/storage-firebase/readme) · [`storage-git`](/packages/storage-git/readme) |
+| **Queues & Messaging** | [`@quatrain/queue`](/packages/queue/readme) | [`queue-amqp`](/packages/queue-amqp/readme) · [`queue-mqtt`](/packages/queue-mqtt/readme) · [`queue-sqlite`](/packages/queue-sqlite/readme) · [`queue-aws`](/packages/queue-aws/readme) · [`queue-gcp`](/packages/queue-gcp/readme) · [`messaging`](/packages/messaging/readme) |
+| **APIs & Gateways** | [`@quatrain/api`](/packages/api/readme) | [`api-client`](/packages/api-client/readme) · [`api-server`](/packages/api-server/readme) · [`api-server-express`](/packages/api-server-express/readme) · [`api-server-astro`](/packages/api-server-astro/readme) · [`api-xmlrpc`](/packages/api-xmlrpc/readme) |
+| **AI, Chat & Cognitive** | [`@quatrain/ai`](/packages/ai/readme) | [`ai-gemini`](/packages/ai-gemini/readme) · [`chat`](/packages/chat/readme) · [`skills`](/packages/skills/readme) |
+| **Platform & Tooling** | [`@quatrain/cli`](/packages/cli/readme) | [`cache`](/packages/cache/readme) · [`cache-redis`](/packages/cache-redis/readme) · [`log`](/packages/log/readme) · [`i18n`](/packages/i18n/readme) · [`mdm`](/packages/mdm/readme) · [`testing`](/packages/testing/readme) |
+
+👉 **[Explore Full Interactive Packages Catalog](/packages)**
+
+---
+
+## 🧠 Open Knowledge Base (OKF v0.1) & Tycho Integration
+
+Quatrain Core embeds an official knowledge base formatted according to the **Open Knowledge Format (OKF v0.1)** under [`okf/`](/okf).
+
+Designed specifically for **AI pair-programming agents** (Gemini, Claude, Antigravity, Cursor) and human engineers, it provides authoritative, hallucination-free guidance across core architectural areas:
+* 🏛️ **Domain Modeling**: [okf/domain-modeling](/okf/domain-modeling) (Schemas, `.TYPE`, FSM workflows)
+* 💾 **Persistence**: [okf/persistence-adapters](/okf/persistence-adapters) (Repositories, PostgreSQL, SQLite, Migrations)
+* 🔐 **Auth & Security**: [okf/auth-and-security](/okf/auth-and-security) (SSO, Supabase, RBAC, Field-Level Security)
+* 🗄️ **Object Storage**: [okf/storage-and-assets](/okf/storage-and-assets) (Unified S3/MinIO & Local FS storage)
+* 📬 **Queues & Streaming**: [okf/queues-and-events](/okf/queues-and-events) (RabbitMQ/AMQP, background workers)
+* 🌐 **API Gateways**: [okf/api-and-gateways](/okf/api-and-gateways) (Isomorphic fetch client, CrudEndpoint)
+* 🤖 **AI Agents**: [okf/ai-and-agents](/okf/ai-and-agents) (Gemini models, schema-guaranteed JSON generation)
+
+### Annexing via Tycho CLI (`tycho knowledge`)
+
+```bash
+# 1. Register the Quatrain Core repository in Tycho
+tycho repo add quatrain Quatrain/Core
+
+# 2. Install the knowledge package
+tycho knowledge install quatrain/quatrain-core
+
+# 3. Check active knowledge packages
+tycho knowledge list
+```
+
+---
+
+## 🧰 Companion Projects
+
+* **[Quatrain CoreApps](https://github.com/Quatrain/CoreApps)**: Pre-packaged Docker / Podman containers, including:
+  * `api-gateway`: High-performance reverse proxy and routing gateway.
+  * `studio-image`: Web modeling studio for entity scaffolding.
+* **[Quatrain CoreUX](https://github.com/Quatrain/CoreUX)**: Mantine-based UI design tokens, components, high-contrast mobile interfaces, and voice adapters.

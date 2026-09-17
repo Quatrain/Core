@@ -34,11 +34,15 @@ export function CoreHero() {
         </h1>
 
         <p className="text-xl sm:text-2xl font-semibold text-slate-800 dark:text-slate-200 font-heading">
-          Business logic outlasts infrastructure.
+          A Modular, Sovereign & Universal TypeScript Backend Framework
+        </p>
+
+        <p className="text-base sm:text-lg italic text-slate-500 dark:text-slate-400 font-medium">
+          "Business Logic outlives Infrastructure"
         </p>
 
         <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-3xl leading-relaxed">
-          Le framework TypeScript fondé sur l'architecture hexagonale où les entités métier sont <strong>100% pures et pérennes</strong>. Découplez votre logique de domaine de vos bases de données, mécanismes d'authentification, bus de messages et modèles d'IA.
+          An enterprise-grade, modular TypeScript framework designed to build resilient, cloud-agnostic applications. Built around the Adapter Pattern, it completely decouples domain modeling and business rules from the underlying infrastructure.
         </p>
 
         {/* Action Buttons */}
@@ -47,7 +51,7 @@ export function CoreHero() {
             href="/core/okf"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 shadow-lg shadow-sky-500/25 hover:shadow-sky-500/35 transition-all duration-200"
           >
-            <span>🏛️ Explorer l'Architecture (OKF)</span>
+            <span>📖 Explore OKF Knowledge Base</span>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
@@ -57,7 +61,7 @@ export function CoreHero() {
             href="/core/packages"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm text-slate-800 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/90 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition-all duration-200"
           >
-            <span>📦 Catalogue des 71 Packages</span>
+            <span>📦 Browse 71 Packages</span>
           </Link>
 
           <a
@@ -77,31 +81,31 @@ export function CoreHero() {
               71
             </div>
             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5">
-              Packages Modulaires
+              Modular Packages
             </div>
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-black font-heading text-sky-600 dark:text-sky-400">
-              7 Couches
+              7
             </div>
             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5">
-              Architecture Hexagonale
+              Architectural Layers
             </div>
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-black font-heading text-indigo-600 dark:text-indigo-400">
-              0 ms
+              100%
             </div>
             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5">
-              Latence Local-First
+              Sovereign & Portable
             </div>
           </div>
           <div>
             <div className="text-2xl sm:text-3xl font-black font-heading text-emerald-600 dark:text-emerald-400">
-              15 Ans
+              AGPL-3.0
             </div>
             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5">
-              Horizon de Pérennité
+              Open Source
             </div>
           </div>
         </div>

@@ -2986,7 +2986,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/api@workspace:*, @quatrain/api@workspace:packages/api":
+"@quatrain/api@npm:^1.1.8, @quatrain/api@workspace:*, @quatrain/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@quatrain/api@workspace:packages/api"
   dependencies:
@@ -3034,7 +3034,7 @@ __metadata:
   resolution: "@quatrain/auth-firebase@workspace:packages/auth-firebase"
   dependencies:
     "@quatrain/api": "workspace:*"
-    "@quatrain/auth": "npm:^1.2.12"
+    "@quatrain/auth": "npm:^1.2.13"
     "@quatrain/backend": "npm:^1.2.20"
     "@quatrain/core": "npm:^1.2.18"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -3058,7 +3058,7 @@ __metadata:
   resolution: "@quatrain/auth-github@workspace:packages/auth-github"
   dependencies:
     "@quatrain/api": "workspace:*"
-    "@quatrain/auth": "npm:^1.2.12"
+    "@quatrain/auth": "npm:^1.2.13"
     "@quatrain/backend": "npm:^1.2.20"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/node": "npm:^22.10.1"
@@ -3128,7 +3128,7 @@ __metadata:
   resolution: "@quatrain/auth-supabase@workspace:packages/auth-supabase"
   dependencies:
     "@quatrain/api": "workspace:*"
-    "@quatrain/auth": "npm:^1.2.12"
+    "@quatrain/auth": "npm:^1.2.13"
     "@quatrain/backend": "npm:^1.2.20"
     "@supabase/supabase-js": "npm:^2.108.2"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -3144,7 +3144,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/auth@npm:^1.2.12, @quatrain/auth@workspace:*, @quatrain/auth@workspace:packages/auth":
+"@quatrain/auth@npm:^1.2.13":
+  version: 1.2.13
+  resolution: "@quatrain/auth@npm:1.2.13"
+  dependencies:
+    "@quatrain/api": "npm:^1.1.8"
+    "@quatrain/backend": "npm:^1.2.20"
+    "@quatrain/core": "npm:^1.2.18"
+    "@quatrain/http": "npm:^1.0.5"
+  checksum: 10c0/c715655a8f8aa29c85fa24548d374e1b7f7dceeee30dc4855d061f39370db2172ea2b0958d4669adf89375d5066f1cdd7407855eaca0d709ed8b5d48e55f1518
+  languageName: node
+  linkType: hard
+
+"@quatrain/auth@workspace:*, @quatrain/auth@workspace:packages/auth":
   version: 0.0.0-use.local
   resolution: "@quatrain/auth@workspace:packages/auth"
   dependencies:
@@ -3523,7 +3535,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/http@workspace:*, @quatrain/http@workspace:packages/http":
+"@quatrain/http@npm:^1.0.5, @quatrain/http@workspace:*, @quatrain/http@workspace:packages/http":
   version: 0.0.0-use.local
   resolution: "@quatrain/http@workspace:packages/http"
   dependencies:

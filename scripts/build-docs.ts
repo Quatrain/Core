@@ -23,10 +23,28 @@ function formatTitle(name: string): string {
     return name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 }
 
+interface NextraMetaLink {
+    title: string
+    href: string
+    newWindow?: boolean
+}
+
+type NextraMetaItem = string | NextraMetaLink
+type NextraMetaRecord = Record<string, NextraMetaItem>
+
+interface PackageCatalogItem {
+    dir: string
+    name: string
+    description: string
+    hasOverview: boolean
+    hasHowto: boolean
+    apiRefFile: string | null
+}
+
 /**
  * Copies documentation files from source to destination
  */
-function aggregateMarkdownFiles(sourceDir: string): void {
+export function aggregateMarkdownFiles(sourceDir: string): void {
     const fullSourcePath: string = path.join(ROOT_DIR, sourceDir)
     console.info(`[INFO] Scanning ${sourceDir} for Markdown files...`)
     
@@ -37,8 +55,9 @@ function aggregateMarkdownFiles(sourceDir: string): void {
 
     try {
         const items = fs.readdirSync(fullSourcePath)
-        const dirMeta: Record<string, string> = {}
+        let dirMeta: NextraMetaRecord = {}
         const baseTargetDir = path.join(DOCS_DIR, sourceDir)
+        const packageCatalog: PackageCatalogItem[] = []
         
         if (!fs.existsSync(baseTargetDir)) {
             fs.mkdirSync(baseTargetDir, { recursive: true })
@@ -48,25 +67,113 @@ function aggregateMarkdownFiles(sourceDir: string): void {
             const itemPath = path.join(fullSourcePath, item)
             if (fs.statSync(itemPath).isDirectory()) {
                 let hasDocs = false
-                const itemMeta: Record<string, string> = {}
+                let hasReadme = false
+                let hasHowto = false
+                const itemMeta: NextraMetaRecord = {}
+
+                // Check package.json details
+                let pkgName = `@quatrain/${item}`
+                let pkgDescription = ''
+                const pkgJsonPath = path.join(itemPath, 'package.json')
+                if (fs.existsSync(pkgJsonPath)) {
+                    try {
+                        const parsedPkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8')) as { name?: string; description?: string }
+                        if (parsedPkg.name) pkgName = parsedPkg.name
+                        if (parsedPkg.description) pkgDescription = parsedPkg.description
+                    } catch {
+                        // Keep fallback name and empty description
+                    }
+                }
+
+                // Check if TypeDoc module will be/is generated
+                const hasSrc = fs.existsSync(path.join(itemPath, 'src', 'index.ts'))
+                const apiRefModuleFile = `_quatrain_${item}.html`
+                const hasApiRef = hasSrc || fs.existsSync(path.join(API_REF_DIR, 'modules', apiRefModuleFile))
+
+                const targetDir = path.join(baseTargetDir, item)
 
                 for (const targetFile of TARGET_FILES) {
                     const filePath = path.join(itemPath, targetFile)
                     if (fs.existsSync(filePath)) {
                         hasDocs = true
-                        const targetDir = path.join(baseTargetDir, item)
                         if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true })
                         
                         const destFileName = targetFile.toLowerCase()
-                        fs.copyFileSync(filePath, path.join(targetDir, destFileName))
+                        let fileContent = fs.readFileSync(filePath, 'utf8')
+
+                        if (targetFile === 'README.md') {
+                            hasReadme = true
+                            if (hasApiRef) {
+                                const callout = `\n> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for ${pkgName} ↗](/api-reference/modules/${apiRefModuleFile}).\n`
+                                const titleMatch = fileContent.match(/^(#[^\n]+\n)/)
+                                if (titleMatch) {
+                                    fileContent = fileContent.replace(titleMatch[1], `${titleMatch[1]}${callout}`)
+                                } else {
+                                    fileContent = `${callout}\n${fileContent}`
+                                }
+                            }
+                        } else if (targetFile === 'HOWTO.md') {
+                            hasHowto = true
+                        }
+
+                        fs.writeFileSync(path.join(targetDir, destFileName), fileContent)
                         itemMeta[destFileName.replace('.md', '')] = targetFile === 'README.md' ? 'Overview' : targetFile.replace('.md', '')
                     }
                 }
 
-                if (hasDocs) {
-                    fs.writeFileSync(path.join(baseTargetDir, item, '_meta.js'), `export default ${JSON.stringify(itemMeta, null, 2)}`)
-                    dirMeta[item] = formatTitle(item)
+                if (!hasReadme && hasApiRef) {
+                    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true })
+                    const defaultReadme = `# ${pkgName}\n\n> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for ${pkgName} ↗](/api-reference/modules/${apiRefModuleFile}).\n\n${pkgDescription || 'Part of the Quatrain Core framework.'}\n`
+                    fs.writeFileSync(path.join(targetDir, 'readme.md'), defaultReadme)
+                    itemMeta['readme'] = 'Overview'
+                    hasReadme = true
+                    hasDocs = true
                 }
+
+                if (hasApiRef) {
+                    itemMeta['api'] = {
+                        title: 'API Reference ↗',
+                        href: `/api-reference/modules/${apiRefModuleFile}`,
+                        newWindow: true
+                    }
+                }
+
+                if (hasDocs || hasApiRef) {
+                    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true })
+                    fs.writeFileSync(path.join(targetDir, '_meta.js'), `export default ${JSON.stringify(itemMeta, null, 2)}`)
+                    dirMeta[item] = formatTitle(item)
+                    packageCatalog.push({
+                        dir: item,
+                        name: pkgName,
+                        description: pkgDescription,
+                        hasOverview: hasReadme,
+                        hasHowto: hasHowto,
+                        apiRefFile: hasApiRef ? apiRefModuleFile : null
+                    })
+                }
+            }
+        }
+
+        if (sourceDir === 'packages' && packageCatalog.length > 0) {
+            packageCatalog.sort((a, b) => a.name.localeCompare(b.name))
+            let catalogMarkdown = `# Quatrain Core Packages\n\n`
+            catalogMarkdown += `Welcome to the Quatrain Core package catalog. Quatrain is built as a modular suite of decoupled packages covering domain modeling, database adapters, authentication providers, object storage, queuing, AI, and developer tooling.\n\n`
+            catalogMarkdown += `## Package Catalog\n\n`
+            catalogMarkdown += `| Package | Description | Guides | API Reference |\n`
+            catalogMarkdown += `| :--- | :--- | :--- | :--- |\n`
+            for (const entry of packageCatalog) {
+                const docsLinks: string[] = []
+                if (entry.hasOverview) docsLinks.push(`[Overview](/packages/${entry.dir}/readme)`)
+                if (entry.hasHowto) docsLinks.push(`[HOWTO](/packages/${entry.dir}/howto)`)
+                const docsCol = docsLinks.length > 0 ? docsLinks.join(' · ') : '—'
+                const apiCol = entry.apiRefFile ? `[API Reference ↗](/api-reference/modules/${entry.apiRefFile})` : '—'
+                const desc = entry.description ? entry.description.replace(/\|/g, '\\|') : '—'
+                catalogMarkdown += `| [\`${entry.name}\`](/packages/${entry.dir}/readme) | ${desc} | ${docsCol} | ${apiCol} |\n`
+            }
+            fs.writeFileSync(path.join(baseTargetDir, 'index.md'), catalogMarkdown)
+            dirMeta = {
+                index: 'Overview & Catalog',
+                ...dirMeta
             }
         }
 
@@ -81,7 +188,7 @@ function aggregateMarkdownFiles(sourceDir: string): void {
 /**
  * Generates API documentation using TypeDoc.
  */
-function generateApiReference(): void {
+export function generateApiReference(): void {
     console.info('[INFO] Generating API Reference with TypeDoc...')
     
     if (fs.existsSync(API_REF_DIR)) fs.rmSync(API_REF_DIR, { recursive: true, force: true })
@@ -141,6 +248,29 @@ function generateApiReference(): void {
                     const pkgData = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'))
                     pkgData.main = 'src/index.ts'
                     pkgData.types = 'src/index.ts'
+                    if (pkgData.module) pkgData.module = 'src/index.ts'
+                    if (pkgData.exports) {
+                        if (typeof pkgData.exports === 'string') {
+                            pkgData.exports = {
+                                types: './src/index.ts',
+                                default: './src/index.ts'
+                            }
+                        } else if (pkgData.exports['.']) {
+                            if (typeof pkgData.exports['.'] === 'string') {
+                                pkgData.exports['.'] = {
+                                    types: './src/index.ts',
+                                    default: './src/index.ts'
+                                }
+                            } else {
+                                pkgData.exports['.'] = {
+                                    types: './src/index.ts',
+                                    import: './src/index.ts',
+                                    require: './src/index.ts',
+                                    default: './src/index.ts'
+                                }
+                            }
+                        }
+                    }
                     fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgData, null, 2))
                 }
             }
@@ -205,4 +335,6 @@ function main(): void {
     console.info(`--- Documentation Build Finished in ${((Date.now() - start) / 1000).toFixed(2)}s ---`)
 }
 
-main()
+if (require.main === module) {
+    main()
+}

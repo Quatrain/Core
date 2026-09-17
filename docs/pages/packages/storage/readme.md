@@ -1,5 +1,7 @@
 # @quatrain/storage
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/storage ↗](/api-reference/modules/_quatrain_storage.html).
+
 The unified file and blob storage abstraction for the Quatrain ecosystem. This package provides a consistent API for uploading, downloading, and managing files across different storage providers (S3, Firebase, Supabase).
 
 ## Introduction

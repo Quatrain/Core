@@ -1,5 +1,7 @@
 # @quatrain/messaging
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/messaging ↗](/api-reference/modules/_quatrain_messaging.html).
+
 The unified messaging and notification abstraction for the Quatrain framework. This package provides an interface for sending transactional emails, SMS, push notifications, and in-app messages.
 
 ## Introduction

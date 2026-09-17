@@ -1,5 +1,7 @@
 # @quatrain/ai
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/ai ↗](/api-reference/modules/_quatrain_ai.html).
+
 AI adapters commons. Provides an abstraction layer for various Artificial Intelligence providers.
 
 ## Purpose

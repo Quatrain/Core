@@ -1,5 +1,7 @@
 # @quatrain/cloudwrapper-supabase
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/cloudwrapper-supabase ↗](/api-reference/modules/_quatrain_cloudwrapper-supabase.html).
+
 The Supabase ecosystem wrapper for `@quatrain/cloudwrapper`.
 
 ## Introduction

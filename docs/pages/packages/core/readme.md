@@ -1,5 +1,7 @@
 # @quatrain/core
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/core ↗](/api-reference/modules/_quatrain_core.html).
+
 The foundation of the Quatrain framework. This package provides the base components for building business objects and defining data models. It works entirely in-memory and has no persistence dependencies.
 
 ## Features

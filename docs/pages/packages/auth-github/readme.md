@@ -1,5 +1,7 @@
 # @quatrain/auth-github
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth-github ↗](/api-reference/modules/_quatrain_auth-github.html).
+
 Authentication adapter and pluggable endpoints for GitHub OAuth 2.0 Web Application Flow.
 
 ## Installation

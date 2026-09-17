@@ -1,5 +1,7 @@
 # @quatrain/storage-supabase
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/storage-supabase ↗](/api-reference/modules/_quatrain_storage-supabase.html).
+
 The Supabase Storage adapter for `@quatrain/storage`.
 
 ## Introduction

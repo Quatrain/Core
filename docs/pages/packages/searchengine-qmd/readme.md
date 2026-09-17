@@ -1,5 +1,7 @@
 # @quatrain/searchengine-qmd
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/searchengine-qmd ↗](/api-reference/modules/_quatrain_searchengine-qmd.html).
+
 QMD (Query Markup Documents) search engine provider adapter for the `@quatrain/searchengine` namespace.
 
 ## Overview

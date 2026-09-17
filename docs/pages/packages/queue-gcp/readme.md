@@ -1,5 +1,7 @@
 # @quatrain/queue-gcp
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/queue-gcp ↗](/api-reference/modules/_quatrain_queue-gcp.html).
+
 The Google Cloud Pub/Sub adapter for `@quatrain/queue`.
 
 ## Introduction

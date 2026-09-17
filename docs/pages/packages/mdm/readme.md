@@ -1,5 +1,7 @@
 # `@quatrain/mdm` — Agnostic Master Data Management (MDM) Core Package
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/mdm ↗](/api-reference/modules/_quatrain_mdm.html).
+
 The `@quatrain/mdm` package provides an abstract, domain-agnostic Master Data Management (MDM) architecture for physical assets, garments, audio/video media, virtual products (*digital access keychains, credentials*), managed services, and composite objects.
 
 ---

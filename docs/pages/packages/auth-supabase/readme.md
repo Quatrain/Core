@@ -1,5 +1,7 @@
 # @quatrain/auth-supabase
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/auth-supabase ↗](/api-reference/modules/_quatrain_auth-supabase.html).
+
 The Supabase Authentication adapter for `@quatrain/auth`.
 
 ## Introduction

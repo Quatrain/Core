@@ -1,5 +1,7 @@
 # @quatrain/backend
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/backend ↗](/api-reference/modules/_quatrain_backend.html).
+
 This package provides the database abstraction layer for Quatrain Core. It adds persistence capabilities to the in-memory objects from `@quatrain/core`.
 
 ## Features

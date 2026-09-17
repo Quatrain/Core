@@ -1,5 +1,7 @@
 # @quatrain/http
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/http ↗](/api-reference/modules/_quatrain_http.html).
+
 A lightweight utility package containing standard HTTP enums and utility helpers for HTTP request/response handling.
 
 ## Features

@@ -1,5 +1,7 @@
 # @quatrain/worker
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/worker ↗](/api-reference/modules/_quatrain_worker.html).
+
 A comprehensive toolkit for building and managing backend processing workers within the Quatrain ecosystem. It provides robust utilities for executing child processes, interacting with file systems, pushing remote events, and standardizing message handler execution.
 
 ## Introduction

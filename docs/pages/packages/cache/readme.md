@@ -1,5 +1,7 @@
 # @quatrain/cache
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/cache ↗](/api-reference/modules/_quatrain_cache.html).
+
 Base package defining generic caching interfaces and middlewares for the Quatrain ecosystem.
 
 ## Overview

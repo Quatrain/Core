@@ -1,5 +1,7 @@
 # @quatrain/state-machine
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/state-machine ↗](/api-reference/modules/_quatrain_state-machine.html).
+
 Generic strongly-typed Finite State Machine with anonymous guards and actions.
 
 ## Overview

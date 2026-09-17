@@ -1,5 +1,7 @@
 # @quatrain/queue-aws
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/queue-aws ↗](/api-reference/modules/_quatrain_queue-aws.html).
+
 The AWS SQS (Simple Queue Service) adapter for `@quatrain/queue`.
 
 ## Introduction

@@ -1,5 +1,7 @@
 # @quatrain/api-xmlrpc
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/api-xmlrpc ↗](/api-reference/modules/_quatrain_api-xmlrpc.html).
+
 An XML-RPC client package designed for the Quatrain Core framework. It provides a simple, Promise-based wrapper around the XML-RPC protocol.
 
 ## Features

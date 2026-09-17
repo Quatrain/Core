@@ -1,5 +1,7 @@
 # @quatrain/cloudwrapper
 
+> 📦 **API Reference**: Detailed TypeScript documentation, classes, interfaces, and methods are available in the [TypeDoc API Reference for @quatrain/cloudwrapper ↗](/api-reference/modules/_quatrain_cloudwrapper.html).
+
 A comprehensive wrapper for cloud provider SDKs within the Quatrain framework.
 
 ## Introduction

@@ -198,7 +198,7 @@ export class RestBackendAdapter extends AbstractBackendAdapter {
       const items = Array.isArray(response.data) ? response.data : [response.data]
       
       return {
-         items: items.map(item => {
+         items: items.map((item: Record<string, any>) => {
             const instance = Reflect.construct(dataObject.constructor, [])
             instance.populate(item)
             return instance

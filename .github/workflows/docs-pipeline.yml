@@ -9,6 +9,7 @@ on:
     paths:
       - 'docs/**'
       - 'scripts/build-docs.ts'
+      - 'okf/**'
   pull_request:
     branches:
       - main
@@ -16,6 +17,7 @@ on:
     paths:
       - 'docs/**'
       - 'scripts/build-docs.ts'
+      - 'okf/**'
   schedule:
     - cron: '0 3 * * *' # Tous les jours à 03:00 UTC
 

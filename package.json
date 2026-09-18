@@ -28,7 +28,8 @@
   },
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "packageManager": "yarn@4.5.3",
   "dependencies": {

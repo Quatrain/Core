@@ -22,6 +22,9 @@ export class UnauthorizedError extends ResourceError {}
 /** Indicates an authenticated action denied by privileges (e.g., HTTP 403). */
 export class ForbiddenError extends ResourceError {}
 
+/** Indicates an access violation evaluated and rejected by RBAC policies. */
+export class AuthorizationError extends ForbiddenError {}
+
 /** Indicates a non-existent database or file resource lookup (e.g., HTTP 404). */
 export class NotFoundError extends ResourceError {}
 

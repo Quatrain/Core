@@ -6,11 +6,13 @@ export {
    BadRequestError,
    UnauthorizedError,
    ForbiddenError,
+   AuthorizationError,
    NotFoundError,
    GoneError,
    ValidationError,
    BackendError,
 } from './exceptions'
+export * from './rbac'
 
 /**
  * Standard properties shared by all persisted base objects.

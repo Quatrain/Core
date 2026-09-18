@@ -3,6 +3,7 @@ import {
    BadRequestError,
    UnauthorizedError,
    ForbiddenError,
+   AuthorizationError,
    NotFoundError,
    GoneError,
    ValidationError
@@ -27,6 +28,11 @@ describe('Custom Resource Exceptions', () => {
 
       const forbidden = new ForbiddenError('Forbidden')
       expect(forbidden.name).toBe('ForbiddenError')
+
+      const authZ = new AuthorizationError('Access denied by RBAC')
+      expect(authZ.name).toBe('AuthorizationError')
+      expect(authZ).toBeInstanceOf(ForbiddenError)
+      expect(authZ).toBeInstanceOf(ResourceError)
 
       const notFound = new NotFoundError('Not Found')
       expect(notFound.name).toBe('NotFoundError')

@@ -1,0 +1,23 @@
+{
+  "name": "@quatrain/example-contact-hub",
+  "version": "1.0.0",
+  "description": "Quatrain Sovereign Contact & Task Hub Reference Example",
+  "license": "AGPL-3.0-only",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@quatrain/backend": "workspace:*",
+    "@quatrain/core": "workspace:*",
+    "@quatrain/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.2.2"
+  }
+}

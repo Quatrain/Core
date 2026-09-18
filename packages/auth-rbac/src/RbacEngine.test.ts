@@ -186,5 +186,78 @@ describe('RbacEngine & Pattern Matching', () => {
          expect(check.valid).toBe(true)
          expect(check.rejectedScopes).toEqual([])
       })
+
+      it('allows antimatch scopes without privilege escalation', async () => {
+         const requestedScopes = ['read:medias/*', '!read:medias/confidential/*']
+         const check = await rbac.isSubsetOf(adminSubject, requestedScopes)
+
+         expect(check.valid).toBe(true)
+         expect(check.rejectedScopes).toEqual([])
+      })
+   })
+
+   describe('Antimatch (!) and Explicit Deny Rules', () => {
+      const rbac = new RbacEngine()
+
+      // Define role with broad access but explicit antimatch exclusions
+      rbac.registerRole({
+         name: 'restricted-editor',
+         rules: [
+            {
+               effect: 'deny',
+               action: 'delete',
+               resource: 'medias/protected/*',
+            },
+            {
+               effect: 'deny',
+               action: '*',
+               resource: 'system/*',
+            },
+            {
+               action: ['read', 'create', 'update', 'delete'],
+               resource: 'medias/*',
+            },
+         ],
+      })
+
+      const editorSubject: RbacSubject = {
+         uid: 'editor-1',
+         role: 'restricted-editor',
+      }
+
+      it('allows actions on unblocked resources', async () => {
+         expect(await rbac.can(editorSubject, 'read', 'medias/photo.jpg')).toBe(true)
+         expect(await rbac.can(editorSubject, 'delete', 'medias/photo.jpg')).toBe(true)
+      })
+
+      it('blocks actions matched by explicit deny rules', async () => {
+         const evalResult = await rbac.evaluate(editorSubject, 'delete', 'medias/protected/contract.pdf')
+         expect(evalResult.allowed).toBe(false)
+         expect(evalResult.reason).toContain('Explicitly denied by antimatch rule')
+
+         expect(await rbac.can(editorSubject, 'delete', 'medias/protected/contract.pdf')).toBe(false)
+         expect(await rbac.can(editorSubject, 'read', 'medias/protected/contract.pdf')).toBe(true)
+      })
+
+      it('blocks all actions matched by wildcard deny rules', async () => {
+         expect(await rbac.can(editorSubject, 'read', 'system/config')).toBe(false)
+         expect(await rbac.can(editorSubject, 'create', 'system/users')).toBe(false)
+      })
+
+      it('respects antimatch scopes (!) on tokens overriding role permissions', async () => {
+         const tokenWithExclusions: RbacSubject = {
+            uid: 'token-anti-1',
+            role: 'visitor',
+            scopes: [
+               'read:medias/*',
+               '!read:medias/internal/*',
+               '!delete:*',
+            ],
+         }
+
+         expect(await rbac.can(tokenWithExclusions, 'read', 'medias/public.jpg')).toBe(true)
+         expect(await rbac.can(tokenWithExclusions, 'read', 'medias/internal/secret.jpg')).toBe(false)
+         expect(await rbac.can(tokenWithExclusions, 'delete', 'medias/public.jpg')).toBe(false)
+      })
    })
 })

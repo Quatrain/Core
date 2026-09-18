@@ -63,6 +63,29 @@ if (!valid) {
 
 ---
 
+## 3. Explicit Deny & Antimatch Rules (`!`)
+
+To carve out exceptions from a broader allowance (or explicitly forbid actions regardless of role inheritance), prefix the scope with `!` or set `effect: 'deny'`:
+
+```typescript
+// On a consumer application or token:
+const tokenSubject = {
+   uid: 'token_worker',
+   role: 'admin',
+   scopes: [
+      'read:medias/*',
+      '!read:medias/confidential/*', // Explicitly forbid confidential media
+      '!delete:*',                   // Prohibit any delete operation
+   ],
+}
+
+await rbac.can(tokenSubject, 'read', 'medias/photo.jpg')              // true
+await rbac.can(tokenSubject, 'read', 'medias/confidential/salary.pdf') // false (DENIED by antimatch)
+await rbac.can(tokenSubject, 'delete', 'medias/photo.jpg')             // false (DENIED by antimatch)
+```
+
+---
+
 ## 3. Resolving HTTP Requests into Semantic Actions
 
 ```typescript

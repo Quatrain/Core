@@ -138,16 +138,27 @@ export class RbacEngine {
    }
 
    /**
-    * Parses explicit scope strings such as "read:medias/*" or "create:jobs" into a PermissionRule.
+    * Parses explicit scope strings such as "read:medias/*", "!delete:medias/*", or "!*:system/*"
+    * into a PermissionRule.
+    * A leading '!' denotes an antimatch (explicit DENY) rule that overrides broader allowances.
     */
    public parseScope(scopeStr: string): PermissionRule | null {
-      const parts = scopeStr.split(':')
+      let trimmed = scopeStr.trim()
+      let effect: 'allow' | 'deny' = 'allow'
+
+      if (trimmed.startsWith('!')) {
+         effect = 'deny'
+         trimmed = trimmed.substring(1).trim()
+      }
+
+      const parts = trimmed.split(':')
       if (parts.length < 2) return null
 
       const action = parts[0].trim() as SemanticAction
       const resource = parts.slice(1).join(':').trim()
 
       return {
+         effect,
          action,
          resource,
       }
@@ -191,8 +202,50 @@ export class RbacEngine {
 
       const allRules = [...roleRules, ...directScopeRules]
 
-      // 4. Iterate over rules and check for matches
-      for (const rule of allRules) {
+      // 4. First Pass: Evaluate any explicit DENY (antimatch) rules.
+      // Deny rules strictly override any broader allowances.
+      const denyRules = allRules.filter(r => r.effect === 'deny')
+      for (const rule of denyRules) {
+         if (matchAction(rule.action, action) && matchPattern(rule.resource, resource)) {
+            if (rule.condition) {
+               try {
+                  const conditionResult = await rule.condition(subject, context)
+                  if (typeof conditionResult === 'boolean' && conditionResult) {
+                     return {
+                        allowed: false,
+                        reason: `Explicitly denied by antimatch rule on ${rule.resource}`,
+                        matchedRule: rule,
+                     }
+                  } else if (Array.isArray(conditionResult)) {
+                     const target = (context as any)?.target || (context as any)?.targetCompany || (context as any)?.company
+                     if (target && conditionResult.includes(target)) {
+                        return {
+                           allowed: false,
+                           reason: `Explicitly denied by antimatch scope list on ${rule.resource}`,
+                           matchedRule: rule,
+                        }
+                     }
+                  }
+               } catch (err) {
+                  return {
+                     allowed: false,
+                     reason: `Antimatch condition execution threw error: ${(err as Error).message}`,
+                     matchedRule: rule,
+                  }
+               }
+            } else {
+               return {
+                  allowed: false,
+                  reason: `Explicitly denied by antimatch rule on ${rule.resource}`,
+                  matchedRule: rule,
+               }
+            }
+         }
+      }
+
+      // 5. Second Pass: Evaluate ALLOW rules
+      const allowRules = allRules.filter(r => r.effect !== 'deny')
+      for (const rule of allowRules) {
          if (matchAction(rule.action, action) && matchPattern(rule.resource, resource)) {
             // Check dynamic condition / scope resolver if present (ABAC)
             if (rule.condition) {
@@ -209,7 +262,6 @@ export class RbacEngine {
                      }
                   } else if (Array.isArray(conditionResult)) {
                      // Array of allowed identifiers (e.g., company paths)
-                     // If context provides targetId or targetCompany, check inclusion
                      const target = (context as any)?.target || (context as any)?.targetCompany || (context as any)?.company
                      if (target && conditionResult.includes(target)) {
                         return {
@@ -294,6 +346,11 @@ export class RbacEngine {
          const parsed = this.parseScope(scopeStr)
          if (!parsed) {
             rejectedScopes.push(scopeStr)
+            continue
+         }
+
+         // Explicit DENY (antimatch) scopes reduce privileges, they never escalate privileges.
+         if (parsed.effect === 'deny') {
             continue
          }
 

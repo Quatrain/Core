@@ -47,7 +47,11 @@ export interface PermissionRule<
    TSubject extends RbacSubject = RbacSubject,
    TContext = any,
 > {
-   /** Semantic action or actions permitted by this rule. */
+   /**
+    * Effect of the rule: 'allow' (default) or 'deny' (antimatch to explicitly prohibit).
+    */
+   effect?: 'allow' | 'deny'
+   /** Semantic action or actions covered by this rule. */
    action: SemanticAction | SemanticAction[]
    /** Target resource identifier, pattern, or path (supports '*' wildcards and ':param' segments). */
    resource: string

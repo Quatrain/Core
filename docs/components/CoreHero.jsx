@@ -48,7 +48,7 @@ export function CoreHero() {
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-3.5 pt-3">
           <Link
-            href="/core/okf"
+            href="/okf"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 shadow-lg shadow-sky-500/25 hover:shadow-sky-500/35 transition-all duration-200"
           >
             <span>📖 Explore OKF Knowledge Base</span>
@@ -58,7 +58,7 @@ export function CoreHero() {
           </Link>
 
           <Link
-            href="/core/packages"
+            href="/packages"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm text-slate-800 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/90 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition-all duration-200"
           >
             <span>📦 Browse 71 Packages</span>

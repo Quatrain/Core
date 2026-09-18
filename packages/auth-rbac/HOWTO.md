@@ -6,19 +6,19 @@ In this step-by-step tutorial, you will learn how to design a complete, producti
 
 ```mermaid
 flowchart LR
-    subgraph "1. Authentification (@quatrain/auth)"
+    subgraph "1. Authentication (@quatrain/auth)"
         OAuth["OAuth / Supabase / OIDC"]
         LDAP["LDAP / Active Directory"]
         Basic["HTTP Basic / htpasswd"]
         Key["API Key (M2M Agent)"]
     end
 
-    subgraph "2. Résolution d'Identité"
+    subgraph "2. Identity Resolution"
         Identity["RbacUserContext<br>• id<br>• roles<br>• subjectType<br>• attributes"]
     end
 
-    subgraph "3. Gouvernance (@quatrain/auth-rbac)"
-        Engine["RbacPolicyEngine<br>• Actions CRUD (READ, WRITE, ...)<br>• Tarpit & Anti-Abus M2M<br>• Field-Level Security (FLS)"]
+    subgraph "3. Governance (@quatrain/auth-rbac)"
+        Engine["RbacPolicyEngine<br>• Actions CRUD (READ, WRITE, ...)<br>• Tarpit & M2M Anti-Abuse<br>• Field-Level Security (FLS)"]
     end
 
     OAuth --> Identity
@@ -26,7 +26,7 @@ flowchart LR
     Basic --> Identity
     Key --> Identity
     Identity --> Engine
-    Engine --> App["Contrôleurs & Pages Web (Astro / Express / React)"]
+    Engine --> App["Controllers & Web Pages (Astro / Express / React)"]
 ```
 
 ---

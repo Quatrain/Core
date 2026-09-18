@@ -24,12 +24,12 @@ export default {
     key: 'quatrain-community-banner',
     text: (
       <a href="https://quatrain.community" target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-medium">
-        <span>🌐 <strong>Quatrain Community</strong> : Fédérer les initiatives open-source — Rejoindre quatrain.community ↗</span>
+        <span>🌐 <strong>Quatrain Community</strong>: Uniting open-source initiatives — Join quatrain.community ↗</span>
       </a>
     )
   },
   search: {
-    placeholder: 'Rechercher architecture, packages, API...'
+    placeholder: 'Search architecture, packages, API...'
   },
   docsRepositoryBase: 'https://github.com/Quatrain/Core/tree/main/docs',
   gitTimestamp: false,

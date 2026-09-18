@@ -1,28 +1,28 @@
 import { SemanticAction } from '@quatrain/types'
+import { HttpMethod } from '@quatrain/http'
 
 /**
  * Resolves standard HTTP methods to semantic actions.
  * 
- * - GET / HEAD -> 'read'
+ * - GET / HEAD / OPTIONS -> 'read'
  * - POST -> 'create' (or 'execute' if matched by an action path convention)
  * - PUT / PATCH -> 'update'
  * - DELETE -> 'delete'
- * - OPTIONS -> 'read'
  */
 export function resolveHttpToSemanticAction(
-   method: string,
+   method: HttpMethod | string,
    path: string,
    actionRoutePatterns: RegExp[] = [/\/execute\b/, /\/rotate-secret\b/, /\/oauth\b/, /\/queue\b/, /\/run\b/]
 ): SemanticAction {
-   const upperMethod = method.toUpperCase()
+   const upperMethod = typeof method === 'string' ? method.toUpperCase() : method
 
    switch (upperMethod) {
-      case 'GET':
-      case 'HEAD':
-      case 'OPTIONS':
+      case HttpMethod.GET:
+      case HttpMethod.HEAD:
+      case HttpMethod.OPTIONS:
          return 'read'
 
-      case 'POST': {
+      case HttpMethod.POST: {
          // Check if this route is an action/execution rather than an entity creation
          for (const pattern of actionRoutePatterns) {
             if (pattern.test(path)) {
@@ -32,11 +32,11 @@ export function resolveHttpToSemanticAction(
          return 'create'
       }
 
-      case 'PUT':
-      case 'PATCH':
+      case HttpMethod.PUT:
+      case HttpMethod.PATCH:
          return 'update'
 
-      case 'DELETE':
+      case HttpMethod.DELETE:
          return 'delete'
 
       default:

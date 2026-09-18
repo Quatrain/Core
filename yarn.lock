@@ -3108,6 +3108,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/auth-rbac@workspace:packages/auth-rbac"
   dependencies:
+    "@quatrain/http": "workspace:*"
     "@quatrain/types": "workspace:*"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"

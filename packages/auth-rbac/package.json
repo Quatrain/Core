@@ -21,6 +21,7 @@
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
+    "@quatrain/http": "workspace:*",
     "@quatrain/types": "workspace:*"
   },
   "devDependencies": {
@@ -36,6 +37,7 @@
     "typescript": "^5.1.5"
   },
   "scripts": {
+    "test": "jest",
     "test-ci": "jest --runInBand",
     "build": "tsc",
     "wbuild": "tsc --watch",

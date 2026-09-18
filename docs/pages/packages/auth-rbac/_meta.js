@@ -3,7 +3,7 @@ export default {
   "howto": "HOWTO",
   "api": {
     "title": "API Reference ↗",
-    "href": "/api-reference/modules/_quatrain_auth-rbac.html",
+    "href": "/core/api-reference/modules/_quatrain_auth-rbac.html",
     "newWindow": true
   }
 }

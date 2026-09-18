@@ -2,7 +2,7 @@ export default {
   "readme": "Overview",
   "api": {
     "title": "API Reference ↗",
-    "href": "/api-reference/modules/_quatrain_git-client.html",
+    "href": "/core/api-reference/modules/_quatrain_git-client.html",
     "newWindow": true
   }
 }

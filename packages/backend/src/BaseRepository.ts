@@ -130,7 +130,7 @@ export class BaseRepository<T extends BaseObjectType> {
 
    /**
     * Retrieve object from its backend
-    * @param param string | ReferenceType
+    * @param param string | ObjectUri | ReferenceType
     * @returns {Promise<T | null>}
     */
    async read(param: string | ObjectUri | ReferenceType): Promise<any> {
@@ -140,14 +140,28 @@ export class BaseRepository<T extends BaseObjectType> {
          )
       }
 
-      let key
+      let key: string
+      let adapter = this.backendAdapter
+      let requestedUri: ObjectUri | undefined
 
       if (param instanceof ObjectUri) {
          key = param.path
+         requestedUri = param
+         if (param.backend) {
+            adapter = Backend.getBackend(param.backend)
+         }
       } else if (typeof param === 'object') {
          key = param.ref
       } else {
          key = param
+         if (typeof key === 'string' && key.includes(':')) {
+            const parsedUri = new ObjectUri(key)
+            requestedUri = parsedUri
+            if (parsedUri.backend) {
+               adapter = Backend.getBackend(parsedUri.backend)
+               key = parsedUri.path
+            }
+         }
       }
 
       if (typeof key !== 'string') {
@@ -159,7 +173,11 @@ export class BaseRepository<T extends BaseObjectType> {
       try {
          let dataObject = await this.getDataObject(key)
 
-         const response = await this.backendAdapter.read(dataObject)
+         const response = await adapter.read(dataObject)
+
+         if (requestedUri && requestedUri.backend && response) {
+            response.uri = requestedUri
+         }
 
          const obj = this._model.fromDataObject(response)
 
@@ -185,24 +203,42 @@ export class BaseRepository<T extends BaseObjectType> {
 
    /**
     * Updates an existing database record using the mutated object instance.
+    * Automatically routes to the backend deduced from the object's URI.
     * 
     * @param obj - The modified object instance.
     * @returns A promise resolving to the updated object footprint.
     */
    async update<B extends PersistedBaseObject>(obj: B) {
       const dataObject = obj.dataObject || obj
-      const savedObj = await this.backendAdapter.update(dataObject)
+      const backend = dataObject.backend
+         ? Backend.getBackend(dataObject.backend)
+         : this.backendAdapter
+      const savedObj = await backend.update(dataObject)
 
       return this._model.fromDataObject(savedObj)
    }
 
    /**
     * delete object in its backend
-    * @param uid string
+    * Automatically routes to the backend deduced from the object's URI.
+    * @param uid string | ObjectUri
     */
-   async delete(uid: string, hardDelete = false) {
-      const dataObject = await this.getDataObject(uid)
-      return await this.backendAdapter.delete(dataObject, hardDelete)
+   async delete(uid: string | ObjectUri, hardDelete = false) {
+      let adapter = this.backendAdapter
+      let key = typeof uid === 'string' ? uid : uid.path
+
+      if (uid instanceof ObjectUri && uid.backend) {
+         adapter = Backend.getBackend(uid.backend)
+      } else if (typeof uid === 'string' && uid.includes(':')) {
+         const parsedUri = new ObjectUri(uid)
+         if (parsedUri.backend) {
+            adapter = Backend.getBackend(parsedUri.backend)
+            key = parsedUri.path
+         }
+      }
+
+      const dataObject = await this.getDataObject(key)
+      return await adapter.delete(dataObject, hardDelete)
    }
 
    /**

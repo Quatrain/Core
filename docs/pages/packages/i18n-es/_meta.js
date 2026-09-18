@@ -3,7 +3,7 @@ export default {
   "howto": "HOWTO",
   "api": {
     "title": "API Reference ↗",
-    "href": "/api-reference/modules/_quatrain_i18n-es.html",
+    "href": "/core/api-reference/modules/_quatrain_i18n-es.html",
     "newWindow": true
   }
 }

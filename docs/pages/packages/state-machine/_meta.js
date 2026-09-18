@@ -3,7 +3,7 @@ export default {
   "howto": "HOWTO",
   "api": {
     "title": "API Reference ↗",
-    "href": "/api-reference/modules/_quatrain_state-machine.html",
+    "href": "/core/api-reference/modules/_quatrain_state-machine.html",
     "newWindow": true
   }
 }

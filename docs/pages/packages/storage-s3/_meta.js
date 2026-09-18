@@ -3,7 +3,7 @@ export default {
   "howto": "HOWTO",
   "api": {
     "title": "API Reference ↗",
-    "href": "/api-reference/modules/_quatrain_storage-s3.html",
+    "href": "/core/api-reference/modules/_quatrain_storage-s3.html",
     "newWindow": true
   }
 }

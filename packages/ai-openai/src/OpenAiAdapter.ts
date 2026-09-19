@@ -173,28 +173,25 @@ export class OpenAiAdapter extends AbstractAiAdapter {
       const options: OpenAiAdapterConfig =
          typeof config === 'string' ? { apiKey: config } : config
 
-      if (!options || typeof options !== 'object') {
-         throw new Error('OpenAiAdapter: configuration object is required')
-      }
-
-      if (!options.apiKey || typeof options.apiKey !== 'string' || options.apiKey.trim() === '') {
+      if (options.apiKey.trim() === '') {
          throw new Error('OpenAiAdapter: apiKey is required and cannot be empty')
       }
 
-      if (options.baseUrl !== undefined) {
-         if (typeof options.baseUrl !== 'string' || options.baseUrl.trim() === '') {
-            throw new Error('OpenAiAdapter: baseUrl cannot be an empty string')
-         }
+      if (options.baseUrl !== undefined && options.baseUrl.trim() === '') {
+         throw new Error('OpenAiAdapter: baseUrl cannot be an empty string')
       }
 
-      if (options.defaultModel !== undefined) {
-         if (typeof options.defaultModel !== 'string' || options.defaultModel.trim() === '') {
-            throw new Error('OpenAiAdapter: defaultModel cannot be an empty string')
-         }
+      if (options.defaultModel !== undefined && options.defaultModel.trim() === '') {
+         throw new Error('OpenAiAdapter: defaultModel cannot be an empty string')
+      }
+
+      let rawBaseUrl = (options.baseUrl ?? 'https://api.openai.com/v1').trim()
+      while (rawBaseUrl.endsWith('/')) {
+         rawBaseUrl = rawBaseUrl.slice(0, -1)
       }
 
       this._apiKey = options.apiKey.trim()
-      this._baseUrl = (options.baseUrl ?? 'https://api.openai.com/v1').trim().replace(/\/+$/, '')
+      this._baseUrl = rawBaseUrl
       this._defaultModel = (options.defaultModel ?? 'gpt-4o').trim()
       this._defaultTemperature = options.defaultTemperature ?? 0.7
       this._timeoutMs = options.timeoutMs ?? 60000
@@ -314,8 +311,27 @@ export class OpenAiAdapter extends AbstractAiAdapter {
       const response = await this._postChatCompletions(payload, options?.headers)
       const data = (await response.json()) as OpenAiChatResponse
 
-      const firstChoice = data.choices?.[0]
-      return firstChoice?.message?.content ?? ''
+      const firstChoice = data.choices[0]
+      return firstChoice?.message.content ?? ''
+   }
+
+   /**
+    * Strips optional markdown JSON codeblock fences from a response string.
+    *
+    * @param rawContent - Raw text output from model.
+    * @returns Cleaned JSON text.
+    */
+   protected _cleanJsonFences(rawContent: string): string {
+      let text = rawContent.trim()
+      if (text.startsWith('```json')) {
+         text = text.slice(7)
+      } else if (text.startsWith('```')) {
+         text = text.slice(3)
+      }
+      if (text.endsWith('```')) {
+         text = text.slice(0, -3)
+      }
+      return text.trim()
    }
 
    /**
@@ -327,7 +343,7 @@ export class OpenAiAdapter extends AbstractAiAdapter {
     * @returns Parsed JSON object conforming to type T.
     */
    async generateStructured<T = unknown>(
-      prompt: string | unknown,
+      prompt: unknown,
       schema: unknown,
       options?: OpenAiGenerateOptions,
    ): Promise<T> {
@@ -372,17 +388,13 @@ export class OpenAiAdapter extends AbstractAiAdapter {
       const response = await this._postChatCompletions(payload, options?.headers)
       const data = (await response.json()) as OpenAiChatResponse
 
-      const rawContent = data.choices?.[0]?.message?.content?.trim()
+      const firstChoice = data.choices[0]
+      const rawContent = firstChoice?.message.content?.trim()
       if (!rawContent) {
          throw new Error('OpenAiAdapter: No content returned for structured output request')
       }
 
-      // Strip potential markdown fences (```json ... ```)
-      const cleaned = rawContent
-         .replace(/^```(?:json)?\s*/i, '')
-         .replace(/\s*```$/, '')
-         .trim()
-
+      const cleaned = this._cleanJsonFences(rawContent)
       return JSON.parse(cleaned) as T
    }
 
@@ -460,7 +472,9 @@ export class OpenAiAdapter extends AbstractAiAdapter {
       const url = `${this._baseUrl}/chat/completions`
 
       const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), this._timeoutMs)
+      const timer = setTimeout(() => {
+         controller.abort()
+      }, this._timeoutMs)
 
       try {
          const response = await fetch(url, {
@@ -479,7 +493,7 @@ export class OpenAiAdapter extends AbstractAiAdapter {
             let errorDetail = response.statusText
             try {
                const errorBody = (await response.json()) as { error?: { message?: string } }
-               if (errorBody?.error?.message) {
+               if (errorBody.error?.message) {
                   errorDetail = errorBody.error.message
                }
             } catch {
@@ -495,6 +509,32 @@ export class OpenAiAdapter extends AbstractAiAdapter {
    }
 
    /**
+    * Parse an individual Server-Sent Events line and extract delta content.
+    *
+    * @param line - Raw SSE line string.
+    * @returns Text delta string if available, or null.
+    */
+   protected _parseSseLine(line: string): string | null {
+      const trimmed = line.trim()
+      if (!trimmed.startsWith('data: ') || trimmed === 'data: [DONE]') {
+         return null
+      }
+
+      const jsonStr = trimmed.slice(6).trim()
+      if (!jsonStr) {
+         return null
+      }
+
+      try {
+         const parsed = JSON.parse(jsonStr) as OpenAiChatChunk
+         const firstChoice = parsed.choices[0]
+         return firstChoice?.delta.content ?? null
+      } catch {
+         return null
+      }
+   }
+
+   /**
     * Internal async generator parsing Server-Sent Events (SSE) stream chunks.
     */
    protected async *_parseSseStream(
@@ -505,9 +545,11 @@ export class OpenAiAdapter extends AbstractAiAdapter {
       let buffer = ''
 
       try {
-         while (true) {
+         let isReading = true
+         while (isReading) {
             const { done, value } = await reader.read()
             if (done) {
+               isReading = false
                break
             }
 
@@ -516,27 +558,12 @@ export class OpenAiAdapter extends AbstractAiAdapter {
             buffer = lines.pop() ?? ''
 
             for (const line of lines) {
-               const trimmed = line.trim()
-               if (!trimmed || trimmed.startsWith(':')) {
-                  continue
-               }
-               if (trimmed === 'data: [DONE]') {
+               if (line.trim() === 'data: [DONE]') {
                   return
                }
-               if (trimmed.startsWith('data: ')) {
-                  const jsonStr = trimmed.slice(6).trim()
-                  if (!jsonStr) {
-                     continue
-                  }
-                  try {
-                     const parsed = JSON.parse(jsonStr) as OpenAiChatChunk
-                     const textChunk = parsed.choices?.[0]?.delta?.content
-                     if (textChunk) {
-                        yield textChunk
-                     }
-                  } catch {
-                     // Silently ignore non-JSON stream events
-                  }
+               const token = this._parseSseLine(line)
+               if (token) {
+                  yield token
                }
             }
          }

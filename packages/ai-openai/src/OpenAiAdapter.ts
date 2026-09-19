@@ -311,8 +311,12 @@ export class OpenAiAdapter extends AbstractAiAdapter {
       const response = await this._postChatCompletions(payload, options?.headers)
       const data = (await response.json()) as OpenAiChatResponse
 
+      if (data.choices.length === 0) {
+         return ''
+      }
+
       const firstChoice = data.choices[0]
-      return firstChoice?.message.content ?? ''
+      return firstChoice.message.content ?? ''
    }
 
    /**
@@ -388,12 +392,16 @@ export class OpenAiAdapter extends AbstractAiAdapter {
       const response = await this._postChatCompletions(payload, options?.headers)
       const data = (await response.json()) as OpenAiChatResponse
 
+      if (data.choices.length === 0) {
+         throw new Error('OpenAiAdapter: No choices returned in chat completion response')
+      }
+
       const firstChoice = data.choices[0]
-      const rawContent = firstChoice?.message.content?.trim()
-      if (!rawContent) {
+      if (!firstChoice.message.content) {
          throw new Error('OpenAiAdapter: No content returned for structured output request')
       }
 
+      const rawContent = firstChoice.message.content.trim()
       const cleaned = this._cleanJsonFences(rawContent)
       return JSON.parse(cleaned) as T
    }
@@ -527,8 +535,11 @@ export class OpenAiAdapter extends AbstractAiAdapter {
 
       try {
          const parsed = JSON.parse(jsonStr) as OpenAiChatChunk
+         if (parsed.choices.length === 0) {
+            return null
+         }
          const firstChoice = parsed.choices[0]
-         return firstChoice?.delta.content ?? null
+         return firstChoice.delta.content ?? null
       } catch {
          return null
       }
@@ -545,15 +556,9 @@ export class OpenAiAdapter extends AbstractAiAdapter {
       let buffer = ''
 
       try {
-         let isReading = true
-         while (isReading) {
-            const { done, value } = await reader.read()
-            if (done) {
-               isReading = false
-               break
-            }
-
-            buffer += decoder.decode(value, { stream: true })
+         let result = await reader.read()
+         while (!result.done) {
+            buffer += decoder.decode(result.value, { stream: true })
             const lines = buffer.split('\n')
             buffer = lines.pop() ?? ''
 
@@ -566,6 +571,8 @@ export class OpenAiAdapter extends AbstractAiAdapter {
                   yield token
                }
             }
+
+            result = await reader.read()
          }
       } finally {
          reader.releaseLock()

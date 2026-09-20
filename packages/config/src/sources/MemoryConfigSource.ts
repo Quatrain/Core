@@ -74,10 +74,10 @@ export class MemoryConfigSource extends AbstractConfigSource {
             hasSubKeys = true
             const subPath = storedKey.slice(prefix.length)
             const parts = subPath.split('.')
+            const lastKey = parts.pop()
             let current = subTree
 
-            for (let i = 0; i < parts.length - 1; i++) {
-               const part = parts[i]
+            for (const part of parts) {
                if (!isSafeKey(part)) {
                   continue
                }
@@ -91,8 +91,7 @@ export class MemoryConfigSource extends AbstractConfigSource {
                }
             }
 
-            const lastKey = parts[parts.length - 1]
-            if (isSafeKey(lastKey)) {
+            if (lastKey !== undefined && isSafeKey(lastKey)) {
                Reflect.set(current, lastKey, val)
             }
          }
@@ -107,13 +106,12 @@ export class MemoryConfigSource extends AbstractConfigSource {
       }
 
       const parts = key.split('.')
-      const rootKey = parts[0]
-      if (!isSafeKey(rootKey) || !this._store.has(rootKey)) {
+      const [rootKey, ...subParts] = parts
+      if (!rootKey || !isSafeKey(rootKey) || !this._store.has(rootKey)) {
          return undefined
       }
 
       let current: unknown = this._store.get(rootKey)
-      const subParts = parts.slice(1)
       for (const part of subParts) {
          if (!isSafeKey(part) || typeof current !== 'object' || current === null) {
             return undefined

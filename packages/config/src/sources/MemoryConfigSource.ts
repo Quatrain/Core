@@ -64,7 +64,22 @@ export class MemoryConfigSource extends AbstractConfigSource {
          return this._store.get(key)
       }
 
-      // Check if key is a prefix for nested sub-paths (e.g. 'services.mail' for 'services.mail.smtp.host')
+      const subTree = this._extractSubTree(key)
+      if (subTree !== undefined) {
+         return subTree
+      }
+
+      if (key.includes('.')) {
+         return this._resolveNestedKey(key)
+      }
+
+      return undefined
+   }
+
+   /**
+    * Extracts nested configuration object if key is a prefix for stored paths.
+    */
+   protected _extractSubTree(key: string): Record<string, unknown> | undefined {
       const prefix = `${key}.`
       let hasSubKeys = false
       const subTree: Record<string, unknown> = {}
@@ -73,38 +88,48 @@ export class MemoryConfigSource extends AbstractConfigSource {
          if (storedKey.startsWith(prefix)) {
             hasSubKeys = true
             const subPath = storedKey.slice(prefix.length)
-            const parts = subPath.split('.')
-            const lastKey = parts.pop()
-            let current = subTree
-
-            for (const part of parts) {
-               if (!isSafeKey(part)) {
-                  continue
-               }
-               const existing = Reflect.get(current, part)
-               if (typeof existing !== 'object' || existing === null || Array.isArray(existing)) {
-                  const nextObj: Record<string, unknown> = {}
-                  Reflect.set(current, part, nextObj)
-                  current = nextObj
-               } else {
-                  current = existing as Record<string, unknown>
-               }
-            }
-
-            if (lastKey !== undefined && isSafeKey(lastKey)) {
-               Reflect.set(current, lastKey, val)
-            }
+            this._assignSubPath(subTree, subPath, val)
          }
       }
 
-      if (hasSubKeys) {
-         return subTree
+      return hasSubKeys ? subTree : undefined
+   }
+
+   /**
+    * Helper assigning a nested value into the target sub-tree.
+    */
+   protected _assignSubPath(
+      subTree: Record<string, unknown>,
+      subPath: string,
+      val: unknown,
+   ): void {
+      const parts = subPath.split('.')
+      const lastKey = parts.pop()
+      let current = subTree
+
+      for (const part of parts) {
+         if (!isSafeKey(part)) {
+            continue
+         }
+         const existing = Reflect.get(current, part)
+         if (typeof existing !== 'object' || existing === null || Array.isArray(existing)) {
+            const nextObj: Record<string, unknown> = {}
+            Reflect.set(current, part, nextObj)
+            current = nextObj
+         } else {
+            current = existing as Record<string, unknown>
+         }
       }
 
-      if (!key.includes('.')) {
-         return undefined
+      if (lastKey !== undefined && isSafeKey(lastKey)) {
+         Reflect.set(current, lastKey, val)
       }
+   }
 
+   /**
+    * Resolves dot-notation path traversing an in-memory object tree.
+    */
+   protected _resolveNestedKey(key: string): unknown {
       const parts = key.split('.')
       const [rootKey, ...subParts] = parts
       if (!rootKey || !isSafeKey(rootKey) || !this._store.has(rootKey)) {

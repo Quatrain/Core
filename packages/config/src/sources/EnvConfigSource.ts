@@ -122,34 +122,35 @@ export class EnvConfigSource extends AbstractConfigSource {
     * Internal helper generating candidate environment variable names.
     */
    protected _resolveCandidateKeys(key: string): string[] {
-      const candidates: string[] = []
+      const candidates = new Set<string>()
       const snakeKey = this._toSnakeCase(key)
 
       if (this._prefix) {
-         if (key.startsWith(this._prefix)) {
-            candidates.push(key)
-            if (!candidates.includes(snakeKey)) {
-               candidates.push(snakeKey)
-            }
-         } else {
-            const prefixedExact = `${this._prefix}${key}`
-            const prefixedSnake = `${this._prefix}${snakeKey}`
-            candidates.push(prefixedExact)
-            if (!candidates.includes(prefixedSnake)) {
-               candidates.push(prefixedSnake)
-            }
-            // Fallback to exact raw key if directly requested
-            if (!candidates.includes(key)) {
-               candidates.push(key)
-            }
-         }
+         this._appendPrefixedCandidates(candidates, key, snakeKey)
       } else {
-         candidates.push(key)
-         if (!candidates.includes(snakeKey)) {
-            candidates.push(snakeKey)
-         }
+         candidates.add(key)
+         candidates.add(snakeKey)
       }
 
-      return candidates
+      return Array.from(candidates)
+   }
+
+   /**
+    * Appends prefixed candidates when a namespace prefix is defined.
+    */
+   protected _appendPrefixedCandidates(
+      candidates: Set<string>,
+      key: string,
+      snakeKey: string,
+   ): void {
+      if (key.startsWith(this._prefix)) {
+         candidates.add(key)
+         candidates.add(snakeKey)
+         return
+      }
+
+      candidates.add(`${this._prefix}${key}`)
+      candidates.add(`${this._prefix}${snakeKey}`)
+      candidates.add(key)
    }
 }

@@ -177,11 +177,11 @@ export class OpenAiAdapter extends AbstractAiAdapter {
          throw new Error('OpenAiAdapter: apiKey is required and cannot be empty')
       }
 
-      if (options.baseUrl !== undefined && options.baseUrl.trim() === '') {
+      if (options.baseUrl?.trim() === '') {
          throw new Error('OpenAiAdapter: baseUrl cannot be an empty string')
       }
 
-      if (options.defaultModel !== undefined && options.defaultModel.trim() === '') {
+      if (options.defaultModel?.trim() === '') {
          throw new Error('OpenAiAdapter: defaultModel cannot be an empty string')
       }
 

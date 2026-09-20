@@ -498,14 +498,23 @@ export class OpenAiAdapter extends AbstractAiAdapter {
          })
 
          if (!response.ok) {
-            let errorDetail = response.statusText
+            let errorDetail = response.statusText || ''
             try {
-               const errorBody = (await response.json()) as { error?: { message?: string } }
-               if (errorBody.error?.message) {
-                  errorDetail = errorBody.error.message
+               const rawText = await response.text()
+               try {
+                  const errorBody = JSON.parse(rawText) as { error?: { message?: string } }
+                  if (errorBody.error?.message) {
+                     errorDetail = errorBody.error.message
+                  } else if (rawText.trim() !== '') {
+                     errorDetail = rawText
+                  }
+               } catch {
+                  if (rawText.trim() !== '') {
+                     errorDetail = rawText
+                  }
                }
             } catch {
-               // Keep statusText if body is not JSON
+               // Keep statusText if reading body fails
             }
             throw new Error(`OpenAiAdapter API error (${response.status}): ${errorDetail}`)
          }

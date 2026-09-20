@@ -34,7 +34,7 @@
     "typescript": "^5.1.5"
   },
   "dependencies": {
-    "@quatrain/core": "^1.2.18",
+    "@quatrain/core": "^1.2.19",
     "@quatrain/queue": "^1.2.3",
     "@quatrain/storage": "^1.2.14",
     "axios": "^1.7.7",

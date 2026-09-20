@@ -32,12 +32,12 @@ export class ObjectConfigSource extends AbstractConfigSource {
     * @param key - Property key or dot-notation path.
     * @returns Value if present, or undefined.
     */
-   get(key: string): unknown | undefined {
+   get(key: string): unknown {
       if (!isSafeKey(key)) {
          return undefined
       }
 
-      if (Object.prototype.hasOwnProperty.call(this._data, key)) {
+      if (Object.hasOwn(this._data, key)) {
          return Reflect.get(this._data, key)
       }
 
@@ -53,7 +53,7 @@ export class ObjectConfigSource extends AbstractConfigSource {
             return undefined
          }
          const dict = current as Record<string, unknown>
-         if (!Object.prototype.hasOwnProperty.call(dict, part)) {
+         if (!Object.hasOwn(dict, part)) {
             return undefined
          }
          current = Reflect.get(dict, part)

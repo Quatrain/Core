@@ -114,7 +114,7 @@ export class EnvConfigSource extends AbstractConfigSource {
    protected _toSnakeCase(key: string): string {
       return key
          .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
-         .replace(/[\.\-]/g, '_')
+         .replace(/[.-]/g, '_')
          .toUpperCase()
    }
 
@@ -137,6 +137,10 @@ export class EnvConfigSource extends AbstractConfigSource {
             candidates.push(prefixedExact)
             if (!candidates.includes(prefixedSnake)) {
                candidates.push(prefixedSnake)
+            }
+            // Fallback to exact raw key if directly requested
+            if (!candidates.includes(key)) {
+               candidates.push(key)
             }
          }
       } else {

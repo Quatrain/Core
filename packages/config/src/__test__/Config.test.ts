@@ -349,13 +349,134 @@ describe('@quatrain/config', () => {
          expect(scoped.requireString('name')).toBe('email')
       })
 
-      it('prevents prototype pollution when setting or getting keys', () => {
+      it('prevents prototype pollution when setting or getting keys across all sources', () => {
          const memory = new MemoryConfigSource()
          memory.set('__proto__.polluted', 'yes')
          memory.set('constructor.prototype.polluted', 'yes')
+         memory.set('prototype.polluted', 'yes')
 
          expect(memory.get('__proto__.polluted')).toBeUndefined()
+         expect(memory.get('constructor.prototype.polluted')).toBeUndefined()
+         expect(memory.get('prototype.polluted')).toBeUndefined()
          expect(({} as Record<string, unknown>).polluted).toBeUndefined()
+
+         const objSource = new ObjectConfigSource({
+            validKey: 'safe',
+         })
+         expect(objSource.get('__proto__.polluted')).toBeUndefined()
+         expect(objSource.get('constructor.prototype.polluted')).toBeUndefined()
+         expect(objSource.get('prototype.polluted')).toBeUndefined()
+
+         const container = new ConfigContainer('sec-test')
+         container.set('__proto__.injected', 'bad')
+         expect(container.get('__proto__.injected')).toBeUndefined()
+         expect(({} as Record<string, unknown>).injected).toBeUndefined()
+      })
+
+      it('performs deep merge in toRecord() across multiple sources', () => {
+         const baseObj = new ObjectConfigSource(
+            {
+               database: {
+                  host: 'localhost',
+                  port: 5432,
+                  pool: { max: 10, min: 2 },
+               },
+               app: { name: 'core' },
+            },
+            'base',
+            10,
+         )
+
+         const overrideObj = new ObjectConfigSource(
+            {
+               database: {
+                  port: 5433,
+                  pool: { max: 20 },
+                  user: 'postgres',
+               },
+            },
+            'override',
+            20,
+         )
+
+         const container = new ConfigContainer('merge-test', [baseObj, overrideObj])
+         const collapsed = container.toRecord()
+
+         expect(collapsed).toEqual({
+            database: {
+               host: 'localhost',
+               port: 5433,
+               pool: { max: 20, min: 2 },
+               user: 'postgres',
+            },
+            app: { name: 'core' },
+         })
+      })
+
+      it('falls back to non-prefixed env keys when prefixed key is missing', () => {
+         const envSource = new EnvConfigSource({
+            prefix: 'APP_',
+            env: {
+               APP_TITLE: 'My App',
+               PORT: '3333',
+               HOST_NAME: '0.0.0.0',
+            },
+         })
+
+         // Prefixed key matches directly
+         expect(envSource.get('title')).toBe('My App')
+         // Exact raw env key fallback matches
+         expect(envSource.get('PORT')).toBe('3333')
+         expect(envSource.get('HOST_NAME')).toBe('0.0.0.0')
+         expect(envSource.get('missing')).toBeUndefined()
+      })
+
+      it('handles trailing dots in scope and retrieves sub-tree in getAll()', () => {
+         Config.set('services.mail.smtp.host', 'smtp.example.com')
+         Config.set('services.mail.smtp.port', 587)
+
+         const mailScope = Config.scope('services.mail.')
+         expect(mailScope.namespace).toBe('@default.services.mail')
+         expect(mailScope.requireString('smtp.host')).toBe('smtp.example.com')
+         expect(mailScope.requireNumber('smtp.port')).toBe(587)
+
+         const subRecord = mailScope.toRecord()
+         expect(subRecord).toEqual({
+            smtp: {
+               host: 'smtp.example.com',
+               port: 587,
+            },
+         })
+      })
+
+      it('safely handles non-primitive types in getters and error messages', () => {
+         Config.set('rawObject', { nested: 'data' })
+         Config.set('numberAsBool', 1)
+         Config.set('zeroAsBool', 0)
+
+         // getString, getNumber, getBoolean should return fallback for objects
+         expect(Config.getString('rawObject', 'fallback')).toBe('fallback')
+         expect(Config.getNumber('rawObject', 42)).toBe(42)
+         expect(Config.getBoolean('rawObject', false)).toBe(false)
+
+         // getBoolean handles numeric 1 and 0
+         expect(Config.getBoolean('numberAsBool')).toBe(true)
+         expect(Config.getBoolean('zeroAsBool')).toBe(false)
+
+         // Error formatting for requireNumber and requireBoolean with objects
+         expect(() => Config.requireNumber('rawObject')).toThrow(
+            /Expected numeric value but received \{"nested":"data"\}/,
+         )
+         expect(() => Config.requireBoolean('rawObject')).toThrow(
+            /Expected boolean value \(true\/false\/1\/0\) but received \{"nested":"data"\}/,
+         )
+      })
+
+      it('handles non-object and array inputs in Config.addConfig gracefully', () => {
+         const arrayInput = ['item1', 'item2'] as unknown as Record<string, unknown>
+         const container = Config.addConfig('array-test', arrayInput)
+         expect(container).toBeInstanceOf(ConfigContainer)
+         expect(container.get('item1')).toBeUndefined()
       })
    })
 })

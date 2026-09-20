@@ -41,7 +41,7 @@ export abstract class AbstractConfigSource {
     * @param key - The property key or dot-notation path.
     * @returns The raw value if present, or undefined.
     */
-   abstract get(key: string): unknown | undefined
+   abstract get(key: string): unknown
 
    /**
     * Checks if a given key exists in this configuration source.

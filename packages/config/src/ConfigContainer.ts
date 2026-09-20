@@ -40,6 +40,23 @@ function deepMerge(
 }
 
 /**
+ * Safely formats raw values for error messages without falling back to [object Object].
+ */
+function formatRawValue(val: unknown): string {
+   if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+      return String(val)
+   }
+   if (typeof val === 'object' && val !== null) {
+      try {
+         return JSON.stringify(val)
+      } catch {
+         return '[Complex Object]'
+      }
+   }
+   return String(val as string | number | boolean | null | undefined)
+}
+
+/**
  * Isolated configuration container managing prioritized sources for a specific namespace or scope.
  */
 export class ConfigContainer {
@@ -216,7 +233,7 @@ export class ConfigContainer {
       throw new ConfigurationError(
          path,
          this.namespace,
-         `Expected numeric value but received ${String(raw)}`,
+         `Expected numeric value but received ${formatRawValue(raw)}`,
          helpText,
       )
    }
@@ -249,7 +266,7 @@ export class ConfigContainer {
       throw new ConfigurationError(
          path,
          this.namespace,
-         `Expected boolean value (true/false/1/0) but received ${String(raw)}`,
+         `Expected boolean value (true/false/1/0) but received ${formatRawValue(raw)}`,
          helpText,
       )
    }
@@ -312,7 +329,13 @@ export class ConfigContainer {
       if (val === undefined || val === null) {
          return fallback
       }
-      return String(val).trim()
+      if (typeof val === 'string') {
+         return val.trim()
+      }
+      if (typeof val === 'number' || typeof val === 'boolean') {
+         return String(val)
+      }
+      return fallback
    }
 
    /**
@@ -323,8 +346,14 @@ export class ConfigContainer {
       if (val === undefined || val === null) {
          return fallback
       }
-      const parsed = Number(val)
-      return Number.isNaN(parsed) ? fallback : parsed
+      if (typeof val === 'number') {
+         return Number.isNaN(val) ? fallback : val
+      }
+      if (typeof val === 'string' && val.trim() !== '') {
+         const parsed = Number(val)
+         return Number.isNaN(parsed) ? fallback : parsed
+      }
+      return fallback
    }
 
    /**
@@ -338,12 +367,22 @@ export class ConfigContainer {
       if (typeof val === 'boolean') {
          return val
       }
-      const lower = String(val).trim().toLowerCase()
-      if (lower === 'true' || lower === '1') {
-         return true
+      if (typeof val === 'string') {
+         const lower = val.trim().toLowerCase()
+         if (lower === 'true' || lower === '1') {
+            return true
+         }
+         if (lower === 'false' || lower === '0') {
+            return false
+         }
       }
-      if (lower === 'false' || lower === '0') {
-         return false
+      if (typeof val === 'number') {
+         if (val === 1) {
+            return true
+         }
+         if (val === 0) {
+            return false
+         }
       }
       return fallback
    }
@@ -356,7 +395,10 @@ export class ConfigContainer {
     * @returns A new ConfigContainer scoped to the subPath.
     */
    scope(subPath: string): ConfigContainer {
-      const cleanSubPath = subPath.replace(/\.+$/, '')
+      let cleanSubPath = subPath
+      while (cleanSubPath.endsWith('.')) {
+         cleanSubPath = cleanSubPath.slice(0, -1)
+      }
       const subNamespace = `${this.namespace}.${cleanSubPath}`
 
       const subSource = new (class extends AbstractConfigSource {
@@ -367,7 +409,7 @@ export class ConfigContainer {
             super()
          }
 
-         get(key: string): unknown | undefined {
+         get(key: string): unknown {
             return this.parent.get(`${cleanSubPath}.${key}`)
          }
 

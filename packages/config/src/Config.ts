@@ -17,14 +17,25 @@ export type ConfigRegistry = Map<string, ConfigContainer>
  */
 export class Config extends Core {
    /**
+    * Internal store for the default configuration alias.
+    */
+   protected static _defaultConfig = '@default'
+
+   /**
     * The alias of the currently active default configuration container.
     */
-   static defaultConfig = '@default'
+   static get defaultConfig(): string {
+      return this._defaultConfig
+   }
+
+   static set defaultConfig(alias: string) {
+      this._defaultConfig = alias
+   }
 
    /**
     * Dedicated logger scope for the Config subsystem.
     */
-   static logger = this.addLogger('Config')
+   static readonly logger = this.addLogger('Config')
 
    /**
     * Internal registry mapping aliases to ConfigContainer instances.

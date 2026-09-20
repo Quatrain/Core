@@ -1,4 +1,4 @@
-import { AbstractConfigSource } from './AbstractConfigSource'
+import { AbstractConfigSource, isSafeKey } from './AbstractConfigSource'
 
 /**
  * Configuration source that wraps a structured JavaScript object or parsed JSON data.
@@ -23,7 +23,7 @@ export class ObjectConfigSource extends AbstractConfigSource {
       super()
       this.name = name
       this.priority = priority
-      this._data = data ?? {}
+      this._data = data
    }
 
    /**
@@ -33,8 +33,12 @@ export class ObjectConfigSource extends AbstractConfigSource {
     * @returns Value if present, or undefined.
     */
    get(key: string): unknown | undefined {
+      if (!isSafeKey(key)) {
+         return undefined
+      }
+
       if (Object.prototype.hasOwnProperty.call(this._data, key)) {
-         return this._data[key]
+         return Reflect.get(this._data, key)
       }
 
       if (!key.includes('.')) {
@@ -45,14 +49,14 @@ export class ObjectConfigSource extends AbstractConfigSource {
       let current: unknown = this._data
 
       for (const part of parts) {
-         if (typeof current !== 'object' || current === null) {
+         if (!isSafeKey(part) || typeof current !== 'object' || current === null) {
             return undefined
          }
          const dict = current as Record<string, unknown>
          if (!Object.prototype.hasOwnProperty.call(dict, part)) {
             return undefined
          }
-         current = dict[part]
+         current = Reflect.get(dict, part)
       }
 
       return current

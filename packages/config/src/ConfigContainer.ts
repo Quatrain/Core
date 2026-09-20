@@ -1,6 +1,43 @@
-import { AbstractConfigSource } from './sources/AbstractConfigSource'
+import { AbstractConfigSource, isSafeKey } from './sources/AbstractConfigSource'
 import { MemoryConfigSource } from './sources/MemoryConfigSource'
 import { ConfigurationError } from './errors/ConfigurationError'
+
+/**
+ * Safely deep-merges source records into target without prototype pollution.
+ */
+function deepMerge(
+   target: Record<string, unknown>,
+   source: Record<string, unknown>,
+): Record<string, unknown> {
+   for (const key of Object.keys(source)) {
+      if (!isSafeKey(key)) {
+         continue
+      }
+      const sourceVal = Reflect.get(source, key)
+      const targetVal = Reflect.get(target, key)
+
+      if (
+         typeof sourceVal === 'object' &&
+         sourceVal !== null &&
+         !Array.isArray(sourceVal) &&
+         typeof targetVal === 'object' &&
+         targetVal !== null &&
+         !Array.isArray(targetVal)
+      ) {
+         Reflect.set(
+            target,
+            key,
+            deepMerge(
+               targetVal as Record<string, unknown>,
+               sourceVal as Record<string, unknown>,
+            ),
+         )
+      } else {
+         Reflect.set(target, key, sourceVal)
+      }
+   }
+   return target
+}
 
 /**
  * Isolated configuration container managing prioritized sources for a specific namespace or scope.
@@ -339,20 +376,11 @@ export class ConfigContainer {
          }
 
          getAll(): Record<string, unknown> {
-            const parentRecord = this.parent.toRecord()
-            const parts = cleanSubPath.split('.')
-            let current: unknown = parentRecord
-
-            for (const part of parts) {
-               if (typeof current !== 'object' || current === null) {
-                  return {}
-               }
-               current = (current as Record<string, unknown>)[part]
+            const subTree = this.parent.get<unknown>(cleanSubPath)
+            if (typeof subTree === 'object' && subTree !== null && !Array.isArray(subTree)) {
+               return { ...(subTree as Record<string, unknown>) }
             }
-
-            return typeof current === 'object' && current !== null
-               ? (current as Record<string, unknown>)
-               : {}
+            return {}
          }
       })(this)
 
@@ -363,15 +391,13 @@ export class ConfigContainer {
     * Collapses all sources into a single merged key-value record snapshot.
     */
    toRecord(): Record<string, unknown> {
-      const record: Record<string, unknown> = {}
+      let record: Record<string, unknown> = {}
 
       // Apply lowest priority sources first so higher priority sources override
       const reversed = [...this._sources].reverse()
       for (const source of reversed) {
          const data = source.getAll()
-         for (const key of Object.keys(data)) {
-            record[key] = data[key]
-         }
+         record = deepMerge(record, data)
       }
 
       return record

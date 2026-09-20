@@ -1,4 +1,4 @@
-import { AbstractConfigSource } from './AbstractConfigSource'
+import { AbstractConfigSource, isSafeKey, isSafePath } from './AbstractConfigSource'
 
 /**
  * In-memory configuration source for runtime programmatic overrides and unit testing.
@@ -6,7 +6,7 @@ import { AbstractConfigSource } from './AbstractConfigSource'
 export class MemoryConfigSource extends AbstractConfigSource {
    readonly name: string
    readonly priority: number
-   protected _store: Record<string, unknown>
+   protected _store: Map<string, unknown>
 
    /**
     * Construct a new MemoryConfigSource.
@@ -23,11 +23,13 @@ export class MemoryConfigSource extends AbstractConfigSource {
       super()
       this.name = name
       this.priority = priority
-      this._store = {}
+      this._store = new Map<string, unknown>()
 
       if (initialData) {
          for (const key of Object.keys(initialData)) {
-            this._store[key] = initialData[key]
+            if (isSafePath(key)) {
+               this._store.set(key, Reflect.get(initialData, key))
+            }
          }
       }
    }
@@ -40,24 +42,37 @@ export class MemoryConfigSource extends AbstractConfigSource {
     * @param value - Value to set.
     */
    set(key: string, value: unknown): void {
+      if (!isSafePath(key)) {
+         return
+      }
+
+      this._store.set(key, value)
+
       if (!key.includes('.')) {
-         this._store[key] = value
          return
       }
 
       const parts = key.split('.')
-      let current: Record<string, unknown> = this._store
+      const rootKey = parts[0]
+      let rootObj = this._store.get(rootKey)
+      if (typeof rootObj !== 'object' || rootObj === null || Array.isArray(rootObj)) {
+         rootObj = {}
+         this._store.set(rootKey, rootObj)
+      }
 
-      for (let i = 0; i < parts.length - 1; i++) {
+      let current = rootObj as Record<string, unknown>
+      for (let i = 1; i < parts.length - 1; i++) {
          const part = parts[i]
-         if (typeof current[part] !== 'object' || current[part] === null) {
-            current[part] = {}
+         let next = Reflect.get(current, part)
+         if (typeof next !== 'object' || next === null || Array.isArray(next)) {
+            next = {}
+            Reflect.set(current, part, next)
          }
-         current = current[part] as Record<string, unknown>
+         current = next as Record<string, unknown>
       }
 
       const lastPart = parts[parts.length - 1]
-      current[lastPart] = value
+      Reflect.set(current, lastPart, value)
    }
 
    /**
@@ -67,8 +82,12 @@ export class MemoryConfigSource extends AbstractConfigSource {
     * @returns Value if present, or undefined.
     */
    get(key: string): unknown | undefined {
-      if (Object.prototype.hasOwnProperty.call(this._store, key)) {
-         return this._store[key]
+      if (!isSafePath(key)) {
+         return undefined
+      }
+
+      if (this._store.has(key)) {
+         return this._store.get(key)
       }
 
       if (!key.includes('.')) {
@@ -76,17 +95,22 @@ export class MemoryConfigSource extends AbstractConfigSource {
       }
 
       const parts = key.split('.')
-      let current: unknown = this._store
+      const rootKey = parts[0]
+      if (!isSafeKey(rootKey) || !this._store.has(rootKey)) {
+         return undefined
+      }
 
-      for (const part of parts) {
-         if (typeof current !== 'object' || current === null) {
+      let current: unknown = this._store.get(rootKey)
+      for (let i = 1; i < parts.length; i++) {
+         const part = parts[i]
+         if (!isSafeKey(part) || typeof current !== 'object' || current === null) {
             return undefined
          }
          const dict = current as Record<string, unknown>
          if (!Object.prototype.hasOwnProperty.call(dict, part)) {
             return undefined
          }
-         current = dict[part]
+         current = Reflect.get(dict, part)
       }
 
       return current
@@ -106,6 +130,12 @@ export class MemoryConfigSource extends AbstractConfigSource {
     * Returns all stored entries.
     */
    getAll(): Record<string, unknown> {
-      return { ...this._store }
+      const result: Record<string, unknown> = {}
+      for (const [key, val] of this._store.entries()) {
+         if (isSafeKey(key)) {
+            Reflect.set(result, key, val)
+         }
+      }
+      return result
    }
 }

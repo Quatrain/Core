@@ -1,4 +1,4 @@
-import { AbstractConfigSource } from './AbstractConfigSource'
+import { AbstractConfigSource, isSafeKey } from './AbstractConfigSource'
 
 /**
  * Options for configuring the Environment configuration source.
@@ -33,7 +33,7 @@ export interface EnvConfigSourceOptions {
 export class EnvConfigSource extends AbstractConfigSource {
    readonly name: string
    readonly priority: number
-   protected _env: Record<string, string | undefined>
+   protected _env: Map<string, string | undefined>
    protected _prefix: string
 
    /**
@@ -48,11 +48,11 @@ export class EnvConfigSource extends AbstractConfigSource {
       this._prefix = options?.prefix ?? ''
 
       if (options?.env) {
-         this._env = { ...options.env }
-      } else if (typeof process !== 'undefined' && process.env) {
-         this._env = { ...process.env }
+         this._env = new Map(Object.entries(options.env))
+      } else if (typeof process !== 'undefined') {
+         this._env = new Map(Object.entries(process.env))
       } else {
-         this._env = {}
+         this._env = new Map()
       }
    }
 
@@ -68,14 +68,16 @@ export class EnvConfigSource extends AbstractConfigSource {
     * @returns String value if defined and non-empty, or undefined.
     */
    get(key: string): string | undefined {
+      if (!isSafeKey(key)) {
+         return undefined
+      }
+
       const candidates = this._resolveCandidateKeys(key)
 
       for (const candidate of candidates) {
-         if (Object.prototype.hasOwnProperty.call(this._env, candidate)) {
-            const val = this._env[candidate]
-            if (val !== undefined) {
-               return val
-            }
+         const val = this._env.get(candidate)
+         if (val !== undefined) {
+            return val
          }
       }
 
@@ -96,9 +98,11 @@ export class EnvConfigSource extends AbstractConfigSource {
     */
    getAll(): Record<string, unknown> {
       const result: Record<string, unknown> = {}
-      for (const key of Object.keys(this._env)) {
+      for (const [key, val] of this._env.entries()) {
          if (!this._prefix || key.startsWith(this._prefix)) {
-            result[key] = this._env[key]
+            if (isSafeKey(key)) {
+               Reflect.set(result, key, val)
+            }
          }
       }
       return result

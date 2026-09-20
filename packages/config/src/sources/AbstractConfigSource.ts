@@ -1,4 +1,24 @@
 /**
+ * Guards against Prototype Pollution by blocking dangerous object properties.
+ */
+export function isSafeKey(key: string): boolean {
+   return key !== '__proto__' && key !== 'constructor' && key !== 'prototype'
+}
+
+/**
+ * Validates that all segments of a dot-notation path are safe from Prototype Pollution.
+ */
+export function isSafePath(path: string): boolean {
+   const parts = path.split('.')
+   for (const part of parts) {
+      if (!isSafeKey(part)) {
+         return false
+      }
+   }
+   return true
+}
+
+/**
  * Abstract base contract for all configuration source providers.
  * Concrete providers load configuration from environment variables,
  * structured JSON/JS files, or memory dictionaries.

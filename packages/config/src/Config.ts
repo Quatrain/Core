@@ -8,9 +8,7 @@ import { ConfigurationError } from './errors/ConfigurationError'
 /**
  * Registry mapping aliases to their configured ConfigContainer instances.
  */
-export type ConfigRegistry = {
-   [alias: string]: ConfigContainer
-}
+export type ConfigRegistry = Map<string, ConfigContainer>
 
 /**
  * Pivot class for managing application and agent tool configurations across Quatrain.
@@ -31,7 +29,7 @@ export class Config extends Core {
    /**
     * Internal registry mapping aliases to ConfigContainer instances.
     */
-   protected static _configs: ConfigRegistry = {}
+   protected static _configs: ConfigRegistry = new Map<string, ConfigContainer>()
 
    /**
     * Registers a new or existing configuration container under a specific alias.
@@ -52,7 +50,7 @@ export class Config extends Core {
          container = dataOrSource
       } else if (dataOrSource instanceof AbstractConfigSource) {
          container = new ConfigContainer(alias, [dataOrSource])
-      } else if (typeof dataOrSource === 'object' && dataOrSource !== null) {
+      } else if (dataOrSource && typeof dataOrSource === 'object' && !Array.isArray(dataOrSource)) {
          container = new ConfigContainer(alias, [
             new ObjectConfigSource(dataOrSource, `${alias}:object`),
          ])
@@ -60,7 +58,7 @@ export class Config extends Core {
          container = new ConfigContainer(alias)
       }
 
-      this._configs[alias] = container
+      this._configs.set(alias, container)
       this.logger.debug(`Registered config container under alias "${alias}"`)
 
       if (setDefault) {
@@ -80,16 +78,16 @@ export class Config extends Core {
     * @throws {ConfigurationError} If a custom alias is requested but not registered.
     */
    static getConfig(alias: string = this.defaultConfig): ConfigContainer {
-      if (alias === this.defaultConfig && !this._configs[this.defaultConfig]) {
+      if (alias === this.defaultConfig && !this._configs.has(this.defaultConfig)) {
          const defaultContainer = new ConfigContainer(this.defaultConfig, [
             new EnvConfigSource(),
          ])
-         this._configs[this.defaultConfig] = defaultContainer
+         this._configs.set(this.defaultConfig, defaultContainer)
          return defaultContainer
       }
 
-      const existing = this._configs[alias]
-      if (existing) {
+      const existing = this._configs.get(alias)
+      if (existing !== undefined) {
          return existing
       }
 
@@ -121,7 +119,7 @@ export class Config extends Core {
     * @param alias - Target alias identifier.
     */
    static hasConfig(alias: string): boolean {
-      return Object.prototype.hasOwnProperty.call(this._configs, alias)
+      return this._configs.has(alias)
    }
 
    /**
@@ -131,11 +129,7 @@ export class Config extends Core {
     * @returns True if the container was removed.
     */
    static removeConfig(alias: string): boolean {
-      if (this.hasConfig(alias)) {
-         delete this._configs[alias]
-         return true
-      }
-      return false
+      return this._configs.delete(alias)
    }
 
    /**
@@ -143,7 +137,7 @@ export class Config extends Core {
     * Useful for isolating unit tests.
     */
    static clear(): void {
-      this._configs = {}
+      this._configs.clear()
       this.defaultConfig = '@default'
    }
 

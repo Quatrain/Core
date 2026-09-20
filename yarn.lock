@@ -3534,6 +3534,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/example-contact-hub@workspace:examples/contact-hub":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/example-contact-hub@workspace:examples/contact-hub"
+  dependencies:
+    "@quatrain/backend": "workspace:*"
+    "@quatrain/core": "workspace:*"
+    "@quatrain/types": "workspace:*"
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/gateway-upstream-express@workspace:packages/gateway-upstream-express":
   version: 0.0.0-use.local
   resolution: "@quatrain/gateway-upstream-express@workspace:packages/gateway-upstream-express"

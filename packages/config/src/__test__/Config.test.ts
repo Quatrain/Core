@@ -123,10 +123,9 @@ describe('@quatrain/config', () => {
       it('delegates to specified alias when alias argument is provided', () => {
          Config.addConfig('crm', { tenantId: 'tenant-42' })
 
-         const crmVal = Config.get('tenantId', undefined, 'crm')
-         expect(crmVal).toBe('tenant-42')
-         const crmStr = Config.requireString('tenantId', undefined, 'crm')
-         expect(crmStr).toBe('tenant-42')
+         const crmContainer = Config.getConfig('crm')
+         expect(crmContainer.get('tenantId')).toBe('tenant-42')
+         expect(crmContainer.requireString('tenantId')).toBe('tenant-42')
       })
 
       it('throws ConfigurationError on missing required parameter with guidance', () => {

@@ -47,32 +47,6 @@ export class MemoryConfigSource extends AbstractConfigSource {
       }
 
       this._store.set(key, value)
-
-      if (!key.includes('.')) {
-         return
-      }
-
-      const parts = key.split('.')
-      const rootKey = parts[0]
-      let rootObj = this._store.get(rootKey)
-      if (typeof rootObj !== 'object' || rootObj === null || Array.isArray(rootObj)) {
-         rootObj = {}
-         this._store.set(rootKey, rootObj)
-      }
-
-      let current = rootObj as Record<string, unknown>
-      for (let i = 1; i < parts.length - 1; i++) {
-         const part = parts[i]
-         let next = Reflect.get(current, part)
-         if (typeof next !== 'object' || next === null || Array.isArray(next)) {
-            next = {}
-            Reflect.set(current, part, next)
-         }
-         current = next as Record<string, unknown>
-      }
-
-      const lastPart = parts[parts.length - 1]
-      Reflect.set(current, lastPart, value)
    }
 
    /**
@@ -101,8 +75,8 @@ export class MemoryConfigSource extends AbstractConfigSource {
       }
 
       let current: unknown = this._store.get(rootKey)
-      for (let i = 1; i < parts.length; i++) {
-         const part = parts[i]
+      const subParts = parts.slice(1)
+      for (const part of subParts) {
          if (!isSafeKey(part) || typeof current !== 'object' || current === null) {
             return undefined
          }

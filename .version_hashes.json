@@ -398,5 +398,10 @@
     "version": "1.0.0",
     "hash": "KYcT7UHBVj28+KEEFzuxRDL7w44=-add1f403a9032c9789ae8d72cf45f315a782097286c3eb1a5e327fe62a5e495c",
     "last_published": "2026-09-17T07:18:42.913Z"
+  },
+  "@quatrain/ai-openai": {
+    "version": "1.1.1",
+    "hash": "9M066JSMdoXvjUaS7U2CSNXeqPc=-20413853d8835297eb401969acab442c5a1bb9ce6726b2cb16430ff81c4a92eb",
+    "last_published": "2026-09-20T09:55:39.258Z"
   }
 }

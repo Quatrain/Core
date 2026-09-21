@@ -21,7 +21,7 @@
   "dependencies": {
     "@quatrain/api": "workspace:*",
     "@quatrain/auth": "^1.2.13",
-    "@quatrain/backend": "^1.2.20",
+    "@quatrain/backend": "^1.2.21",
     "@supabase/supabase-js": "^2.108.2"
   },
   "devDependencies": {

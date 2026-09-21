@@ -176,7 +176,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           BRANCH="${GITHUB_REF_NAME:-main}"
-          git pull --rebase origin "$BRANCH"
+          git pull --rebase origin "$BRANCH" --autostash
 
       - name: Publish all changed packages
         run: |
@@ -185,6 +185,11 @@ jobs:
           else
             yarn publish:all
           fi
+
+      - name: Sync with remote to prevent push rejection
+        run: |
+          BRANCH="${GITHUB_REF_NAME:-main}"
+          git pull --rebase origin "$BRANCH" --autostash
 
       - name: Commit version bumps & hashes
         uses: stefanzweifel/git-auto-commit-action@v5 # NOSONAR

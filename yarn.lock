@@ -3532,7 +3532,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/core@npm:^1.2.18, @quatrain/core@npm:^1.2.19, @quatrain/core@workspace:*, @quatrain/core@workspace:packages/core":
+"@quatrain/core@npm:^1.2.18, @quatrain/core@workspace:*, @quatrain/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@quatrain/core@workspace:packages/core"
   dependencies:
@@ -3552,6 +3552,18 @@ __metadata:
     which: "npm:^5.0.0"
   languageName: unknown
   linkType: soft
+
+"@quatrain/core@npm:^1.2.19":
+  version: 1.2.19
+  resolution: "@quatrain/core@npm:1.2.19"
+  dependencies:
+    "@quatrain/log": "npm:^1.2.6"
+    "@quatrain/types": "npm:^1.2.18"
+    node-persist: "npm:^4.0.4"
+    which: "npm:^5.0.0"
+  checksum: 10c0/c6082a3b9e401773dd4f298d5111aa4466749bf10a00a823b790c5fd4422ff7a5eacd2f88de999b0e644a4999fd5fd717bdcfa0961f68c67757ad359971ad280
+  languageName: node
+  linkType: hard
 
 "@quatrain/gateway-upstream-express@workspace:packages/gateway-upstream-express":
   version: 0.0.0-use.local
@@ -3683,7 +3695,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/log@workspace:*, @quatrain/log@workspace:packages/log":
+"@quatrain/log@npm:^1.2.6, @quatrain/log@workspace:*, @quatrain/log@workspace:packages/log":
   version: 0.0.0-use.local
   resolution: "@quatrain/log@workspace:packages/log"
   dependencies:
@@ -4088,7 +4100,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/types@workspace:*, @quatrain/types@workspace:packages/types":
+"@quatrain/types@npm:^1.2.18, @quatrain/types@workspace:*, @quatrain/types@workspace:packages/types":
   version: 0.0.0-use.local
   resolution: "@quatrain/types@workspace:packages/types"
   dependencies:

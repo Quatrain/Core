@@ -21,7 +21,7 @@ COPY tsconfig.json ./
 RUN yarn config set nodeLinker node-modules
 
 # Install dependencies
-RUN touch docs/yarn.lock && yarn install --immutable
+RUN touch docs/yarn.lock && YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
 
 # Run full documentation aggregation
 # On utilise 10Go de RAM pour TypeDoc

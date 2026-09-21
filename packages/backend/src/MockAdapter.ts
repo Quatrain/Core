@@ -1,6 +1,5 @@
 import { Core, ObjectUri } from '@quatrain/core'
 import { DataObjectClass } from './types/DataObjectClass'
-import { faker } from '@faker-js/faker'
 import { BackendError } from './BackendError'
 import { NotFoundError } from './NotFoundError'
 import { QueryResultType } from './Query'
@@ -76,8 +75,23 @@ export class MockAdapter
    }
 
    /**
+    * Helper generating a random alphanumeric ID for mock records.
+    * 
+    * @param length - The length of the ID to generate (defaults to 12).
+    * @returns The generated alphanumeric string.
+    */
+   protected generateId(length = 12): string {
+      const chars = '0123456789abcdefghijklmnopqrstuvwxyz'
+      let result = ''
+      for (let i = 0; i < length; i++) {
+         result += chars.charAt(Math.floor(Math.random() * chars.length))
+      }
+      return result
+   }
+
+   /**
     * Mocks the `create` database action, storing the item in the local fixture map.
-    * Generates a random alphanumeric ID via faker.
+    * Generates a random alphanumeric ID.
     * 
     * @param dataObject - The DataObject to save.
     * @returns A promise resolving to the DataObject populated with the new URI.
@@ -85,7 +99,7 @@ export class MockAdapter
    create(dataObject: DataObjectClass<any>): Promise<DataObjectClass<any>> {
       const uri = `${this.getCollection(
          dataObject
-      )}/${faker.random.alphaNumeric(12)}`
+      )}/${this.generateId(12)}`
 
       dataObject.uri = new ObjectUri(uri)
 

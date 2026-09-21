@@ -1,7 +1,7 @@
-import { User } from '@quatrain/core'
+import { User } from '@quatrain/backend'
 
 export interface AuthInterface {
-   register(user: User): Promise<any>
+   register(user: User, clearPassword?: string): Promise<any>
 
    signup(login: string, password: string): Promise<any>
 

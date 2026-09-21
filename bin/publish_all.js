@@ -173,6 +173,15 @@ async function publishAll() {
                     }
                 });
 
+                // Ensure repository metadata exists for npm provenance verification
+                if (!updatedPkgJson.repository || !updatedPkgJson.repository.url) {
+                    updatedPkgJson.repository = {
+                        type: 'git',
+                        url: 'git+https://github.com/Quatrain/Core.git',
+                        directory: `packages/${pkg}`
+                    };
+                }
+
                 try {
                     // Temporarily write the versioned + stripped file
                     fs.writeFileSync(pkgJsonPath, JSON.stringify(updatedPkgJson, null, 2), 'utf8');

@@ -1,4 +1,4 @@
-import { Worker } from './Worker'
+import { Worker, ProcessError } from './Worker'
 import { FileSystem } from './FileSystem'
 import { Helpers } from './Helpers'
 
@@ -8,6 +8,7 @@ import { ModeEnum } from './types/ModeEnum'
 
 export {
    Worker,
+   ProcessError,
    FileSystem,
    Helpers,
    ModeEnum,

@@ -1,4 +1,4 @@
-import { Worker } from './Worker'
+import { Worker, ProcessError } from './Worker'
 import axios from 'axios'
 import { spawn } from 'node:child_process'
 
@@ -275,6 +275,49 @@ describe('Worker', () => {
          await expect(
             Worker.execPromise('invalid-command', [])
          ).rejects.toThrow('Process failed and returned code: 1')
+      })
+
+      it('should extract reason and attach to ProcessError on failure', async () => {
+         const mockChild = {
+            stdout: {
+               on: jest.fn((event, callback) => {
+                  if (event === 'data') {
+                     setTimeout(
+                        () =>
+                           callback(
+                              Buffer.from(
+                                 'Processing frame 1\nNo QR code detected\n'
+                              )
+                           ),
+                        10
+                     )
+                  }
+               }),
+            },
+            stderr: {
+               on: jest.fn(),
+            },
+            on: jest.fn((event, callback) => {
+               if (event === 'close') {
+                  setTimeout(() => callback(1), 20)
+               }
+            }),
+         }
+
+         mockedSpawn.mockReturnValue(mockChild as any)
+
+         let caughtError: unknown
+         try {
+            await Worker.execPromise('tracker', [])
+         } catch (err) {
+            caughtError = err
+         }
+
+         expect(caughtError).toBeInstanceOf(ProcessError)
+         const procErr = caughtError as ProcessError
+         expect(procErr.code).toBe(1)
+         expect(procErr.reason).toBe('No QR code detected')
+         expect(procErr.stdout).toContain('No QR code detected')
       })
 
       it('should use current working directory by default', async () => {

@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/auth",
-  "version": "1.2.12",
+  "version": "1.2.13-beta.0",
   "license": "AGPL-3.0-only",
   "description": "Auth adapters commons",
   "main": "dist/index.js",
@@ -45,5 +45,6 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  }
+  },
+  "stableVersion": "1.2.12"
 }

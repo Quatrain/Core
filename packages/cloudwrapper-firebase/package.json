@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/cloudwrapper-firebase",
-  "version": "1.2.4",
+  "version": "1.2.5-beta.0",
   "license": "AGPL-3.0-only",
   "description": "Cloud Wrapper adapter for Firebase",
   "main": "dist/index.js",
@@ -49,5 +49,6 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  }
+  },
+  "stableVersion": "1.2.4"
 }

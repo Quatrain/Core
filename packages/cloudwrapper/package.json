@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/cloudwrapper",
-  "version": "1.2.3",
+  "version": "1.2.4-beta.0",
   "license": "AGPL-3.0-only",
   "description": "Cloud wrappers commons",
   "main": "dist/index.js",
@@ -48,5 +48,6 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  }
+  },
+  "stableVersion": "1.2.3"
 }

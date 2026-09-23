@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/backend-sqlite",
-  "version": "1.1.9",
+  "version": "1.1.10-beta.0",
   "license": "AGPL-3.0-only",
   "description": "Backend adapter for SQLite",
   "main": "dist/index.js",
@@ -47,5 +47,6 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  }
+  },
+  "stableVersion": "1.1.9"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/core",
-  "version": "1.2.18",
+  "version": "1.2.19-beta.0",
   "description": "Core objects for business apps",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -45,5 +45,6 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  }
+  },
+  "stableVersion": "1.2.18"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/backend-firestore",
-  "version": "1.2.15",
+  "version": "1.2.16-beta.0",
   "license": "AGPL-3.0-only",
   "description": "Backend adapter for Firestore",
   "main": "dist/index.js",
@@ -49,5 +49,6 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  }
+  },
+  "stableVersion": "1.2.15"
 }

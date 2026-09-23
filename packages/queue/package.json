@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/queue",
-  "version": "1.2.3",
+  "version": "1.2.4-beta.0",
   "description": "Message Queue management base",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -44,5 +44,6 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  }
+  },
+  "stableVersion": "1.2.3"
 }

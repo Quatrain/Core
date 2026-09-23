@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/auth-github",
-  "version": "1.2.11",
+  "version": "1.2.12-beta.0",
   "license": "AGPL-3.0-only",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -31,5 +31,6 @@
     "build": "tsc",
     "wbuild": "tsc --watch",
     "bump-to": "yarn version"
-  }
+  },
+  "stableVersion": "1.2.11"
 }

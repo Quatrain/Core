@@ -133,6 +133,7 @@ async function publishAll() {
         const pkgName = pkgJson.name;
         
         const hash = computedHashes[pkgName];
+        const previousData = previousDataMap[pkgName] || {};
         const prevBuf = Buffer.from(previousData.hash || '');
         const currBuf = Buffer.from(hash || '');
         const isHashMatching = prevBuf.length === currBuf.length && crypto.timingSafeEqual(prevBuf, currBuf);

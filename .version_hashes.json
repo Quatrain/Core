@@ -90,14 +90,14 @@
     "last_published": "2026-09-23T12:45:50.085Z"
   },
   "@quatrain/storage-s3": {
-    "version": "1.2.9-beta.0",
-    "hash": "9OtJ7/PwTdxSBrnzzF0IHTCSnI0=-5592b44b2f3073fd46e5b886d275dc4ad3561e0e98a599fc6813c5c169f8cb11",
-    "last_published": "2026-09-23T12:46:00.882Z"
+    "version": "1.2.9",
+    "hash": "gmuFDALrvoYxrjF8gD0b9ny+Prw=-56bb978ff5dcebcf9b944df96f3a626265091957d2b036fec8f508391c2095df",
+    "last_published": "2026-09-16T08:53:46.078Z"
   },
   "@quatrain/storage-supabase": {
-    "version": "1.2.11-beta.0",
-    "hash": "fz4B0QuYBDbqva5v++t3iE6vjzA=-a750f1a6b38b835a1489f5439bdbae8b336973799a351705362d97515b3f3f98",
-    "last_published": "2026-09-23T12:46:07.644Z"
+    "version": "1.2.11",
+    "hash": "PFIgolKCf5csB4oF7OhnUDeFfmE=-7e39ea528a70e9e9ed244d312b00bbdbc8bee47320eb0f8adc355392548775b2",
+    "last_published": "2026-09-16T08:53:49.504Z"
   },
   "@quatrain/worker": {
     "version": "1.2.15-beta.0",
@@ -220,9 +220,9 @@
     "last_published": "2026-05-15T13:36:43.943Z"
   },
   "@quatrain/api-server-express": {
-    "version": "1.1.14",
-    "hash": "RhwiVXXkJjBHCBovYa9t7DGu+AU=-4e6c2fe5448b92cc9e27c7705b0713e302926d4dd06c95557f9b358cfef1e71d",
-    "last_published": "2026-09-07T15:16:23.388Z"
+    "version": "1.1.16",
+    "hash": "ozTIpOwkTF1luGazk32zv6EO+uQ=-4e6c2fe5448b92cc9e27c7705b0713e302926d4dd06c95557f9b358cfef1e71d",
+    "last_published": "2026-09-16T14:14:39.944Z"
   },
   "@quatrain/auth-basic": {
     "version": "1.0.3",

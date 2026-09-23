@@ -26,6 +26,14 @@ export class ExpressAdapter implements ServerAdapter {
       }
    }
 
+   /**
+    * Maps Express native request and response objects into Quatrain-standardized
+    * ApiRequest and ApiResponse wrappers while preserving native stream and response methods.
+    * 
+    * @param req - Native Express request.
+    * @param res - Native Express response.
+    * @returns Object containing standardized apiReq and apiRes instances.
+    */
    private mapRequestResponse(req: express.Request, res: express.Response): { apiReq: ApiRequest; apiRes: ApiResponse } {
       const apiReq: ApiRequest = Object.assign(req, {
          body: req.body,
@@ -34,31 +42,18 @@ export class ExpressAdapter implements ServerAdapter {
          headers: req.headers as Record<string, string | string[] | undefined>
       })
 
-      const apiRes: ApiResponse = {
-         status: (code: number) => {
-            res.status(code)
-            return apiRes
-         },
-         json: (data: any) => {
-            res.json(data)
-         },
-         send: (data?: any) => {
-            res.send(data)
-         },
-         setHeader: (name: string, value: string) => {
-            res.setHeader(name, value)
-         },
-         write: (data: string) => {
-            res.write(data)
-         },
-         end: () => {
-            res.end()
-         }
-      }
+      const apiRes: ApiResponse = res
 
       return { apiReq, apiRes }
    }
 
+   /**
+    * Wraps a standard Quatrain ApiHandler into an Express RequestHandler middleware,
+    * forwarding any thrown asynchronous errors to Express's next() error handler.
+    * 
+    * @param handler - The Quatrain ApiHandler to wrap.
+    * @returns An Express RequestHandler function.
+    */
    private wrapHandler(handler: ApiHandler): express.RequestHandler {
       return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
          void (async () => {
@@ -68,6 +63,14 @@ export class ExpressAdapter implements ServerAdapter {
       }
    }
 
+   /**
+    * Normalizes a handler argument into an Express RequestHandler.
+    * Preserves native Express error/middleware handlers having 3 or more arguments,
+    * and wraps standard 2-argument Quatrain ApiHandlers.
+    * 
+    * @param handler - The handler function or middleware.
+    * @returns A compatible Express RequestHandler.
+    */
    private normalizeHandler(handler: any): express.RequestHandler {
       if (typeof handler === 'function' && handler.length >= 3) {
          return handler

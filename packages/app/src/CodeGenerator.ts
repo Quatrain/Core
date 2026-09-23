@@ -120,7 +120,7 @@ ${layoutCode}         {/* --- Fin du layout --- */}
    private static generatePackageJson(config: any, targetDir: string): void {
       const packagePath = path.resolve(targetDir, 'package.json')
       
-      const targetNpmTag = 'latest-dev' // Use 'latest' for production, 'latest-dev' for testing features
+      const targetNpmTag = 'beta' // Use 'latest' for production, 'beta' for testing features
 
       const packageJson = {
          name: config.name?.toLowerCase().replaceAll(/[^a-z0-9]/g, '-') || "quatrain-generated-app",
@@ -419,8 +419,8 @@ export const down = async ({ context: adapter }: { context: AbstractBackendAdapt
          dependencies: {
             "@mantine/core": "^7.11.1",
             "@mantine/hooks": "^7.11.1",
-            "@quatrain/api-client": "latest-dev",
-            "@quatrain/ux-form-react": "latest-dev",
+            "@quatrain/api-client": "beta",
+            "@quatrain/ux-form-react": "beta",
             "react": "^18.3.1",
             "react-dom": "^18.3.1",
             "react-router-dom": "^6.24.1"

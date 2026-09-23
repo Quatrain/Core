@@ -70,7 +70,33 @@ export class Core {
       }
    }
 
+   /**
+    * Stores a primitive value durably in the core storage instance.
+    * 
+    * @param key - Identification string.
+    * @param value - Value.
+    * @deprecated Deprecated since Quatrain v1.2.0. Use `@quatrain/config` instead.
+    */
+   static async addConfig(key: string, value: any) {
+      if (!this.storage.set) {
+         await this.storage.init()
+      }
+      await this.storage.set(`${this.storagePrefix}_${key}`, value)
+   }
 
+   /**
+    * Recovers a durably persisted value from the storage layer.
+    * 
+    * @param key - The target identifier.
+    * @returns The recovered value.
+    * @deprecated Deprecated since Quatrain v1.2.0. Use `@quatrain/config` instead.
+    */
+   static async getConfig(key: string) {
+      if (!this.storage.get) {
+         await this.storage.init()
+      }
+      return await this.storage.get(`${this.storagePrefix}_${key}`)
+   }
    /**
     * Maps a specific entity class to an active name so the factory reflection can locate it.
     * 

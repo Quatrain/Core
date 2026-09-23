@@ -44,3 +44,4 @@ docs/out/
 docs/.yarn/
 firestore-debug.log
 firebase-debug.log
+.node-persist/

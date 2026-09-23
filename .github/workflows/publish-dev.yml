@@ -61,8 +61,8 @@ jobs:
             exit 1
           fi
 
-      - name: Publish all changed packages (latest-dev)
-        run: yarn node bin/publish_all.js --tag latest-dev
+      - name: Publish all changed packages (beta)
+        run: yarn node bin/publish_all.js --tag beta --beta
 
       - name: Sync with remote to prevent push rejection
         run: |

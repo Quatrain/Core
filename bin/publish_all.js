@@ -97,11 +97,9 @@ async function publishAll() {
     }
 
     const forceBuild = process.argv.includes('--force');
-    const prArgIndex = process.argv.indexOf('--pr');
-    const prNum = prArgIndex !== -1 ? process.argv[prArgIndex + 1] : null;
     const tagArgIndex = process.argv.indexOf('--tag');
     const isBeta = process.argv.includes('--beta') || (tagArgIndex !== -1 && process.argv[tagArgIndex + 1] === 'beta');
-    const defaultTag = isBeta ? 'beta' : (prNum ? `pr${prNum}` : 'latest');
+    const defaultTag = isBeta ? 'beta' : 'latest';
     const npmTag = tagArgIndex !== -1 ? process.argv[tagArgIndex + 1] : defaultTag;
     const tagString = npmTag ? `--tag ${npmTag}` : '';
 
@@ -136,7 +134,7 @@ async function publishAll() {
         const hash = computedHashes[pkgName];
         const previousData = previousDataMap[pkgName];
         
-        if (previousData.hash !== hash || prNum) {
+        if (previousData.hash !== hash) {
             console.log(`[PUBLISH] Changes detected in ${pkgName}. Releasing...`);
             
             try {
@@ -145,12 +143,7 @@ async function publishAll() {
                 const originalPkgContent = fs.readFileSync(pkgJsonPath, 'utf8');
                 let bumpedContent = originalPkgContent;
 
-                if (prNum) {
-                    const baseVersion = pkgJson.version.split('-')[0];
-                    newVersion = `${baseVersion}-pr${prNum}.${Date.now().toString().slice(-4)}`;
-                    updatedPkgJson = JSON.parse(originalPkgContent);
-                    updatedPkgJson.version = newVersion;
-                } else if (isBeta) {
+                if (isBeta) {
                     const currentVer = pkgJson.version;
                     const betaMatch = currentVer.match(/^(\d+\.\d+\.\d+)-beta\.(\d+)$/);
                     if (betaMatch) {
@@ -253,20 +246,18 @@ async function publishAll() {
                     }
                 } finally {
                     // Restore the package.json to retain workspace: protocols but keep the version bump
-                    fs.writeFileSync(pkgJsonPath, prNum ? originalPkgContent : bumpedContent, 'utf8');
+                    fs.writeFileSync(pkgJsonPath, bumpedContent, 'utf8');
                     if (fs.existsSync(path.join(pkgDir, 'package.tgz'))) fs.unlinkSync(path.join(pkgDir, 'package.tgz'));
                     if (fs.existsSync(path.join(pkgDir, '.npmignore'))) fs.unlinkSync(path.join(pkgDir, '.npmignore'));
                 }
                 
-                // Keep registry updated with the stable hash (only for official releases)
-                if (!prNum) {
-                    registry[pkgName] = {
-                        version: newVersion,
-                        hash: hash,
-                        last_published: new Date().toISOString()
-                    };
-                    changed = true;
-                }
+                // Keep registry updated with the stable hash
+                registry[pkgName] = {
+                    version: newVersion,
+                    hash: hash,
+                    last_published: new Date().toISOString()
+                };
+                changed = true;
                 
                 console.log(`[PUBLISH] Success for ${pkgName} v${newVersion} (tag: ${npmTag})`);
                 publishedPackages.push({

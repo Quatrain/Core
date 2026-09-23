@@ -20,13 +20,13 @@
   ],
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "peerDependencies": {
-    "@quatrain/core": "^1.2.19"
+    "@quatrain/core": "workspace:*"
   },
   "dependencies": {
-    "@quatrain/backend": "^1.2.21",
-    "@quatrain/cloudwrapper": "^1.2.3",
-    "@quatrain/core": "^1.2.19",
-    "@quatrain/storage": "^1.2.14",
+    "@quatrain/backend": "workspace:*",
+    "@quatrain/cloudwrapper": "workspace:*",
+    "@quatrain/core": "workspace:*",
+    "@quatrain/storage": "workspace:*",
     "@supabase/supabase-js": "^2.108.2",
     "ws": "^8.18.3"
   },

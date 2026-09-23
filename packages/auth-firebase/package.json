@@ -19,13 +19,13 @@
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "peerDependencies": {
-    "@quatrain/core": "^1.2.19"
+    "@quatrain/core": "workspace:*"
   },
   "dependencies": {
     "@quatrain/api": "workspace:*",
-    "@quatrain/auth": "^1.2.13",
-    "@quatrain/backend": "^1.2.21",
-    "@quatrain/core": "^1.2.19",
+    "@quatrain/auth": "workspace:*",
+    "@quatrain/backend": "workspace:*",
+    "@quatrain/core": "workspace:*",
     "firebase-admin": "^13.0.1"
   },
   "devDependencies": {

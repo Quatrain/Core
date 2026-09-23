@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-sqs": "3.721.0",
-    "@quatrain/queue": "^1.2.3"
+    "@quatrain/queue": "workspace:*"
   },
   "scripts": {
     "test-ci": "jest --runInBand",

@@ -21,8 +21,8 @@
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
     "@google/genai": "latest",
-    "@quatrain/ai": "^1.1.4",
-    "@quatrain/core": "^1.2.19"
+    "@quatrain/ai": "workspace:*",
+    "@quatrain/core": "workspace:*"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

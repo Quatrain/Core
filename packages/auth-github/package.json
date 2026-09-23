@@ -19,8 +19,8 @@
   "author": "Quatrain Développement SAS <developers@quatrain.com>",
   "dependencies": {
     "@quatrain/api": "workspace:*",
-    "@quatrain/auth": "^1.2.13",
-    "@quatrain/backend": "^1.2.21"
+    "@quatrain/auth": "workspace:*",
+    "@quatrain/backend": "workspace:*"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

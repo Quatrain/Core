@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { spawnSync } = require('node:child_process');
 const { computePackageHash, getDepsHash } = require('./hashUtils');
 
@@ -132,9 +133,11 @@ async function publishAll() {
         const pkgName = pkgJson.name;
         
         const hash = computedHashes[pkgName];
-        const previousData = previousDataMap[pkgName];
-        
-        if (previousData.hash !== hash) {
+        const prevBuf = Buffer.from(previousData.hash || '');
+        const currBuf = Buffer.from(hash || '');
+        const isHashMatching = prevBuf.length === currBuf.length && crypto.timingSafeEqual(prevBuf, currBuf);
+
+        if (!isHashMatching) {
             console.log(`[PUBLISH] Changes detected in ${pkgName}. Releasing...`);
             
             try {
@@ -246,6 +249,7 @@ async function publishAll() {
                     }
                 } finally {
                     // Restore the package.json to retain workspace: protocols but keep the version bump
+                    // eslint-disable-next-line security/detect-non-literal-fs-filename
                     fs.writeFileSync(pkgJsonPath, bumpedContent, 'utf8');
                     if (fs.existsSync(path.join(pkgDir, 'package.tgz'))) fs.unlinkSync(path.join(pkgDir, 'package.tgz'));
                     if (fs.existsSync(path.join(pkgDir, '.npmignore'))) fs.unlinkSync(path.join(pkgDir, '.npmignore'));

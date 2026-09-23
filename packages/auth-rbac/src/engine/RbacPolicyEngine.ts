@@ -12,9 +12,14 @@ import { mapHttpMethodToAction } from '../types'
 import { TarpitManager } from './TarpitManager'
 
 /**
+ * Accepted semantic action, HTTP verb or custom action string for route evaluation.
+ */
+export type RouteActionInput = RbacAction | HttpMethod | (string & Record<never, never>)
+
+/**
  * Normalizes an action or HTTP method to unified semantic RbacAction.
  */
-function normalizeAction(actionOrMethod: string): { semantic: RbacAction; raw: string } {
+function normalizeAction(actionOrMethod: RouteActionInput): { semantic: RbacAction; raw: string } {
   const upper = (actionOrMethod || 'READ').toUpperCase()
   if (['READ', 'WRITE', 'CREATE', 'UPDATE', 'DELETE', 'EXECUTE', 'MANAGE', '*'].includes(upper)) {
     return { semantic: upper as RbacAction, raw: upper }
@@ -50,7 +55,7 @@ function matchGlob(pattern: string, uri: string): boolean {
       .map((segment) =>
         segment
           .split('*')
-          .map((sub) => sub.replace(/[-[\]{}()+?.,\\^$|#\s]/g, '\\$&'))
+          .map((sub) => sub.replace(/[-[\]{}()+?.,\\^$|#\s]/g, String.raw`\$&`))
           .join('[^/]+')
       )
       .join('.*') +
@@ -65,7 +70,7 @@ function matchGlob(pattern: string, uri: string): boolean {
  * Manages role hierarchies, route authorizations, payload sanitization, and M2M tarpitting.
  */
 export class RbacPolicyEngine {
-  private roles: Map<string, RoleDefinition> = new Map()
+  private readonly roles = new Map<string, RoleDefinition>()
   /**
    * Dedicated manager handling rate-limiting, anomaly detection, and intentional tarpitting latency.
    */
@@ -128,6 +133,76 @@ export class RbacPolicyEngine {
   }
 
   /**
+   * Evaluates tarpit delays and potential block state across applicable roles.
+   */
+  private evaluateTarpitState(
+    user: RbacUserContext,
+    roles: RoleDefinition[]
+  ): { tarpitDelayMs: number; isThrottled: boolean; isBlocked: boolean } {
+    let tarpitDelayMs = 0
+    let isThrottled = false
+
+    for (const role of roles) {
+      if (role.tarpit && role.tarpit.enabled !== false) {
+        const subjectKey = `${user.subjectType || 'human'}:${user.id}`
+        const tarpitRes = this.tarpitManager.evaluate(subjectKey, role.tarpit)
+        if (tarpitRes.delayMs > tarpitDelayMs) {
+          tarpitDelayMs = tarpitRes.delayMs
+        }
+        if (tarpitRes.isThrottled) {
+          isThrottled = true
+        }
+        if (tarpitRes.isBlocked) {
+          return { tarpitDelayMs, isThrottled: true, isBlocked: true }
+        }
+      }
+    }
+
+    return { tarpitDelayMs, isThrottled, isBlocked: false }
+  }
+
+  /**
+   * Determines if a route rule matches the given semantic or HTTP action.
+   */
+  private isRuleActionMatch(
+    rule: RouteRule,
+    normalized: { semantic: RbacAction; raw: string }
+  ): boolean {
+    const declaredActions = rule.actions || rule.methods || []
+    if (declaredActions.length === 0) return true
+    if (declaredActions.includes('*') || declaredActions.includes('MANAGE')) return true
+    if (declaredActions.includes(normalized.semantic)) return true
+    if (declaredActions.includes(normalized.raw as any)) return true
+    return normalized.semantic === 'WRITE' && declaredActions.includes('CREATE' as any)
+  }
+
+  /**
+   * Scans applicable roles for the highest specificity matching route rule.
+   */
+  private findMatchingRouteRule(
+    roles: RoleDefinition[],
+    normUri: string,
+    normalized: { semantic: RbacAction; raw: string }
+  ): RouteRule | null {
+    const matchingRules: { rule: RouteRule; score: number }[] = []
+
+    for (const role of roles) {
+      if (!role.routes) continue
+
+      for (const rule of role.routes) {
+        if (this.isRuleActionMatch(rule, normalized) && matchGlob(rule.pattern, normUri)) {
+          const score = rule.pattern.replaceAll('*', '').length
+          matchingRules.push({ rule, score })
+        }
+      }
+    }
+
+    if (matchingRules.length === 0) return null
+    matchingRules.sort((a, b) => b.score - a.score)
+    return matchingRules[0].rule
+  }
+
+  /**
    * Evaluates route access for a user context against a target URI and semantic action (or HTTP method).
    *
    * @param user - Authenticated user context.
@@ -138,73 +213,33 @@ export class RbacPolicyEngine {
   public evaluateRoute(
     user: RbacUserContext,
     uri: string,
-    actionOrMethod: RbacAction | HttpMethod | string = 'READ'
+    actionOrMethod: RouteActionInput = 'READ'
   ): RouteEvaluationResult {
     const normUri = normalizeUri(uri)
     const normalized = normalizeAction(actionOrMethod)
     const applicableRoles = this.getApplicableRoles(user)
 
     // 1. Tarpit Evaluation for M2M Agents and suspicious traffic
-    let highestTarpitDelay = 0
-    let isThrottled = false
-
-    for (const role of applicableRoles) {
-      if (role.tarpit && role.tarpit.enabled !== false) {
-        const subjectKey = `${user.subjectType || 'human'}:${user.id}`
-        const tarpitRes = this.tarpitManager.evaluate(subjectKey, role.tarpit)
-        if (tarpitRes.delayMs > highestTarpitDelay) {
-          highestTarpitDelay = tarpitRes.delayMs
-        }
-        if (tarpitRes.isThrottled) {
-          isThrottled = true
-        }
-        if (tarpitRes.isBlocked) {
-          return {
-            allowed: false,
-            decision: 'deny',
-            tarpitDelayMs: highestTarpitDelay,
-            isThrottled: true,
-            reason: 'Subject is temporarily blocked due to repeated rate limit violations (Tarpit Lock).'
-          }
-        }
+    const tarpit = this.evaluateTarpitState(user, applicableRoles)
+    if (tarpit.isBlocked) {
+      return {
+        allowed: false,
+        decision: 'deny',
+        tarpitDelayMs: tarpit.tarpitDelayMs,
+        isThrottled: true,
+        reason: 'Subject is temporarily blocked due to repeated rate limit violations (Tarpit Lock).'
       }
     }
 
     // 2. Gather all route rules from applicable roles
-    const matchingRules: { rule: RouteRule; score: number }[] = []
-
-    for (const role of applicableRoles) {
-      if (!role.routes) continue
-
-      for (const rule of role.routes) {
-        const declaredActions = rule.actions || rule.methods || []
-        const actionMatches =
-          declaredActions.length === 0 ||
-          declaredActions.includes('*') ||
-          declaredActions.includes('MANAGE') ||
-          declaredActions.includes(normalized.semantic) ||
-          declaredActions.includes(normalized.raw as any) ||
-          (normalized.semantic === 'WRITE' && declaredActions.includes('CREATE' as any))
-
-        if (actionMatches && matchGlob(rule.pattern, normUri)) {
-          // Specificity score: longer patterns have higher priority
-          const score = rule.pattern.replace(/\*/g, '').length
-          matchingRules.push({ rule, score })
-        }
-      }
-    }
-
-    // Sort by specificity descending
-    matchingRules.sort((a, b) => b.score - a.score)
-
-    if (matchingRules.length > 0) {
-      const topMatch = matchingRules[0].rule
+    const matchedRule = this.findMatchingRouteRule(applicableRoles, normUri, normalized)
+    if (matchedRule) {
       return {
-        allowed: topMatch.access === 'allow',
-        decision: topMatch.access,
-        matchedRule: topMatch,
-        tarpitDelayMs: highestTarpitDelay,
-        isThrottled
+        allowed: matchedRule.access === 'allow',
+        decision: matchedRule.access,
+        matchedRule,
+        tarpitDelayMs: tarpit.tarpitDelayMs,
+        isThrottled: tarpit.isThrottled
       }
     }
 
@@ -212,8 +247,8 @@ export class RbacPolicyEngine {
     return {
       allowed: false,
       decision: 'deny',
-      tarpitDelayMs: highestTarpitDelay,
-      isThrottled,
+      tarpitDelayMs: tarpit.tarpitDelayMs,
+      isThrottled: tarpit.isThrottled,
       reason: 'No matching route rule found (Default Deny).'
     }
   }
@@ -224,7 +259,7 @@ export class RbacPolicyEngine {
   public canAccessRoute(
     user: RbacUserContext,
     uri: string,
-    actionOrMethod: RbacAction | HttpMethod | string = 'READ'
+    actionOrMethod: RouteActionInput = 'READ'
   ): boolean {
     return this.evaluateRoute(user, uri, actionOrMethod).allowed
   }

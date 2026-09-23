@@ -11,7 +11,7 @@ interface SubjectTrafficRecord {
  * Designed to neutralize aggressive scraping, brute-force attempts, and runaway AI agent loops.
  */
 export class TarpitManager {
-  private traffic: Map<string, SubjectTrafficRecord> = new Map()
+  private readonly traffic: Map<string, SubjectTrafficRecord> = new Map()
 
   /**
    * Evaluates request traffic for a given subject key and returns the required tarpit delay or blocking decision.

@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import { Core, ObjectUri } from '@quatrain/core'
 import { DataObjectClass } from './types/DataObjectClass'
 import { BackendError } from './BackendError'
@@ -82,9 +83,10 @@ export class MockAdapter
     */
    protected generateId(length = 12): string {
       const chars = '0123456789abcdefghijklmnopqrstuvwxyz'
+      const bytes = crypto.randomBytes(length)
       let result = ''
       for (let i = 0; i < length; i++) {
-         result += chars.charAt(Math.floor(Math.random() * chars.length))
+         result += chars.charAt(bytes[i] % chars.length)
       }
       return result
    }

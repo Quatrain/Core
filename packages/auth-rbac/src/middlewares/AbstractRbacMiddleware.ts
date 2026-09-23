@@ -35,7 +35,7 @@ export abstract class AbstractRbacMiddleware<TRequest = any, TResponse = any, TN
     request: TRequest,
     response: TResponse,
     reason: 'unauthenticated' | 'forbidden' | 'tarpit_blocked'
-  ): Promise<any> | any
+  ): Promise<unknown> | unknown
 
   /**
    * Factory method building a scoped `RbacRequestContext` helper for controllers and templates.

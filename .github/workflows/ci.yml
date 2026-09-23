@@ -192,10 +192,26 @@ jobs:
           git pull --rebase origin "$BRANCH" --autostash
 
       - name: Commit version bumps & hashes
+        id: auto_commit
         uses: stefanzweifel/git-auto-commit-action@v5 # NOSONAR
         with:
           commit_message: "chore: release versions & update hashes [skip ci]"
           commit_options: '--no-verify'
+
+      - name: Create and push temporal release tag on main
+        if: github.ref == 'refs/heads/main' && steps.auto_commit.outputs.changes_detected == 'true'
+        run: |
+          git fetch --tags origin
+          DATE_TAG="v$(date -u +'%Y.%m.%d')"
+          TAG="$DATE_TAG"
+          COUNTER=1
+          while git rev-parse "$TAG" >/dev/null 2>&1; do
+            TAG="${DATE_TAG}.${COUNTER}"
+            COUNTER=$((COUNTER + 1))
+          done
+          echo "Creating temporal release tag: $TAG"
+          git tag -a "$TAG" -m "Release $TAG [skip ci]"
+          git push origin "$TAG"
 
   publish-preview:
     name: Publish On-Demand QA Preview Packages

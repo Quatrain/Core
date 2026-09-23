@@ -1,4 +1,9 @@
-import { Core } from '@quatrain/core'
+import {
+   AbstractLoggerAdapter,
+   DefaultLoggerAdapter,
+   Log,
+   LogLevel,
+} from '@quatrain/log'
 import { ConfigContainer } from './ConfigContainer'
 import { AbstractConfigSource } from './sources/AbstractConfigSource'
 import { ObjectConfigSource } from './sources/ObjectConfigSource'
@@ -12,10 +17,10 @@ export type ConfigRegistry = Map<string, ConfigContainer>
 
 /**
  * Pivot class for managing application and agent tool configurations across Quatrain.
- * Extends `Core` and manages a central registry of isolated configuration namespaces,
+ * Manages a central registry of isolated configuration namespaces,
  * mirroring sister classes such as `Backend`, `Storage`, `Log`, and `Queue`.
  */
-export class Config extends Core {
+export class Config {
    /**
     * Internal store for the default configuration alias.
     */
@@ -35,7 +40,11 @@ export class Config extends Core {
    /**
     * Dedicated logger scope for the Config subsystem.
     */
-   static readonly logger = this.addLogger('Config')
+   static readonly logger: AbstractLoggerAdapter = Log.addLogger(
+      '@Config',
+      new DefaultLoggerAdapter('Config', LogLevel.DEBUG),
+      true
+   )
 
    /**
     * Internal registry mapping aliases to ConfigContainer instances.

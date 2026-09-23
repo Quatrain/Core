@@ -181,7 +181,7 @@ jobs:
       - name: Publish all changed packages
         run: |
           if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
-            yarn publish:all --tag latest-dev
+            yarn publish:all --tag beta --beta
           else
             yarn publish:all
           fi

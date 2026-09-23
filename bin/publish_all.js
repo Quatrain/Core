@@ -100,7 +100,9 @@ async function publishAll() {
     const prArgIndex = process.argv.indexOf('--pr');
     const prNum = prArgIndex !== -1 ? process.argv[prArgIndex + 1] : null;
     const tagArgIndex = process.argv.indexOf('--tag');
-    const npmTag = tagArgIndex !== -1 ? process.argv[tagArgIndex + 1] : (prNum ? `pr${prNum}` : 'latest');
+    const isBeta = process.argv.includes('--beta') || (tagArgIndex !== -1 && process.argv[tagArgIndex + 1] === 'beta');
+    const defaultTag = isBeta ? 'beta' : (prNum ? `pr${prNum}` : 'latest');
+    const npmTag = tagArgIndex !== -1 ? process.argv[tagArgIndex + 1] : defaultTag;
     const tagString = npmTag ? `--tag ${npmTag}` : '';
 
     if (!anyPackageChanged && !forceBuild) {
@@ -141,18 +143,43 @@ async function publishAll() {
                 let newVersion;
                 let updatedPkgJson;
                 const originalPkgContent = fs.readFileSync(pkgJsonPath, 'utf8');
+                let bumpedContent = originalPkgContent;
 
                 if (prNum) {
                     const baseVersion = pkgJson.version.split('-')[0];
                     newVersion = `${baseVersion}-pr${prNum}.${Date.now().toString().slice(-4)}`;
                     updatedPkgJson = JSON.parse(originalPkgContent);
                     updatedPkgJson.version = newVersion;
-                } else {
-                    // Execute standard release pipeline
-                    runSync('yarn', ['version', 'patch'], { cwd: pkgDir, stdio: 'inherit' });
-                    const bumpedContent = fs.readFileSync(pkgJsonPath, 'utf8');
+                } else if (isBeta) {
+                    const currentVer = pkgJson.version;
+                    const betaMatch = currentVer.match(/^(\d+\.\d+\.\d+)-beta\.(\d+)$/);
+                    if (betaMatch) {
+                        const nextCount = parseInt(betaMatch[2], 10) + 1;
+                        newVersion = `${betaMatch[1]}-beta.${nextCount}`;
+                    } else {
+                        // Current version is stable (e.g. 1.2.19), bump patch and append -beta.0
+                        const base = currentVer.split('-')[0];
+                        const parts = base.split('.').map(Number);
+                        parts[2] = (parts[2] || 0) + 1;
+                        newVersion = `${parts.join('.')}-beta.0`;
+                    }
+                    runSync('yarn', ['version', newVersion], { cwd: pkgDir, stdio: 'inherit' });
+                    bumpedContent = fs.readFileSync(pkgJsonPath, 'utf8');
                     updatedPkgJson = JSON.parse(bumpedContent);
-                    newVersion = updatedPkgJson.version;
+                } else {
+                    // Standard stable release (on main)
+                    if (pkgJson.version.includes('-beta')) {
+                        // Finalize beta version to stable SemVer
+                        newVersion = pkgJson.version.split('-')[0];
+                        runSync('yarn', ['version', newVersion], { cwd: pkgDir, stdio: 'inherit' });
+                        bumpedContent = fs.readFileSync(pkgJsonPath, 'utf8');
+                        updatedPkgJson = JSON.parse(bumpedContent);
+                    } else {
+                        runSync('yarn', ['version', 'patch'], { cwd: pkgDir, stdio: 'inherit' });
+                        bumpedContent = fs.readFileSync(pkgJsonPath, 'utf8');
+                        updatedPkgJson = JSON.parse(bumpedContent);
+                        newVersion = updatedPkgJson.version;
+                    }
                 }
                 
                 // Strip workspace: protocol before packing
@@ -226,7 +253,7 @@ async function publishAll() {
                     }
                 } finally {
                     // Restore the package.json to retain workspace: protocols but keep the version bump
-                    fs.writeFileSync(pkgJsonPath, originalPkgContent, 'utf8');
+                    fs.writeFileSync(pkgJsonPath, prNum ? originalPkgContent : bumpedContent, 'utf8');
                     if (fs.existsSync(path.join(pkgDir, 'package.tgz'))) fs.unlinkSync(path.join(pkgDir, 'package.tgz'));
                     if (fs.existsSync(path.join(pkgDir, '.npmignore'))) fs.unlinkSync(path.join(pkgDir, '.npmignore'));
                 }

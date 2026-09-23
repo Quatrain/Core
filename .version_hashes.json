@@ -90,14 +90,14 @@
     "last_published": "2026-09-23T12:45:50.085Z"
   },
   "@quatrain/storage-s3": {
-    "version": "1.2.9",
-    "hash": "gmuFDALrvoYxrjF8gD0b9ny+Prw=-56bb978ff5dcebcf9b944df96f3a626265091957d2b036fec8f508391c2095df",
-    "last_published": "2026-09-16T08:53:46.078Z"
+    "version": "1.2.10-beta.0",
+    "hash": "gmuFDALrvoYxrjF8gD0b9ny+Prw=-5592b44b2f3073fd46e5b886d275dc4ad3561e0e98a599fc6813c5c169f8cb11",
+    "last_published": "2026-09-23T16:14:42.517Z"
   },
   "@quatrain/storage-supabase": {
-    "version": "1.2.11",
-    "hash": "PFIgolKCf5csB4oF7OhnUDeFfmE=-7e39ea528a70e9e9ed244d312b00bbdbc8bee47320eb0f8adc355392548775b2",
-    "last_published": "2026-09-16T08:53:49.504Z"
+    "version": "1.2.12-beta.0",
+    "hash": "PFIgolKCf5csB4oF7OhnUDeFfmE=-a750f1a6b38b835a1489f5439bdbae8b336973799a351705362d97515b3f3f98",
+    "last_published": "2026-09-23T16:14:48.990Z"
   },
   "@quatrain/worker": {
     "version": "1.2.15-beta.0",

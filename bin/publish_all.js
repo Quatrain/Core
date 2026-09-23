@@ -76,6 +76,13 @@ async function publishAll() {
     const previousDataMap = {};
     let anyPackageChanged = false;
     
+    const forceBuild = process.argv.includes('--force');
+    const tagArgIndex = process.argv.indexOf('--tag');
+    const isBeta = process.argv.includes('--beta') || (tagArgIndex !== -1 && process.argv[tagArgIndex + 1] === 'beta');
+    const defaultTag = isBeta ? 'beta' : 'latest';
+    const npmTag = tagArgIndex !== -1 ? process.argv[tagArgIndex + 1] : defaultTag;
+    const tagString = npmTag ? `--tag ${npmTag}` : '';
+
     console.log('[PREPARE] Computing stable hashes prior to build...');
     for (const pkg of packages) {
         const pkgDir = getPkgDir(pkg);
@@ -91,18 +98,12 @@ async function publishAll() {
         previousDataMap[pkgName] = registry[pkgName] || {};
         
         const hasDist = fs.existsSync(path.join(pkgDir, 'dist')) || fs.existsSync(path.join(pkgDir, 'lib'));
+        const needsFinalize = !isBeta && pkgJson.version.includes('-beta');
         
-        if (!hasDist || previousDataMap[pkgName].hash !== computedHashes[pkgName]) {
+        if (!hasDist || previousDataMap[pkgName].hash !== computedHashes[pkgName] || needsFinalize) {
             anyPackageChanged = true;
         }
     }
-
-    const forceBuild = process.argv.includes('--force');
-    const tagArgIndex = process.argv.indexOf('--tag');
-    const isBeta = process.argv.includes('--beta') || (tagArgIndex !== -1 && process.argv[tagArgIndex + 1] === 'beta');
-    const defaultTag = isBeta ? 'beta' : 'latest';
-    const npmTag = tagArgIndex !== -1 ? process.argv[tagArgIndex + 1] : defaultTag;
-    const tagString = npmTag ? `--tag ${npmTag}` : '';
 
     if (!anyPackageChanged && !forceBuild) {
         console.log('[BUILD] No package changes detected and build artifacts present. Skipping build phase completely.');
@@ -138,8 +139,10 @@ async function publishAll() {
         const currBuf = Buffer.from(hash || '');
         const isHashMatching = prevBuf.length === currBuf.length && crypto.timingSafeEqual(prevBuf, currBuf);
 
-        if (!isHashMatching) {
-            console.log(`[PUBLISH] Changes detected in ${pkgName}. Releasing...`);
+        const needsFinalize = !isBeta && pkgJson.version.includes('-beta');
+
+        if (!isHashMatching || needsFinalize) {
+            console.log(`[PUBLISH] Changes detected or beta finalization needed in ${pkgName}. Releasing...`);
             
             try {
                 let newVersion;

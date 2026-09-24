@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/queue-gcp",
-  "version": "1.2.2-beta.0",
+  "version": "1.2.3",
   "description": "Queue adapter for Google Cloud Platform PubSub",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -45,6 +45,5 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  },
-  "stableVersion": "1.2.1"
+  }
 }

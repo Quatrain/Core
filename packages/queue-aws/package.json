@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/queue-aws",
-  "version": "1.2.2-beta.0",
+  "version": "1.2.2",
   "description": "Queue adapter for AWS SQS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -44,6 +44,5 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  },
-  "stableVersion": "1.2.1"
+  }
 }

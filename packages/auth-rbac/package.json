@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/auth-rbac",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.1",
   "license": "AGPL-3.0-only",
   "description": "Isomorphic Role-Based Access Control, Field-Level Security, M2M Agent Guards & Tarpitting for Quatrain",
   "publishConfig": {
@@ -55,6 +55,5 @@
     "build": "tsc",
     "wbuild": "tsc --watch",
     "bump-to": "yarn version"
-  },
-  "stableVersion": "1.0.0-beta.1"
+  }
 }

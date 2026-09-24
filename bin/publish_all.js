@@ -163,24 +163,57 @@ async function publishAll() {
                         parts[2] = (parts[2] || 0) + 1;
                         newVersion = `${parts.join('.')}-beta.0`;
                     }
-                    runSync('yarn', ['version', newVersion], { cwd: pkgDir, stdio: 'inherit' });
-                    bumpedContent = fs.readFileSync(pkgJsonPath, 'utf8');
-                    updatedPkgJson = JSON.parse(bumpedContent);
                 } else {
                     // Standard stable release (on main)
                     if (pkgJson.version.includes('-beta')) {
                         // Finalize beta version to stable SemVer
                         newVersion = pkgJson.version.split('-')[0];
-                        runSync('yarn', ['version', newVersion], { cwd: pkgDir, stdio: 'inherit' });
-                        bumpedContent = fs.readFileSync(pkgJsonPath, 'utf8');
-                        updatedPkgJson = JSON.parse(bumpedContent);
                     } else {
-                        runSync('yarn', ['version', 'patch'], { cwd: pkgDir, stdio: 'inherit' });
-                        bumpedContent = fs.readFileSync(pkgJsonPath, 'utf8');
-                        updatedPkgJson = JSON.parse(bumpedContent);
-                        newVersion = updatedPkgJson.version;
+                        const parts = pkgJson.version.split('.').map(Number);
+                        parts[2] = (parts[2] || 0) + 1;
+                        newVersion = parts.join('.');
+                    }
+
+                    // Check if newVersion was already published on npmjs before today
+                    try {
+                        const res = spawnSync('npm', ['view', pkgName, 'time', '--json'], { encoding: 'utf8' });
+                        if (res.status === 0 && res.stdout) {
+                            const timeMap = JSON.parse(res.stdout);
+                            const today = new Date().toISOString().slice(0, 10);
+                            const pubDate = timeMap[newVersion];
+                            if (pubDate && pubDate.slice(0, 10) < today) {
+                                console.log(`[VERSION-GUARD] ${pkgName}@${newVersion} was published on ${pubDate} (before today). Finding next available patch...`);
+                                const [major, minor] = newVersion.split('.').map(Number);
+                                let maxPatch = -1;
+                                for (const v of Object.keys(timeMap)) {
+                                    const m = v.match(/^(\d+)\.(\d+)\.(\d+)$/);
+                                    if (m && Number(m[1]) === major && Number(m[2]) === minor) {
+                                        const patch = Number(m[3]);
+                                        if (patch > maxPatch) maxPatch = patch;
+                                    }
+                                }
+                                if (maxPatch >= 0) {
+                                    newVersion = `${major}.${minor}.${maxPatch + 1}`;
+                                } else {
+                                    const parts = newVersion.split('.').map(Number);
+                                    parts[2] = (parts[2] || 0) + 1;
+                                    newVersion = parts.join('.');
+                                }
+                                console.log(`[VERSION-GUARD] Adjusted target version for ${pkgName} to ${newVersion}`);
+                            }
+                        }
+                    } catch (e) {
+                        // ignore if offline or unpublished package
                     }
                 }
+
+                // Update package.json directly without relying on Yarn CLI
+                const currentData = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+                currentData.version = newVersion;
+                delete currentData.stableVersion;
+                bumpedContent = JSON.stringify(currentData, null, 2) + '\n';
+                fs.writeFileSync(pkgJsonPath, bumpedContent, 'utf8');
+                updatedPkgJson = JSON.parse(bumpedContent);
                 
                 // Strip workspace: protocol before packing
                 ['dependencies', 'devDependencies', 'peerDependencies'].forEach(deptype => {
@@ -221,7 +254,7 @@ async function publishAll() {
                     let existsNpmjs = false;
                     try {
                         const out = runSync('npm', ['view', `${pkgName}@${newVersion}`, 'version', '--registry', 'https://registry.npmjs.org/'], { cwd: pkgDir, stdio: 'pipe' }).trim();
-                        if (out === newVersion) existsNpmjs = true;
+                        if (out.split('\n').map(s => s.trim()).includes(newVersion)) existsNpmjs = true;
                     } catch (e) { /* ignores 404 */ }
 
                     if (!existsNpmjs) {
@@ -237,7 +270,7 @@ async function publishAll() {
                     let existsGithub = false;
                     try {
                         const out = runSync('npm', ['view', `${pkgName}@${newVersion}`, 'version', '--registry', 'https://npm.pkg.github.com/'], { cwd: pkgDir, stdio: 'pipe' }).trim();
-                        if (out === newVersion) existsGithub = true;
+                        if (out.split('\n').map(s => s.trim()).includes(newVersion)) existsGithub = true;
                     } catch (e) { /* ignores 404 */ }
 
                     if (!existsGithub) {
@@ -283,7 +316,7 @@ async function publishAll() {
             let existsNpmjs = false;
             try {
                 const out = runSync('npm', ['view', `${pkgName}@${previousData.version}`, 'version', '--registry', 'https://registry.npmjs.org/'], { cwd: pkgDir, stdio: 'pipe' }).trim();
-                if (out === previousData.version) existsNpmjs = true;
+                if (out.split('\n').map(s => s.trim()).includes(previousData.version)) existsNpmjs = true;
             } catch (e) { /* ignores 404 */ }
 
             if (!existsNpmjs) {

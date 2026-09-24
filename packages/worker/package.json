@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/worker",
-  "version": "1.2.15-beta.0",
+  "version": "1.2.15",
   "description": "Container Worker helpers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -50,6 +50,5 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  },
-  "stableVersion": "1.2.14"
+  }
 }

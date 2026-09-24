@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/config",
-  "version": "1.0.1-beta.0",
+  "version": "1.0.2",
   "license": "AGPL-3.0-only",
   "description": "Multi-source configuration manager and registry for Quatrain applications and agent tools",
   "main": "dist/index.js",
@@ -43,6 +43,5 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  },
-  "stableVersion": "1.0.0"
+  }
 }

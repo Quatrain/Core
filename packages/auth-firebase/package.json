@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/auth-firebase",
-  "version": "1.2.10-beta.0",
+  "version": "1.2.10",
   "license": "AGPL-3.0-only",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -48,6 +48,5 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  },
-  "stableVersion": "1.2.9"
+  }
 }

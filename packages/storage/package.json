@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/storage",
-  "version": "1.2.15-beta.0",
+  "version": "1.2.15",
   "description": "Common types and utils for Storages Adapters",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -47,6 +47,5 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  },
-  "stableVersion": "1.2.14"
+  }
 }

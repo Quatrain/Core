@@ -29,11 +29,16 @@ export interface ExpressLikeResponse {
 export type ExpressLikeNextFunction = (err?: any) => void
 
 /**
+ * Resolver function signature retrieving user context from Express request.
+ */
+export type ExpressUserResolver = (req: ExpressLikeRequest) => Promise<RbacUserContext | null> | RbacUserContext | null
+
+/**
  * Options for configuring ExpressRbacMiddleware.
  */
 export interface ExpressRbacOptions {
   /** Custom extractor function to retrieve the user context from request */
-  userResolver?: (req: ExpressLikeRequest) => Promise<RbacUserContext | null> | RbacUserContext | null
+  userResolver?: ExpressUserResolver
   /** Whether to inject tarpit delay asynchronously before calling next() */
   enableTarpitSleep?: boolean
 }
@@ -46,8 +51,8 @@ export class ExpressRbacMiddleware extends AbstractRbacMiddleware<
   ExpressLikeResponse,
   ExpressLikeNextFunction
 > {
-  private userResolver?: (req: ExpressLikeRequest) => Promise<RbacUserContext | null> | RbacUserContext | null
-  private enableTarpitSleep: boolean
+  private readonly userResolver?: ExpressUserResolver
+  private readonly enableTarpitSleep: boolean
 
   constructor(engine: any, options: ExpressRbacOptions = {}) {
     super(engine)
@@ -136,13 +141,13 @@ export class ExpressRbacMiddleware extends AbstractRbacMiddleware<
           res.setHeader('X-Security-Tarpit-Delay', `${evaluation.tarpitDelayMs}ms`)
         }
 
-        // 4. Access Decision
         if (!evaluation.allowed) {
-          const reason = evaluation.isThrottled && evaluation.tarpitDelayMs > 0
-            ? 'tarpit_blocked'
-            : user
-              ? 'forbidden'
-              : 'unauthenticated'
+          let reason: 'unauthenticated' | 'forbidden' | 'tarpit_blocked' = 'unauthenticated'
+          if (evaluation.isThrottled && evaluation.tarpitDelayMs > 0) {
+            reason = 'tarpit_blocked'
+          } else if (user) {
+            reason = 'forbidden'
+          }
 
           return this.handleAccessDenied(req, res, reason)
         }

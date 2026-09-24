@@ -1,7 +1,10 @@
 # .markdownlint.yaml
 # Tell markdownlint to allow 2 spaces after a list marker, matching Prettier's style.
 MD030:
-   ul_single: 2
-   ol_single: 2
-   ul_multi: 2
-   ol_multi: 2
+  ul_single: 2
+  ol_single: 2
+  ul_multi: 2
+  ol_multi: 2
+
+# Disable line length rule for markdown files
+MD013: false

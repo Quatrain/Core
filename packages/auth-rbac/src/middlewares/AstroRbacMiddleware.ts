@@ -14,11 +14,16 @@ export interface AstroLikeContext {
 export type AstroLikeMiddlewareNext = () => Promise<Response>
 
 /**
+ * Resolver function signature retrieving user context from Astro context.
+ */
+export type AstroUserResolver = (context: AstroLikeContext) => Promise<RbacUserContext | null> | RbacUserContext | null
+
+/**
  * Options for configuring AstroRbacMiddleware.
  */
 export interface AstroRbacOptions {
   /** Custom extractor function to retrieve the user context from Astro context */
-  userResolver?: (context: AstroLikeContext) => Promise<RbacUserContext | null> | RbacUserContext | null
+  userResolver?: AstroUserResolver
   /** URL path to redirect unauthenticated users for HTML pages (defaults to "/login") */
   loginRedirectPath?: string
   /** URL path to redirect forbidden users for HTML pages (defaults to "/403") */
@@ -32,10 +37,10 @@ export interface AstroRbacOptions {
  * Unifies API endpoints (JSON responses) and SSR pages (redirects / forbidden status).
  */
 export class AstroRbacMiddleware extends AbstractRbacMiddleware<AstroLikeContext, Response> {
-  private userResolver?: (context: AstroLikeContext) => Promise<RbacUserContext | null> | RbacUserContext | null
-  private loginRedirectPath: string
-  private forbiddenRedirectPath: string
-  private enableTarpitSleep: boolean
+  private readonly userResolver?: AstroUserResolver
+  private readonly loginRedirectPath: string
+  private readonly forbiddenRedirectPath: string
+  private readonly enableTarpitSleep: boolean
 
   constructor(engine: any, options: AstroRbacOptions = {}) {
     super(engine)
@@ -143,13 +148,13 @@ export class AstroRbacMiddleware extends AbstractRbacMiddleware<AstroLikeContext
         await this.engine.tarpitManager.sleep(evaluation.tarpitDelayMs)
       }
 
-      // 4. Access Decision
       if (!evaluation.allowed) {
-        const reason = evaluation.isThrottled && evaluation.tarpitDelayMs > 0
-          ? 'tarpit_blocked'
-          : user
-            ? 'forbidden'
-            : 'unauthenticated'
+        let reason: 'unauthenticated' | 'forbidden' | 'tarpit_blocked' = 'unauthenticated'
+        if (evaluation.isThrottled && evaluation.tarpitDelayMs > 0) {
+          reason = 'tarpit_blocked'
+        } else if (user) {
+          reason = 'forbidden'
+        }
 
         return this.handleAccessDenied(context, null, reason)
       }

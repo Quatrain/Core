@@ -1,0 +1,6 @@
+# Documentation build artifacts and generated pages
+docs/**
+coverage/**
+dist/**
+node_modules/**
+.yarn/**

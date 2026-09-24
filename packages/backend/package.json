@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/backend",
-  "version": "1.2.20",
+  "version": "1.2.21-beta.0",
   "license": "AGPL-3.0-only",
   "description": "Backend adapters commons",
   "main": "dist/index.js",
@@ -46,5 +46,6 @@
   },
   "typedoc": {
     "entryPoint": "src/index.ts"
-  }
+  },
+  "stableVersion": "1.2.20"
 }

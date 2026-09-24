@@ -10,9 +10,9 @@
     "last_published": "2026-09-23T12:42:40.600Z"
   },
   "@quatrain/backend": {
-    "version": "1.2.21",
-    "hash": "tH464ZLD6J4GeXZT+nn2kS0o4m4=-989fdce0cdb7d3088b6275bac4746949a2924ec968edce66884982c396b1adb6",
-    "last_published": "2026-09-21T20:51:31.906Z"
+    "version": "1.2.21-beta.0",
+    "hash": "iDmoexJU0JJ9FTxxvzWT9FRcUMs=-989fdce0cdb7d3088b6275bac4746949a2924ec968edce66884982c396b1adb6",
+    "last_published": "2026-09-24T08:15:13.502Z"
   },
   "@quatrain/backend-firestore": {
     "version": "1.2.16-beta.0",
@@ -395,9 +395,9 @@
     "last_published": "2026-09-23T12:45:25.091Z"
   },
   "@quatrain/auth-rbac": {
-    "version": "1.0.0",
-    "hash": "KYcT7UHBVj28+KEEFzuxRDL7w44=-add1f403a9032c9789ae8d72cf45f315a782097286c3eb1a5e327fe62a5e495c",
-    "last_published": "2026-09-17T07:18:42.913Z"
+    "version": "1.0.0-beta.2",
+    "hash": "GjiCTrnUduu5nPOdHps5n1+srnY=-add1f403a9032c9789ae8d72cf45f315a782097286c3eb1a5e327fe62a5e495c",
+    "last_published": "2026-09-24T08:15:04.868Z"
   },
   "@quatrain/ai-openai": {
     "version": "1.1.1",

@@ -1,0 +1,34 @@
+{
+  "name": "@quatrain/git-github",
+  "version": "1.0.0",
+  "license": "AGPL-3.0-only",
+  "description": "Quatrain Core GitHub adapter with bi-modal CLI (gh) and HTTP REST API engine",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "src/",
+    "dist/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/git-github"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "dependencies": {
+    "@quatrain/core": "workspace:*",
+    "@quatrain/git": "workspace:*"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "wbuild": "tsc --watch"
+  }
+}

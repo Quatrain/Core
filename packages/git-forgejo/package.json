@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/git-forgejo",
-  "version": "1.0.0",
+  "version": "1.0.1-beta.0",
   "license": "AGPL-3.0-only",
   "description": "Quatrain Core Forgejo & Gitea sovereign adapter with bi-modal CLI (tea) and HTTP REST API v1 engine",
   "main": "dist/index.js",

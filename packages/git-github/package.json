@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/git-github",
-  "version": "1.0.0",
+  "version": "1.0.1-beta.0",
   "license": "AGPL-3.0-only",
   "description": "Quatrain Core GitHub adapter with bi-modal CLI (gh) and HTTP REST API engine",
   "main": "dist/index.js",

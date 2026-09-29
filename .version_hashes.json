@@ -408,5 +408,20 @@
     "version": "1.0.2",
     "hash": "xu0o3Bi5ov8vAW7v9mP5tnacPKg=-e33b4920f809ae455ffa1355e141d5a18938984aa147bbd0140f9aef55581695",
     "last_published": "2026-09-24T10:05:25.541Z"
+  },
+  "@quatrain/git": {
+    "version": "1.0.1-beta.0",
+    "hash": "5E8BIbIaiCotBj5DUr4g041mzTs=-6a917febd1de9049581f80a3468a60c9a1db211cb9b768ecdb5bdbc5b9ad408a",
+    "last_published": "2026-09-29T19:46:07.797Z"
+  },
+  "@quatrain/git-forgejo": {
+    "version": "1.0.1-beta.0",
+    "hash": "nCf/UagZ4It3Xf9eBbui4tUYI48=-ade1ede77ea183a0a3f3ff65c1d932b2a77d507a3ccace432f99e96988382de6",
+    "last_published": "2026-09-29T19:46:17.829Z"
+  },
+  "@quatrain/git-github": {
+    "version": "1.0.1-beta.0",
+    "hash": "cxwEpiJ6rwZ1yXvRtbTFK1s+n6I=-ade1ede77ea183a0a3f3ff65c1d932b2a77d507a3ccace432f99e96988382de6",
+    "last_published": "2026-09-29T19:46:25.463Z"
   }
 }

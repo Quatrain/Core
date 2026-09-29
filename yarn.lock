@@ -3560,6 +3560,41 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/git-forgejo@workspace:packages/git-forgejo":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/git-forgejo@workspace:packages/git-forgejo"
+  dependencies:
+    "@quatrain/core": "workspace:*"
+    "@quatrain/git": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/git-github@workspace:packages/git-github":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/git-github@workspace:packages/git-github"
+  dependencies:
+    "@quatrain/core": "workspace:*"
+    "@quatrain/git": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/git@workspace:*, @quatrain/git@workspace:packages/git":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/git@workspace:packages/git"
+  dependencies:
+    "@quatrain/core": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/http@workspace:*, @quatrain/http@workspace:packages/http":
   version: 0.0.0-use.local
   resolution: "@quatrain/http@workspace:packages/http"

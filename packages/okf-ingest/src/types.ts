@@ -107,3 +107,65 @@ export interface DedupStats {
    totalTokens: number;
    totalCostUsd: number;
 }
+
+export interface BookOutlineChapter {
+   index: number;
+   title: string;
+   slug: string;
+   summary?: string;
+   startMarker?: string;
+   endMarker?: string;
+}
+
+export interface BookOutline {
+   title: string;
+   slug: string;
+   description: string;
+   category: string;
+   authors?: string[];
+   publisher?: string;
+   publicationYear?: string | number;
+   thematics?: string[];
+   soils?: string[];
+   climates?: string[];
+   itineraries?: string[];
+   crops?: string[];
+   tags: string[];
+   chapters: BookOutlineChapter[];
+}
+
+export interface ChapterExtractionResult {
+   index: number;
+   title: string;
+   slug: string;
+   relativePath: string;
+   doc: OkfDocument;
+   usage: OkfTokenUsage;
+   diagramsTranscribed: number;
+   tablesTranscribed: number;
+}
+
+export interface MonographInput {
+   rawText: string;
+   filename: string;
+   fileHash: string;
+   originalFileUri: string;
+   gitLocalPath: string;
+}
+
+export interface MonographOptions extends ExtractionOptions {
+   splitThresholdChars?: number;
+   maxChapters?: number;
+}
+
+export interface MonographIngestionResult {
+   masterDoc: OkfDocument;
+   masterRelativePath: string;
+   chapterDocs: ChapterExtractionResult[];
+   allCreatedFiles: string[];
+   folderPath: string;
+   totalTokens: OkfTokenUsage;
+   totalCostUsd: number;
+   totalDiagrams: number;
+   totalTables: number;
+}

@@ -1,4 +1,10 @@
-import { GoogleGenAI } from '@google/genai';
+import {
+   Content,
+   GenerateContentResponseUsageMetadata,
+   GoogleGenAI,
+   Schema,
+   Type,
+} from '@google/genai';
 import { calculateTokenCost } from './cost';
 import {
    ExtractionOptions,
@@ -7,53 +13,53 @@ import {
    OkfTokenUsage,
 } from './types';
 
-export const OKF_INGEST_AI_SCHEMA = {
-   type: 'OBJECT',
+export const OKF_INGEST_AI_SCHEMA: Schema = {
+   type: Type.OBJECT,
    properties: {
-      title: { type: 'STRING' },
-      type: { type: 'STRING' },
-      description: { type: 'STRING' },
-      category: { type: 'STRING' },
+      title: { type: Type.STRING },
+      type: { type: Type.STRING },
+      description: { type: Type.STRING },
+      category: { type: Type.STRING },
       thematics: {
-         type: 'ARRAY',
-         items: { type: 'STRING' },
+         type: Type.ARRAY,
+         items: { type: Type.STRING },
       },
       soils: {
-         type: 'ARRAY',
-         items: { type: 'STRING' },
+         type: Type.ARRAY,
+         items: { type: Type.STRING },
       },
       climates: {
-         type: 'ARRAY',
-         items: { type: 'STRING' },
+         type: Type.ARRAY,
+         items: { type: Type.STRING },
       },
       itineraries: {
-         type: 'ARRAY',
-         items: { type: 'STRING' },
+         type: Type.ARRAY,
+         items: { type: Type.STRING },
       },
       crops: {
-         type: 'ARRAY',
-         items: { type: 'STRING' },
+         type: Type.ARRAY,
+         items: { type: Type.STRING },
       },
       tags: {
-         type: 'ARRAY',
-         items: { type: 'STRING' },
+         type: Type.ARRAY,
+         items: { type: Type.STRING },
       },
       authors: {
-         type: 'ARRAY',
-         items: { type: 'STRING' },
+         type: Type.ARRAY,
+         items: { type: Type.STRING },
       },
-      publisher: { type: 'STRING' },
-      publicationYear: { type: 'STRING' },
-      language: { type: 'STRING' },
+      publisher: { type: Type.STRING },
+      publicationYear: { type: Type.STRING },
+      language: { type: Type.STRING },
       diagrams: {
-         type: 'ARRAY',
+         type: Type.ARRAY,
          items: {
-            type: 'OBJECT',
+            type: Type.OBJECT,
             properties: {
-               title: { type: 'STRING' },
-               type: { type: 'STRING' }, // mermaid | table | caption
-               content: { type: 'STRING' }, // Mermaid diagram code or Markdown table
-               explanation: { type: 'STRING' },
+               title: { type: Type.STRING },
+               type: { type: Type.STRING }, // mermaid | table | caption
+               content: { type: Type.STRING }, // Mermaid diagram code or Markdown table
+               explanation: { type: Type.STRING },
             },
             required: ['title', 'type', 'content', 'explanation'],
          },
@@ -100,23 +106,32 @@ Consignes strictes :
 
 ${options.contextNote ? `Note contextuelle prioritaire :\n${options.contextNote}\n` : ''}`;
 
-   let contents: unknown;
-
    // Google GenAI inlineData has a strict payload limit (~20MB base64 / ~15MB binary)
    const canSendInline = input.isScanned && input.buffer && input.isPdf && input.buffer.length <= 15 * 1024 * 1024;
 
+   let responseText = '';
+   let usageMetadata: GenerateContentResponseUsageMetadata | null | undefined = undefined;
+
    if (canSendInline && input.buffer) {
-      // Multimodal direct PDF upload for scanned / image-dense documents
       const base64Data = input.buffer.toString('base64');
-      contents = [
-         { text: promptText },
-         {
-            inlineData: {
-               mimeType: 'application/pdf',
-               data: base64Data,
+      const response = await ai.models.generateContent({
+         model,
+         contents: [
+            promptText,
+            {
+               inlineData: {
+                  mimeType: 'application/pdf',
+                  data: base64Data,
+               },
             },
+         ],
+         config: {
+            responseMimeType: 'application/json',
+            responseSchema: OKF_INGEST_AI_SCHEMA,
          },
-      ];
+      });
+      responseText = response.text || '';
+      usageMetadata = response.usageMetadata;
    } else {
       const maxChars = options.maxContentChars || 80_000;
       const raw = input.rawText || '';
@@ -126,24 +141,24 @@ ${options.contextNote ? `Note contextuelle prioritaire :\n${options.contextNote}
          const tailLen = Math.floor(maxChars * 0.3);
          excerpt = `${raw.substring(0, headLen)}\n\n[... document intermédiaire volumineux tronqué pour analyse ...]\n\n${raw.substring(raw.length - tailLen)}`;
       }
-      contents = `${promptText}\n\nExtrait du contenu texte du document :\n---\n${excerpt}\n---`;
+      const response = await ai.models.generateContent({
+         model,
+         contents: `${promptText}\n\nExtrait du contenu texte du document :\n---\n${excerpt}\n---`,
+         config: {
+            responseMimeType: 'application/json',
+            responseSchema: OKF_INGEST_AI_SCHEMA,
+         },
+      });
+      responseText = response.text || '';
+      usageMetadata = response.usageMetadata;
    }
 
-   const response = await ai.models.generateContent({
-      model,
-      contents: contents as any,
-      config: {
-         responseMimeType: 'application/json',
-         responseSchema: OKF_INGEST_AI_SCHEMA as any,
-      },
-   });
-
-   if (!response.text) {
+   if (!responseText) {
       throw new Error('[OKF Ingest] No response text returned from Gemini API');
    }
 
-   const parsed = JSON.parse(response.text) as Record<string, any>;
-   const usage: OkfTokenUsage = calculateTokenCost(response.usageMetadata, model);
+   const parsed = JSON.parse(responseText) as Record<string, unknown>;
+   const usage: OkfTokenUsage = calculateTokenCost(usageMetadata, model);
 
    // Build diagrams / visual synthesis section in Markdown
    const diagrams = Array.isArray(parsed.diagrams) ? parsed.diagrams : [];
@@ -171,24 +186,24 @@ ${options.contextNote ? `Note contextuelle prioritaire :\n${options.contextNote}
       visualMarkdown = parts.join('\n');
    }
 
-   const title = parsed.title || input.filename.replace(/\.[^/.]+$/, '');
-   const description = parsed.description || 'Document technique ingéré.';
+   const title = typeof parsed.title === 'string' ? parsed.title : input.filename.replace(/\.[^/.]+$/, '');
+   const description = typeof parsed.description === 'string' ? parsed.description : 'Document technique ingéré.';
 
    const metadata: OkfFrontmatterV2 = {
-      type: parsed.type || 'document',
+      type: typeof parsed.type === 'string' ? parsed.type : 'document',
       title,
       description,
-      tags: Array.isArray(parsed.tags) && parsed.tags.length > 0 ? parsed.tags : ['agronomie'],
-      category: parsed.category || options.defaultCategory || 'inbox',
-      thematics: parsed.thematics,
-      soils: parsed.soils,
-      climates: parsed.climates,
-      itineraries: parsed.itineraries,
-      crops: parsed.crops,
-      authors: parsed.authors,
-      publisher: parsed.publisher,
-      publicationYear: parsed.publicationYear,
-      language: parsed.language || 'fr',
+      tags: Array.isArray(parsed.tags) && parsed.tags.length > 0 ? (parsed.tags as string[]) : ['agronomie'],
+      category: typeof parsed.category === 'string' ? parsed.category : (options.defaultCategory || 'inbox'),
+      thematics: Array.isArray(parsed.thematics) ? (parsed.thematics as string[]) : undefined,
+      soils: Array.isArray(parsed.soils) ? (parsed.soils as string[]) : undefined,
+      climates: Array.isArray(parsed.climates) ? (parsed.climates as string[]) : undefined,
+      itineraries: Array.isArray(parsed.itineraries) ? (parsed.itineraries as string[]) : undefined,
+      crops: Array.isArray(parsed.crops) ? (parsed.crops as string[]) : undefined,
+      authors: Array.isArray(parsed.authors) ? (parsed.authors as string[]) : undefined,
+      publisher: typeof parsed.publisher === 'string' ? parsed.publisher : undefined,
+      publicationYear: typeof parsed.publicationYear === 'string' ? parsed.publicationYear : undefined,
+      language: typeof parsed.language === 'string' ? parsed.language : 'français',
       status: 'draft',
       generated: {
          by: `quatrain/okf-ingest (${model})`,

@@ -81,6 +81,7 @@ export interface ExtractionOptions {
    defaultCategory?: string;
    enableVisionMermaid?: boolean;
    contextNote?: string;
+   maxContentChars?: number;
 }
 
 export interface IngestionExtractionResult {

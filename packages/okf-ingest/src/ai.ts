@@ -102,7 +102,10 @@ ${options.contextNote ? `Note contextuelle prioritaire :\n${options.contextNote}
 
    let contents: unknown;
 
-   if (input.isScanned && input.buffer && input.isPdf) {
+   // Google GenAI inlineData has a strict payload limit (~20MB base64 / ~15MB binary)
+   const canSendInline = input.isScanned && input.buffer && input.isPdf && input.buffer.length <= 15 * 1024 * 1024;
+
+   if (canSendInline && input.buffer) {
       // Multimodal direct PDF upload for scanned / image-dense documents
       const base64Data = input.buffer.toString('base64');
       contents = [
@@ -115,7 +118,14 @@ ${options.contextNote ? `Note contextuelle prioritaire :\n${options.contextNote}
          },
       ];
    } else {
-      const excerpt = (input.rawText || '').substring(0, 12000);
+      const maxChars = options.maxContentChars || 80_000;
+      const raw = input.rawText || '';
+      let excerpt = raw;
+      if (raw.length > maxChars) {
+         const headLen = Math.floor(maxChars * 0.7);
+         const tailLen = Math.floor(maxChars * 0.3);
+         excerpt = `${raw.substring(0, headLen)}\n\n[... document intermédiaire volumineux tronqué pour analyse ...]\n\n${raw.substring(raw.length - tailLen)}`;
+      }
       contents = `${promptText}\n\nExtrait du contenu texte du document :\n---\n${excerpt}\n---`;
    }
 

@@ -110,7 +110,7 @@ export const BOOK_OUTLINE_AI_SCHEMA: Schema = {
          },
       },
    },
-   required: ['title', 'description', 'category', 'tags', 'chapters'],
+   required: ['title', 'description', 'category', 'tags', 'chapters', 'language', 'abstracts', 'keywords'],
 };
 
 /**

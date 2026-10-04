@@ -90,7 +90,7 @@ export const OKF_INGEST_AI_SCHEMA: Schema = {
          },
       },
    },
-   required: ['title', 'description', 'category', 'tags'],
+   required: ['title', 'description', 'category', 'tags', 'language', 'abstracts', 'keywords'],
 };
 
 export interface AiSourceInput {

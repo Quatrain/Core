@@ -13,6 +13,8 @@ import {
    MonographOptions,
    OkfDocument,
    OkfFrontmatterV2,
+   OkfMultilingualContent,
+   OkfMultilingualKeywords,
    OkfTokenUsage,
 } from './types';
 
@@ -45,6 +47,30 @@ export const BOOK_OUTLINE_AI_SCHEMA: Schema = {
       },
       publisher: { type: Type.STRING },
       publicationYear: { type: Type.STRING },
+      language: { type: Type.STRING }, // ISO 639-1 (e.g. "fr", "en", "es", "ar")
+      originalLanguage: { type: Type.STRING },
+      abstracts: {
+         type: Type.OBJECT,
+         properties: {
+            en: { type: Type.STRING },
+            ar: { type: Type.STRING },
+         },
+         required: ['en', 'ar'],
+      },
+      keywords: {
+         type: Type.OBJECT,
+         properties: {
+            en: {
+               type: Type.ARRAY,
+               items: { type: Type.STRING },
+            },
+            ar: {
+               type: Type.ARRAY,
+               items: { type: Type.STRING },
+            },
+         },
+         required: ['en', 'ar'],
+      },
       thematics: {
          type: Type.ARRAY,
          items: { type: Type.STRING },
@@ -118,11 +144,19 @@ Analyse ce livre ou cette monographie volumineuse (${filename}) pour identifier 
 
 Consignes strictes :
 1. "title" : Titre officiel et complet de l'ouvrage (sans extension).
-2. "description" : Résumé global d'une phrase concise sur la portée et l'objet de l'ouvrage.
+2. "description" : Résumé global d'une phrase concise sur la portée et l'objet de l'ouvrage dans sa langue originale.
 3. "category" : Chemin de dossier en minuscules slugifiées (ex: soil-health, cover-crops, agriculture, viticulture, agronomie-livres).
-4. Taxonomies globales (selon pertinence de l'ouvrage) :
+4. "language" : Code ISO 639-1 de la langue principale (ex: "fr", "en", "es", "de", "ar").
+5. "originalLanguage" : Code ISO 639-1 de la langue d'origine de l'ouvrage.
+6. "abstracts" : Synthèse globale dense de l'ouvrage (2 à 3 phrases) :
+   - "en" : Abstract en anglais scientifique soigné.
+   - "ar" : Abstract en arabe agronomique soigné (الفصحى).
+7. "keywords" : Mots-clés normalisés pour l'indexation :
+   - "en" : 4 à 8 mots-clés en anglais.
+   - "ar" : 4 à 8 mots-clés en arabe.
+8. Taxonomies globales (selon pertinence de l'ouvrage) :
    - "soils", "climates", "itineraries", "crops", "thematics", "tags", "authors", "publisher", "publicationYear".
-5. "chapters" : Liste ordonnée des chapitres ou grandes parties logiques (généralement entre 3 et 12 chapitres).
+9. "chapters" : Liste ordonnée des chapitres ou grandes parties logiques (généralement entre 3 et 12 chapitres).
    - "index" : Numéro du chapitre (1, 2, 3...).
    - "title" : Titre explicite du chapitre.
    - "summary" : Synthèse concise de 1 à 2 phrases de ce que traite ce chapitre.
@@ -172,6 +206,10 @@ ${sampleText}
       authors: Array.isArray(parsed.authors) ? (parsed.authors as string[]) : undefined,
       publisher: typeof parsed.publisher === 'string' ? parsed.publisher : undefined,
       publicationYear: typeof parsed.publicationYear === 'string' ? parsed.publicationYear : undefined,
+      language: typeof parsed.language === 'string' ? parsed.language : 'fr',
+      originalLanguage: typeof parsed.originalLanguage === 'string' ? parsed.originalLanguage : (typeof parsed.language === 'string' ? parsed.language : 'fr'),
+      abstracts: typeof parsed.abstracts === 'object' && parsed.abstracts !== null ? (parsed.abstracts as OkfMultilingualContent) : undefined,
+      keywords: typeof parsed.keywords === 'object' && parsed.keywords !== null ? (parsed.keywords as OkfMultilingualKeywords) : undefined,
       thematics: Array.isArray(parsed.thematics) ? (parsed.thematics as string[]) : undefined,
       soils: Array.isArray(parsed.soils) ? (parsed.soils as string[]) : undefined,
       climates: Array.isArray(parsed.climates) ? (parsed.climates as string[]) : undefined,
@@ -343,6 +381,10 @@ Extrais spécifiquement les concepts, taxonomies, schémas et tableaux propres �
          authors: outline.authors,
          publisher: outline.publisher,
          publicationYear: outline.publicationYear,
+         language: chapterResult.metadata.language || outline.language || 'fr',
+         originalLanguage: chapterResult.metadata.originalLanguage || outline.originalLanguage || 'fr',
+         abstracts: chapterResult.metadata.abstracts,
+         keywords: chapterResult.metadata.keywords,
       };
 
       const chapterRelativePath = path.join(folderPath, `${ch.slug}.md`);
@@ -402,6 +444,10 @@ Extrais spécifiquement les concepts, taxonomies, schémas et tableaux propres �
       authors: outline.authors,
       publisher: outline.publisher,
       publicationYear: outline.publicationYear,
+      language: outline.language || 'fr',
+      originalLanguage: outline.originalLanguage || outline.language || 'fr',
+      abstracts: outline.abstracts,
+      keywords: outline.keywords,
    };
 
    const masterBody = `# ${outline.title}

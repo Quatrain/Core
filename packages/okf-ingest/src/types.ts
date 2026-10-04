@@ -28,6 +28,18 @@ export interface OkfGenerationMetadata {
 
 export type OkfDocumentStatus = 'draft' | 'curated' | 'active' | 'archived';
 
+export interface OkfMultilingualContent {
+   en?: string;
+   ar?: string;
+   [lang: string]: string | undefined;
+}
+
+export interface OkfMultilingualKeywords {
+   en?: string[];
+   ar?: string[];
+   [lang: string]: string[] | undefined;
+}
+
 export interface OkfFrontmatterV2 {
    type: string;
    title: string;
@@ -51,11 +63,13 @@ export interface OkfFrontmatterV2 {
    edition?: string;
    publicationYear?: string | number;
    language?: string;
+   originalLanguage?: string;
+   abstracts?: OkfMultilingualContent;
+   keywords?: OkfMultilingualKeywords;
    isbn?: string;
    doi?: string;
    copyright?: string;
    originalTitle?: string;
-   originalLanguage?: string;
    originalPublisher?: string;
    originalYear?: string | number;
    originalCopyright?: string;
@@ -122,6 +136,10 @@ export interface BookOutline {
    slug: string;
    description: string;
    category: string;
+   language?: string;
+   originalLanguage?: string;
+   abstracts?: OkfMultilingualContent;
+   keywords?: OkfMultilingualKeywords;
    authors?: string[];
    publisher?: string;
    publicationYear?: string | number;

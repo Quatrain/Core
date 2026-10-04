@@ -10,6 +10,8 @@ import {
    ExtractionOptions,
    IngestionExtractionResult,
    OkfFrontmatterV2,
+   OkfMultilingualContent,
+   OkfMultilingualKeywords,
    OkfTokenUsage,
 } from './types';
 
@@ -50,7 +52,30 @@ export const OKF_INGEST_AI_SCHEMA: Schema = {
       },
       publisher: { type: Type.STRING },
       publicationYear: { type: Type.STRING },
-      language: { type: Type.STRING },
+      language: { type: Type.STRING }, // ISO 639-1 (e.g. "fr", "en", "es", "ar")
+      originalLanguage: { type: Type.STRING },
+      abstracts: {
+         type: Type.OBJECT,
+         properties: {
+            en: { type: Type.STRING },
+            ar: { type: Type.STRING },
+         },
+         required: ['en', 'ar'],
+      },
+      keywords: {
+         type: Type.OBJECT,
+         properties: {
+            en: {
+               type: Type.ARRAY,
+               items: { type: Type.STRING },
+            },
+            ar: {
+               type: Type.ARRAY,
+               items: { type: Type.STRING },
+            },
+         },
+         required: ['en', 'ar'],
+      },
       diagrams: {
          type: Type.ARRAY,
          items: {
@@ -88,18 +113,26 @@ export async function extractSemanticContent(
    const model = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
    const promptText = `Tu es un ingénieur expert en structuration de connaissances pour le format Open Knowledge Format (OKF v0.2).
-Analyse le document ci-joint (${input.filename}) et extrais ses métadonnées, taxonomies et représentations visuelles.
+Analyse le document ci-joint (${input.filename}) et extrais ses métadonnées, taxonomies, résumés multilingues et représentations visuelles.
 
 Consignes strictes :
 1. "title" : Titre propre, professionnel et explicite (sans extension).
-2. "description" : Exactement UNE seule phrase concise résumant le document, sa portée et son utilité technique.
+2. "description" : Exactement UNE seule phrase concise résumant le document, sa portée et son utilité technique dans sa langue originale.
 3. "category" : Chemin de dossier court en minuscules slugifiées (ex: soil-health, cover-crops, viticulture, agriculture, water-management, soil-amendments, formations).
-4. Taxonomies agronomiques (selon pertinence) :
+4. "language" : Code ISO 639-1 obligatoire identifiant la langue du texte (ex: "fr", "en", "es", "de", "ar").
+5. "originalLanguage" : Code ISO 639-1 de la langue d'origine (identique à "language" sauf si le texte indique être une traduction).
+6. "abstracts" : Résumé technique concis et dense (2 à 3 phrases) :
+   - "en" : Synthèse technique en anglais scientifique soigné.
+   - "ar" : Synthèse technique en arabe agronomique soigné (الفصحى).
+7. "keywords" : Mots-clés normalisés pour l'indexation :
+   - "en" : 4 à 8 mots-clés techniques en anglais.
+   - "ar" : 4 à 8 mots-clés techniques en arabe.
+8. Taxonomies agronomiques (selon pertinence) :
    - "soils" : sols concernés (ex: argilo-calcaire, limoneux, sableux, vivant-microbiote).
    - "climates" : zones climatiques (ex: mediterraneen, oceanique, semi-aride, continental).
    - "itineraries" : pratiques (ex: viticulture-biologique, semis-direct, enherbement-permanent).
    - "crops" : cultures ciblées (ex: vigne, ble, colza, maraichage).
-5. "diagrams" : CRITIQUE — Pour chaque schéma, organigramme, flux de travail, cycle technique ou tableau clé repéré :
+9. "diagrams" : CRITIQUE — Pour chaque schéma, organigramme, flux de travail, cycle technique ou tableau clé repéré :
    - Si c'est un flux, processus ou cycle : fournis le code Mermaid complet ("type": "mermaid", "content": "graph TD\\n...").
    - Si c'est un tableau de comparaison ou de données : fournis le tableau Markdown complet ("type": "table", "content": "| Col1 | Col2 |\\n|---|---|...").
    - Si c'est une figure visuelle complexe : fournis une description technique dense et exhaustive ("type": "caption").
@@ -203,7 +236,10 @@ ${options.contextNote ? `Note contextuelle prioritaire :\n${options.contextNote}
       authors: Array.isArray(parsed.authors) ? (parsed.authors as string[]) : undefined,
       publisher: typeof parsed.publisher === 'string' ? parsed.publisher : undefined,
       publicationYear: typeof parsed.publicationYear === 'string' ? parsed.publicationYear : undefined,
-      language: typeof parsed.language === 'string' ? parsed.language : 'français',
+      language: typeof parsed.language === 'string' ? parsed.language : 'fr',
+      originalLanguage: typeof parsed.originalLanguage === 'string' ? parsed.originalLanguage : (typeof parsed.language === 'string' ? parsed.language : 'fr'),
+      abstracts: typeof parsed.abstracts === 'object' && parsed.abstracts !== null ? (parsed.abstracts as OkfMultilingualContent) : undefined,
+      keywords: typeof parsed.keywords === 'object' && parsed.keywords !== null ? (parsed.keywords as OkfMultilingualKeywords) : undefined,
       status: 'draft',
       generated: {
          by: `quatrain/okf-ingest (${model})`,

@@ -87,4 +87,33 @@ describe('OKF v0.2 Serializer', () => {
       expect(parsed.metadata.tags).toEqual(['pedologie', 'sol-vivant']);
       expect(parsed.body).toBe(body);
    });
+
+   it('should serialize and parse multilingual metadata (language, abstracts, keywords)', () => {
+      const metadata: OkfFrontmatterV2 = {
+         type: 'document',
+         title: 'Couverts végétaux et fertilité',
+         description: 'Rôle des couverts dans la dynamique biologique.',
+         tags: ['couverts', 'fertilite'],
+         language: 'fr',
+         originalLanguage: 'fr',
+         abstracts: {
+            en: 'Practical technical guide detailing cover crop sowing rates and biomass production.',
+            ar: 'دليل تقني عملي يفصل معدلات بذر محاصيل التغطية وإنتاج الكتلة الحيوية.',
+         },
+         keywords: {
+            en: ['cover-crops', 'biomass', 'soil-health'],
+            ar: ['محاصيل-التغطية', 'الكتلة-الحيوية', 'صحة-التربة'],
+         },
+      };
+
+      const serialized = serializeOkfDocument(metadata, '# Contenu');
+      const parsed = parseOkfDocument(serialized);
+
+      expect(parsed.metadata.language).toBe('fr');
+      expect(parsed.metadata.originalLanguage).toBe('fr');
+      expect(parsed.metadata.abstracts?.en).toContain('Practical technical guide');
+      expect(parsed.metadata.abstracts?.ar).toContain('دليل تقني عملي');
+      expect(parsed.metadata.keywords?.en).toEqual(['cover-crops', 'biomass', 'soil-health']);
+      expect(parsed.metadata.keywords?.ar).toEqual(['محاصيل-التغطية', 'الكتلة-الحيوية', 'صحة-التربة']);
+   });
 });

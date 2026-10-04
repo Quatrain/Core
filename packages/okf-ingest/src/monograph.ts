@@ -52,14 +52,19 @@ export const BOOK_OUTLINE_AI_SCHEMA: Schema = {
       abstracts: {
          type: Type.OBJECT,
          properties: {
+            fr: { type: Type.STRING },
             en: { type: Type.STRING },
             ar: { type: Type.STRING },
          },
-         required: ['en', 'ar'],
+         required: ['fr', 'en', 'ar'],
       },
       keywords: {
          type: Type.OBJECT,
          properties: {
+            fr: {
+               type: Type.ARRAY,
+               items: { type: Type.STRING },
+            },
             en: {
                type: Type.ARRAY,
                items: { type: Type.STRING },
@@ -69,7 +74,7 @@ export const BOOK_OUTLINE_AI_SCHEMA: Schema = {
                items: { type: Type.STRING },
             },
          },
-         required: ['en', 'ar'],
+         required: ['fr', 'en', 'ar'],
       },
       thematics: {
          type: Type.ARRAY,
@@ -148,12 +153,14 @@ Consignes strictes :
 3. "category" : Chemin de dossier en minuscules slugifiées (ex: soil-health, cover-crops, agriculture, viticulture, agronomie-livres).
 4. "language" : Code ISO 639-1 de la langue principale (ex: "fr", "en", "es", "de", "ar").
 5. "originalLanguage" : Code ISO 639-1 de la langue d'origine de l'ouvrage.
-6. "abstracts" : Synthèse globale dense de l'ouvrage (2 à 3 phrases) :
+6. "abstracts" : Synthèse globale dense de l'ouvrage (2 à 3 phrases) dans les 3 langues suivantes :
+   - "fr" : Abstract en français agronomique soigné.
    - "en" : Abstract en anglais scientifique soigné.
    - "ar" : Abstract en arabe agronomique soigné (الفصحى).
-7. "keywords" : Mots-clés normalisés pour l'indexation :
-   - "en" : 4 à 8 mots-clés en anglais.
-   - "ar" : 4 à 8 mots-clés en arabe.
+7. "keywords" : Mots-clés normalisés pour l'indexation (4 à 8 par langue) :
+   - "fr" : Mots-clés en français.
+   - "en" : Mots-clés en anglais.
+   - "ar" : Mots-clés en arabe.
 8. Taxonomies globales (selon pertinence de l'ouvrage) :
    - "soils", "climates", "itineraries", "crops", "thematics", "tags", "authors", "publisher", "publicationYear".
 9. "chapters" : Liste ordonnée des chapitres ou grandes parties logiques (généralement entre 3 et 12 chapitres).

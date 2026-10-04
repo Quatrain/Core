@@ -57,14 +57,19 @@ export const OKF_INGEST_AI_SCHEMA: Schema = {
       abstracts: {
          type: Type.OBJECT,
          properties: {
+            fr: { type: Type.STRING },
             en: { type: Type.STRING },
             ar: { type: Type.STRING },
          },
-         required: ['en', 'ar'],
+         required: ['fr', 'en', 'ar'],
       },
       keywords: {
          type: Type.OBJECT,
          properties: {
+            fr: {
+               type: Type.ARRAY,
+               items: { type: Type.STRING },
+            },
             en: {
                type: Type.ARRAY,
                items: { type: Type.STRING },
@@ -74,7 +79,7 @@ export const OKF_INGEST_AI_SCHEMA: Schema = {
                items: { type: Type.STRING },
             },
          },
-         required: ['en', 'ar'],
+         required: ['fr', 'en', 'ar'],
       },
       diagrams: {
          type: Type.ARRAY,
@@ -121,12 +126,14 @@ Consignes strictes :
 3. "category" : Chemin de dossier court en minuscules slugifiées (ex: soil-health, cover-crops, viticulture, agriculture, water-management, soil-amendments, formations).
 4. "language" : Code ISO 639-1 obligatoire identifiant la langue du texte (ex: "fr", "en", "es", "de", "ar").
 5. "originalLanguage" : Code ISO 639-1 de la langue d'origine (identique à "language" sauf si le texte indique être une traduction).
-6. "abstracts" : Résumé technique concis et dense (2 à 3 phrases) :
+6. "abstracts" : Résumé technique concis et dense (2 à 3 phrases) dans les 3 langues suivantes :
+   - "fr" : Synthèse technique en français agronomique soigné.
    - "en" : Synthèse technique en anglais scientifique soigné.
    - "ar" : Synthèse technique en arabe agronomique soigné (الفصحى).
-7. "keywords" : Mots-clés normalisés pour l'indexation :
-   - "en" : 4 à 8 mots-clés techniques en anglais.
-   - "ar" : 4 à 8 mots-clés techniques en arabe.
+7. "keywords" : Mots-clés normalisés pour l'indexation (4 à 8 par langue) :
+   - "fr" : Mots-clés techniques en français.
+   - "en" : Mots-clés techniques en anglais.
+   - "ar" : Mots-clés techniques en arabe.
 8. Taxonomies agronomiques (selon pertinence) :
    - "soils" : sols concernés (ex: argilo-calcaire, limoneux, sableux, vivant-microbiote).
    - "climates" : zones climatiques (ex: mediterraneen, oceanique, semi-aride, continental).

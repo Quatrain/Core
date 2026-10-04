@@ -29,12 +29,14 @@ export interface OkfGenerationMetadata {
 export type OkfDocumentStatus = 'draft' | 'curated' | 'active' | 'archived';
 
 export interface OkfMultilingualContent {
+   fr?: string;
    en?: string;
    ar?: string;
    [lang: string]: string | undefined;
 }
 
 export interface OkfMultilingualKeywords {
+   fr?: string[];
    en?: string[];
    ar?: string[];
    [lang: string]: string[] | undefined;

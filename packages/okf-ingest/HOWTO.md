@@ -64,10 +64,10 @@ const result = await extractSemanticContent(
    },
    undefined, // apiKey resolved via adapter or process.env.GEMINI_API_KEY
    {
-      targetLanguages: ['fr', 'en', 'ar'], // Configurable target languages
-      defaultCategory: 'soil-health',
-      soa: 'bradtech/world-agronomy',
-      revision: 'rev-2026.10',
+      targetLanguages: ['en', 'fr'], // Configurable target languages
+      defaultCategory: 'technical-guides',
+      soa: 'authority-namespace/knowledge-repo',
+      revision: 'rev-2026.01',
    }
 );
 
@@ -115,16 +115,13 @@ Domain profiles define domain-specific taxonomies, prompt guidelines, and JSON s
 ### Using Built-in Profiles
 
 ```typescript
-import { BradAgronomyProfile, GenericDomainProfile } from '@quatrain/okf-ingest';
+import { GenericDomainProfile } from '@quatrain/okf-ingest';
 
-// 1. Generic Profile (Defaults to ['en'])
+// Generic Profile (Defaults to ['en'])
 const generic = new GenericDomainProfile();
 
-// 2. Brad Agronomy Profile (Defaults to ['fr', 'en', 'ar'], adds soils, climates, itineraries, crops)
-const agronomy = new BradAgronomyProfile();
-
 const result = await extractSemanticContent(input, undefined, {
-   taxonomyProfile: agronomy,
+   taxonomyProfile: generic,
 });
 ```
 
@@ -172,7 +169,7 @@ export class PharmacopeiaProfile implements DomainTaxonomyProfile {
 For large multi-chapter books or encyclopedias:
 
 ```typescript
-import { ingestMonograph, BradAgronomyProfile } from '@quatrain/okf-ingest';
+import { ingestMonograph, GenericDomainProfile } from '@quatrain/okf-ingest';
 import * as fs from 'node:fs/promises';
 
 const bookText = await fs.readFile('path/to/large-book.txt', 'utf-8');
@@ -180,16 +177,16 @@ const bookText = await fs.readFile('path/to/large-book.txt', 'utf-8');
 const summary = await ingestMonograph(
    {
       rawText: bookText,
-      filename: 'encylopedia-bio-indicators.pdf',
+      filename: 'handbook-reference.pdf',
       fileHash: 'sha256-hash-here',
-      originalFileUri: 'originals/books/encylopedia-bio-indicators.pdf',
+      originalFileUri: 'originals/books/handbook-reference.pdf',
       gitLocalPath: '/path/to/my-git-knowledge-repo',
    },
    {
-      taxonomyProfile: new BradAgronomyProfile(),
-      targetLanguages: ['fr', 'en', 'ar'],
+      taxonomyProfile: new GenericDomainProfile(),
+      targetLanguages: ['en', 'fr'],
       splitThresholdChars: 40000,
-      defaultCategory: 'botany',
+      defaultCategory: 'reference',
    }
 );
 

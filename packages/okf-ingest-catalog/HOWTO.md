@@ -7,9 +7,9 @@
 ## 1. Overview & Catalog Architecture
 
 Unlike free-form technical reports or monographs with narrative chapters, an **encyclopedic catalog** contains:
-1. **Methodological / Foundational Chapters**: Introductory context (e.g. soil science basics, plant classification criteria).
-2. **Sequential Entry Collection**: Dozens or hundreds of distinct atomic entries (e.g. plant fiches, chemical entries, medical preparations).
-3. **Lineage Contract**: Each atomic record must maintain strict traceability back to its source publication (`parentBook: { title, slug, resource, fileHash }`) and its global sequence number (`sequence: 1, 2, ... N`).
+1. **Methodological / Foundational Chapters**: Introductory context (e.g. classification methodology, terminology, diagnostic keys).
+2. **Sequential Entry Collection**: Dozens or hundreds of distinct atomic entries (e.g. botanical species, chemical compounds, technical terms).
+3. **Lineage Contract**: Each atomic record maintains strict traceability back to its source publication (`parentBook: { title, slug, resource, fileHash }`) and its global sequence number (`sequence: 1, 2, ... N`).
 4. **Master Index**: A root `index.md` listing introductory chapters and a structured markdown table referencing every atomic entry file.
 
 ---
@@ -17,15 +17,15 @@ Unlike free-form technical reports or monographs with narrative chapters, an **e
 ## 2. Extraction Pipeline Workflow
 
 ```
-PDF / Document
+PDF / Catalog Document
     │
-    ├─► Extract Introductory Methodology Chapters (p. 8-47)
-    │     └─► 01-bases-du-sol.md, 02-cah-et-blocages.md
+    ├─► Extract Introductory Methodology Chapters (e.g. p. 1-20)
+    │     └─► 01-taxonomy-and-methodology.md
     │
-    ├─► Slicing / Detection of Catalog Chunks (p. 50-339)
+    ├─► Slicing / Detection of Catalog Chunks (e.g. p. 21-300)
     │     │
-    │     ├─► Chunk 1: Acanthus mollis (p. 50)
-    │     ├─► Chunk 2: Acer platanoides (p. 51)
+    │     ├─► Chunk 1: Salvia officinalis (p. 21)
+    │     ├─► Chunk 2: Thymus vulgaris (p. 22)
     │     └─► ... Chunk N
     │
     ├─► Atomic AI Enrichment (@quatrain/ai adapter)
@@ -35,7 +35,7 @@ PDF / Document
     │     └─► Diagrams & Markdown Tables
     │
     ├─► Write Ordered Atomic Fiches
-    │     └─► entries/001-acanthus-mollis.md, entries/002-acer-platanoides.md
+    │     └─► entries/001-salvia-officinalis.md, entries/002-thymus-vulgaris.md
     │
     └─► Generate Master Monograph Index
           └─► index.md (Table of Contents + Catalog Table)
@@ -56,16 +56,16 @@ import { sliceCatalogEntriesByDescriptors } from '@quatrain/okf-ingest-catalog';
 
 const descriptors = [
    {
-      title: 'Acanthe molle',
-      scientificName: 'Acanthus mollis',
-      family: 'Acanthaceae',
-      startMarker: 'ACANTHACÉES',
+      title: 'Common Sage',
+      scientificName: 'Salvia officinalis',
+      family: 'Lamiaceae',
+      startMarker: 'SALVIA OFFICINALIS',
    },
    {
-      title: 'Érable plane',
-      scientificName: 'Acer platanoides',
-      family: 'Sapindaceae',
-      startMarker: 'ACÉRACÉES',
+      title: 'Common Thyme',
+      scientificName: 'Thymus vulgaris',
+      family: 'Lamiaceae',
+      startMarker: 'THYMUS VULGARIS',
    },
 ];
 
@@ -80,8 +80,8 @@ Ideal for standardized structured publications with identifiable entry delimiter
 ```typescript
 import { detectCatalogEntriesRegex } from '@quatrain/okf-ingest-catalog';
 
-// Example: matches "### FICHE 42 : Plant Name"
-const entryPattern = /^###\s*FICHE\s*(\d+)\s*:\s*(.+)$/gm;
+// Example: matches "### ENTRY 42 : Subject Title"
+const entryPattern = /^###\s*ENTRY\s*(\d+)\s*:\s*(.+)$/gm;
 
 const chunks = detectCatalogEntriesRegex(rawCatalogText, entryPattern, {
    minLength: 100, // Skip short fragments
@@ -97,7 +97,7 @@ To execute the complete catalog ingestion with introductory chapters and atomic 
 ```typescript
 import { Ai } from '@quatrain/ai';
 import { GeminiAdapter } from '@quatrain/ai-gemini';
-import { BradAgronomyProfile } from '@quatrain/okf-ingest';
+import { GenericDomainProfile } from '@quatrain/okf-ingest';
 import { ingestCatalogMonograph } from '@quatrain/okf-ingest-catalog';
 
 // 1. Setup Quatrain AI Adapter
@@ -108,18 +108,18 @@ Ai.setAdapter(adapter);
 // 2. Execute Ingestion
 const summary = await ingestCatalogMonograph(
    {
-      bookTitle: "L'encyclopédie des plantes bio-indicatrices - Volume 3",
-      description: "Guide complet de diagnostic des sols par les plantes bio-indicatrices par Gérard Ducerf.",
-      category: "bio-indication",
-      authors: ["Gérard Ducerf"],
-      publisher: "Éditions Promonature",
-      publicationYear: 2008,
-      edition: "Volume 3",
+      bookTitle: "Encyclopedia of Botanical Flora",
+      description: "Comprehensive field guide and reference catalog of botanical species and diagnostic keys.",
+      category: "botany",
+      authors: ["Flora Research Institute"],
+      publisher: "Academic Press",
+      publicationYear: 2024,
+      edition: "First Edition",
       introChapters: [
          {
             index: 1,
-            title: "Comprendre les bases du sol et le CAH",
-            slug: "01-bases-du-sol",
+            title: "Taxonomic Classification & Morphological Keys",
+            slug: "01-taxonomy-and-methodology",
             text: ch1RawText,
          },
       ],
@@ -127,11 +127,11 @@ const summary = await ingestCatalogMonograph(
    },
    {
       gitLocalPath: "/path/to/my-knowledge-repo",
-      originalFileUri: "originals/ducerf-vol-3.pdf",
+      originalFileUri: "originals/botanical-flora.pdf",
       fileHash: "sha256-hash-of-pdf",
-      filename: "ducerf-vol-3.pdf",
-      taxonomyProfile: new BradAgronomyProfile(), // or GenericDomainProfile()
-      targetLanguages: ["fr", "en", "ar"], // Multilingual target languages
+      filename: "botanical-flora.pdf",
+      taxonomyProfile: new GenericDomainProfile(), // or custom DomainTaxonomyProfile
+      targetLanguages: ["en", "fr"], // Configurable multilingual target languages
       entryType: "catalog-entry",
       onProgress: (current, total, title) => {
          console.log(`Processing ${current}/${total}: ${title}`);
@@ -151,13 +151,13 @@ console.log(`Total tokens: ${summary.usage.total} ($${summary.usage.costUsd} USD
 The engine generates a clean, browseable OKF v0.2 directory hierarchy:
 
 ```
-content/bio-indication/lencyclopedie-des-plantes-bio-indicatrices-volume-3/
-├── index.md                     # Master monograph index with metadata & TOC
-├── 01-bases-du-sol.md           # Chapter 1 (methodology)
-└── entries/                     # Sequentially numbered atomic records
-    ├── 001-acanthus-mollis.md   # Entry 1 (Acanthe molle)
-    ├── 002-acer-platanoides.md  # Entry 2 (Érable plane)
-    └── 003-acer-pseudoplatanus.md
+content/botany/encyclopedia-of-botanical-flora/
+├── index.md                        # Master monograph index with metadata & TOC
+├── 01-taxonomy-and-methodology.md  # Chapter 1 (methodology)
+└── entries/                        # Sequentially numbered atomic records
+    ├── 001-salvia-officinalis.md   # Entry 1
+    ├── 002-thymus-vulgaris.md      # Entry 2
+    └── ...
 ```
 
 ---
@@ -170,16 +170,16 @@ Every entry generated adheres strictly to the OKF v0.2 lineage and taxonomy sche
 ---
 # --- Open Knowledge Format v0.2 ---
 type: catalog-entry
-title: Acanthus (Acanthus mollis)
-description: Acanthus mollis is a robust perennial herb belonging to the Acanthaceae family.
+title: Common Sage (Salvia officinalis)
+description: Salvia officinalis is a perennial subshrub belonging to the Lamiaceae family.
 tags:
-  - acanthus
-  - acanthaceae
-  - bio-indication
+  - salvia
+  - lamiaceae
+  - medicinal-flora
 status: draft
 generated:
   by: quatrain/okf-ingest-catalog (gemini-2.5-flash)
-  at: 2026-10-05T12:46:44.375Z
+  at: 2026-10-05T12:00:00.000Z
   tokens:
     prompt: 1145
     candidates: 755
@@ -187,60 +187,51 @@ generated:
     costUsd: 0.000806
 sources:
   - id: parent-book
-    resource: originals/ducerf-vol-3.pdf
-    title: L'encyclopédie des plantes bio-indicatrices - Volume 3
-    fileHash: ea231c95a0c5107cd90b53fca5772806e1902db22d217996ffdaeb251822fcf5
-soa: quatrain/knowledge
-category: bio-indication
-language: fr
-originalLanguage: fr
+    resource: originals/botanical-flora.pdf
+    title: Encyclopedia of Botanical Flora
+    fileHash: a1b2c3d4e5f6...
+soa: authority-namespace/knowledge-repo
+category: botany
+language: en
+originalLanguage: en
 abstracts:
-  fr: Plante vivace pubescente de 30-80 cm, bio-indicatrice d'un engorgement en matière organique...
-  en: Acanthus mollis is a pubescent perennial plant, serving as a bioindicator for organic matter...
-  ar: تتميز نبتة الأقنثا المعمرة والمغطاة بالزغب بكونها مؤشراً حيوياً على تشبع التربة بالمواد العضوية...
+  en: Salvia officinalis is a woody perennial subshrub characterized by grayish aromatic leaves...
+  fr: Salvia officinalis est un sous-arbrisseau vivace caractérisé par des feuilles grisâtres aromatiques...
 keywords:
-  fr: [Acanthus mollis, Acanthacées, bio-indicatrice, sol humide]
-  en: [Acanthus mollis, Acanthaceae, bioindicator, wet soil]
-  ar: [أقنثا موليس, أقنثية, مؤشر حيوي, تربة رطبة]
+  en: [Salvia officinalis, Lamiaceae, perennial subshrub, aromatic]
+  fr: [Salvia officinalis, Lamiacées, sous-arbrisseau vivace, aromatique]
 sequence: 1
-pageRange: "50"
-scientificName: Acanthus mollis
-family: Acanthaceae
+pageRange: "21"
+scientificName: Salvia officinalis
+family: Lamiaceae
 diagnosticKeys:
-  - engorgement en matière organique carbonée sur sol humide
+  - well-drained calcareous substrate
 properties:
-  - anti-inflammatoire
+  - antiseptic
+  - antioxidant
 parentBook:
-  title: L'encyclopédie des plantes bio-indicatrices - Volume 3
-  slug: lencyclopedie-des-plantes-bio-indicatrices-volume-3
-  resource: originals/ducerf-vol-3.pdf
-  fileHash: ea231c95a0c5107cd90b53fca5772806e1902db22d217996ffdaeb251822fcf5
-  authors: [Gérard Ducerf]
-  publisher: Éditions Promonature
-  publicationYear: "2008"
-  edition: Volume 3
-soils:
-  - humide
-  - engorgement-matiere-organique-carbonee
-climates:
-  - méditerranéen
+  title: Encyclopedia of Botanical Flora
+  slug: encyclopedia-of-botanical-flora
+  resource: originals/botanical-flora.pdf
+  fileHash: a1b2c3d4e5f6...
+  authors: [Flora Research Institute]
+  publisher: Academic Press
+  publicationYear: "2024"
+  edition: First Edition
 ---
 
-# Acanthus (Acanthus mollis)
+# Common Sage (Salvia officinalis)
 
-**Taxonomy / Classification:** *Acanthus mollis* | **Family / Group:** Acanthaceae
+**Taxonomy / Classification:** *Salvia officinalis* | **Family / Group:** Lamiaceae
 
-> Extracted from: [L'encyclopédie des plantes bio-indicatrices - Volume 3](../index.md) (pages 50)
+> Extracted from: [Encyclopedia of Botanical Flora](../index.md) (pages 21)
 
 ## 🔬 Key Diagnostic Criteria & Indicators
-- **engorgement en matière organique carbonée sur sol humide**
-
-## 🌱 Soil & Habitat Characteristics
-- humide
-- engorgement-matiere-organique-carbonee
+- **well-drained calcareous substrate**
 
 ## 🌿 Properties & Applications
-- anti-inflammatoire
+- antiseptic
+- antioxidant
 
 ## 📖 Detailed Entry Description & Source Text
 [Source text of entry...]

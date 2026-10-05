@@ -1,0 +1,305 @@
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+import {
+   BookOutlineChapter,
+   extractSemanticContent,
+   OkfFrontmatterV2,
+   OkfTokenUsage,
+   serializeOkfDocument,
+} from '@quatrain/okf-ingest';
+import { extractCatalogEntryContent } from './ai';
+import { slugify } from './detector';
+import {
+   CatalogEntryChunk,
+   CatalogEntryResult,
+   CatalogIngestionOptions,
+   CatalogIngestionSummary,
+   CatalogParentBookRef,
+} from './types';
+
+export interface CatalogMonographInput {
+   bookTitle: string;
+   description: string;
+   category: string;
+   authors?: string[];
+   publisher?: string;
+   publicationYear?: string | number;
+   edition?: string;
+   language?: string;
+   originalLanguage?: string;
+   tags?: string[];
+   introChapters?: Array<{
+      index: number;
+      title: string;
+      slug: string;
+      text: string;
+      summary?: string;
+   }>;
+   entries: CatalogEntryChunk[];
+   annexChapters?: Array<{
+      index: number;
+      title: string;
+      slug: string;
+      text: string;
+      summary?: string;
+   }>;
+}
+
+/**
+ * Ingests a structured catalog/encyclopedic monograph into a coherent OKF v0.2 collection.
+ */
+export async function ingestCatalogMonograph(
+   input: CatalogMonographInput,
+   options: CatalogIngestionOptions
+): Promise<CatalogIngestionSummary> {
+   const bookSlug = slugify(input.bookTitle);
+   const model = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+   const soa = options.soa || 'bradtech/world-agronomy';
+   const revision = options.revision;
+
+   const parentBook: CatalogParentBookRef = {
+      title: input.bookTitle,
+      slug: bookSlug,
+      resource: options.originalFileUri,
+      fileHash: options.fileHash,
+      authors: input.authors,
+      publisher: input.publisher,
+      publicationYear: input.publicationYear,
+      edition: input.edition,
+   };
+
+   // 1. Prepare target filesystem structure
+   const bookRelativeFolder = path.join('content', input.category, bookSlug);
+   const absoluteBookFolder = path.join(options.gitLocalPath, bookRelativeFolder);
+   const entriesRelativeFolder = path.join(bookRelativeFolder, 'entries');
+   const absoluteEntriesFolder = path.join(options.gitLocalPath, entriesRelativeFolder);
+
+   await fs.mkdir(absoluteBookFolder, { recursive: true });
+   await fs.mkdir(absoluteEntriesFolder, { recursive: true });
+
+   const allCreatedFiles: string[] = [];
+   const processedEntries: CatalogEntryResult[] = [];
+   const processedIntroChapters: BookOutlineChapter[] = [];
+
+   let totalPromptTokens = 0;
+   let totalCandidatesTokens = 0;
+   let totalThinkingTokens = 0;
+   let totalCostUsd = 0;
+   let totalDiagrams = 0;
+   let totalTables = 0;
+
+   // 2. Process Introductory/Methodology Chapters
+   if (input.introChapters && input.introChapters.length > 0) {
+      for (const ch of input.introChapters) {
+         const chapterResult = await extractSemanticContent(
+            {
+               rawText: ch.text,
+               filename: `${options.filename} - Chapitre ${ch.index}: ${ch.title}`,
+            },
+            options.apiKey,
+            {
+               model,
+               defaultCategory: input.category,
+               contextNote: `Partie introductive/méthodologique de l'ouvrage encyclopédique "${input.bookTitle}".
+Chapitre ${ch.index} : "${ch.title}".`,
+            }
+         );
+
+         totalPromptTokens += chapterResult.usage.prompt;
+         totalCandidatesTokens += chapterResult.usage.candidates;
+         totalThinkingTokens += chapterResult.usage.thinking;
+         totalCostUsd += chapterResult.usage.costUsd;
+         totalDiagrams += chapterResult.diagramsTranscribed;
+         totalTables += chapterResult.tablesTranscribed;
+
+         const chapterMetadata: OkfFrontmatterV2 = {
+            type: 'chapitre',
+            title: `Chapitre ${ch.index} : ${chapterResult.metadata.title || ch.title}`,
+            description: chapterResult.metadata.description || ch.summary || `Chapitre ${ch.index} de l'ouvrage ${input.bookTitle}.`,
+            tags: Array.from(new Set([...(chapterResult.metadata.tags || []), bookSlug])),
+            status: 'draft',
+            generated: {
+               by: `quatrain/okf-ingest-catalog (${model})`,
+               at: new Date().toISOString(),
+               tokens: chapterResult.usage,
+            },
+            sources: [
+               {
+                  id: 'parent-book',
+                  resource: options.originalFileUri,
+                  title: input.bookTitle,
+                  fileHash: options.fileHash,
+               },
+            ],
+            soa,
+            revision,
+            category: input.category,
+            language: chapterResult.metadata.language || input.language || 'fr',
+            originalLanguage: chapterResult.metadata.originalLanguage || input.originalLanguage || 'fr',
+            abstracts: chapterResult.metadata.abstracts,
+            keywords: chapterResult.metadata.keywords,
+            thematics: chapterResult.metadata.thematics,
+            soils: chapterResult.metadata.soils,
+            climates: chapterResult.metadata.climates,
+            itineraries: chapterResult.metadata.itineraries,
+            crops: chapterResult.metadata.crops,
+            authors: input.authors,
+            publisher: input.publisher,
+            publicationYear: input.publicationYear,
+         };
+
+         const chapterRelPath = path.join(bookRelativeFolder, `${ch.slug}.md`);
+         const absoluteChapterPath = path.join(options.gitLocalPath, chapterRelPath);
+         const content = serializeOkfDocument(chapterMetadata, chapterResult.body);
+         await fs.writeFile(absoluteChapterPath, content, 'utf-8');
+
+         allCreatedFiles.push(chapterRelPath);
+         processedIntroChapters.push({
+            index: ch.index,
+            title: ch.title,
+            slug: ch.slug,
+            summary: ch.summary || chapterResult.metadata.description,
+         });
+      }
+   }
+
+   // 3. Process Atomic Catalog Entries
+   let currentEntry = 0;
+   const totalEntries = input.entries.length;
+
+   for (const entryChunk of input.entries) {
+      currentEntry++;
+      if (options.onProgress) {
+         options.onProgress(currentEntry, totalEntries, entryChunk.rawTitle);
+      }
+
+      const entryResult = await extractCatalogEntryContent(entryChunk, {
+         apiKey: options.apiKey,
+         parentBook,
+         entryType: options.entryType || 'plant-profile',
+         model,
+         defaultCategory: input.category,
+         soa,
+         revision,
+      });
+
+      totalPromptTokens += entryResult.usage.prompt;
+      totalCandidatesTokens += entryResult.usage.candidates;
+      totalThinkingTokens += entryResult.usage.thinking;
+      totalCostUsd += entryResult.usage.costUsd;
+      totalDiagrams += entryResult.diagramsTranscribed;
+      totalTables += entryResult.tablesTranscribed;
+
+      const entryRelPath = path.join(entriesRelativeFolder, `${entryChunk.slug}.md`);
+      const absoluteEntryPath = path.join(options.gitLocalPath, entryRelPath);
+      const entrySerialized = serializeOkfDocument(entryResult.metadata, entryResult.body);
+      await fs.writeFile(absoluteEntryPath, entrySerialized, 'utf-8');
+
+      allCreatedFiles.push(entryRelPath);
+      processedEntries.push({
+         sequence: entryChunk.sequence,
+         slug: entryChunk.slug,
+         metadata: entryResult.metadata,
+         body: entryResult.body,
+         relativePath: entryRelPath,
+         usage: entryResult.usage,
+         diagramsTranscribed: entryResult.diagramsTranscribed,
+         tablesTranscribed: entryResult.tablesTranscribed,
+      });
+   }
+
+   // 4. Construct Master index.md
+   const aggregatedUsage: OkfTokenUsage = {
+      prompt: totalPromptTokens,
+      candidates: totalCandidatesTokens,
+      thinking: totalThinkingTokens,
+      total: totalPromptTokens + totalCandidatesTokens + totalThinkingTokens,
+      costUsd: Number(totalCostUsd.toFixed(6)),
+   };
+
+   const masterMetadata: OkfFrontmatterV2 = {
+      type: 'monographie',
+      title: input.bookTitle,
+      description: input.description,
+      tags: Array.from(new Set([...(input.tags || ['catalogue', 'encyclopedie']), bookSlug])),
+      status: 'draft',
+      generated: {
+         by: `quatrain/okf-ingest-catalog (${model})`,
+         at: new Date().toISOString(),
+         tokens: aggregatedUsage,
+      },
+      sources: [
+         {
+            id: 'original-file',
+            resource: options.originalFileUri,
+            title: options.filename,
+            fileHash: options.fileHash,
+         },
+      ],
+      soa,
+      revision,
+      category: input.category,
+      authors: input.authors,
+      publisher: input.publisher,
+      publicationYear: input.publicationYear,
+      edition: input.edition,
+      language: input.language || 'fr',
+      originalLanguage: input.originalLanguage || input.language || 'fr',
+      abstracts: {
+         fr: input.description,
+         en: `Encyclopedic catalog titled "${input.bookTitle}" containing ${processedEntries.length} atomic entries and reference chapters.`,
+         ar: `دليل وموسوعة مرجعية بعنوان "${input.bookTitle}" تضم ${processedEntries.length} مدخل مفصل وفصول منهجية.`,
+      },
+      keywords: {
+         fr: [input.bookTitle, 'catalogue', 'bio-indication', 'plantes'],
+         en: [input.bookTitle, 'catalog', 'bio-indicators', 'plants'],
+         ar: [input.bookTitle, 'دليل', 'مؤشرات حيوية', 'نباتات'],
+      },
+   };
+
+   let masterBody = `# ${input.bookTitle}\n\n${input.description}\n\n`;
+
+   if (processedIntroChapters.length > 0) {
+      masterBody += `## I. Guide Méthodologique & Principes Fondamentaux\n\n`;
+      for (const ch of processedIntroChapters) {
+         masterBody += `- [**Chapitre ${ch.index} : ${ch.title}**](./${ch.slug}.md)\n`;
+         if (ch.summary) {
+            masterBody += `  *${ch.summary}*\n`;
+         }
+      }
+      masterBody += `\n`;
+   }
+
+   if (processedEntries.length > 0) {
+      masterBody += `## II. Répertoire Séquentiel des Entrées (${processedEntries.length} fiches)\n\n`;
+      masterBody += `| N° | Entrée vernaculaire | Nom scientifique | Famille | Fiche détaillée |\n`;
+      masterBody += `|:---:|:---|:---|:---|:---|\n`;
+
+      for (const entry of processedEntries) {
+         const meta = entry.metadata;
+         const seqStr = String(entry.sequence).padStart(3, '0');
+         const latinStr = meta.scientificName ? `*${meta.scientificName}*` : '—';
+         const famStr = meta.family || '—';
+         masterBody += `| ${seqStr} | **${meta.title}** | ${latinStr} | ${famStr} | [Consulter la fiche](./entries/${entry.slug}.md) |\n`;
+      }
+      masterBody += `\n`;
+   }
+
+   const masterIndexPath = path.join(bookRelativeFolder, 'index.md');
+   const absoluteMasterIndexPath = path.join(options.gitLocalPath, masterIndexPath);
+   const masterContent = serializeOkfDocument(masterMetadata, masterBody);
+   await fs.writeFile(absoluteMasterIndexPath, masterContent, 'utf-8');
+   allCreatedFiles.push(masterIndexPath);
+
+   return {
+      bookSlug,
+      bookTitle: input.bookTitle,
+      masterIndexPath,
+      totalEntries: processedEntries.length,
+      totalChapters: processedIntroChapters.length,
+      createdFiles: allCreatedFiles,
+      usage: aggregatedUsage,
+      totalDiagrams,
+      totalTables,
+   };
+}

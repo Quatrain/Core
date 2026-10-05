@@ -28,7 +28,6 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@google/genai": "latest",
     "@quatrain/ai": "workspace:*",
     "@quatrain/ai-gemini": "workspace:*",
     "@quatrain/core": "workspace:*",

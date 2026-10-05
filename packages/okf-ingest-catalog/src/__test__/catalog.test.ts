@@ -172,36 +172,52 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
          expect(prompt).not.toContain('Tu es un ingénieur agronome');
       });
 
-      it('should extract catalog entry using a decoupled runner and assign standard catalog-entry type', async () => {
+      it('should extract catalog entry using a decoupled AbstractAiAdapter and assign standard catalog-entry type', async () => {
+         const { AbstractAiAdapter } = require('@quatrain/ai');
          const { extractCatalogEntryContent } = require('../ai');
-         const mockRunner = {
-            async generateStructured(prompt: string) {
+
+         class MockAiAdapter extends AbstractAiAdapter {
+            public lastPrompt = '';
+            init(): void {}
+            async generateText(_prompt: string): Promise<string> {
+               return '{}';
+            }
+            async generateStructured(prompt: unknown, _schema: unknown, options?: unknown): Promise<unknown> {
+               this.lastPrompt = typeof prompt === 'string' ? prompt : JSON.stringify(prompt);
+               if (options && typeof options === 'object' && 'onUsage' in options) {
+                  const onUsage = (options as { onUsage?: (u: unknown) => void }).onUsage;
+                  if (typeof onUsage === 'function') {
+                     onUsage({
+                        promptTokenCount: 80,
+                        candidatesTokenCount: 40,
+                        totalTokenCount: 120,
+                     });
+                  }
+               }
                return {
-                  data: {
-                     title: 'Acanthe à feuilles molles (Acanthus mollis)',
-                     scientificName: 'Acanthus mollis',
-                     family: 'Acanthaceae',
-                     description: 'Plante vivace méditerranéenne aux grandes feuilles lobées.',
-                     language: 'fr',
-                     originalLanguage: 'fr',
-                     abstracts: {
-                        en: 'Perennial Mediterranean plant with large lobed leaves.',
-                        fr: 'Plante vivace méditerranéenne aux grandes feuilles lobées.',
-                        ar: 'نبات معمر متوسطي بأوراق مفصصة كبيرة.',
-                     },
-                     keywords: {
-                        en: ['bear breeches', 'mediterranean'],
-                        fr: ['acanthe', 'méditerranée'],
-                        ar: ['شوك الجمل', 'متوسطي'],
-                     },
-                     tags: ['botany', 'mediterranean'],
-                     properties: ['ornamental', 'medicinal'],
+                  title: 'Acanthe à feuilles molles (Acanthus mollis)',
+                  scientificName: 'Acanthus mollis',
+                  family: 'Acanthaceae',
+                  description: 'Plante vivace méditerranéenne aux grandes feuilles lobées.',
+                  language: 'fr',
+                  originalLanguage: 'fr',
+                  abstracts: {
+                     en: 'Perennial Mediterranean plant with large lobed leaves.',
+                     fr: 'Plante vivace méditerranéenne aux grandes feuilles lobées.',
+                     ar: 'نبات معمر متوسطي بأوراق مفصصة كبيرة.',
                   },
-                  usage: { prompt: 80, candidates: 40, thinking: 0, total: 120, costUsd: 0.00004 },
-                  rawText: '{}',
+                  keywords: {
+                     en: ['bear breeches', 'mediterranean'],
+                     fr: ['acanthe', 'méditerranée'],
+                     ar: ['شوك الجمل', 'متوسطي'],
+                  },
+                  tags: ['botany', 'mediterranean'],
+                  properties: ['ornamental', 'medicinal'],
                };
-            },
-         };
+            }
+         }
+
+         const mockAdapter = new MockAiAdapter();
 
          const result = await extractCatalogEntryContent(
             {
@@ -212,7 +228,7 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
                text: 'Acanthe à feuilles molles...',
             },
             {
-               runner: mockRunner,
+               adapter: mockAdapter,
                parentBook: {
                   title: 'Encyclopédie des plantes',
                   slug: 'encyclopedie-des-plantes',
@@ -228,6 +244,78 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
          expect(result.metadata.sequence).toBe(1);
          expect(result.usage.total).toBe(120);
          expect(result.body).toContain('**Taxonomy / Classification:** *Acanthus mollis* | **Family / Group:** Acanthaceae');
+      });
+
+      it('should support parameterized target languages for catalog entry extraction', async () => {
+         const { AbstractAiAdapter } = require('@quatrain/ai');
+         const { extractCatalogEntryContent } = require('../ai');
+
+         class MockLangAdapter extends AbstractAiAdapter {
+            public lastPrompt = '';
+            init(): void {}
+            async generateText(_prompt: string): Promise<string> {
+               return '{}';
+            }
+            async generateStructured(prompt: unknown, _schema: unknown, options?: unknown): Promise<unknown> {
+               this.lastPrompt = typeof prompt === 'string' ? prompt : JSON.stringify(prompt);
+               if (options && typeof options === 'object' && 'onUsage' in options) {
+                  const onUsage = (options as { onUsage?: (u: unknown) => void }).onUsage;
+                  if (typeof onUsage === 'function') {
+                     onUsage({
+                        promptTokenCount: 50,
+                        candidatesTokenCount: 30,
+                        totalTokenCount: 80,
+                     });
+                  }
+               }
+               return {
+                  title: 'Meadowsweet (Filipendula ulmaria)',
+                  scientificName: 'Filipendula ulmaria',
+                  family: 'Rosaceae',
+                  description: 'Perennial herb in wet soils.',
+                  language: 'en',
+                  originalLanguage: 'en',
+                  abstracts: {
+                     en: 'High density English summary of Meadowsweet.',
+                     de: 'Dichte deutsche Zusammenfassung von Mädesüß.',
+                  },
+                  keywords: {
+                     en: ['meadowsweet', 'wetlands'],
+                     de: ['mädesüß', 'feuchtgebiete'],
+                  },
+                  tags: ['herb', 'wetlands'],
+                  properties: ['salicylic acid precursor', 'anti-inflammatory'],
+               };
+            }
+         }
+
+         const mockAdapter = new MockLangAdapter();
+
+         const result = await extractCatalogEntryContent(
+            {
+               sequence: 2,
+               rawTitle: 'Reine des prés',
+               slug: '002-reine-des-pres',
+               pageRange: '100-102',
+               text: 'Filipendula ulmaria dans les prairies humides...',
+            },
+            {
+               adapter: mockAdapter,
+               targetLanguages: ['en', 'de'],
+               parentBook: {
+                  title: 'European Medicinal Flora',
+                  slug: 'european-medicinal-flora',
+                  resource: 'flora.pdf',
+                  fileHash: 'flora123',
+               },
+            }
+         );
+
+         expect(mockAdapter.lastPrompt).toContain('en, de');
+         expect(result.metadata.abstracts?.en).toContain('High density English summary');
+         expect(result.metadata.abstracts?.de).toContain('Dichte deutsche Zusammenfassung');
+         expect(result.metadata.keywords?.de).toEqual(['mädesüß', 'feuchtgebiete']);
+         expect(result.metadata.language).toBe('en');
       });
    });
 });

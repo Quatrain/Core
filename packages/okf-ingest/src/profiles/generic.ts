@@ -12,6 +12,7 @@ export class GenericDomainProfile implements DomainTaxonomyProfile {
 
    defaultCategory = 'general';
    defaultTags = ['knowledge', 'okf'];
+   targetLanguages = ['en'];
 
    promptGuidelines = [
       '8. "tags": Relevant lowercase tags identifying the primary topics and technical domains.',

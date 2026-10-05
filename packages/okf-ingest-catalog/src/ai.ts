@@ -1,11 +1,15 @@
-import { Schema, Type } from '@google/genai';
+import { AbstractAiAdapter } from '@quatrain/ai';
 import {
    AiStructuredRunner,
+   calculateTokenCost,
    DomainTaxonomyProfile,
    GenericDomainProfile,
    OkfDocumentType,
+   OkfJsonSchema,
+   OkfJsonSchemaProperty,
    OkfTokenUsage,
-   resolveStructuredRunner,
+   RawTokenUsageMetadata,
+   resolveAiAdapter,
 } from '@quatrain/okf-ingest';
 import { buildCatalogEntryPrompt } from './prompts/catalogEntryPrompt';
 import {
@@ -17,62 +21,35 @@ import {
 /**
  * Universal JSON Schema properties for catalog and encyclopedic entries.
  */
-export const CATALOG_CORE_PROPERTIES: Record<string, Schema> = {
-   title: { type: Type.STRING },
-   scientificName: { type: Type.STRING },
-   family: { type: Type.STRING },
-   description: { type: Type.STRING },
-   category: { type: Type.STRING },
-   language: { type: Type.STRING },
-   originalLanguage: { type: Type.STRING },
-   abstracts: {
-      type: Type.OBJECT,
-      properties: {
-         fr: { type: Type.STRING },
-         en: { type: Type.STRING },
-         ar: { type: Type.STRING },
-      },
-      required: ['fr', 'en', 'ar'],
-   },
-   keywords: {
-      type: Type.OBJECT,
-      properties: {
-         fr: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-         },
-         en: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-         },
-         ar: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-         },
-      },
-      required: ['fr', 'en', 'ar'],
-   },
+export const CATALOG_BASE_PROPERTIES: Record<string, OkfJsonSchemaProperty> = {
+   title: { type: 'STRING' },
+   scientificName: { type: 'STRING' },
+   family: { type: 'STRING' },
+   description: { type: 'STRING' },
+   category: { type: 'STRING' },
+   language: { type: 'STRING' },
+   originalLanguage: { type: 'STRING' },
    tags: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING },
+      type: 'ARRAY',
+      items: { type: 'STRING' },
    },
    properties: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING },
+      type: 'ARRAY',
+      items: { type: 'STRING' },
    },
    diagnosticKeys: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING },
+      type: 'ARRAY',
+      items: { type: 'STRING' },
    },
    diagrams: {
-      type: Type.ARRAY,
+      type: 'ARRAY',
       items: {
-         type: Type.OBJECT,
+         type: 'OBJECT',
          properties: {
-            title: { type: Type.STRING },
-            type: { type: Type.STRING },
-            content: { type: Type.STRING },
-            explanation: { type: Type.STRING },
+            title: { type: 'STRING' },
+            type: { type: 'STRING' },
+            content: { type: 'STRING' },
+            explanation: { type: 'STRING' },
          },
          required: ['title', 'type', 'content', 'explanation'],
       },
@@ -81,16 +58,40 @@ export const CATALOG_CORE_PROPERTIES: Record<string, Schema> = {
 
 /**
  * Builds a JSON Schema for structured catalog entry extraction,
- * merging universal catalog properties with profile domain extensions.
+ * merging universal catalog properties with profile domain extensions and configured target languages.
  */
-export function buildCatalogAiSchema(profile?: DomainTaxonomyProfile): Schema {
-   const properties: Record<string, Schema> = {
-      ...CATALOG_CORE_PROPERTIES,
-      ...((profile?.schemaProperties as Record<string, Schema>) || {}),
+export function buildCatalogAiSchema(
+   profile?: DomainTaxonomyProfile,
+   languages: string[] = ['en']
+): OkfJsonSchema {
+   const abstractProps: Record<string, OkfJsonSchemaProperty> = {};
+   const keywordProps: Record<string, OkfJsonSchemaProperty> = {};
+
+   for (const lang of languages) {
+      abstractProps[lang] = { type: 'STRING' };
+      keywordProps[lang] = {
+         type: 'ARRAY',
+         items: { type: 'STRING' },
+      };
+   }
+
+   const properties: Record<string, OkfJsonSchemaProperty> = {
+      ...CATALOG_BASE_PROPERTIES,
+      abstracts: {
+         type: 'OBJECT',
+         properties: abstractProps,
+         required: languages,
+      },
+      keywords: {
+         type: 'OBJECT',
+         properties: keywordProps,
+         required: languages,
+      },
+      ...((profile?.schemaProperties as Record<string, OkfJsonSchemaProperty>) || {}),
    };
 
    return {
-      type: Type.OBJECT,
+      type: 'OBJECT',
       properties,
       required: [
          'title',
@@ -105,11 +106,14 @@ export function buildCatalogAiSchema(profile?: DomainTaxonomyProfile): Schema {
    };
 }
 
-export const CATALOG_ENTRY_AI_SCHEMA: Schema = buildCatalogAiSchema();
+export const CATALOG_ENTRY_AI_SCHEMA: OkfJsonSchema = buildCatalogAiSchema();
 
 export interface EntryExtractionOptions {
    apiKey?: string;
+   adapter?: AbstractAiAdapter;
    runner?: AiStructuredRunner;
+   targetLanguages?: string[];
+   languages?: string[];
    parentBook: CatalogParentBookRef;
    entryType?: OkfDocumentType;
    model?: string;
@@ -121,7 +125,7 @@ export interface EntryExtractionOptions {
 
 /**
  * Extracts and enriches a single encyclopedic/catalog entry.
- * Model-agnostic and composable with domain taxonomy profiles.
+ * Model-agnostic and delegates strictly through @quatrain/ai adapters.
  */
 export async function extractCatalogEntryContent(
    chunk: CatalogEntryChunk,
@@ -133,22 +137,42 @@ export async function extractCatalogEntryContent(
    diagramsTranscribed: number;
    tablesTranscribed: number;
 }> {
-   const runner = resolveStructuredRunner(options.apiKey, options.runner);
+   const adapter = resolveAiAdapter({ adapter: options.adapter, apiKey: options.apiKey });
    const profile = options.taxonomyProfile || new GenericDomainProfile();
-   const schema = buildCatalogAiSchema(profile);
+   const targetLanguages = options.targetLanguages || options.languages || profile.targetLanguages || ['en'];
+   const schema = buildCatalogAiSchema(profile, targetLanguages);
    const model = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
    const prompt = buildCatalogEntryPrompt(
       {
          chunk,
          parentBook: options.parentBook,
+         languages: targetLanguages,
       },
       profile
    );
 
-   const result = await runner.generateStructured<Record<string, unknown>>(prompt, schema, { model });
-   const parsed = result.data;
-   const usage: OkfTokenUsage = result.usage;
+   let rawUsage: RawTokenUsageMetadata | undefined = undefined;
+   const parsed = (await adapter.generateStructured(prompt, schema, {
+      model,
+      onUsage: (u: unknown) => {
+         if (typeof u === 'object' && u !== null) {
+            rawUsage = u as RawTokenUsageMetadata;
+         }
+      },
+   })) as Record<string, unknown>;
+
+   let usage: OkfTokenUsage;
+   if (rawUsage) {
+      usage = calculateTokenCost(rawUsage, model);
+   } else {
+      const estPrompt = Math.ceil(prompt.length / 4);
+      const estOutput = Math.ceil(JSON.stringify(parsed).length / 4);
+      usage = calculateTokenCost(
+         { promptTokenCount: estPrompt, candidatesTokenCount: estOutput, totalTokenCount: estPrompt + estOutput },
+         model
+      );
+   }
 
    const title = typeof parsed.title === 'string' ? parsed.title : chunk.rawTitle;
    const scientificName = typeof parsed.scientificName === 'string' ? parsed.scientificName : chunk.scientificName;
@@ -158,16 +182,41 @@ export async function extractCatalogEntryContent(
       typeof parsed.category === 'string'
          ? parsed.category
          : (options.defaultCategory || profile.defaultCategory || 'catalog');
-   const language = typeof parsed.language === 'string' ? parsed.language : 'fr';
-   const originalLanguage = typeof parsed.originalLanguage === 'string' ? parsed.originalLanguage : 'fr';
+   const language = typeof parsed.language === 'string' ? parsed.language : (targetLanguages[0] || 'en');
+   const originalLanguage =
+      typeof parsed.originalLanguage === 'string'
+         ? parsed.originalLanguage
+         : language;
 
-   const abstracts = (typeof parsed.abstracts === 'object' && parsed.abstracts !== null
-      ? parsed.abstracts
-      : { fr: description, en: description, ar: description }) as OkfCatalogEntryMetadata['abstracts'];
+   const abstracts: OkfCatalogEntryMetadata['abstracts'] = {};
+   if (typeof parsed.abstracts === 'object' && parsed.abstracts !== null) {
+      const parsedAbs = parsed.abstracts as Record<string, string>;
+      for (const lang of targetLanguages) {
+         if (typeof parsedAbs[lang] === 'string') {
+            abstracts[lang] = parsedAbs[lang];
+         }
+      }
+   }
+   if (Object.keys(abstracts).length === 0) {
+      for (const lang of targetLanguages) {
+         abstracts[lang] = description;
+      }
+   }
 
-   const keywords = (typeof parsed.keywords === 'object' && parsed.keywords !== null
-      ? parsed.keywords
-      : { fr: [title], en: [title], ar: [title] }) as OkfCatalogEntryMetadata['keywords'];
+   const keywords: OkfCatalogEntryMetadata['keywords'] = {};
+   if (typeof parsed.keywords === 'object' && parsed.keywords !== null) {
+      const parsedKw = parsed.keywords as Record<string, string[]>;
+      for (const lang of targetLanguages) {
+         if (Array.isArray(parsedKw[lang])) {
+            keywords[lang] = parsedKw[lang];
+         }
+      }
+   }
+   if (Object.keys(keywords).length === 0) {
+      for (const lang of targetLanguages) {
+         keywords[lang] = [title];
+      }
+   }
 
    const tags = Array.isArray(parsed.tags) ? (parsed.tags as string[]) : [];
    const properties = Array.isArray(parsed.properties) ? (parsed.properties as string[]) : undefined;

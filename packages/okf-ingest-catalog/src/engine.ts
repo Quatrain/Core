@@ -60,6 +60,7 @@ export async function ingestCatalogMonograph(
    const soa = options.soa || 'quatrain/knowledge';
    const revision = options.revision;
    const profile = options.taxonomyProfile || new GenericDomainProfile();
+   const targetLanguages = options.targetLanguages || options.languages || profile.targetLanguages || ['en'];
 
    const parentBook: CatalogParentBookRef = {
       title: input.bookTitle,
@@ -103,9 +104,11 @@ export async function ingestCatalogMonograph(
             options.apiKey,
             {
                model,
+               adapter: options.adapter,
                runner: options.runner,
                taxonomyProfile: profile,
                defaultCategory: input.category,
+               targetLanguages,
                contextNote: `Introductory / methodological section of encyclopedic monograph "${input.bookTitle}".
 Chapter ${ch.index}: "${ch.title}".`,
             }
@@ -181,6 +184,7 @@ Chapter ${ch.index}: "${ch.title}".`,
 
       const entryResult = await extractCatalogEntryContent(entryChunk, {
          apiKey: options.apiKey,
+         adapter: options.adapter,
          runner: options.runner,
          parentBook,
          entryType: options.entryType || 'catalog-entry',
@@ -189,6 +193,7 @@ Chapter ${ch.index}: "${ch.title}".`,
          soa,
          revision,
          taxonomyProfile: profile,
+         targetLanguages,
       });
 
       totalPromptTokens += entryResult.usage.prompt;
@@ -234,6 +239,25 @@ Chapter ${ch.index}: "${ch.title}".`,
       costUsd: Number(totalCostUsd.toFixed(6)),
    };
 
+   const masterAbstracts: Record<string, string> = {};
+   const masterKeywords: Record<string, string[]> = {};
+
+   for (const lang of targetLanguages) {
+      if (lang === 'fr') {
+         masterAbstracts.fr = input.description;
+         masterKeywords.fr = [input.bookTitle, 'catalogue', 'encyclopedie'];
+      } else if (lang === 'en') {
+         masterAbstracts.en = `Encyclopedic catalog titled "${input.bookTitle}" containing ${processedEntries.length} atomic entries and reference chapters.`;
+         masterKeywords.en = [input.bookTitle, 'catalog', 'encyclopedia'];
+      } else if (lang === 'ar') {
+         masterAbstracts.ar = `دليل وموسوعة مرجعية بعنوان "${input.bookTitle}" تضم ${processedEntries.length} مدخل مفصل وفصول منهجية.`;
+         masterKeywords.ar = [input.bookTitle, 'دليل', 'موسوعة'];
+      } else {
+         masterAbstracts[lang] = input.description;
+         masterKeywords[lang] = [input.bookTitle, 'catalog'];
+      }
+   }
+
    const masterMetadata: OkfFrontmatterV2 = {
       type: 'monograph',
       title: input.bookTitle,
@@ -260,18 +284,10 @@ Chapter ${ch.index}: "${ch.title}".`,
       publisher: input.publisher,
       publicationYear: input.publicationYear,
       edition: input.edition,
-      language: input.language || 'fr',
-      originalLanguage: input.originalLanguage || input.language || 'fr',
-      abstracts: {
-         fr: input.description,
-         en: `Encyclopedic catalog titled "${input.bookTitle}" containing ${processedEntries.length} atomic entries and reference chapters.`,
-         ar: `دليل وموسوعة مرجعية بعنوان "${input.bookTitle}" تضم ${processedEntries.length} مدخل مفصل وفصول منهجية.`,
-      },
-      keywords: {
-         fr: [input.bookTitle, 'catalogue', 'encyclopedie'],
-         en: [input.bookTitle, 'catalog', 'encyclopedia'],
-         ar: [input.bookTitle, 'دليل', 'موسوعة'],
-      },
+      language: input.language || targetLanguages[0] || 'en',
+      originalLanguage: input.originalLanguage || input.language || targetLanguages[0] || 'en',
+      abstracts: masterAbstracts,
+      keywords: masterKeywords,
    };
 
    let masterBody = `# ${input.bookTitle}\n\n${input.description}\n\n`;

@@ -1,10 +1,10 @@
-import { Schema, Type } from '@google/genai';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import { resolveAiAdapter } from './adapter';
 import { extractSemanticContent } from './ai';
+import { calculateTokenCost, RawTokenUsageMetadata } from './cost';
 import { GenericDomainProfile } from './profiles/generic';
 import { buildBookOutlinePrompt } from './prompts/outlinePrompt';
-import { resolveStructuredRunner } from './runner';
 import { serializeOkfDocument } from './serializer';
 import {
    BookOutline,
@@ -17,6 +17,8 @@ import {
    OkfDocument,
    OkfDocumentType,
    OkfFrontmatterV2,
+   OkfJsonSchema,
+   OkfJsonSchemaProperty,
    OkfMultilingualContent,
    OkfMultilingualKeywords,
    OkfTokenUsage,
@@ -40,81 +42,79 @@ export function slugify(text: string): string {
 }
 
 /**
- * Builds a JSON Schema for book outline discovery, merging universal fields with domain extensions.
+ * Builds a JSON Schema for book outline discovery, merging universal fields,
+ * domain extensions, and configurable target languages.
  */
-export function buildBookOutlineSchema(profile?: DomainTaxonomyProfile): Schema {
-   const properties: Record<string, Schema> = {
-      title: { type: Type.STRING },
-      description: { type: Type.STRING },
-      category: { type: Type.STRING },
+export function buildBookOutlineSchema(
+   profile?: DomainTaxonomyProfile,
+   languages: string[] = ['en']
+): OkfJsonSchema {
+   const abstractProps: Record<string, OkfJsonSchemaProperty> = {};
+   const keywordProps: Record<string, OkfJsonSchemaProperty> = {};
+
+   for (const lang of languages) {
+      abstractProps[lang] = { type: 'STRING' };
+      keywordProps[lang] = {
+         type: 'ARRAY',
+         items: { type: 'STRING' },
+      };
+   }
+
+   const properties: Record<string, OkfJsonSchemaProperty> = {
+      title: { type: 'STRING' },
+      description: { type: 'STRING' },
+      category: { type: 'STRING' },
       authors: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
+         type: 'ARRAY',
+         items: { type: 'STRING' },
       },
-      publisher: { type: Type.STRING },
-      publicationYear: { type: Type.STRING },
-      language: { type: Type.STRING },
-      originalLanguage: { type: Type.STRING },
+      publisher: { type: 'STRING' },
+      publicationYear: { type: 'STRING' },
+      language: { type: 'STRING' },
+      originalLanguage: { type: 'STRING' },
       abstracts: {
-         type: Type.OBJECT,
-         properties: {
-            fr: { type: Type.STRING },
-            en: { type: Type.STRING },
-            ar: { type: Type.STRING },
-         },
-         required: ['fr', 'en', 'ar'],
+         type: 'OBJECT',
+         properties: abstractProps,
+         required: languages,
       },
       keywords: {
-         type: Type.OBJECT,
-         properties: {
-            fr: {
-               type: Type.ARRAY,
-               items: { type: Type.STRING },
-            },
-            en: {
-               type: Type.ARRAY,
-               items: { type: Type.STRING },
-            },
-            ar: {
-               type: Type.ARRAY,
-               items: { type: Type.STRING },
-            },
-         },
-         required: ['fr', 'en', 'ar'],
+         type: 'OBJECT',
+         properties: keywordProps,
+         required: languages,
       },
       tags: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
+         type: 'ARRAY',
+         items: { type: 'STRING' },
       },
       chapters: {
-         type: Type.ARRAY,
+         type: 'ARRAY',
          items: {
-            type: Type.OBJECT,
+            type: 'OBJECT',
             properties: {
-               index: { type: Type.INTEGER },
-               title: { type: Type.STRING },
-               summary: { type: Type.STRING },
-               startMarker: { type: Type.STRING },
-               endMarker: { type: Type.STRING },
+               index: { type: 'INTEGER' },
+               title: { type: 'STRING' },
+               summary: { type: 'STRING' },
+               startMarker: { type: 'STRING' },
+               endMarker: { type: 'STRING' },
             },
             required: ['index', 'title', 'summary'],
          },
       },
-      ...((profile?.schemaProperties as Record<string, Schema>) || {}),
+      ...((profile?.schemaProperties as Record<string, OkfJsonSchemaProperty>) || {}),
    };
 
    return {
-      type: Type.OBJECT,
+      type: 'OBJECT',
       properties,
       required: ['title', 'description', 'category', 'tags', 'chapters', 'language', 'abstracts', 'keywords'],
    };
 }
 
-export const BOOK_OUTLINE_AI_SCHEMA: Schema = buildBookOutlineSchema();
+export const BOOK_OUTLINE_AI_SCHEMA: OkfJsonSchema = buildBookOutlineSchema();
 
 /**
  * Discovers the structural outline, table of contents and chapter boundaries of a large book or monograph.
- * Decoupled from specific model providers and composable with domain taxonomy profiles.
+ * Decoupled from specific model providers and delegates strictly through @quatrain/ai adapters.
  */
 export async function extractBookOutline(
    rawText: string,
@@ -122,9 +122,10 @@ export async function extractBookOutline(
    apiKey?: string,
    options: MonographOptions = {}
 ): Promise<{ outline: BookOutline; usage: OkfTokenUsage }> {
-   const runner = resolveStructuredRunner(apiKey || options.apiKey, options.runner);
+   const adapter = resolveAiAdapter({ adapter: options.adapter, apiKey: apiKey || options.apiKey });
    const profile = options.taxonomyProfile || new GenericDomainProfile();
-   const schema = buildBookOutlineSchema(profile);
+   const targetLanguages = options.targetLanguages || options.languages || profile.targetLanguages || ['en'];
+   const schema = buildBookOutlineSchema(profile, targetLanguages);
    const model = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
    const headLength = 35_000;
@@ -134,11 +135,29 @@ export async function extractBookOutline(
       sampleText = `${rawText.substring(0, headLength)}\n\n[... intermediate voluminous book content omitted ...]\n\n${rawText.substring(rawText.length - tailLength)}`;
    }
 
-   const prompt = buildBookOutlinePrompt({ filename, sampleText }, profile);
+   const prompt = buildBookOutlinePrompt({ filename, sampleText, languages: targetLanguages }, profile);
 
-   const result = await runner.generateStructured<Record<string, unknown>>(prompt, schema, { model });
-   const parsed = result.data;
-   const usage: OkfTokenUsage = result.usage;
+   let rawUsage: RawTokenUsageMetadata | undefined = undefined;
+   const parsed = (await adapter.generateStructured(prompt, schema, {
+      model,
+      onUsage: (u: unknown) => {
+         if (typeof u === 'object' && u !== null) {
+            rawUsage = u as RawTokenUsageMetadata;
+         }
+      },
+   })) as Record<string, unknown>;
+
+   let usage: OkfTokenUsage;
+   if (rawUsage) {
+      usage = calculateTokenCost(rawUsage, model);
+   } else {
+      const estPrompt = Math.ceil(prompt.length / 4);
+      const estOutput = Math.ceil(JSON.stringify(parsed).length / 4);
+      usage = calculateTokenCost(
+         { promptTokenCount: estPrompt, candidatesTokenCount: estOutput, totalTokenCount: estPrompt + estOutput },
+         model
+      );
+   }
 
    const rawChapters = Array.isArray(parsed.chapters) ? parsed.chapters : [];
    const chapters: BookOutlineChapter[] = rawChapters.map((c, i) => {
@@ -157,6 +176,27 @@ export async function extractBookOutline(
    const domainMeta = profile.extractDomainMetadata ? profile.extractDomainMetadata(parsed) : {};
    const fallbackTitle = path.basename(filename, path.extname(filename));
 
+   // Construct dynamic multilingual abstracts & keywords
+   const abstracts: OkfMultilingualContent = {};
+   if (typeof parsed.abstracts === 'object' && parsed.abstracts !== null) {
+      const parsedAbs = parsed.abstracts as Record<string, string>;
+      for (const lang of targetLanguages) {
+         if (typeof parsedAbs[lang] === 'string') {
+            abstracts[lang] = parsedAbs[lang];
+         }
+      }
+   }
+
+   const keywords: OkfMultilingualKeywords = {};
+   if (typeof parsed.keywords === 'object' && parsed.keywords !== null) {
+      const parsedKw = parsed.keywords as Record<string, string[]>;
+      for (const lang of targetLanguages) {
+         if (Array.isArray(parsedKw[lang])) {
+            keywords[lang] = parsedKw[lang];
+         }
+      }
+   }
+
    const outline: BookOutline = {
       title: typeof parsed.title === 'string' ? parsed.title : fallbackTitle,
       slug: slugify(typeof parsed.title === 'string' ? parsed.title : fallbackTitle),
@@ -168,21 +208,15 @@ export async function extractBookOutline(
       authors: Array.isArray(parsed.authors) ? (parsed.authors as string[]) : undefined,
       publisher: typeof parsed.publisher === 'string' ? parsed.publisher : undefined,
       publicationYear: typeof parsed.publicationYear === 'string' ? parsed.publicationYear : undefined,
-      language: typeof parsed.language === 'string' ? parsed.language : 'fr',
+      language: typeof parsed.language === 'string' ? parsed.language : targetLanguages[0] || 'en',
       originalLanguage:
          typeof parsed.originalLanguage === 'string'
             ? parsed.originalLanguage
             : typeof parsed.language === 'string'
               ? parsed.language
-              : 'fr',
-      abstracts:
-         typeof parsed.abstracts === 'object' && parsed.abstracts !== null
-            ? (parsed.abstracts as OkfMultilingualContent)
-            : undefined,
-      keywords:
-         typeof parsed.keywords === 'object' && parsed.keywords !== null
-            ? (parsed.keywords as OkfMultilingualKeywords)
-            : undefined,
+              : targetLanguages[0] || 'en',
+      abstracts: Object.keys(abstracts).length > 0 ? abstracts : undefined,
+      keywords: Object.keys(keywords).length > 0 ? keywords : undefined,
       tags:
          Array.isArray(parsed.tags) && parsed.tags.length > 0
             ? (parsed.tags as string[])
@@ -288,13 +322,14 @@ export async function decomposeAndIngestMonograph(
 ): Promise<MonographIngestionResult> {
    const splitThreshold = options.splitThresholdChars || 60_000;
    const profile = options.taxonomyProfile || new GenericDomainProfile();
+   const targetLanguages = options.targetLanguages || options.languages || profile.targetLanguages || ['en'];
 
    // 1. Direct single-doc extraction if below threshold
    if (input.rawText.length < splitThreshold) {
       const singleDoc = await extractSemanticContent(
          { rawText: input.rawText, filename: input.filename },
          apiKey,
-         { ...options, taxonomyProfile: profile }
+         { ...options, taxonomyProfile: profile, targetLanguages }
       );
 
       const docSlug = slugify(singleDoc.metadata.title);
@@ -327,7 +362,7 @@ export async function decomposeAndIngestMonograph(
       input.rawText,
       input.filename,
       apiKey,
-      { ...options, taxonomyProfile: profile }
+      { ...options, taxonomyProfile: profile, targetLanguages }
    );
 
    const slices = sliceTextByChapters(input.rawText, outline.chapters);
@@ -361,6 +396,7 @@ export async function decomposeAndIngestMonograph(
          {
             ...options,
             taxonomyProfile: profile,
+            targetLanguages,
             defaultCategory: outline.category,
             contextNote: `This text is Chapter ${ch.index} ("${ch.title}") of the book "${outline.title}".
 Extract specifically the concepts, taxonomies, diagrams, and tables relevant to this chapter.`,
@@ -401,8 +437,8 @@ Extract specifically the concepts, taxonomies, diagrams, and tables relevant to 
          authors: outline.authors,
          publisher: outline.publisher,
          publicationYear: outline.publicationYear,
-         language: chapterResult.metadata.language || outline.language || 'fr',
-         originalLanguage: chapterResult.metadata.originalLanguage || outline.originalLanguage || 'fr',
+         language: chapterResult.metadata.language || outline.language || targetLanguages[0] || 'en',
+         originalLanguage: chapterResult.metadata.originalLanguage || outline.originalLanguage || targetLanguages[0] || 'en',
          abstracts: chapterResult.metadata.abstracts,
          keywords: chapterResult.metadata.keywords,
          thematics: chapterResult.metadata.thematics || outline.thematics,
@@ -469,8 +505,8 @@ Extract specifically the concepts, taxonomies, diagrams, and tables relevant to 
       authors: outline.authors,
       publisher: outline.publisher,
       publicationYear: outline.publicationYear,
-      language: outline.language || 'fr',
-      originalLanguage: outline.originalLanguage || outline.language || 'fr',
+      language: outline.language || targetLanguages[0] || 'en',
+      originalLanguage: outline.originalLanguage || outline.language || targetLanguages[0] || 'en',
       abstracts: outline.abstracts,
       keywords: outline.keywords,
    };

@@ -1,35 +1,37 @@
 import { describe, expect, it } from 'bun:test';
+import { AbstractAiAdapter } from '@quatrain/ai';
 import { extractSemanticContent } from '../ai';
 import { BradAgronomyProfile } from '../profiles/bradAgronomy';
 import { GenericDomainProfile } from '../profiles/generic';
 import { buildDocumentPrompt } from '../prompts/documentPrompt';
 import { buildBookOutlinePrompt } from '../prompts/outlinePrompt';
-import { AiRunnerOptions, AiRunnerResponse, AiStructuredRunner, OkfTokenUsage } from '../types';
 
-class MockStructuredRunner implements AiStructuredRunner {
+class MockAiAdapter extends AbstractAiAdapter {
    public lastPrompt = '';
 
-   constructor(private mockResponse: Record<string, unknown>) {}
+   constructor(private mockResponse: Record<string, unknown>) {
+      super();
+   }
 
-   async generateStructured<T = Record<string, unknown>>(
-      prompt: string,
-      _schema: unknown,
-      _options?: AiRunnerOptions
-   ): Promise<AiRunnerResponse<T>> {
-      this.lastPrompt = prompt;
-      const usage: OkfTokenUsage = {
-         prompt: 100,
-         candidates: 50,
-         thinking: 0,
-         total: 150,
-         costUsd: 0.00005,
-      };
+   init(): void {}
 
-      return {
-         data: this.mockResponse as T,
-         usage,
-         rawText: JSON.stringify(this.mockResponse),
-      };
+   async generateText(_prompt: string, _options?: unknown): Promise<string> {
+      return JSON.stringify(this.mockResponse);
+   }
+
+   async generateStructured(prompt: unknown, _schema: unknown, options?: unknown): Promise<unknown> {
+      this.lastPrompt = typeof prompt === 'string' ? prompt : JSON.stringify(prompt);
+      if (options && typeof options === 'object' && 'onUsage' in options) {
+         const onUsage = (options as { onUsage?: (u: unknown) => void }).onUsage;
+         if (typeof onUsage === 'function') {
+            onUsage({
+               promptTokenCount: 100,
+               candidatesTokenCount: 50,
+               totalTokenCount: 150,
+            });
+         }
+      }
+      return this.mockResponse;
    }
 }
 
@@ -58,8 +60,8 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
       expect(prompt).toContain('"itineraries": Agricultural management practices');
    });
 
-   it('should extract generic document metadata using a decoupled custom runner without Gemini SDK', async () => {
-      const mockRunner = new MockStructuredRunner({
+   it('should extract generic document metadata using a decoupled custom AbstractAiAdapter without Gemini SDK', async () => {
+      const mockAdapter = new MockAiAdapter({
          title: 'Decoupled Architecture Standard',
          type: 'specification',
          description: 'Standard for building decoupled and composable AI pipelines.',
@@ -69,33 +71,66 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
          originalLanguage: 'en',
          abstracts: {
             en: 'Dense English abstract on decoupled architecture.',
-            fr: 'Synthèse en français.',
-            ar: 'ملخص باللغة العربية.',
          },
          keywords: {
             en: ['architecture', 'decoupling'],
-            fr: ['architecture', 'découplage'],
-            ar: ['معمارية', 'فصل'],
          },
       });
 
       const result = await extractSemanticContent(
          { rawText: 'Decoupled architecture documentation', filename: 'standard.md' },
          undefined,
-         { runner: mockRunner, taxonomyProfile: new GenericDomainProfile() }
+         { adapter: mockAdapter, taxonomyProfile: new GenericDomainProfile() }
       );
 
-      expect(mockRunner.lastPrompt).toContain('Decoupled architecture documentation');
+      expect(mockAdapter.lastPrompt).toContain('Decoupled architecture documentation');
       expect(result.metadata.title).toBe('Decoupled Architecture Standard');
       expect(result.metadata.type).toBe('specification');
       expect(result.metadata.category).toBe('architecture');
+      expect(result.metadata.abstracts?.en).toContain('Dense English abstract');
       expect(result.metadata.soils).toBeUndefined();
       expect(result.metadata.climates).toBeUndefined();
       expect(result.usage.total).toBe(150);
    });
 
+   it('should support parameterized target languages (e.g. en and es)', async () => {
+      const mockAdapter = new MockAiAdapter({
+         title: 'Plant Health Manual',
+         type: 'guide',
+         description: 'Botanical guide.',
+         category: 'botany',
+         tags: ['plants'],
+         language: 'es',
+         originalLanguage: 'es',
+         abstracts: {
+            en: 'English summary of plant health.',
+            es: 'Resumen en español de salud vegetal.',
+         },
+         keywords: {
+            en: ['plants', 'health'],
+            es: ['plantas', 'salud'],
+         },
+      });
+
+      const result = await extractSemanticContent(
+         { rawText: 'Plant biology text in Spanish', filename: 'manual.pdf' },
+         undefined,
+         {
+            adapter: mockAdapter,
+            taxonomyProfile: new GenericDomainProfile(),
+            targetLanguages: ['en', 'es'],
+         }
+      );
+
+      expect(mockAdapter.lastPrompt).toContain('clear scientific English');
+      expect(mockAdapter.lastPrompt).toContain('formal Spanish');
+      expect(result.metadata.abstracts?.en).toBe('English summary of plant health.');
+      expect(result.metadata.abstracts?.es).toBe('Resumen en español de salud vegetal.');
+      expect(result.metadata.keywords?.es).toEqual(['plantas', 'salud']);
+   });
+
    it('should extract agronomic taxonomies when BradAgronomyProfile is supplied', async () => {
-      const mockRunner = new MockStructuredRunner({
+      const mockAdapter = new MockAiAdapter({
          title: 'Gestion des sols calcaires',
          type: 'guide',
          description: 'Guide technique pour sols argilo-calcaires.',
@@ -122,7 +157,7 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
       const result = await extractSemanticContent(
          { rawText: 'Texte agronomique', filename: 'sols.pdf' },
          undefined,
-         { runner: mockRunner, taxonomyProfile: new BradAgronomyProfile() }
+         { adapter: mockAdapter, taxonomyProfile: new BradAgronomyProfile() }
       );
 
       expect(result.metadata.title).toBe('Gestion des sols calcaires');
@@ -130,6 +165,9 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
       expect(result.metadata.climates).toEqual(['mediterraneen']);
       expect(result.metadata.itineraries).toEqual(['semis-direct']);
       expect(result.metadata.crops).toEqual(['vigne']);
+      expect(result.metadata.abstracts?.fr).toBeDefined();
+      expect(result.metadata.abstracts?.en).toBeDefined();
+      expect(result.metadata.abstracts?.ar).toBeDefined();
    });
 
    it('should generate International English book outline prompt', () => {

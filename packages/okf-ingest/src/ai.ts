@@ -1,72 +1,49 @@
-import { Schema, Type } from '@google/genai';
+import { resolveAiAdapter } from './adapter';
+import { calculateTokenCost, RawTokenUsageMetadata } from './cost';
 import { GenericDomainProfile } from './profiles/generic';
 import { buildDocumentPrompt } from './prompts/documentPrompt';
-import { resolveStructuredRunner } from './runner';
 import {
-   AiRunnerResponse,
    DomainTaxonomyProfile,
    ExtractionOptions,
    IngestionExtractionResult,
    OkfDocumentType,
    OkfFrontmatterV2,
+   OkfJsonSchema,
+   OkfJsonSchemaProperty,
    OkfMultilingualContent,
    OkfMultilingualKeywords,
    OkfTokenUsage,
 } from './types';
 
-export const OKF_CORE_PROPERTIES: Record<string, Schema> = {
-   title: { type: Type.STRING },
-   type: { type: Type.STRING },
-   description: { type: Type.STRING },
-   category: { type: Type.STRING },
+/**
+ * Universal JSON Schema properties for core OKF document metadata.
+ */
+export const OKF_BASE_PROPERTIES: Record<string, OkfJsonSchemaProperty> = {
+   title: { type: 'STRING' },
+   type: { type: 'STRING' },
+   description: { type: 'STRING' },
+   category: { type: 'STRING' },
    tags: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING },
+      type: 'ARRAY',
+      items: { type: 'STRING' },
    },
    authors: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING },
+      type: 'ARRAY',
+      items: { type: 'STRING' },
    },
-   publisher: { type: Type.STRING },
-   publicationYear: { type: Type.STRING },
-   language: { type: Type.STRING },
-   originalLanguage: { type: Type.STRING },
-   abstracts: {
-      type: Type.OBJECT,
-      properties: {
-         fr: { type: Type.STRING },
-         en: { type: Type.STRING },
-         ar: { type: Type.STRING },
-      },
-      required: ['fr', 'en', 'ar'],
-   },
-   keywords: {
-      type: Type.OBJECT,
-      properties: {
-         fr: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-         },
-         en: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-         },
-         ar: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-         },
-      },
-      required: ['fr', 'en', 'ar'],
-   },
+   publisher: { type: 'STRING' },
+   publicationYear: { type: 'STRING' },
+   language: { type: 'STRING' },
+   originalLanguage: { type: 'STRING' },
    diagrams: {
-      type: Type.ARRAY,
+      type: 'ARRAY',
       items: {
-         type: Type.OBJECT,
+         type: 'OBJECT',
          properties: {
-            title: { type: Type.STRING },
-            type: { type: Type.STRING },
-            content: { type: Type.STRING },
-            explanation: { type: Type.STRING },
+            title: { type: 'STRING' },
+            type: { type: 'STRING' },
+            content: { type: 'STRING' },
+            explanation: { type: 'STRING' },
          },
          required: ['title', 'type', 'content', 'explanation'],
       },
@@ -75,22 +52,46 @@ export const OKF_CORE_PROPERTIES: Record<string, Schema> = {
 
 /**
  * Builds a composite OKF JSON Schema by merging universal core properties
- * with domain-specific taxonomy fields from the provided profile.
+ * with domain-specific taxonomy fields and dynamically configured target languages.
  */
-export function buildOkfAiSchema(profile?: DomainTaxonomyProfile): Schema {
-   const properties: Record<string, Schema> = {
-      ...OKF_CORE_PROPERTIES,
-      ...((profile?.schemaProperties as Record<string, Schema>) || {}),
+export function buildOkfAiSchema(
+   profile?: DomainTaxonomyProfile,
+   languages: string[] = ['en']
+): OkfJsonSchema {
+   const abstractProps: Record<string, OkfJsonSchemaProperty> = {};
+   const keywordProps: Record<string, OkfJsonSchemaProperty> = {};
+
+   for (const lang of languages) {
+      abstractProps[lang] = { type: 'STRING' };
+      keywordProps[lang] = {
+         type: 'ARRAY',
+         items: { type: 'STRING' },
+      };
+   }
+
+   const properties: Record<string, OkfJsonSchemaProperty> = {
+      ...OKF_BASE_PROPERTIES,
+      abstracts: {
+         type: 'OBJECT',
+         properties: abstractProps,
+         required: languages,
+      },
+      keywords: {
+         type: 'OBJECT',
+         properties: keywordProps,
+         required: languages,
+      },
+      ...((profile?.schemaProperties as Record<string, OkfJsonSchemaProperty>) || {}),
    };
 
    return {
-      type: Type.OBJECT,
+      type: 'OBJECT',
       properties,
       required: ['title', 'description', 'category', 'tags', 'language', 'abstracts', 'keywords'],
    };
 }
 
-export const OKF_INGEST_AI_SCHEMA: Schema = buildOkfAiSchema();
+export const OKF_INGEST_AI_SCHEMA: OkfJsonSchema = buildOkfAiSchema();
 
 export interface AiSourceInput {
    buffer?: Buffer;
@@ -102,16 +103,17 @@ export interface AiSourceInput {
 
 /**
  * Extracts semantic metadata, transcribes diagrams/tables, and tracks token usage.
- * Model-agnostic and composable with domain taxonomy profiles.
+ * Model-agnostic and delegates strictly through @quatrain/ai adapters.
  */
 export async function extractSemanticContent(
    input: AiSourceInput,
    apiKey?: string,
    options: ExtractionOptions = {}
 ): Promise<IngestionExtractionResult> {
-   const runner = resolveStructuredRunner(apiKey || options.apiKey, options.runner);
+   const adapter = resolveAiAdapter({ adapter: options.adapter, apiKey: apiKey || options.apiKey });
    const profile = options.taxonomyProfile || new GenericDomainProfile();
-   const schema = buildOkfAiSchema(profile);
+   const targetLanguages = options.targetLanguages || options.languages || profile.targetLanguages || ['en'];
+   const schema = buildOkfAiSchema(profile, targetLanguages);
    const model = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
    const prompt = buildDocumentPrompt(
@@ -121,28 +123,57 @@ export async function extractSemanticContent(
          isScanned: input.isScanned,
          contextNote: options.contextNote,
          maxExcerptChars: options.maxContentChars,
+         languages: targetLanguages,
       },
       profile
    );
 
+   let rawUsage: RawTokenUsageMetadata | undefined = undefined;
+   let parsed: Record<string, unknown>;
+
    const canSendInline =
       Boolean(input.isScanned && input.buffer && input.isPdf && input.buffer.length <= 15 * 1024 * 1024);
 
-   let result: AiRunnerResponse<Record<string, unknown>>;
-
-   if (canSendInline && input.buffer && runner.generateStructuredMultimodal) {
-      result = await runner.generateStructuredMultimodal<Record<string, unknown>>(
+   if (canSendInline && input.buffer) {
+      const contents = [
          prompt,
-         [{ mimeType: 'application/pdf', data: input.buffer.toString('base64') }],
-         schema,
-         { model }
-      );
+         {
+            inlineData: {
+               mimeType: 'application/pdf',
+               data: input.buffer.toString('base64'),
+            },
+         },
+      ];
+      parsed = (await adapter.generateStructured(contents, schema, {
+         model,
+         onUsage: (u: unknown) => {
+            if (typeof u === 'object' && u !== null) {
+               rawUsage = u as RawTokenUsageMetadata;
+            }
+         },
+      })) as Record<string, unknown>;
    } else {
-      result = await runner.generateStructured<Record<string, unknown>>(prompt, schema, { model });
+      parsed = (await adapter.generateStructured(prompt, schema, {
+         model,
+         onUsage: (u: unknown) => {
+            if (typeof u === 'object' && u !== null) {
+               rawUsage = u as RawTokenUsageMetadata;
+            }
+         },
+      })) as Record<string, unknown>;
    }
 
-   const parsed = result.data;
-   const usage: OkfTokenUsage = result.usage;
+   let usage: OkfTokenUsage;
+   if (rawUsage) {
+      usage = calculateTokenCost(rawUsage, model);
+   } else {
+      const estPrompt = Math.ceil(prompt.length / 4);
+      const estOutput = Math.ceil(JSON.stringify(parsed).length / 4);
+      usage = calculateTokenCost(
+         { promptTokenCount: estPrompt, candidatesTokenCount: estOutput, totalTokenCount: estPrompt + estOutput },
+         model
+      );
+   }
 
    // Process visual diagrams & Markdown tables
    const diagrams = Array.isArray(parsed.diagrams) ? parsed.diagrams : [];
@@ -182,6 +213,27 @@ export async function extractSemanticContent(
    const description = typeof parsed.description === 'string' ? parsed.description : 'Ingested technical document.';
    const domainMeta = profile.extractDomainMetadata ? profile.extractDomainMetadata(parsed) : {};
 
+   // Construct dynamic multilingual abstracts & keywords
+   const abstracts: OkfMultilingualContent = {};
+   if (typeof parsed.abstracts === 'object' && parsed.abstracts !== null) {
+      const parsedAbs = parsed.abstracts as Record<string, string>;
+      for (const lang of targetLanguages) {
+         if (typeof parsedAbs[lang] === 'string') {
+            abstracts[lang] = parsedAbs[lang];
+         }
+      }
+   }
+
+   const keywords: OkfMultilingualKeywords = {};
+   if (typeof parsed.keywords === 'object' && parsed.keywords !== null) {
+      const parsedKw = parsed.keywords as Record<string, string[]>;
+      for (const lang of targetLanguages) {
+         if (Array.isArray(parsedKw[lang])) {
+            keywords[lang] = parsedKw[lang];
+         }
+      }
+   }
+
    const metadata: OkfFrontmatterV2 = {
       type: typeof parsed.type === 'string' ? (parsed.type as OkfDocumentType) : 'guide',
       title,
@@ -197,21 +249,15 @@ export async function extractSemanticContent(
       authors: Array.isArray(parsed.authors) ? (parsed.authors as string[]) : undefined,
       publisher: typeof parsed.publisher === 'string' ? parsed.publisher : undefined,
       publicationYear: typeof parsed.publicationYear === 'string' ? parsed.publicationYear : undefined,
-      language: typeof parsed.language === 'string' ? parsed.language : 'fr',
+      language: typeof parsed.language === 'string' ? parsed.language : targetLanguages[0] || 'en',
       originalLanguage:
          typeof parsed.originalLanguage === 'string'
             ? parsed.originalLanguage
             : typeof parsed.language === 'string'
               ? parsed.language
-              : 'fr',
-      abstracts:
-         typeof parsed.abstracts === 'object' && parsed.abstracts !== null
-            ? (parsed.abstracts as OkfMultilingualContent)
-            : undefined,
-      keywords:
-         typeof parsed.keywords === 'object' && parsed.keywords !== null
-            ? (parsed.keywords as OkfMultilingualKeywords)
-            : undefined,
+              : targetLanguages[0] || 'en',
+      abstracts: Object.keys(abstracts).length > 0 ? abstracts : undefined,
+      keywords: Object.keys(keywords).length > 0 ? keywords : undefined,
       status: 'draft',
       generated: {
          by: `quatrain/okf-ingest (${model})`,

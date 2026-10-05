@@ -1,3 +1,5 @@
+import { AbstractAiAdapter } from '@quatrain/ai';
+
 /**
  * Core type contracts for the @quatrain/okf-ingest package.
  * Conforms strictly to the Open Knowledge Format (OKF v0.2) specification.
@@ -151,6 +153,27 @@ export interface AiStructuredRunner {
 }
 
 /**
+ * Universal JSON Schema definition for AI structured outputs,
+ * completely independent of any single model provider.
+ */
+export interface OkfJsonSchemaProperty {
+   type: string;
+   description?: string;
+   items?: OkfJsonSchemaProperty;
+   properties?: Record<string, OkfJsonSchemaProperty>;
+   required?: string[];
+   enum?: string[];
+   [key: string]: unknown;
+}
+
+export interface OkfJsonSchema {
+   type: string;
+   properties: Record<string, OkfJsonSchemaProperty>;
+   required?: string[];
+   [key: string]: unknown;
+}
+
+/**
  * Specification of an individual domain-specific taxonomy field.
  */
 export interface DomainTaxonomyField {
@@ -176,6 +199,7 @@ export interface DomainTaxonomyProfile {
    renderMarkdownSections?: (metadata: Record<string, unknown>) => string;
    defaultCategory?: string;
    defaultTags?: string[];
+   targetLanguages?: string[];
 }
 
 export interface ExtractionOptions {
@@ -186,8 +210,11 @@ export interface ExtractionOptions {
    enableVisionMermaid?: boolean;
    contextNote?: string;
    maxContentChars?: number;
+   adapter?: AbstractAiAdapter;
    runner?: AiStructuredRunner;
    apiKey?: string;
+   targetLanguages?: string[];
+   languages?: string[];
    taxonomyProfile?: DomainTaxonomyProfile;
 }
 

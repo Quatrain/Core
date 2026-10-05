@@ -1,3 +1,4 @@
+import { AbstractAiAdapter } from '@quatrain/ai';
 import {
    AiStructuredRunner,
    BookOutlineChapter,
@@ -79,7 +80,10 @@ export interface CatalogEntryResult {
  */
 export interface CatalogIngestionOptions {
    apiKey?: string;
+   adapter?: AbstractAiAdapter;
    runner?: AiStructuredRunner;
+   targetLanguages?: string[];
+   languages?: string[];
    gitLocalPath: string;
    originalFileUri: string;
    fileHash: string;

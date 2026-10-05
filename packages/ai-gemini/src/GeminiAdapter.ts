@@ -65,6 +65,18 @@ export class GeminiAdapter extends AbstractAiAdapter {
          throw new Error('No text returned from Gemini API')
       }
 
+      if (typeof options?.onUsage === 'function' && response.usageMetadata) {
+         options.onUsage(response.usageMetadata)
+      }
+
+      if (options?.includeMetadata) {
+         return {
+            data: JSON.parse(response.text),
+            usageMetadata: response.usageMetadata,
+            rawText: response.text,
+         }
+      }
+
       return JSON.parse(response.text)
    }
 

@@ -19,20 +19,22 @@ export const GEMINI_MODEL_PRICING: Record<string, ModelPricing> = {
 
 const DEFAULT_PRICING: ModelPricing = { inputRate: 0.075, outputRate: 0.30 };
 
+export interface RawTokenUsageMetadata {
+   promptTokenCount?: number;
+   candidatesTokenCount?: number;
+   thoughtsTokenCount?: number;
+   totalTokenCount?: number;
+}
+
 /**
- * Calculates exact token counts and cost in USD from Google GenAI usageMetadata.
+ * Calculates exact token counts and cost in USD from usage metadata.
  *
- * @param usage - Raw usage metadata returned from the Gemini API.
- * @param model - Identifier of the Gemini model used.
+ * @param usage - Raw usage metadata returned from the AI model API.
+ * @param model - Identifier of the model used.
  * @returns Standardized OkfTokenUsage with cost in USD.
  */
 export function calculateTokenCost(
-   usage: {
-      promptTokenCount?: number;
-      candidatesTokenCount?: number;
-      thoughtsTokenCount?: number;
-      totalTokenCount?: number;
-   } | null | undefined,
+   usage: RawTokenUsageMetadata | null | undefined,
    model = 'gemini-2.5-flash'
 ): OkfTokenUsage {
    const prompt = usage?.promptTokenCount ?? 0;

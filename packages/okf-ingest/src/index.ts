@@ -17,4 +17,5 @@ export * from './ai';
 export * from './dedup';
 export * from './writer';
 export * from './monograph';
+export * from './adapter';
 

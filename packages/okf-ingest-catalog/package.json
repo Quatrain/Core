@@ -25,7 +25,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@google/genai": "latest",
+    "@quatrain/ai": "workspace:*",
     "@quatrain/core": "workspace:*",
     "@quatrain/log": "workspace:*",
     "@quatrain/okf-ingest": "workspace:*",

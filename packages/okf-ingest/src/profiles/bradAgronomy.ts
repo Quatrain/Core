@@ -1,5 +1,4 @@
-import { Schema, Type } from '@google/genai';
-import { DomainTaxonomyProfile } from '../types';
+import { DomainTaxonomyProfile, OkfJsonSchemaProperty } from '../types';
 
 /**
  * Specialized agronomic taxonomy profile for BRAD agroecological knowledge bases (world-agronomy).
@@ -13,6 +12,7 @@ export class BradAgronomyProfile implements DomainTaxonomyProfile {
 
    defaultCategory = 'soil-health';
    defaultTags = ['agronomie', 'agriculture'];
+   targetLanguages = ['fr', 'en', 'ar'];
 
    promptGuidelines = [
       '8. Agronomic and Pedological Taxonomies (where relevant):',
@@ -23,26 +23,26 @@ export class BradAgronomyProfile implements DomainTaxonomyProfile {
       '   - "thematics": Main thematic domains (e.g. soil-health, cover-crops, bio-indication, fertilization, water-management).',
    ];
 
-   schemaProperties: Record<string, Schema> = {
+   schemaProperties: Record<string, OkfJsonSchemaProperty> = {
       thematics: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
+         type: 'ARRAY',
+         items: { type: 'STRING' },
       },
       soils: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
+         type: 'ARRAY',
+         items: { type: 'STRING' },
       },
       climates: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
+         type: 'ARRAY',
+         items: { type: 'STRING' },
       },
       itineraries: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
+         type: 'ARRAY',
+         items: { type: 'STRING' },
       },
       crops: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
+         type: 'ARRAY',
+         items: { type: 'STRING' },
       },
    };
 

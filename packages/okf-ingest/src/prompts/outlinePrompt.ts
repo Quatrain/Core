@@ -1,13 +1,15 @@
 import { DomainTaxonomyProfile } from '../types';
+import { LANGUAGE_SYNTHESIS_DESCRIPTIONS } from './documentPrompt';
 
 export interface BookOutlinePromptParams {
    filename: string;
    sampleText: string;
+   languages?: string[];
 }
 
 /**
  * Builds an International English prompt for monograph/book outline extraction,
- * composable with optional domain taxonomy profiles.
+ * composable with optional domain taxonomy profiles and configurable target languages.
  */
 export function buildBookOutlinePrompt(
    params: BookOutlinePromptParams,
@@ -17,17 +19,22 @@ export function buildBookOutlinePrompt(
       profile?.systemRole ||
       'You are an expert knowledge engineer specializing in structured knowledge synthesis and comprehensive book decomposition according to the Open Knowledge Format (OKF v0.2) specification.';
 
+   const targetLanguages = params.languages || profile?.targetLanguages || ['en'];
+
+   const abstractLines = targetLanguages.map(
+      (lang) =>
+         `   - "${lang}": ${LANGUAGE_SYNTHESIS_DESCRIPTIONS[lang] || `Technical abstract in language "${lang}".`}`
+   );
+
    const guidelines: string[] = [
       '1. "title": Official and complete book or monograph title (without file extensions).',
       '2. "description": Exactly ONE concise sentence summarizing the scope and subject matter of the book in its original language.',
       '3. "category": Lowercase slugified category folder path (e.g. soil-health, methodology, reference, agronomy-books).',
       '4. "language": ISO 639-1 code of the primary book language (e.g. "en", "fr", "es", "de", "ar").',
       '5. "originalLanguage": ISO 639-1 code of original publication.',
-      '6. "abstracts": Global dense technical abstract (2 to 3 sentences) in 3 languages:',
-      '   - "en": Scientific abstract in high-density English.',
-      '   - "fr": Technical abstract in formal French.',
-      '   - "ar": Technical abstract in formal Modern Standard Arabic (الفصحى).',
-      '7. "keywords": Standardized index keywords (4 to 8 per language) in "en", "fr", and "ar".',
+      `6. "abstracts": Global dense technical abstract (2 to 3 sentences) in the following languages (${targetLanguages.join(', ')}):`,
+      ...abstractLines,
+      `7. "keywords": Standardized index keywords (4 to 8 per language) for each configured language (${targetLanguages.join(', ')}).`,
       '8. "authors": Array of contributing author names discovered in the book.',
       '9. "publisher": Publishing house or institution if identifiable.',
       '10. "publicationYear": Year of publication if identifiable.',

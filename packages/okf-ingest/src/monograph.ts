@@ -1,17 +1,21 @@
-import { GoogleGenAI, Schema, Type } from '@google/genai';
+import { Schema, Type } from '@google/genai';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { extractSemanticContent } from './ai';
-import { calculateTokenCost } from './cost';
+import { GenericDomainProfile } from './profiles/generic';
+import { buildBookOutlinePrompt } from './prompts/outlinePrompt';
+import { resolveStructuredRunner } from './runner';
 import { serializeOkfDocument } from './serializer';
 import {
    BookOutline,
    BookOutlineChapter,
    ChapterExtractionResult,
+   DomainTaxonomyProfile,
    MonographIngestionResult,
    MonographInput,
    MonographOptions,
    OkfDocument,
+   OkfDocumentType,
    OkfFrontmatterV2,
    OkfMultilingualContent,
    OkfMultilingualKeywords,
@@ -35,9 +39,11 @@ export function slugify(text: string): string {
       .slice(0, 80);
 }
 
-export const BOOK_OUTLINE_AI_SCHEMA: Schema = {
-   type: Type.OBJECT,
-   properties: {
+/**
+ * Builds a JSON Schema for book outline discovery, merging universal fields with domain extensions.
+ */
+export function buildBookOutlineSchema(profile?: DomainTaxonomyProfile): Schema {
+   const properties: Record<string, Schema> = {
       title: { type: Type.STRING },
       description: { type: Type.STRING },
       category: { type: Type.STRING },
@@ -47,7 +53,7 @@ export const BOOK_OUTLINE_AI_SCHEMA: Schema = {
       },
       publisher: { type: Type.STRING },
       publicationYear: { type: Type.STRING },
-      language: { type: Type.STRING }, // ISO 639-1 (e.g. "fr", "en", "es", "ar")
+      language: { type: Type.STRING },
       originalLanguage: { type: Type.STRING },
       abstracts: {
          type: Type.OBJECT,
@@ -76,26 +82,6 @@ export const BOOK_OUTLINE_AI_SCHEMA: Schema = {
          },
          required: ['fr', 'en', 'ar'],
       },
-      thematics: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
-      },
-      soils: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
-      },
-      climates: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
-      },
-      itineraries: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
-      },
-      crops: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
-      },
       tags: {
          type: Type.ARRAY,
          items: { type: Type.STRING },
@@ -114,87 +100,50 @@ export const BOOK_OUTLINE_AI_SCHEMA: Schema = {
             required: ['index', 'title', 'summary'],
          },
       },
-   },
-   required: ['title', 'description', 'category', 'tags', 'chapters', 'language', 'abstracts', 'keywords'],
-};
+      ...((profile?.schemaProperties as Record<string, Schema>) || {}),
+   };
+
+   return {
+      type: Type.OBJECT,
+      properties,
+      required: ['title', 'description', 'category', 'tags', 'chapters', 'language', 'abstracts', 'keywords'],
+   };
+}
+
+export const BOOK_OUTLINE_AI_SCHEMA: Schema = buildBookOutlineSchema();
 
 /**
  * Discovers the structural outline, table of contents and chapter boundaries of a large book or monograph.
- *
- * @param rawText - Raw textual content extracted from the document.
- * @param filename - Source document filename.
- * @param apiKey - Gemini API authentication key.
- * @param options - Extraction parameters and model configuration.
- * @returns Parsed BookOutline and exact token usage.
+ * Decoupled from specific model providers and composable with domain taxonomy profiles.
  */
 export async function extractBookOutline(
    rawText: string,
    filename: string,
-   apiKey: string,
+   apiKey?: string,
    options: MonographOptions = {}
 ): Promise<{ outline: BookOutline; usage: OkfTokenUsage }> {
-   const ai = new GoogleGenAI({ apiKey });
+   const runner = resolveStructuredRunner(apiKey || options.apiKey, options.runner);
+   const profile = options.taxonomyProfile || new GenericDomainProfile();
+   const schema = buildBookOutlineSchema(profile);
    const model = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-   // Build a representative excerpt containing title, preface, detailed table of contents, and conclusion
    const headLength = 35_000;
    const tailLength = 10_000;
    let sampleText = rawText;
    if (rawText.length > headLength + tailLength) {
-      sampleText = `${rawText.substring(0, headLength)}\n\n[... contenu intermédiaire du livre ...]\n\n${rawText.substring(rawText.length - tailLength)}`;
+      sampleText = `${rawText.substring(0, headLength)}\n\n[... intermediate voluminous book content omitted ...]\n\n${rawText.substring(rawText.length - tailLength)}`;
    }
 
-   const prompt = `Tu es un ingénieur expert en structuration de connaissances pour le format Open Knowledge Format (OKF v0.2).
-Analyse ce livre ou cette monographie volumineuse (${filename}) pour identifier son plan d'ensemble et découper son contenu en chapitres logiques autonomes.
+   const prompt = buildBookOutlinePrompt({ filename, sampleText }, profile);
 
-Consignes strictes :
-1. "title" : Titre officiel et complet de l'ouvrage (sans extension).
-2. "description" : Résumé global d'une phrase concise sur la portée et l'objet de l'ouvrage dans sa langue originale.
-3. "category" : Chemin de dossier en minuscules slugifiées (ex: soil-health, cover-crops, agriculture, viticulture, agronomie-livres).
-4. "language" : Code ISO 639-1 de la langue principale (ex: "fr", "en", "es", "de", "ar").
-5. "originalLanguage" : Code ISO 639-1 de la langue d'origine de l'ouvrage.
-6. "abstracts" : Synthèse globale dense de l'ouvrage (2 à 3 phrases) dans les 3 langues suivantes :
-   - "fr" : Abstract en français agronomique soigné.
-   - "en" : Abstract en anglais scientifique soigné.
-   - "ar" : Abstract en arabe agronomique soigné (الفصحى).
-7. "keywords" : Mots-clés normalisés pour l'indexation (4 à 8 par langue) :
-   - "fr" : Mots-clés en français.
-   - "en" : Mots-clés en anglais.
-   - "ar" : Mots-clés en arabe.
-8. Taxonomies globales (selon pertinence de l'ouvrage) :
-   - "soils", "climates", "itineraries", "crops", "thematics", "tags", "authors", "publisher", "publicationYear".
-9. "chapters" : Liste ordonnée des chapitres ou grandes parties logiques (généralement entre 3 et 12 chapitres).
-   - "index" : Numéro du chapitre (1, 2, 3...).
-   - "title" : Titre explicite du chapitre.
-   - "summary" : Synthèse concise de 1 à 2 phrases de ce que traite ce chapitre.
-   - "startMarker" : Extrait textuel exact de 5 à 10 mots consécutifs au tout début de ce chapitre dans le texte ci-dessous pour repérer son ancre.
-   - "endMarker" : Extrait textuel exact de 5 à 10 mots consécutifs vers la fin de ce chapitre.
-
-Extrait représentatif de l'ouvrage :
----
-${sampleText}
----`;
-
-   const response = await ai.models.generateContent({
-      model,
-      contents: prompt,
-      config: {
-         responseMimeType: 'application/json',
-         responseSchema: BOOK_OUTLINE_AI_SCHEMA,
-      },
-   });
-
-   if (!response.text) {
-      throw new Error('[OKF Ingest] No response text returned from Gemini for book outline');
-   }
-
-   const parsed = JSON.parse(response.text) as Record<string, unknown>;
-   const usage: OkfTokenUsage = calculateTokenCost(response.usageMetadata, model);
+   const result = await runner.generateStructured<Record<string, unknown>>(prompt, schema, { model });
+   const parsed = result.data;
+   const usage: OkfTokenUsage = result.usage;
 
    const rawChapters = Array.isArray(parsed.chapters) ? parsed.chapters : [];
    const chapters: BookOutlineChapter[] = rawChapters.map((c, i) => {
       const rec = typeof c === 'object' && c !== null ? (c as Record<string, unknown>) : {};
-      const title = String(rec.title || `Chapitre ${i + 1}`);
+      const title = String(rec.title || `Chapter ${i + 1}`);
       return {
          index: typeof rec.index === 'number' ? rec.index : i + 1,
          title,
@@ -205,25 +154,41 @@ ${sampleText}
       };
    });
 
+   const domainMeta = profile.extractDomainMetadata ? profile.extractDomainMetadata(parsed) : {};
+   const fallbackTitle = path.basename(filename, path.extname(filename));
+
    const outline: BookOutline = {
-      title: typeof parsed.title === 'string' ? parsed.title : path.basename(filename, path.extname(filename)),
-      slug: slugify(typeof parsed.title === 'string' ? parsed.title : path.basename(filename, path.extname(filename))),
-      description: typeof parsed.description === 'string' ? parsed.description : 'Monographie agronomique.',
-      category: typeof parsed.category === 'string' ? parsed.category : (options.defaultCategory || 'agronomie-livres'),
+      title: typeof parsed.title === 'string' ? parsed.title : fallbackTitle,
+      slug: slugify(typeof parsed.title === 'string' ? parsed.title : fallbackTitle),
+      description: typeof parsed.description === 'string' ? parsed.description : 'Monograph publication.',
+      category:
+         typeof parsed.category === 'string'
+            ? parsed.category
+            : (options.defaultCategory || profile.defaultCategory || 'books'),
       authors: Array.isArray(parsed.authors) ? (parsed.authors as string[]) : undefined,
       publisher: typeof parsed.publisher === 'string' ? parsed.publisher : undefined,
       publicationYear: typeof parsed.publicationYear === 'string' ? parsed.publicationYear : undefined,
       language: typeof parsed.language === 'string' ? parsed.language : 'fr',
-      originalLanguage: typeof parsed.originalLanguage === 'string' ? parsed.originalLanguage : (typeof parsed.language === 'string' ? parsed.language : 'fr'),
-      abstracts: typeof parsed.abstracts === 'object' && parsed.abstracts !== null ? (parsed.abstracts as OkfMultilingualContent) : undefined,
-      keywords: typeof parsed.keywords === 'object' && parsed.keywords !== null ? (parsed.keywords as OkfMultilingualKeywords) : undefined,
-      thematics: Array.isArray(parsed.thematics) ? (parsed.thematics as string[]) : undefined,
-      soils: Array.isArray(parsed.soils) ? (parsed.soils as string[]) : undefined,
-      climates: Array.isArray(parsed.climates) ? (parsed.climates as string[]) : undefined,
-      itineraries: Array.isArray(parsed.itineraries) ? (parsed.itineraries as string[]) : undefined,
-      crops: Array.isArray(parsed.crops) ? (parsed.crops as string[]) : undefined,
-      tags: Array.isArray(parsed.tags) ? (parsed.tags as string[]) : ['monographie', 'livre'],
+      originalLanguage:
+         typeof parsed.originalLanguage === 'string'
+            ? parsed.originalLanguage
+            : typeof parsed.language === 'string'
+              ? parsed.language
+              : 'fr',
+      abstracts:
+         typeof parsed.abstracts === 'object' && parsed.abstracts !== null
+            ? (parsed.abstracts as OkfMultilingualContent)
+            : undefined,
+      keywords:
+         typeof parsed.keywords === 'object' && parsed.keywords !== null
+            ? (parsed.keywords as OkfMultilingualKeywords)
+            : undefined,
+      tags:
+         Array.isArray(parsed.tags) && parsed.tags.length > 0
+            ? (parsed.tags as string[])
+            : (profile.defaultTags || ['monograph', 'book']),
       chapters,
+      ...domainMeta,
    };
 
    return { outline, usage };
@@ -231,10 +196,6 @@ ${sampleText}
 
 /**
  * Slices full book text into distinct chapter chunks using discovered anchor markers or proportional distribution.
- *
- * @param rawText - Complete raw textual content of the book.
- * @param chapters - Structured outline chapters.
- * @returns Array of chapter metadata coupled with their corresponding sliced text.
  */
 export function sliceTextByChapters(
    rawText: string,
@@ -243,7 +204,7 @@ export function sliceTextByChapters(
    if (chapters.length === 0) {
       return [
          {
-            chapter: { index: 1, title: 'Document Intégral', slug: '01-document-integral' },
+            chapter: { index: 1, title: 'Complete Document', slug: '01-complete-document' },
             text: rawText,
          },
       ];
@@ -253,43 +214,62 @@ export function sliceTextByChapters(
       return [{ chapter: chapters[0], text: rawText }];
    }
 
-   // Locate start index for each chapter in rawText
    const positions: number[] = [];
    for (let i = 0; i < chapters.length; i++) {
       const ch = chapters[i];
       let pos = -1;
 
-      // 1. Try startMarker
-      if (ch.startMarker && ch.startMarker.length >= 5) {
+      if (ch.startMarker && ch.startMarker.length > 8) {
          pos = rawText.indexOf(ch.startMarker);
          if (pos === -1) {
-            // Fuzzy fallback: try first 15 chars of startMarker
-            pos = rawText.indexOf(ch.startMarker.substring(0, 15));
+            const shortMarker = ch.startMarker.slice(0, 30);
+            pos = rawText.indexOf(shortMarker);
          }
       }
 
-      // 2. Try exact chapter title
       if (pos === -1 && ch.title) {
-         pos = rawText.indexOf(ch.title);
-      }
-
-      // 3. Fallback: proportional positioning
-      if (pos === -1 || (positions.length > 0 && pos <= positions[positions.length - 1])) {
-         const expectedRatio = i / chapters.length;
-         pos = Math.floor(rawText.length * expectedRatio);
+         const regex = new RegExp(`(?:chapitre|chapter|partie|part)?\\s*${ch.index}?\\s*[:.-]?\\s*${ch.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i');
+         const m = rawText.match(regex);
+         if (m && m.index !== undefined) {
+            pos = m.index;
+         }
       }
 
       positions.push(pos);
    }
 
+   // Validate strictly monotonic positions
+   let isMonotonic = true;
+   let lastPos = -1;
+   for (const p of positions) {
+      if (p === -1 || p <= lastPos) {
+         isMonotonic = false;
+         break;
+      }
+      lastPos = p;
+   }
+
+   if (!isMonotonic) {
+      // Fallback: Proportional distribution
+      const totalLen = rawText.length;
+      const sliceSize = Math.floor(totalLen / chapters.length);
+      return chapters.map((ch, idx) => {
+         const start = idx * sliceSize;
+         const end = idx === chapters.length - 1 ? totalLen : (idx + 1) * sliceSize;
+         return {
+            chapter: ch,
+            text: rawText.substring(start, end).trim(),
+         };
+      });
+   }
+
    const results: Array<{ chapter: BookOutlineChapter; text: string }> = [];
    for (let i = 0; i < chapters.length; i++) {
       const start = positions[i];
-      const end = i < chapters.length - 1 ? positions[i + 1] : rawText.length;
-      const text = rawText.substring(start, end).trim();
+      const end = i === chapters.length - 1 ? rawText.length : positions[i + 1];
       results.push({
          chapter: chapters[i],
-         text: text.length > 0 ? text : rawText.substring(start, Math.min(start + 5000, rawText.length)),
+         text: rawText.substring(start, end).trim(),
       });
    }
 
@@ -297,26 +277,63 @@ export function sliceTextByChapters(
 }
 
 /**
- * Ingests a large book or monograph (> 80k chars) into a cohesive folder of OKF v0.2 fiches:
- * - content/<category>/<bookSlug>/index.md (Master monograph index linking chapters)
- * - content/<category>/<bookSlug>/01-<chapterSlug>.md
- * - content/<category>/<bookSlug>/02-<chapterSlug>.md
- *
- * @param input - Monograph input payload with file details and local git repository path.
- * @param apiKey - Gemini API authentication key.
- * @param options - Ingestion options.
- * @returns MonographIngestionResult with aggregated metrics and file paths.
+ * High-level monograph decomposition engine.
+ * Discovers structural outline, slices content into chapters, extracts semantic units,
+ * generates standard OKF v0.2 fiches, and constructs the master index.
  */
-export async function ingestMonograph(
+export async function decomposeAndIngestMonograph(
    input: MonographInput,
-   apiKey: string,
+   apiKey?: string,
    options: MonographOptions = {}
 ): Promise<MonographIngestionResult> {
-   const { outline, usage: outlineUsage } = await extractBookOutline(input.rawText, input.filename, apiKey, options);
-   const slices = sliceTextByChapters(input.rawText, outline.chapters);
+   const splitThreshold = options.splitThresholdChars || 60_000;
+   const profile = options.taxonomyProfile || new GenericDomainProfile();
 
+   // 1. Direct single-doc extraction if below threshold
+   if (input.rawText.length < splitThreshold) {
+      const singleDoc = await extractSemanticContent(
+         { rawText: input.rawText, filename: input.filename },
+         apiKey,
+         { ...options, taxonomyProfile: profile }
+      );
+
+      const docSlug = slugify(singleDoc.metadata.title);
+      const relativePath = path.join(
+         'content',
+         singleDoc.metadata.category || profile.defaultCategory || 'general',
+         `${docSlug}.md`
+      );
+      const absolutePath = path.join(input.gitLocalPath, relativePath);
+
+      await fs.mkdir(path.dirname(absolutePath), { recursive: true });
+      const serialized = serializeOkfDocument(singleDoc.metadata, singleDoc.body);
+      await fs.writeFile(absolutePath, serialized, 'utf-8');
+
+      return {
+         masterDoc: { ...singleDoc, relativePath },
+         masterRelativePath: relativePath,
+         chapterDocs: [],
+         allCreatedFiles: [relativePath],
+         folderPath: path.dirname(relativePath),
+         totalTokens: singleDoc.usage,
+         totalCostUsd: singleDoc.usage.costUsd,
+         totalDiagrams: singleDoc.diagramsTranscribed,
+         totalTables: singleDoc.tablesTranscribed,
+      };
+   }
+
+   // 2. Discover outline for large monographs
+   const { outline, usage: outlineUsage } = await extractBookOutline(
+      input.rawText,
+      input.filename,
+      apiKey,
+      { ...options, taxonomyProfile: profile }
+   );
+
+   const slices = sliceTextByChapters(input.rawText, outline.chapters);
    const folderPath = path.join('content', outline.category, outline.slug);
    const absoluteFolder = path.join(input.gitLocalPath, folderPath);
+
    await fs.mkdir(absoluteFolder, { recursive: true });
 
    const chapterDocs: ChapterExtractionResult[] = [];
@@ -330,7 +347,7 @@ export async function ingestMonograph(
    let totalTables = 0;
 
    const model = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-   const soa = options.soa || 'bradtech/world-agronomy';
+   const soa = options.soa || 'quatrain/knowledge';
    const revision = options.revision;
 
    for (const slice of slices) {
@@ -338,14 +355,15 @@ export async function ingestMonograph(
       const chapterResult = await extractSemanticContent(
          {
             rawText: slice.text,
-            filename: `${input.filename} - Chapitre ${ch.index}: ${ch.title}`,
+            filename: `${input.filename} - Chapter ${ch.index}: ${ch.title}`,
          },
          apiKey,
          {
             ...options,
+            taxonomyProfile: profile,
             defaultCategory: outline.category,
-            contextNote: `Ce texte est le Chapitre ${ch.index} ("${ch.title}") du livre "${outline.title}".
-Extrais spécifiquement les concepts, taxonomies, schémas et tableaux propres à ce chapitre.`,
+            contextNote: `This text is Chapter ${ch.index} ("${ch.title}") of the book "${outline.title}".
+Extract specifically the concepts, taxonomies, diagrams, and tables relevant to this chapter.`,
          }
       );
 
@@ -357,10 +375,10 @@ Extrais spécifiquement les concepts, taxonomies, schémas et tableaux propres �
       totalTables += chapterResult.tablesTranscribed;
 
       const chapterMetadata: OkfFrontmatterV2 = {
-         type: 'chapitre',
-         title: `Chapitre ${ch.index} : ${chapterResult.metadata.title || ch.title}`,
+         type: 'chapter',
+         title: `Chapter ${ch.index}: ${chapterResult.metadata.title || ch.title}`,
          description:
-            chapterResult.metadata.description || ch.summary || `Chapitre ${ch.index} de l'ouvrage ${outline.title}.`,
+            chapterResult.metadata.description || ch.summary || `Chapter ${ch.index} of ${outline.title}.`,
          tags: Array.from(new Set([...(chapterResult.metadata.tags || []), ...(outline.tags || []), outline.slug])),
          status: 'draft',
          generated: {
@@ -373,18 +391,13 @@ Extrais spécifiquement les concepts, taxonomies, schémas et tableaux propres �
                id: 'parent-book',
                resource: input.originalFileUri,
                title: outline.title,
-               chapter: `Chapitre ${ch.index} : ${ch.title}`,
+               chapter: `Chapter ${ch.index}: ${ch.title}`,
                fileHash: input.fileHash,
             },
          ],
          soa,
          revision,
          category: outline.category,
-         thematics: chapterResult.metadata.thematics || outline.thematics,
-         soils: chapterResult.metadata.soils || outline.soils,
-         climates: chapterResult.metadata.climates || outline.climates,
-         itineraries: chapterResult.metadata.itineraries || outline.itineraries,
-         crops: chapterResult.metadata.crops || outline.crops,
          authors: outline.authors,
          publisher: outline.publisher,
          publicationYear: outline.publicationYear,
@@ -392,6 +405,11 @@ Extrais spécifiquement les concepts, taxonomies, schémas et tableaux propres �
          originalLanguage: chapterResult.metadata.originalLanguage || outline.originalLanguage || 'fr',
          abstracts: chapterResult.metadata.abstracts,
          keywords: chapterResult.metadata.keywords,
+         thematics: chapterResult.metadata.thematics || outline.thematics,
+         soils: chapterResult.metadata.soils || outline.soils,
+         climates: chapterResult.metadata.climates || outline.climates,
+         itineraries: chapterResult.metadata.itineraries || outline.itineraries,
+         crops: chapterResult.metadata.crops || outline.crops,
       };
 
       const chapterRelativePath = path.join(folderPath, `${ch.slug}.md`);
@@ -422,7 +440,7 @@ Extrais spécifiquement les concepts, taxonomies, schémas et tableaux propres �
 
    // Master Index Document
    const masterMetadata: OkfFrontmatterV2 = {
-      type: 'monographie',
+      type: 'monograph',
       title: outline.title,
       description: outline.description,
       tags: outline.tags,
@@ -461,12 +479,12 @@ Extrais spécifiquement les concepts, taxonomies, schémas et tableaux propres �
 
 ${outline.description}
 
-## Sommaire & Chapitres Analysés
+## Table of Contents & Analyzed Chapters
 
 ${chapterDocs
    .map(
       (c) =>
-         `- [**Chapitre ${c.index} : ${c.title}**](./${c.slug}.md)\n  *${c.doc.metadata.description}*`
+         `- [**Chapter ${c.index}: ${c.title}**](./${c.slug}.md)\n  *${c.doc.metadata.description}*`
    )
    .join('\n\n')}
 `;

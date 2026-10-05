@@ -145,4 +145,89 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
          expect(parsed.body).toContain('Contenu détaillé...');
       });
    });
+
+   describe('Composable Architecture & Decoupled Runners for Catalogs', () => {
+      it('should generate International English prompt for catalog entry extraction', () => {
+         const { buildCatalogEntryPrompt } = require('../prompts/catalogEntryPrompt');
+         const prompt = buildCatalogEntryPrompt({
+            chunk: {
+               sequence: 1,
+               rawTitle: 'Acanthe',
+               slug: '001-acanthe',
+               pageRange: '50-51',
+               text: 'Acanthus mollis, famille des Acanthacées...',
+            },
+            parentBook: {
+               title: 'Encyclopédie des plantes',
+               slug: 'encyclopedie-des-plantes',
+               resource: 'test.pdf',
+               fileHash: '123456',
+            },
+         });
+
+         expect(prompt).toContain('You are an expert taxonomist and knowledge engineer specializing in encyclopedic knowledge synthesis');
+         expect(prompt).toContain('1. "title": Clean primary common or vernacular entry name');
+         expect(prompt).toContain('2. "scientificName": Canonical Latin binomial');
+         expect(prompt).toContain('4. "description": Exactly ONE concise sentence');
+         expect(prompt).not.toContain('Tu es un ingénieur agronome');
+      });
+
+      it('should extract catalog entry using a decoupled runner and assign standard catalog-entry type', async () => {
+         const { extractCatalogEntryContent } = require('../ai');
+         const mockRunner = {
+            async generateStructured(prompt: string) {
+               return {
+                  data: {
+                     title: 'Acanthe à feuilles molles (Acanthus mollis)',
+                     scientificName: 'Acanthus mollis',
+                     family: 'Acanthaceae',
+                     description: 'Plante vivace méditerranéenne aux grandes feuilles lobées.',
+                     language: 'fr',
+                     originalLanguage: 'fr',
+                     abstracts: {
+                        en: 'Perennial Mediterranean plant with large lobed leaves.',
+                        fr: 'Plante vivace méditerranéenne aux grandes feuilles lobées.',
+                        ar: 'نبات معمر متوسطي بأوراق مفصصة كبيرة.',
+                     },
+                     keywords: {
+                        en: ['bear breeches', 'mediterranean'],
+                        fr: ['acanthe', 'méditerranée'],
+                        ar: ['شوك الجمل', 'متوسطي'],
+                     },
+                     tags: ['botany', 'mediterranean'],
+                     properties: ['ornamental', 'medicinal'],
+                  },
+                  usage: { prompt: 80, candidates: 40, thinking: 0, total: 120, costUsd: 0.00004 },
+                  rawText: '{}',
+               };
+            },
+         };
+
+         const result = await extractCatalogEntryContent(
+            {
+               sequence: 1,
+               rawTitle: 'Acanthe',
+               slug: '001-acanthe',
+               pageRange: '50-51',
+               text: 'Acanthe à feuilles molles...',
+            },
+            {
+               runner: mockRunner,
+               parentBook: {
+                  title: 'Encyclopédie des plantes',
+                  slug: 'encyclopedie-des-plantes',
+                  resource: 'test.pdf',
+                  fileHash: '123456',
+               },
+            }
+         );
+
+         expect(result.metadata.type).toBe('catalog-entry');
+         expect(result.metadata.scientificName).toBe('Acanthus mollis');
+         expect(result.metadata.family).toBe('Acanthaceae');
+         expect(result.metadata.sequence).toBe(1);
+         expect(result.usage.total).toBe(120);
+         expect(result.body).toContain('**Taxonomy / Classification:** *Acanthus mollis* | **Family / Group:** Acanthaceae');
+      });
+   });
 });

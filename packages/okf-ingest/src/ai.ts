@@ -1,102 +1,96 @@
+import { Schema, Type } from '@google/genai';
+import { GenericDomainProfile } from './profiles/generic';
+import { buildDocumentPrompt } from './prompts/documentPrompt';
+import { resolveStructuredRunner } from './runner';
 import {
-   Content,
-   GenerateContentResponseUsageMetadata,
-   GoogleGenAI,
-   Schema,
-   Type,
-} from '@google/genai';
-import { calculateTokenCost } from './cost';
-import {
+   AiRunnerResponse,
+   DomainTaxonomyProfile,
    ExtractionOptions,
    IngestionExtractionResult,
+   OkfDocumentType,
    OkfFrontmatterV2,
    OkfMultilingualContent,
    OkfMultilingualKeywords,
    OkfTokenUsage,
 } from './types';
 
-export const OKF_INGEST_AI_SCHEMA: Schema = {
-   type: Type.OBJECT,
-   properties: {
-      title: { type: Type.STRING },
-      type: { type: Type.STRING },
-      description: { type: Type.STRING },
-      category: { type: Type.STRING },
-      thematics: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
+export const OKF_CORE_PROPERTIES: Record<string, Schema> = {
+   title: { type: Type.STRING },
+   type: { type: Type.STRING },
+   description: { type: Type.STRING },
+   category: { type: Type.STRING },
+   tags: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING },
+   },
+   authors: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING },
+   },
+   publisher: { type: Type.STRING },
+   publicationYear: { type: Type.STRING },
+   language: { type: Type.STRING },
+   originalLanguage: { type: Type.STRING },
+   abstracts: {
+      type: Type.OBJECT,
+      properties: {
+         fr: { type: Type.STRING },
+         en: { type: Type.STRING },
+         ar: { type: Type.STRING },
       },
-      soils: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
+      required: ['fr', 'en', 'ar'],
+   },
+   keywords: {
+      type: Type.OBJECT,
+      properties: {
+         fr: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+         },
+         en: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+         },
+         ar: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+         },
       },
-      climates: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
-      },
-      itineraries: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
-      },
-      crops: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
-      },
-      tags: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
-      },
-      authors: {
-         type: Type.ARRAY,
-         items: { type: Type.STRING },
-      },
-      publisher: { type: Type.STRING },
-      publicationYear: { type: Type.STRING },
-      language: { type: Type.STRING }, // ISO 639-1 (e.g. "fr", "en", "es", "ar")
-      originalLanguage: { type: Type.STRING },
-      abstracts: {
+      required: ['fr', 'en', 'ar'],
+   },
+   diagrams: {
+      type: Type.ARRAY,
+      items: {
          type: Type.OBJECT,
          properties: {
-            fr: { type: Type.STRING },
-            en: { type: Type.STRING },
-            ar: { type: Type.STRING },
+            title: { type: Type.STRING },
+            type: { type: Type.STRING },
+            content: { type: Type.STRING },
+            explanation: { type: Type.STRING },
          },
-         required: ['fr', 'en', 'ar'],
-      },
-      keywords: {
-         type: Type.OBJECT,
-         properties: {
-            fr: {
-               type: Type.ARRAY,
-               items: { type: Type.STRING },
-            },
-            en: {
-               type: Type.ARRAY,
-               items: { type: Type.STRING },
-            },
-            ar: {
-               type: Type.ARRAY,
-               items: { type: Type.STRING },
-            },
-         },
-         required: ['fr', 'en', 'ar'],
-      },
-      diagrams: {
-         type: Type.ARRAY,
-         items: {
-            type: Type.OBJECT,
-            properties: {
-               title: { type: Type.STRING },
-               type: { type: Type.STRING }, // mermaid | table | caption
-               content: { type: Type.STRING }, // Mermaid diagram code or Markdown table
-               explanation: { type: Type.STRING },
-            },
-            required: ['title', 'type', 'content', 'explanation'],
-         },
+         required: ['title', 'type', 'content', 'explanation'],
       },
    },
-   required: ['title', 'description', 'category', 'tags', 'language', 'abstracts', 'keywords'],
 };
+
+/**
+ * Builds a composite OKF JSON Schema by merging universal core properties
+ * with domain-specific taxonomy fields from the provided profile.
+ */
+export function buildOkfAiSchema(profile?: DomainTaxonomyProfile): Schema {
+   const properties: Record<string, Schema> = {
+      ...OKF_CORE_PROPERTIES,
+      ...((profile?.schemaProperties as Record<string, Schema>) || {}),
+   };
+
+   return {
+      type: Type.OBJECT,
+      properties,
+      required: ['title', 'description', 'category', 'tags', 'language', 'abstracts', 'keywords'],
+   };
+}
+
+export const OKF_INGEST_AI_SCHEMA: Schema = buildOkfAiSchema();
 
 export interface AiSourceInput {
    buffer?: Buffer;
@@ -107,155 +101,126 @@ export interface AiSourceInput {
 }
 
 /**
- * Extracts semantic metadata, transcribes diagrams/tables, and computes token cost using Gemini.
+ * Extracts semantic metadata, transcribes diagrams/tables, and tracks token usage.
+ * Model-agnostic and composable with domain taxonomy profiles.
  */
 export async function extractSemanticContent(
    input: AiSourceInput,
-   apiKey: string,
+   apiKey?: string,
    options: ExtractionOptions = {}
 ): Promise<IngestionExtractionResult> {
-   const ai = new GoogleGenAI({ apiKey });
+   const runner = resolveStructuredRunner(apiKey || options.apiKey, options.runner);
+   const profile = options.taxonomyProfile || new GenericDomainProfile();
+   const schema = buildOkfAiSchema(profile);
    const model = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-   const promptText = `Tu es un ingénieur expert en structuration de connaissances pour le format Open Knowledge Format (OKF v0.2).
-Analyse le document ci-joint (${input.filename}) et extrais ses métadonnées, taxonomies, résumés multilingues et représentations visuelles.
+   const prompt = buildDocumentPrompt(
+      {
+         filename: input.filename,
+         rawText: input.rawText,
+         isScanned: input.isScanned,
+         contextNote: options.contextNote,
+         maxExcerptChars: options.maxContentChars,
+      },
+      profile
+   );
 
-Consignes strictes :
-1. "title" : Titre propre, professionnel et explicite (sans extension).
-2. "description" : Exactement UNE seule phrase concise résumant le document, sa portée et son utilité technique dans sa langue originale.
-3. "category" : Chemin de dossier court en minuscules slugifiées (ex: soil-health, cover-crops, viticulture, agriculture, water-management, soil-amendments, formations).
-4. "language" : Code ISO 639-1 obligatoire identifiant la langue du texte (ex: "fr", "en", "es", "de", "ar").
-5. "originalLanguage" : Code ISO 639-1 de la langue d'origine (identique à "language" sauf si le texte indique être une traduction).
-6. "abstracts" : Résumé technique concis et dense (2 à 3 phrases) dans les 3 langues suivantes :
-   - "fr" : Synthèse technique en français agronomique soigné.
-   - "en" : Synthèse technique en anglais scientifique soigné.
-   - "ar" : Synthèse technique en arabe agronomique soigné (الفصحى).
-7. "keywords" : Mots-clés normalisés pour l'indexation (4 à 8 par langue) :
-   - "fr" : Mots-clés techniques en français.
-   - "en" : Mots-clés techniques en anglais.
-   - "ar" : Mots-clés techniques en arabe.
-8. Taxonomies agronomiques (selon pertinence) :
-   - "soils" : sols concernés (ex: argilo-calcaire, limoneux, sableux, vivant-microbiote).
-   - "climates" : zones climatiques (ex: mediterraneen, oceanique, semi-aride, continental).
-   - "itineraries" : pratiques (ex: viticulture-biologique, semis-direct, enherbement-permanent).
-   - "crops" : cultures ciblées (ex: vigne, ble, colza, maraichage).
-9. "diagrams" : CRITIQUE — Pour chaque schéma, organigramme, flux de travail, cycle technique ou tableau clé repéré :
-   - Si c'est un flux, processus ou cycle : fournis le code Mermaid complet ("type": "mermaid", "content": "graph TD\\n...").
-   - Si c'est un tableau de comparaison ou de données : fournis le tableau Markdown complet ("type": "table", "content": "| Col1 | Col2 |\\n|---|---|...").
-   - Si c'est une figure visuelle complexe : fournis une description technique dense et exhaustive ("type": "caption").
+   const canSendInline =
+      Boolean(input.isScanned && input.buffer && input.isPdf && input.buffer.length <= 15 * 1024 * 1024);
 
-${options.contextNote ? `Note contextuelle prioritaire :\n${options.contextNote}\n` : ''}`;
+   let result: AiRunnerResponse<Record<string, unknown>>;
 
-   // Google GenAI inlineData has a strict payload limit (~20MB base64 / ~15MB binary)
-   const canSendInline = input.isScanned && input.buffer && input.isPdf && input.buffer.length <= 15 * 1024 * 1024;
-
-   let responseText = '';
-   let usageMetadata: GenerateContentResponseUsageMetadata | null | undefined = undefined;
-
-   if (canSendInline && input.buffer) {
-      const base64Data = input.buffer.toString('base64');
-      const response = await ai.models.generateContent({
-         model,
-         contents: [
-            promptText,
-            {
-               inlineData: {
-                  mimeType: 'application/pdf',
-                  data: base64Data,
-               },
-            },
-         ],
-         config: {
-            responseMimeType: 'application/json',
-            responseSchema: OKF_INGEST_AI_SCHEMA,
-         },
-      });
-      responseText = response.text || '';
-      usageMetadata = response.usageMetadata;
+   if (canSendInline && input.buffer && runner.generateStructuredMultimodal) {
+      result = await runner.generateStructuredMultimodal<Record<string, unknown>>(
+         prompt,
+         [{ mimeType: 'application/pdf', data: input.buffer.toString('base64') }],
+         schema,
+         { model }
+      );
    } else {
-      const maxChars = options.maxContentChars || 80_000;
-      const raw = input.rawText || '';
-      let excerpt = raw;
-      if (raw.length > maxChars) {
-         const headLen = Math.floor(maxChars * 0.7);
-         const tailLen = Math.floor(maxChars * 0.3);
-         excerpt = `${raw.substring(0, headLen)}\n\n[... document intermédiaire volumineux tronqué pour analyse ...]\n\n${raw.substring(raw.length - tailLen)}`;
-      }
-      const response = await ai.models.generateContent({
-         model,
-         contents: `${promptText}\n\nExtrait du contenu texte du document :\n---\n${excerpt}\n---`,
-         config: {
-            responseMimeType: 'application/json',
-            responseSchema: OKF_INGEST_AI_SCHEMA,
-         },
-      });
-      responseText = response.text || '';
-      usageMetadata = response.usageMetadata;
+      result = await runner.generateStructured<Record<string, unknown>>(prompt, schema, { model });
    }
 
-   if (!responseText) {
-      throw new Error('[OKF Ingest] No response text returned from Gemini API');
-   }
+   const parsed = result.data;
+   const usage: OkfTokenUsage = result.usage;
 
-   const parsed = JSON.parse(responseText) as Record<string, unknown>;
-   const usage: OkfTokenUsage = calculateTokenCost(usageMetadata, model);
-
-   // Build diagrams / visual synthesis section in Markdown
+   // Process visual diagrams & Markdown tables
    const diagrams = Array.isArray(parsed.diagrams) ? parsed.diagrams : [];
    let visualMarkdown = '';
    let diagramsCount = 0;
    let tablesCount = 0;
 
    if (diagrams.length > 0) {
-      const parts: string[] = ['\n\n## Schémas & Synthèse Visuelle\n'];
+      const parts: string[] = ['\n\n## Visual Synthesis & Technical Schemas\n'];
       for (const diag of diagrams) {
-         parts.push(`### ${diag.title || 'Schéma'}\n`);
-         if (diag.type === 'mermaid') {
-            diagramsCount++;
-            parts.push('```mermaid\n' + diag.content.trim() + '\n```\n');
-         } else if (diag.type === 'table') {
-            tablesCount++;
-            parts.push(diag.content.trim() + '\n');
-         } else {
-            parts.push(`> ${diag.content.trim()}\n`);
-         }
-         if (diag.explanation) {
-            parts.push(`*${diag.explanation.trim()}*\n`);
+         if (typeof diag === 'object' && diag !== null) {
+            const d = diag as Record<string, unknown>;
+            const dType = String(d.type || 'table');
+            const dTitle = String(d.title || 'Diagram');
+            const dContent = String(d.content || '').trim();
+            const dExpl = String(d.explanation || '').trim();
+
+            parts.push(`### ${dTitle}\n`);
+            if (dType === 'mermaid' && dContent) {
+               diagramsCount++;
+               parts.push('```mermaid\n' + dContent + '\n```\n');
+            } else if (dType === 'table' && dContent) {
+               tablesCount++;
+               parts.push(dContent + '\n');
+            } else if (dContent) {
+               parts.push(`> ${dContent}\n`);
+            }
+            if (dExpl) {
+               parts.push(`*${dExpl}*\n`);
+            }
          }
       }
       visualMarkdown = parts.join('\n');
    }
 
    const title = typeof parsed.title === 'string' ? parsed.title : input.filename.replace(/\.[^/.]+$/, '');
-   const description = typeof parsed.description === 'string' ? parsed.description : 'Document technique ingéré.';
+   const description = typeof parsed.description === 'string' ? parsed.description : 'Ingested technical document.';
+   const domainMeta = profile.extractDomainMetadata ? profile.extractDomainMetadata(parsed) : {};
 
    const metadata: OkfFrontmatterV2 = {
-      type: typeof parsed.type === 'string' ? parsed.type : 'document',
+      type: typeof parsed.type === 'string' ? (parsed.type as OkfDocumentType) : 'guide',
       title,
       description,
-      tags: Array.isArray(parsed.tags) && parsed.tags.length > 0 ? (parsed.tags as string[]) : ['agronomie'],
-      category: typeof parsed.category === 'string' ? parsed.category : (options.defaultCategory || 'inbox'),
-      thematics: Array.isArray(parsed.thematics) ? (parsed.thematics as string[]) : undefined,
-      soils: Array.isArray(parsed.soils) ? (parsed.soils as string[]) : undefined,
-      climates: Array.isArray(parsed.climates) ? (parsed.climates as string[]) : undefined,
-      itineraries: Array.isArray(parsed.itineraries) ? (parsed.itineraries as string[]) : undefined,
-      crops: Array.isArray(parsed.crops) ? (parsed.crops as string[]) : undefined,
+      tags:
+         Array.isArray(parsed.tags) && parsed.tags.length > 0
+            ? (parsed.tags as string[])
+            : (profile.defaultTags || ['knowledge']),
+      category:
+         typeof parsed.category === 'string'
+            ? parsed.category
+            : (options.defaultCategory || profile.defaultCategory || 'general'),
       authors: Array.isArray(parsed.authors) ? (parsed.authors as string[]) : undefined,
       publisher: typeof parsed.publisher === 'string' ? parsed.publisher : undefined,
       publicationYear: typeof parsed.publicationYear === 'string' ? parsed.publicationYear : undefined,
       language: typeof parsed.language === 'string' ? parsed.language : 'fr',
-      originalLanguage: typeof parsed.originalLanguage === 'string' ? parsed.originalLanguage : (typeof parsed.language === 'string' ? parsed.language : 'fr'),
-      abstracts: typeof parsed.abstracts === 'object' && parsed.abstracts !== null ? (parsed.abstracts as OkfMultilingualContent) : undefined,
-      keywords: typeof parsed.keywords === 'object' && parsed.keywords !== null ? (parsed.keywords as OkfMultilingualKeywords) : undefined,
+      originalLanguage:
+         typeof parsed.originalLanguage === 'string'
+            ? parsed.originalLanguage
+            : typeof parsed.language === 'string'
+              ? parsed.language
+              : 'fr',
+      abstracts:
+         typeof parsed.abstracts === 'object' && parsed.abstracts !== null
+            ? (parsed.abstracts as OkfMultilingualContent)
+            : undefined,
+      keywords:
+         typeof parsed.keywords === 'object' && parsed.keywords !== null
+            ? (parsed.keywords as OkfMultilingualKeywords)
+            : undefined,
       status: 'draft',
       generated: {
          by: `quatrain/okf-ingest (${model})`,
          at: new Date().toISOString(),
          tokens: usage,
       },
+      ...domainMeta,
    };
 
-   // Final document body: Main text + transcribed visual diagrams
    const mainText = (input.rawText || '').trim();
    const body = mainText ? `# ${title}\n\n${mainText}${visualMarkdown}` : `# ${title}\n\n${description}${visualMarkdown}`;
 

@@ -1,5 +1,8 @@
 import {
+   AiStructuredRunner,
    BookOutlineChapter,
+   DomainTaxonomyProfile,
+   OkfDocumentType,
    OkfFrontmatterV2,
    OkfMultilingualContent,
    OkfMultilingualKeywords,
@@ -75,7 +78,8 @@ export interface CatalogEntryResult {
  * Configuration options for catalog monograph ingestion.
  */
 export interface CatalogIngestionOptions {
-   apiKey: string;
+   apiKey?: string;
+   runner?: AiStructuredRunner;
    gitLocalPath: string;
    originalFileUri: string;
    fileHash: string;
@@ -84,7 +88,8 @@ export interface CatalogIngestionOptions {
    model?: string;
    soa?: string;
    revision?: string;
-   entryType?: string;
+   entryType?: OkfDocumentType;
+   taxonomyProfile?: DomainTaxonomyProfile;
    onProgress?: (current: number, total: number, entryTitle: string) => void;
 }
 

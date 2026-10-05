@@ -42,8 +42,22 @@ export interface OkfMultilingualKeywords {
    [lang: string]: string[] | undefined;
 }
 
+export type OkfDocumentType =
+   | 'monograph'
+   | 'chapter'
+   | 'catalog-entry'
+   | 'guide'
+   | 'technical-report'
+   | 'specification'
+   | 'reference'
+   | 'recipe'
+   | 'concept'
+   | 'standard'
+   | 'note'
+   | (string & {});
+
 export interface OkfFrontmatterV2 {
-   type: string;
+   type: OkfDocumentType;
    title: string;
    description: string;
    tags: string[];
@@ -90,6 +104,80 @@ export interface OkfDocument {
    relativePath?: string;
 }
 
+/**
+ * Runner options passed to an AiStructuredRunner instance.
+ */
+export interface AiRunnerOptions {
+   model?: string;
+   temperature?: number;
+   maxOutputTokens?: number;
+   systemInstruction?: string;
+}
+
+/**
+ * Result returned by an AiStructuredRunner execution.
+ */
+export interface AiRunnerResponse<T = Record<string, unknown>> {
+   data: T;
+   usage: OkfTokenUsage;
+   rawText?: string;
+}
+
+/**
+ * Multimodal input part for image/PDF payloads.
+ */
+export interface MultimodalPart {
+   mimeType: string;
+   data: string; // base64 encoded
+}
+
+/**
+ * Pluggable AI model runner contract for structured JSON and multimodal generation.
+ * Enables zero-coupling with specific model providers (Gemini, OpenAI, Claude, Ollama, etc.).
+ */
+export interface AiStructuredRunner {
+   generateStructured<T = Record<string, unknown>>(
+      prompt: string,
+      schema: unknown,
+      options?: AiRunnerOptions
+   ): Promise<AiRunnerResponse<T>>;
+
+   generateStructuredMultimodal?<T = Record<string, unknown>>(
+      prompt: string,
+      parts: MultimodalPart[],
+      schema: unknown,
+      options?: AiRunnerOptions
+   ): Promise<AiRunnerResponse<T>>;
+}
+
+/**
+ * Specification of an individual domain-specific taxonomy field.
+ */
+export interface DomainTaxonomyField {
+   name: string;
+   type: 'string' | 'string[]' | 'number' | 'boolean';
+   description: string;
+   examples?: string[];
+   required?: boolean;
+}
+
+/**
+ * Composable domain profile defining system personas, domain guidelines,
+ * schema properties, and metadata extraction rules.
+ */
+export interface DomainTaxonomyProfile {
+   id: string;
+   name: string;
+   systemRole?: string;
+   promptGuidelines?: string[];
+   fields?: DomainTaxonomyField[];
+   schemaProperties?: Record<string, unknown>;
+   extractDomainMetadata?: (rawResult: Record<string, unknown>) => Record<string, unknown>;
+   renderMarkdownSections?: (metadata: Record<string, unknown>) => string;
+   defaultCategory?: string;
+   defaultTags?: string[];
+}
+
 export interface ExtractionOptions {
    model?: string;
    soa?: string;
@@ -98,6 +186,9 @@ export interface ExtractionOptions {
    enableVisionMermaid?: boolean;
    contextNote?: string;
    maxContentChars?: number;
+   runner?: AiStructuredRunner;
+   apiKey?: string;
+   taxonomyProfile?: DomainTaxonomyProfile;
 }
 
 export interface IngestionExtractionResult {

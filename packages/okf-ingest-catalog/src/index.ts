@@ -7,5 +7,7 @@
 
 export * from './types';
 export * from './detector';
+export * from './prompts/catalogEntryPrompt';
 export * from './ai';
 export * from './engine';
+

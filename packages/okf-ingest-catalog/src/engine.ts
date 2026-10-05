@@ -3,6 +3,8 @@ import * as path from 'node:path';
 import {
    BookOutlineChapter,
    extractSemanticContent,
+   GenericDomainProfile,
+   OkfDocumentType,
    OkfFrontmatterV2,
    OkfTokenUsage,
    serializeOkfDocument,
@@ -46,7 +48,8 @@ export interface CatalogMonographInput {
 }
 
 /**
- * Ingests a structured catalog/encyclopedic monograph into a coherent OKF v0.2 collection.
+ * Ingests a structured catalog or encyclopedic monograph into a coherent OKF v0.2 collection.
+ * Decoupled from specific model providers and composable with domain taxonomy profiles.
  */
 export async function ingestCatalogMonograph(
    input: CatalogMonographInput,
@@ -54,8 +57,9 @@ export async function ingestCatalogMonograph(
 ): Promise<CatalogIngestionSummary> {
    const bookSlug = slugify(input.bookTitle);
    const model = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-   const soa = options.soa || 'bradtech/world-agronomy';
+   const soa = options.soa || 'quatrain/knowledge';
    const revision = options.revision;
+   const profile = options.taxonomyProfile || new GenericDomainProfile();
 
    const parentBook: CatalogParentBookRef = {
       title: input.bookTitle,
@@ -88,20 +92,22 @@ export async function ingestCatalogMonograph(
    let totalDiagrams = 0;
    let totalTables = 0;
 
-   // 2. Process Introductory/Methodology Chapters
+   // 2. Process Introductory / Methodology Chapters
    if (input.introChapters && input.introChapters.length > 0) {
       for (const ch of input.introChapters) {
          const chapterResult = await extractSemanticContent(
             {
                rawText: ch.text,
-               filename: `${options.filename} - Chapitre ${ch.index}: ${ch.title}`,
+               filename: `${options.filename} - Chapter ${ch.index}: ${ch.title}`,
             },
             options.apiKey,
             {
                model,
+               runner: options.runner,
+               taxonomyProfile: profile,
                defaultCategory: input.category,
-               contextNote: `Partie introductive/méthodologique de l'ouvrage encyclopédique "${input.bookTitle}".
-Chapitre ${ch.index} : "${ch.title}".`,
+               contextNote: `Introductory / methodological section of encyclopedic monograph "${input.bookTitle}".
+Chapter ${ch.index}: "${ch.title}".`,
             }
          );
 
@@ -113,9 +119,9 @@ Chapitre ${ch.index} : "${ch.title}".`,
          totalTables += chapterResult.tablesTranscribed;
 
          const chapterMetadata: OkfFrontmatterV2 = {
-            type: 'chapitre',
-            title: `Chapitre ${ch.index} : ${chapterResult.metadata.title || ch.title}`,
-            description: chapterResult.metadata.description || ch.summary || `Chapitre ${ch.index} de l'ouvrage ${input.bookTitle}.`,
+            type: 'chapter',
+            title: `Chapter ${ch.index}: ${chapterResult.metadata.title || ch.title}`,
+            description: chapterResult.metadata.description || ch.summary || `Chapter ${ch.index} of ${input.bookTitle}.`,
             tags: Array.from(new Set([...(chapterResult.metadata.tags || []), bookSlug])),
             status: 'draft',
             generated: {
@@ -175,12 +181,14 @@ Chapitre ${ch.index} : "${ch.title}".`,
 
       const entryResult = await extractCatalogEntryContent(entryChunk, {
          apiKey: options.apiKey,
+         runner: options.runner,
          parentBook,
-         entryType: options.entryType || 'plant-profile',
+         entryType: options.entryType || 'catalog-entry',
          model,
          defaultCategory: input.category,
          soa,
          revision,
+         taxonomyProfile: profile,
       });
 
       totalPromptTokens += entryResult.usage.prompt;
@@ -190,7 +198,16 @@ Chapitre ${ch.index} : "${ch.title}".`,
       totalDiagrams += entryResult.diagramsTranscribed;
       totalTables += entryResult.tablesTranscribed;
 
-      const entryRelPath = path.join(entriesRelativeFolder, `${entryChunk.slug}.md`);
+      // Semantic slug derived from Latin / scientific name or clean title
+      const entryNamingSeed =
+         entryResult.metadata.scientificName ||
+         entryChunk.scientificName ||
+         entryResult.metadata.title ||
+         entryChunk.rawTitle;
+      const cleanSlugName = slugify(entryNamingSeed);
+      const finalEntrySlug = `${String(entryChunk.sequence).padStart(3, '0')}-${cleanSlugName}`;
+
+      const entryRelPath = path.join(entriesRelativeFolder, `${finalEntrySlug}.md`);
       const absoluteEntryPath = path.join(options.gitLocalPath, entryRelPath);
       const entrySerialized = serializeOkfDocument(entryResult.metadata, entryResult.body);
       await fs.writeFile(absoluteEntryPath, entrySerialized, 'utf-8');
@@ -198,7 +215,7 @@ Chapitre ${ch.index} : "${ch.title}".`,
       allCreatedFiles.push(entryRelPath);
       processedEntries.push({
          sequence: entryChunk.sequence,
-         slug: entryChunk.slug,
+         slug: finalEntrySlug,
          metadata: entryResult.metadata,
          body: entryResult.body,
          relativePath: entryRelPath,
@@ -218,10 +235,10 @@ Chapitre ${ch.index} : "${ch.title}".`,
    };
 
    const masterMetadata: OkfFrontmatterV2 = {
-      type: 'monographie',
+      type: 'monograph',
       title: input.bookTitle,
       description: input.description,
-      tags: Array.from(new Set([...(input.tags || ['catalogue', 'encyclopedie']), bookSlug])),
+      tags: Array.from(new Set([...(input.tags || ['catalog', 'encyclopedia']), bookSlug])),
       status: 'draft',
       generated: {
          by: `quatrain/okf-ingest-catalog (${model})`,
@@ -251,18 +268,18 @@ Chapitre ${ch.index} : "${ch.title}".`,
          ar: `دليل وموسوعة مرجعية بعنوان "${input.bookTitle}" تضم ${processedEntries.length} مدخل مفصل وفصول منهجية.`,
       },
       keywords: {
-         fr: [input.bookTitle, 'catalogue', 'bio-indication', 'plantes'],
-         en: [input.bookTitle, 'catalog', 'bio-indicators', 'plants'],
-         ar: [input.bookTitle, 'دليل', 'مؤشرات حيوية', 'نباتات'],
+         fr: [input.bookTitle, 'catalogue', 'encyclopedie'],
+         en: [input.bookTitle, 'catalog', 'encyclopedia'],
+         ar: [input.bookTitle, 'دليل', 'موسوعة'],
       },
    };
 
    let masterBody = `# ${input.bookTitle}\n\n${input.description}\n\n`;
 
    if (processedIntroChapters.length > 0) {
-      masterBody += `## I. Guide Méthodologique & Principes Fondamentaux\n\n`;
+      masterBody += `## I. Methodological Guides & Foundational Chapters\n\n`;
       for (const ch of processedIntroChapters) {
-         masterBody += `- [**Chapitre ${ch.index} : ${ch.title}**](./${ch.slug}.md)\n`;
+         masterBody += `- [**Chapter ${ch.index}: ${ch.title}**](./${ch.slug}.md)\n`;
          if (ch.summary) {
             masterBody += `  *${ch.summary}*\n`;
          }
@@ -271,8 +288,8 @@ Chapitre ${ch.index} : "${ch.title}".`,
    }
 
    if (processedEntries.length > 0) {
-      masterBody += `## II. Répertoire Séquentiel des Entrées (${processedEntries.length} fiches)\n\n`;
-      masterBody += `| N° | Entrée vernaculaire | Nom scientifique | Famille | Fiche détaillée |\n`;
+      masterBody += `## II. Sequential Entry Catalog (${processedEntries.length} entries)\n\n`;
+      masterBody += `| N° | Entry Title | Scientific / Canonical Name | Family / Group | Detailed Record |\n`;
       masterBody += `|:---:|:---|:---|:---|:---|\n`;
 
       for (const entry of processedEntries) {
@@ -280,7 +297,7 @@ Chapitre ${ch.index} : "${ch.title}".`,
          const seqStr = String(entry.sequence).padStart(3, '0');
          const latinStr = meta.scientificName ? `*${meta.scientificName}*` : '—';
          const famStr = meta.family || '—';
-         masterBody += `| ${seqStr} | **${meta.title}** | ${latinStr} | ${famStr} | [Consulter la fiche](./entries/${entry.slug}.md) |\n`;
+         masterBody += `| ${seqStr} | **${meta.title}** | ${latinStr} | ${famStr} | [View record](./entries/${entry.slug}.md) |\n`;
       }
       masterBody += `\n`;
    }

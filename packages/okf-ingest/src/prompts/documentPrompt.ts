@@ -50,6 +50,8 @@ export function buildDocumentPrompt(
       ...abstractLines,
       `7. "keywords": Standardized indexing keywords (4 to 8 per language) for each configured language (${targetLanguages.join(', ')}).`,
       '8. "tags": Lowercase semantic tags capturing the main technical concepts.',
+      '9. "license": Standard SPDX license identifier or Open Access status if stated (e.g. "CC-BY-4.0", "CC-BY-SA-4.0", "CC0-1.0", "Open Access", "Proprietary", "All Rights Reserved", or omitted if unknown).',
+      '10. "copyright": Legal copyright notice if explicitly present (e.g. "© 2024 Éditions France Agricole, Paris").',
    ];
 
    // Add domain-specific prompt guidelines if provided
@@ -58,7 +60,7 @@ export function buildDocumentPrompt(
    }
 
    guidelines.push(
-      '9. "diagrams": CRITICAL — For every technical workflow, system cycle, data flow, or comparative data table discovered in the content:',
+      '11. "diagrams": CRITICAL — For every technical workflow, system cycle, data flow, or comparative data table discovered in the content:',
       '   - If it represents a workflow, sequence, architecture, or cycle: provide complete, valid Mermaid code ("type": "mermaid", "content": "graph TD\\n...").',
       '   - If it represents tabular comparative data: provide the full Markdown table ("type": "table", "content": "| Col1 | Col2 |\\n|---|---|...").',
       '   - If it is a complex visual diagram: provide an exhaustive, dense technical caption ("type": "caption").'

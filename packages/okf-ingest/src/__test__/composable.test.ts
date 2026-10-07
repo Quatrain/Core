@@ -178,7 +178,8 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
 
       expect(prompt).toContain('Analyze this large book or monograph');
       expect(prompt).toContain('1. "title": Official and complete book or monograph title');
-      expect(prompt).toContain('11. "chapters": Ordered array of logical chapters');
+      expect(prompt).toContain('"license": Standard SPDX license identifier');
+      expect(prompt).toContain('"chapters": Ordered array of logical chapters');
       expect(prompt).not.toContain('Tu es un ingénieur expert');
    });
 });

@@ -86,6 +86,7 @@ export interface OkfFrontmatterV2 {
    keywords?: OkfMultilingualKeywords;
    isbn?: string;
    doi?: string;
+   license?: string;
    copyright?: string;
    originalTitle?: string;
    originalPublisher?: string;
@@ -263,6 +264,8 @@ export interface BookOutline {
    authors?: string[];
    publisher?: string;
    publicationYear?: string | number;
+   license?: string;
+   copyright?: string;
    thematics?: string[];
    soils?: string[];
    climates?: string[];

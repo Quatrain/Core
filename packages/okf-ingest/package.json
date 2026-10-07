@@ -30,6 +30,7 @@
   "dependencies": {
     "@quatrain/ai": "workspace:*",
     "@quatrain/ai-gemini": "workspace:*",
+    "@quatrain/ai-openai": "workspace:*",
     "@quatrain/core": "workspace:*",
     "@quatrain/log": "workspace:*",
     "pdf-parse": "^1.1.1",

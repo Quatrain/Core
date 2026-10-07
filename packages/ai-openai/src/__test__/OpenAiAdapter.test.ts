@@ -78,6 +78,11 @@ describe('OpenAiAdapter', () => {
          const adapter = OpenAiAdapter.forOpenRouter('sk-or')
          expect(adapter).toBeInstanceOf(OpenAiAdapter)
       })
+
+      it('creates an adapter for LM Studio with local configuration', () => {
+         const adapter = OpenAiAdapter.forLmStudio('http://localhost:1234/v1', 'gemma-4-e4b-it')
+         expect(adapter).toBeInstanceOf(OpenAiAdapter)
+      })
    })
 
    describe('generateText', () => {
@@ -222,6 +227,56 @@ describe('OpenAiAdapter', () => {
          await expect(adapter.generateStructured('prompt', {})).rejects.toThrow(
             'OpenAiAdapter: No content returned for structured output request',
          )
+      })
+
+      it('supports onUsage callback and omits response_format for local LM Studio adapter', async () => {
+         const mockData: OpenAiChatResponse = {
+            id: 'chatcmpl-lm-123',
+            object: 'chat.completion',
+            created: 123456789,
+            model: 'gemma-4-e4b-it',
+            choices: [
+               {
+                  index: 0,
+                  message: {
+                     role: 'assistant',
+                     content: '{"title": "Acanthe"}',
+                  },
+               },
+            ],
+            usage: {
+               prompt_tokens: 45,
+               completion_tokens: 15,
+               total_tokens: 60,
+            },
+         }
+
+         const mockFetch = jest.fn().mockResolvedValue(createMockResponse(mockData))
+         globalThis.fetch = mockFetch
+
+         const adapter = OpenAiAdapter.forLmStudio('http://localhost:1234/v1', 'gemma-4-e4b-it')
+         let capturedUsage: unknown = null
+
+         const result = await adapter.generateStructured<{ title: string }>(
+            'Extract plant',
+            { type: 'object' },
+            {
+               onUsage: (u) => {
+                  capturedUsage = u
+               },
+            },
+         )
+
+         expect(result.title).toBe('Acanthe')
+         expect(capturedUsage).toEqual({
+            promptTokenCount: 45,
+            candidatesTokenCount: 15,
+            totalTokenCount: 60,
+         })
+
+         const calledInit = mockFetch.mock.calls[0][1] as RequestInit
+         const sentPayload = JSON.parse(calledInit.body as string)
+         expect(sentPayload.response_format).toBeUndefined()
       })
    })
 

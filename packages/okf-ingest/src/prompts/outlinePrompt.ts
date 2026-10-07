@@ -38,6 +38,8 @@ export function buildBookOutlinePrompt(
       '8. "authors": Array of contributing author names discovered in the book.',
       '9. "publisher": Publishing house or institution if identifiable.',
       '10. "publicationYear": Year of publication if identifiable.',
+      '11. "license": Standard SPDX license identifier or Open Access status if stated (e.g. "CC-BY-4.0", "CC-BY-SA-4.0", "CC0-1.0", "Open Access", "Proprietary", "All Rights Reserved", or omitted if unknown).',
+      '12. "copyright": Formal legal copyright statement if present (e.g. "© 2024 Éditions France Agricole, Paris").',
    ];
 
    if (profile?.promptGuidelines && profile.promptGuidelines.length > 0) {
@@ -45,7 +47,7 @@ export function buildBookOutlinePrompt(
    }
 
    guidelines.push(
-      '11. "chapters": Ordered array of logical chapters or major structural parts (typically 3 to 12 chapters):',
+      '13. "chapters": Ordered array of logical chapters or major structural parts (typically 3 to 12 chapters):',
       '    - "index": Sequence number of the chapter (1, 2, 3...).',
       '    - "title": Clean, explicit chapter title.',
       '    - "summary": Concise 1 to 2 sentence summary of chapter content.',

@@ -72,6 +72,8 @@ export function buildBookOutlineSchema(
       publicationYear: { type: 'STRING' },
       language: { type: 'STRING' },
       originalLanguage: { type: 'STRING' },
+      license: { type: 'STRING' },
+      copyright: { type: 'STRING' },
       abstracts: {
          type: 'OBJECT',
          properties: abstractProps,
@@ -505,6 +507,8 @@ Extract specifically the concepts, taxonomies, diagrams, and tables relevant to 
       authors: outline.authors,
       publisher: outline.publisher,
       publicationYear: outline.publicationYear,
+      license: outline.license,
+      copyright: outline.copyright,
       language: outline.language || targetLanguages[0] || 'en',
       originalLanguage: outline.originalLanguage || outline.language || targetLanguages[0] || 'en',
       abstracts: outline.abstracts,
@@ -549,3 +553,5 @@ ${chapterDocs
       totalTables,
    };
 }
+
+export { decomposeAndIngestMonograph as ingestMonograph };

@@ -153,7 +153,7 @@ export async function extractCatalogEntryContent(
    );
 
    let rawUsage: RawTokenUsageMetadata | undefined = undefined;
-   const parsed = (await adapter.generateStructured(prompt, schema, {
+   const rawRecord = (await adapter.generateStructured(prompt, schema, {
       model,
       onUsage: (u: unknown) => {
          if (typeof u === 'object' && u !== null) {
@@ -161,6 +161,12 @@ export async function extractCatalogEntryContent(
          }
       },
    })) as Record<string, unknown>;
+
+   // Normalize if model mirrored schema metadata structure { type: 'OBJECT', properties: { ... } }
+   const parsed =
+      rawRecord.properties && typeof rawRecord.properties === 'object' && !rawRecord.title
+         ? (rawRecord.properties as Record<string, unknown>)
+         : rawRecord;
 
    let usage: OkfTokenUsage;
    if (rawUsage) {

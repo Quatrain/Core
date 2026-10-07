@@ -1,5 +1,5 @@
-import { GoogleGenAI, Schema } from '@google/genai';
-import { calculateTokenCost } from './cost';
+import { GeminiAdapter } from '@quatrain/ai-gemini';
+import { calculateTokenCost, RawTokenUsageMetadata } from './cost';
 import {
    AiRunnerOptions,
    AiRunnerResponse,
@@ -14,17 +14,18 @@ export interface GeminiRunnerConfig {
 }
 
 /**
- * Standard implementation of AiStructuredRunner backed by Google's Gemini SDK (@google/genai).
+ * Standard implementation of AiStructuredRunner backed by Quatrain's GeminiAdapter (@quatrain/ai-gemini).
  */
 export class GeminiStructuredRunner implements AiStructuredRunner {
-   private ai: GoogleGenAI;
+   private adapter: GeminiAdapter;
    private defaultModel: string;
 
    constructor(config: GeminiRunnerConfig) {
       if (!config.apiKey) {
          throw new Error('[GeminiStructuredRunner] API key is required');
       }
-      this.ai = new GoogleGenAI({ apiKey: config.apiKey });
+      this.adapter = new GeminiAdapter(config.apiKey);
+      this.adapter.init();
       this.defaultModel = config.defaultModel || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
    }
 
@@ -34,30 +35,35 @@ export class GeminiStructuredRunner implements AiStructuredRunner {
       options?: AiRunnerOptions
    ): Promise<AiRunnerResponse<T>> {
       const model = options?.model || this.defaultModel;
+      let rawUsage: RawTokenUsageMetadata | undefined;
 
-      const response = await this.ai.models.generateContent({
+      const data = (await this.adapter.generateStructured(prompt, schema, {
          model,
-         contents: prompt,
-         config: {
-            responseMimeType: 'application/json',
-            responseSchema: schema as Schema,
-            temperature: options?.temperature,
-            systemInstruction: options?.systemInstruction,
+         temperature: options?.temperature,
+         systemInstruction: options?.systemInstruction,
+         maxOutputTokens: options?.maxOutputTokens,
+         onUsage: (u: unknown) => {
+            if (typeof u === 'object' && u !== null) {
+               rawUsage = u as RawTokenUsageMetadata;
+            }
          },
-      });
+      })) as T;
 
-      const rawText = response.text || '';
-      if (!rawText) {
-         throw new Error(`[GeminiStructuredRunner] Empty response received from model ${model}`);
-      }
-
-      const data = JSON.parse(rawText) as T;
-      const usage: OkfTokenUsage = calculateTokenCost(response.usageMetadata, model);
+      const usage: OkfTokenUsage = rawUsage
+         ? calculateTokenCost(rawUsage, model)
+         : calculateTokenCost(
+              {
+                 promptTokenCount: Math.ceil(prompt.length / 4),
+                 candidatesTokenCount: Math.ceil(JSON.stringify(data).length / 4),
+                 totalTokenCount: Math.ceil((prompt.length + JSON.stringify(data).length) / 4),
+              },
+              model
+           );
 
       return {
          data,
          usage,
-         rawText,
+         rawText: JSON.stringify(data),
       };
    }
 
@@ -68,7 +74,6 @@ export class GeminiStructuredRunner implements AiStructuredRunner {
       options?: AiRunnerOptions
    ): Promise<AiRunnerResponse<T>> {
       const model = options?.model || this.defaultModel;
-
       const contents = [
          prompt,
          ...parts.map((p) => ({
@@ -79,29 +84,34 @@ export class GeminiStructuredRunner implements AiStructuredRunner {
          })),
       ];
 
-      const response = await this.ai.models.generateContent({
+      let rawUsage: RawTokenUsageMetadata | undefined;
+      const data = (await this.adapter.generateStructured(contents, schema, {
          model,
-         contents,
-         config: {
-            responseMimeType: 'application/json',
-            responseSchema: schema as Schema,
-            temperature: options?.temperature,
-            systemInstruction: options?.systemInstruction,
+         temperature: options?.temperature,
+         systemInstruction: options?.systemInstruction,
+         maxOutputTokens: options?.maxOutputTokens,
+         onUsage: (u: unknown) => {
+            if (typeof u === 'object' && u !== null) {
+               rawUsage = u as RawTokenUsageMetadata;
+            }
          },
-      });
+      })) as T;
 
-      const rawText = response.text || '';
-      if (!rawText) {
-         throw new Error(`[GeminiStructuredRunner] Empty multimodal response received from model ${model}`);
-      }
-
-      const data = JSON.parse(rawText) as T;
-      const usage: OkfTokenUsage = calculateTokenCost(response.usageMetadata, model);
+      const usage: OkfTokenUsage = rawUsage
+         ? calculateTokenCost(rawUsage, model)
+         : calculateTokenCost(
+              {
+                 promptTokenCount: Math.ceil(prompt.length / 4),
+                 candidatesTokenCount: Math.ceil(JSON.stringify(data).length / 4),
+                 totalTokenCount: Math.ceil((prompt.length + JSON.stringify(data).length) / 4),
+              },
+              model
+           );
 
       return {
          data,
          usage,
-         rawText,
+         rawText: JSON.stringify(data),
       };
    }
 }

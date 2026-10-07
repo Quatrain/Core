@@ -35,6 +35,8 @@ export const OKF_BASE_PROPERTIES: Record<string, OkfJsonSchemaProperty> = {
    publicationYear: { type: 'STRING' },
    language: { type: 'STRING' },
    originalLanguage: { type: 'STRING' },
+   license: { type: 'STRING' },
+   copyright: { type: 'STRING' },
    diagrams: {
       type: 'ARRAY',
       items: {
@@ -161,6 +163,11 @@ export async function extractSemanticContent(
             }
          },
       })) as Record<string, unknown>;
+   }
+
+   // Normalize if model mirrored schema metadata structure { type: 'OBJECT', properties: { ... } }
+   if (parsed.properties && typeof parsed.properties === 'object' && !parsed.title) {
+      parsed = parsed.properties as Record<string, unknown>;
    }
 
    let usage: OkfTokenUsage;

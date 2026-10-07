@@ -2,8 +2,24 @@ import pdfParse from 'pdf-parse';
 
 export interface PdfExtractionResult {
    text: string;
+   pages?: string[];
    isScanned: boolean;
    pageCount: number;
+}
+
+// Filter out noisy pdf.js internal warnings (e.g. font private use area)
+function createWarningFilter(origFn: (...args: unknown[]) => void) {
+   return (...args: unknown[]) => {
+      const msg = typeof args[0] === 'string' ? args[0] : '';
+      if (
+         msg.includes('private use area') ||
+         msg.includes('Ran out of space in font') ||
+         msg.startsWith('Warning: ')
+      ) {
+         return;
+      }
+      origFn(...args);
+   };
 }
 
 /**
@@ -16,21 +32,8 @@ export async function extractPdfText(buffer: Buffer): Promise<PdfExtractionResul
    const originalLog = console.log;
    const originalWarn = console.warn;
 
-   // Filter out noisy pdf.js internal warnings (e.g. font private use area)
-   const filterWarning = (origFn: (...args: unknown[]) => void) => (...args: unknown[]) => {
-      const msg = typeof args[0] === 'string' ? args[0] : '';
-      if (
-         msg.includes('private use area') ||
-         msg.includes('Ran out of space in font') ||
-         msg.startsWith('Warning: ')
-      ) {
-         return;
-      }
-      origFn(...args);
-   };
-
-   console.log = filterWarning(originalLog);
-   console.warn = filterWarning(originalWarn);
+   console.log = createWarningFilter(originalLog);
+   console.warn = createWarningFilter(originalWarn);
 
    try {
       const parsed = await pdfParse(buffer);
@@ -52,6 +55,44 @@ export async function extractPdfText(buffer: Buffer): Promise<PdfExtractionResul
          isScanned: true,
          pageCount: 1,
       };
+   } finally {
+      console.log = originalLog;
+      console.warn = originalWarn;
+   }
+}
+
+/**
+ * Extracts page-by-page text from a PDF buffer, preserving ordered sequence.
+ *
+ * @param buffer - Binary PDF file buffer.
+ * @returns Array of text strings, one per page.
+ */
+export async function extractPdfPages(buffer: Buffer): Promise<string[]> {
+   const pagesText: string[] = [];
+   const originalLog = console.log;
+   const originalWarn = console.warn;
+
+   console.log = createWarningFilter(originalLog);
+   console.warn = createWarningFilter(originalWarn);
+
+   try {
+      await pdfParse(buffer, {
+         pagerender: (pageData: { getTextContent: () => Promise<{ items: Array<{ str?: string }> }> }) => {
+            return pageData.getTextContent().then((textContent) => {
+               let pageText = '';
+               for (const item of textContent.items) {
+                  if (item && typeof item.str === 'string') {
+                     pageText += item.str + ' ';
+                  }
+               }
+               pagesText.push(pageText);
+               return pageText;
+            });
+         },
+      });
+      return pagesText;
+   } catch {
+      return [];
    } finally {
       console.log = originalLog;
       console.warn = originalWarn;

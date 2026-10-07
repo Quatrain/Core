@@ -2890,7 +2890,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/ai-openai@workspace:packages/ai-openai":
+"@quatrain/ai-openai@workspace:*, @quatrain/ai-openai@workspace:packages/ai-openai":
   version: 0.0.0-use.local
   resolution: "@quatrain/ai-openai@workspace:packages/ai-openai"
   dependencies:
@@ -3785,7 +3785,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/okf-ingest-catalog@workspace:packages/okf-ingest-catalog"
   dependencies:
-    "@google/genai": "npm:latest"
+    "@quatrain/ai": "workspace:*"
     "@quatrain/core": "workspace:*"
     "@quatrain/log": "workspace:*"
     "@quatrain/okf-ingest": "workspace:*"
@@ -3803,9 +3803,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quatrain/okf-ingest@workspace:packages/okf-ingest"
   dependencies:
-    "@google/genai": "npm:latest"
     "@quatrain/ai": "workspace:*"
     "@quatrain/ai-gemini": "workspace:*"
+    "@quatrain/ai-openai": "workspace:*"
     "@quatrain/core": "workspace:*"
     "@quatrain/log": "workspace:*"
     "@tsconfig/recommended": "npm:^1.0.1"

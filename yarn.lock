@@ -1543,6 +1543,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cyclonedx/yarn-plugin-cyclonedx@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@cyclonedx/yarn-plugin-cyclonedx@npm:3.4.0"
+  dependenciesMeta:
+    eslint:
+      unplugged: true
+    eslint-plugin-eslint-comments:
+      unplugged: true
+  bin:
+    cyclonedx-yarn: bin/cyclonedx-yarn-cli.js
+  checksum: 10c0/ceca0352a53798ea3cac44f9d02fa838a6544e3601d9aa979b035e93b0ba593d33d4e9efba878284dbce1764486e7c48337c8b64be9e1951490fc88c654be570
+  languageName: node
+  linkType: hard
+
 "@emnapi/runtime@npm:^1.2.0":
   version: 1.10.0
   resolution: "@emnapi/runtime@npm:1.10.0"
@@ -7050,6 +7064,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "core-monorepo@workspace:."
   dependencies:
+    "@cyclonedx/yarn-plugin-cyclonedx": "npm:3.4.0"
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/jest": "npm:^29.5.12"
     "@types/node": "npm:^22.10.1"

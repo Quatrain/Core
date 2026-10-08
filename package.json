@@ -5,6 +5,7 @@
   "license": "AGPL-3.0-only",
   "version": "1.2.0",
   "devDependencies": {
+    "@cyclonedx/yarn-plugin-cyclonedx": "3.4.0",
     "@tsconfig/recommended": "^1.0.1",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.10.1",

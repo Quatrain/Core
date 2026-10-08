@@ -12,9 +12,19 @@ function runSync(command, args, options = {}) {
     }
     return result.stdout ? result.stdout.toString() : '';
 }
+const rootDir = path.join(__dirname, '..');
 const workspacesDirs = [
     path.join(__dirname, '../packages')
 ];
+
+// Digests of the exact tarball sent to the registry (sha512 matches npm's dist.integrity)
+function tarballDigests(file) {
+    const buf = fs.readFileSync(file);
+    return {
+        sha256: crypto.createHash('sha256').update(buf).digest('hex'),
+        sha512: crypto.createHash('sha512').update(buf).digest('hex')
+    };
+}
 
 function getPkgDir(pkg) {
     for (const dir of workspacesDirs) {
@@ -83,6 +93,15 @@ async function publishAll() {
     const npmTag = tagArgIndex !== -1 ? process.argv[tagArgIndex + 1] : defaultTag;
     const tagString = npmTag ? `--tag ${npmTag}` : '';
 
+    // --plan <file>: write the list of packages that would be released, then stop (no build, no publish)
+    // --manifest <file>: write the list of packages actually published, with tarball digests
+    const planArgIndex = process.argv.indexOf('--plan');
+    const planFile = planArgIndex !== -1 ? process.argv[planArgIndex + 1] : null;
+    const manifestArgIndex = process.argv.indexOf('--manifest');
+    const manifestFile = manifestArgIndex !== -1 ? process.argv[manifestArgIndex + 1] : null;
+    const toRelease = [];
+    const releaseManifest = [];
+
     console.log('[PREPARE] Computing stable hashes prior to build...');
     for (const pkg of packages) {
         const pkgDir = getPkgDir(pkg);
@@ -103,6 +122,15 @@ async function publishAll() {
         if (!hasDist || previousDataMap[pkgName].hash !== computedHashes[pkgName] || needsFinalize) {
             anyPackageChanged = true;
         }
+        if (previousDataMap[pkgName].hash !== computedHashes[pkgName] || needsFinalize) {
+            toRelease.push({ name: pkgName, version: pkgJson.version, dir: path.relative(rootDir, pkgDir) });
+        }
+    }
+
+    if (planFile) {
+        fs.writeFileSync(planFile, JSON.stringify(toRelease, null, 2) + '\n', 'utf8');
+        console.log(`[PLAN] ${toRelease.length} package(s) to release -> ${planFile}`);
+        return;
     }
 
     if (!anyPackageChanged && !forceBuild) {
@@ -147,6 +175,7 @@ async function publishAll() {
             try {
                 let newVersion;
                 let updatedPkgJson;
+                let digests = {};
                 const originalPkgContent = fs.readFileSync(pkgJsonPath, 'utf8');
                 let bumpedContent = originalPkgContent;
 
@@ -262,6 +291,7 @@ async function publishAll() {
                         if (process.env.GITHUB_ACTIONS) publishArgsNpm.push('--provenance');
                         if (npmTag) publishArgsNpm.push('--tag', npmTag);
                         runSync('npm', publishArgsNpm, { cwd: pkgDir, stdio: 'inherit' });
+                        digests = tarballDigests(path.join(pkgDir, 'package.tgz'));
                     } else {
                         console.log(`[PUBLISH] ${pkgName}@${newVersion} already exists on npmjs, skipping.`);
                     }
@@ -306,6 +336,7 @@ async function publishAll() {
                     Version: newVersion,
                     Tag: npmTag
                 });
+                releaseManifest.push({ name: pkgName, version: newVersion, dir: path.relative(rootDir, pkgDir), tag: npmTag, ...digests });
                 
             } catch (error) {
                 console.error(`[ERROR] Failed to publish ${pkgName}:`, error.message);
@@ -351,6 +382,7 @@ async function publishAll() {
                         if (npmTag) publishArgsNpm.push('--tag', npmTag);
                         runSync('npm', publishArgsNpm, { cwd: pkgDir, stdio: 'inherit' });
                         console.log(`[REPAIR] Successfully published ${pkgName}@${previousData.version} to npmjs.org`);
+                        releaseManifest.push({ name: pkgName, version: updatedPkgJson.version, dir: path.relative(rootDir, pkgDir), tag: npmTag, ...tarballDigests(path.join(pkgDir, 'package.tgz')) });
                     } finally {
                         fs.writeFileSync(pkgJsonPath, originalPkgContent, 'utf8');
                         if (fs.existsSync(path.join(pkgDir, 'package.tgz'))) fs.unlinkSync(path.join(pkgDir, 'package.tgz'));
@@ -400,6 +432,11 @@ async function publishAll() {
         console.log(`Updated ${registryFile}`);
     } else {
         console.log('No package changes detected. Skipped publishing.');
+    }
+
+    if (manifestFile) {
+        fs.writeFileSync(manifestFile, JSON.stringify(releaseManifest, null, 2) + '\n', 'utf8');
+        console.log(`[MANIFEST] ${releaseManifest.length} published package(s) -> ${manifestFile}`);
     }
 
     if (publishedPackages.length > 0) {

@@ -119,6 +119,8 @@ jobs:
       contents: write
       packages: write
       id-token: write
+    outputs:
+      attest: ${{ steps.sbom.outputs.attest }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -178,13 +180,57 @@ jobs:
           BRANCH="${GITHUB_REF_NAME:-main}"
           git pull --rebase origin "$BRANCH" --autostash
 
+      # --- SBOM gate: nothing is published if a package to release pulls a fixable critical CVE
+      - name: Generate SBOMs of packages to release
+        run: |
+          FLAGS=""
+          if [ "${{ github.ref }}" = "refs/heads/develop" ]; then FLAGS="--beta"; fi
+          node bin/publish_all.js --plan "$RUNNER_TEMP/plan.json" $FLAGS
+          node bin/sbom.js --plan "$RUNNER_TEMP/plan.json" --out "$RUNNER_TEMP/sbom-gate"
+
+      - name: Download Grype
+        id: grype
+        uses: anchore/scan-action/download-grype@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+
+      - name: Vulnerability gate
+        env:
+          GRYPE: ${{ steps.grype.outputs.cmd }}
+        run: |
+          shopt -s nullglob
+          status=0
+          for f in "$RUNNER_TEMP"/sbom-gate/*.cdx.json; do
+            echo "::group::$(basename "$f")"
+            "$GRYPE" "sbom:$f" --fail-on critical --only-fixed || status=1
+            echo "::endgroup::"
+          done
+          exit $status
+
       - name: Publish all changed packages
         run: |
           if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
-            yarn publish:all --tag beta --beta
+            yarn publish:all --tag beta --beta --manifest "$RUNNER_TEMP/published.json"
           else
-            yarn publish:all
+            yarn publish:all --manifest "$RUNNER_TEMP/published.json"
           fi
+
+      # --- Release SBOMs: one per published package, with final versions and tarball digests.
+      # continue-on-error so that the version bumps are still committed; the job is failed at the end.
+      - name: Generate SBOMs of published packages
+        id: sbom
+        continue-on-error: true
+        run: |
+          node bin/sbom.js --manifest "$RUNNER_TEMP/published.json" --out "$RUNNER_TEMP/sbom"
+          echo "count=$(jq length "$RUNNER_TEMP/sbom/index.json")" >> "$GITHUB_OUTPUT"
+          echo "attest=$(jq -c '[.[] | select(.sha256)]' "$RUNNER_TEMP/sbom/index.json")" >> "$GITHUB_OUTPUT"
+
+      - name: Upload SBOMs
+        if: steps.sbom.outcome == 'success' && steps.sbom.outputs.count != '0'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sbom
+          path: ${{ runner.temp }}/sbom/
+          if-no-files-found: error
+          overwrite: true
 
       - name: Sync with remote to prevent push rejection
         run: |
@@ -213,6 +259,39 @@ jobs:
           git tag -a "$TAG" -m "Release $TAG [skip ci]"
           git push origin "$TAG"
 
+      - name: Fail if SBOM generation failed
+        if: steps.sbom.outcome == 'failure'
+        run: |
+          echo "::error::Packages were published but their SBOMs could not be generated"
+          exit 1
 
+  # Signed SBOM attestation (Sigstore), bound to the sha256 of each tarball published on main.
+  # Verify with:
+  #   npm pack @quatrain/<pkg>@<version>
+  #   gh attestation verify quatrain-<pkg>-<version>.tgz --repo Quatrain/Core --predicate-type https://cyclonedx.org/bom
+  attest:
+    name: Attest SBOM (${{ matrix.pkg.name }})
+    needs: publish
+    if: github.ref == 'refs/heads/main' && needs.publish.outputs.attest != '' && needs.publish.outputs.attest != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        pkg: ${{ fromJson(needs.publish.outputs.attest) }}
+    steps:
+      - name: Download SBOMs
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: sbom
+          path: sbom
 
-
+      - name: Attest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ${{ matrix.pkg.purl }}
+          subject-digest: sha256:${{ matrix.pkg.sha256 }}
+          sbom-path: sbom/${{ matrix.pkg.sbom }}

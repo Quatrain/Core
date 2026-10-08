@@ -33,7 +33,7 @@ describe('OKF v0.2 Serializer', () => {
                fileHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
             },
          ],
-         soa: 'bradtech/world-agronomy',
+         soa: 'quatrain/knowledge',
          category: 'cover-crops',
       };
 
@@ -45,7 +45,7 @@ describe('OKF v0.2 Serializer', () => {
       expect(frontmatter).toContain('status: draft');
       expect(frontmatter).toContain('by: quatrain/okf-ingest (gemini-2.5-flash)');
       expect(frontmatter).toContain('costUsd: 0.000239');
-      expect(frontmatter).toContain('soa: bradtech/world-agronomy');
+      expect(frontmatter).toContain('soa: quatrain/knowledge');
    });
 
    it('should omit null, undefined, empty strings and empty arrays', () => {

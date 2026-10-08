@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { AbstractAiAdapter } from '@quatrain/ai';
 import { extractSemanticContent } from '../ai';
-import { BradAgronomyProfile } from '../profiles/bradAgronomy';
+import { AgroecologyTaxonomyProfile, BradAgronomyProfile } from '../profiles/agroecology';
 import { GenericDomainProfile } from '../profiles/generic';
 import { buildDocumentPrompt } from '../prompts/documentPrompt';
 import { buildBookOutlinePrompt } from '../prompts/outlinePrompt';
@@ -48,10 +48,14 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
       expect(prompt).not.toContain('Tu es un ingénieur expert');
    });
 
-   it('should inject domain guidelines when using BradAgronomyProfile', () => {
+   it('should inject domain guidelines when using AgroecologyTaxonomyProfile', () => {
+      const profile = new AgroecologyTaxonomyProfile();
+      expect(profile.id).toBe('agroecology');
+      expect(new BradAgronomyProfile()).toBeInstanceOf(AgroecologyTaxonomyProfile);
+
       const prompt = buildDocumentPrompt(
          { filename: 'agronomy-guide.pdf', rawText: 'Soil biology' },
-         new BradAgronomyProfile()
+         profile
       );
 
       expect(prompt).toContain('You are an expert agronomist, soil scientist');
@@ -129,7 +133,7 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
       expect(result.metadata.keywords?.es).toEqual(['plantas', 'salud']);
    });
 
-   it('should extract agronomic taxonomies when BradAgronomyProfile is supplied', async () => {
+   it('should extract agronomic taxonomies when AgroecologyTaxonomyProfile is supplied', async () => {
       const mockAdapter = new MockAiAdapter({
          title: 'Gestion des sols calcaires',
          type: 'guide',
@@ -157,7 +161,7 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
       const result = await extractSemanticContent(
          { rawText: 'Texte agronomique', filename: 'sols.pdf' },
          undefined,
-         { adapter: mockAdapter, taxonomyProfile: new BradAgronomyProfile() }
+         { adapter: mockAdapter, taxonomyProfile: new AgroecologyTaxonomyProfile() }
       );
 
       expect(result.metadata.title).toBe('Gestion des sols calcaires');

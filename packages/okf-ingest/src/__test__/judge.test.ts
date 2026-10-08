@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect } from '@jest/globals';
 import { AbstractAiAdapter } from '@quatrain/ai';
 import {
    OkfEntryEvaluator,

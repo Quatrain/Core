@@ -253,8 +253,8 @@ Chapter ${ch.index}: "${ch.title}".`,
          masterAbstracts.ar = `دليل وموسوعة مرجعية بعنوان "${input.bookTitle}" تضم ${processedEntries.length} مدخل مفصل وفصول منهجية.`;
          masterKeywords.ar = [input.bookTitle, 'دليل', 'موسوعة'];
       } else {
-         masterAbstracts[lang] = input.description;
-         masterKeywords[lang] = [input.bookTitle, 'catalog'];
+         Reflect.set(masterAbstracts, lang, input.description);
+         Reflect.set(masterKeywords, lang, [input.bookTitle, 'catalog']);
       }
    }
 

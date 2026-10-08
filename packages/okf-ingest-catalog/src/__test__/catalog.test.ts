@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from '@jest/globals';
 import { parseOkfDocument, serializeOkfDocument } from '@quatrain/okf-ingest';
 import { detectCatalogEntriesRegex, sliceCatalogEntriesByDescriptors, slugify } from '../detector';
 import { OkfCatalogEntryMetadata } from '../types';

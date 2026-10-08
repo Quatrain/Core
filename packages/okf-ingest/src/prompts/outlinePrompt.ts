@@ -23,7 +23,7 @@ export function buildBookOutlinePrompt(
 
    const abstractLines = targetLanguages.map(
       (lang) =>
-         `   - "${lang}": ${LANGUAGE_SYNTHESIS_DESCRIPTIONS[lang] || `Technical abstract in language "${lang}".`}`
+         `   - "${lang}": ${(Reflect.get(LANGUAGE_SYNTHESIS_DESCRIPTIONS, lang) as string | undefined) || `Technical abstract in language "${lang}".`}`
    );
 
    const guidelines: string[] = [

@@ -9,10 +9,11 @@
 `@quatrain/okf-ingest` provides an end-to-end pipeline to convert raw documents (PDFs, plain text, scanned files) into strictly structured OKF v0.2 Markdown files.
 
 ### Key Principles
-1. **Model Decoupled**: All LLM calls delegate strictly to `@quatrain/ai` via `AbstractAiAdapter` (such as `GeminiAdapter`).
-2. **Configurable Multilingual Targets**: Generates high-density abstracts and keywords in any list of target languages (`targetLanguages: ['en', 'fr', 'ar']`).
-3. **Composable Domain Profiles**: System personas, taxonomy fields (soils, climates, ITKs, categories), and prompt guidelines are pluggable via `DomainTaxonomyProfile`.
-4. **Traceable Lineage & Accounting**: Tracks exact token counts, thinking tokens, USD costs, and parent document lineage (`sources`, `fileHash`, `generated`).
+
+1.  **Model Decoupled**: All LLM calls delegate strictly to `@quatrain/ai` via `AbstractAiAdapter` (such as `GeminiAdapter`).
+2.  **Configurable Multilingual Targets**: Generates high-density abstracts and keywords in any list of target languages (`targetLanguages: ['en', 'fr', 'ar']`).
+3.  **Composable Domain Profiles**: System personas, taxonomy fields (soils, climates, ITKs, categories), and prompt guidelines are pluggable via `DomainTaxonomyProfile`.
+4.  **Traceable Lineage & Accounting**: Tracks exact token counts, thinking tokens, USD costs, and parent document lineage (`sources`, `fileHash`, `generated`).
 
 ---
 

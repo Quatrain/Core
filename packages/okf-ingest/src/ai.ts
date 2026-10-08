@@ -60,16 +60,12 @@ export function buildOkfAiSchema(
    profile?: DomainTaxonomyProfile,
    languages: string[] = ['en']
 ): OkfJsonSchema {
-   const abstractProps: Record<string, OkfJsonSchemaProperty> = {};
-   const keywordProps: Record<string, OkfJsonSchemaProperty> = {};
-
-   for (const lang of languages) {
-      abstractProps[lang] = { type: 'STRING' };
-      keywordProps[lang] = {
-         type: 'ARRAY',
-         items: { type: 'STRING' },
-      };
-   }
+   const abstractProps: Record<string, OkfJsonSchemaProperty> = Object.fromEntries(
+      languages.map((lang) => [lang, { type: 'STRING' }])
+   );
+   const keywordProps: Record<string, OkfJsonSchemaProperty> = Object.fromEntries(
+      languages.map((lang) => [lang, { type: 'ARRAY', items: { type: 'STRING' } }])
+   );
 
    const properties: Record<string, OkfJsonSchemaProperty> = {
       ...OKF_BASE_PROPERTIES,
@@ -83,7 +79,7 @@ export function buildOkfAiSchema(
          properties: keywordProps,
          required: languages,
       },
-      ...((profile?.schemaProperties as Record<string, OkfJsonSchemaProperty>) || {}),
+      ...(profile?.schemaProperties as Record<string, OkfJsonSchemaProperty> | undefined),
    };
 
    return {
@@ -130,7 +126,7 @@ export async function extractSemanticContent(
       profile
    );
 
-   let rawUsage: RawTokenUsageMetadata | undefined = undefined;
+   let rawUsage: RawTokenUsageMetadata | null = null;
    let parsed: Record<string, unknown>;
 
    const canSendInline =
@@ -171,7 +167,7 @@ export async function extractSemanticContent(
    }
 
    let usage: OkfTokenUsage;
-   if (rawUsage) {
+   if (rawUsage !== null) {
       usage = calculateTokenCost(rawUsage, model);
    } else {
       const estPrompt = Math.ceil(prompt.length / 4);
@@ -223,20 +219,22 @@ export async function extractSemanticContent(
    // Construct dynamic multilingual abstracts & keywords
    const abstracts: OkfMultilingualContent = {};
    if (typeof parsed.abstracts === 'object' && parsed.abstracts !== null) {
-      const parsedAbs = parsed.abstracts as Record<string, string>;
+      const parsedAbs = parsed.abstracts as Record<string, unknown>;
       for (const lang of targetLanguages) {
-         if (typeof parsedAbs[lang] === 'string') {
-            abstracts[lang] = parsedAbs[lang];
+         const val = Reflect.get(parsedAbs, lang);
+         if (typeof val === 'string') {
+            Reflect.set(abstracts, lang, val);
          }
       }
    }
 
    const keywords: OkfMultilingualKeywords = {};
    if (typeof parsed.keywords === 'object' && parsed.keywords !== null) {
-      const parsedKw = parsed.keywords as Record<string, string[]>;
+      const parsedKw = parsed.keywords as Record<string, unknown>;
       for (const lang of targetLanguages) {
-         if (Array.isArray(parsedKw[lang])) {
-            keywords[lang] = parsedKw[lang];
+         const val = Reflect.get(parsedKw, lang);
+         if (Array.isArray(val)) {
+            Reflect.set(keywords, lang, val as string[]);
          }
       }
    }

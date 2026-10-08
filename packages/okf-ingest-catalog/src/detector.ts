@@ -47,9 +47,8 @@ export function sliceCatalogEntriesByDescriptors(
    // Sort descriptors strictly by their sequential appearance in the text
    positions.sort((a, b) => a.index - b.index);
 
-   for (let i = 0; i < positions.length; i++) {
-      const current = positions[i];
-      const nextIndex = i + 1 < positions.length ? positions[i + 1].index : rawText.length;
+   for (const [i, current] of positions.entries()) {
+      const nextIndex = positions.at(i + 1)?.index ?? rawText.length;
       const textSlice = rawText.substring(current.index, nextIndex).trim();
 
       const sequence = i + 1;
@@ -84,16 +83,17 @@ export function detectCatalogEntriesRegex(
    let match: RegExpExecArray | null;
 
    // Clone regex to ensure global search
-   const re = new RegExp(entryHeaderRegex.source, entryHeaderRegex.flags.includes('g') ? entryHeaderRegex.flags : entryHeaderRegex.flags + 'g');
+   const flags = entryHeaderRegex.flags.includes('g') ? entryHeaderRegex.flags : `${entryHeaderRegex.flags}g`;
+   // eslint-disable-next-line security/detect-non-literal-regexp
+   const re = new RegExp(entryHeaderRegex.source, flags);
 
    while ((match = re.exec(rawText)) !== null) {
       const title = match[1] || match[0];
       matches.push({ title: title.trim(), index: match.index });
    }
 
-   for (let i = 0; i < matches.length; i++) {
-      const current = matches[i];
-      const nextIndex = i + 1 < matches.length ? matches[i + 1].index : rawText.length;
+   for (const [i, current] of matches.entries()) {
+      const nextIndex = matches.at(i + 1)?.index ?? rawText.length;
       const textSlice = rawText.substring(current.index, nextIndex).trim();
 
       if (textSlice.length >= minLength) {

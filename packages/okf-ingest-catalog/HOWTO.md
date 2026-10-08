@@ -7,16 +7,17 @@
 ## 1. Overview & Catalog Architecture
 
 Unlike free-form technical reports or monographs with narrative chapters, an **encyclopedic catalog** contains:
-1. **Methodological / Foundational Chapters**: Introductory context (e.g. classification methodology, terminology, diagnostic keys).
-2. **Sequential Entry Collection**: Dozens or hundreds of distinct atomic entries (e.g. botanical species, chemical compounds, technical terms).
-3. **Lineage Contract**: Each atomic record maintains strict traceability back to its source publication (`parentBook: { title, slug, resource, fileHash }`) and its global sequence number (`sequence: 1, 2, ... N`).
-4. **Master Index**: A root `index.md` listing introductory chapters and a structured markdown table referencing every atomic entry file.
+
+1.  **Methodological / Foundational Chapters**: Introductory context (e.g. classification methodology, terminology, diagnostic keys).
+2.  **Sequential Entry Collection**: Dozens or hundreds of distinct atomic entries (e.g. botanical species, chemical compounds, technical terms).
+3.  **Lineage Contract**: Each atomic record maintains strict traceability back to its source publication (`parentBook: { title, slug, resource, fileHash }`) and its global sequence number (`sequence: 1, 2, ... N`).
+4.  **Master Index**: A root `index.md` listing introductory chapters and a structured markdown table referencing every atomic entry file.
 
 ---
 
 ## 2. Extraction Pipeline Workflow
 
-```
+```text
 PDF / Catalog Document
     │
     ├─► Extract Introductory Methodology Chapters (e.g. p. 1-20)
@@ -150,7 +151,7 @@ console.log(`Total tokens: ${summary.usage.total} ($${summary.usage.costUsd} USD
 
 The engine generates a clean, browseable OKF v0.2 directory hierarchy:
 
-```
+```text
 content/botany/encyclopedia-of-botanical-flora/
 ├── index.md                        # Master monograph index with metadata & TOC
 ├── 01-taxonomy-and-methodology.md  # Chapter 1 (methodology)

@@ -422,7 +422,7 @@ Respond strictly with a JSON object conforming to the required schema. Do NOT in
       const hallucinations: OkfHallucination[] = [];
       if (Array.isArray(data.hallucinations)) {
          for (const h of data.hallucinations) {
-            if (h && typeof h === 'object') {
+            if (typeof h === 'object' && h !== null) {
                const rawSev = String(h.severity || 'major').toLowerCase();
                const severity: 'critical' | 'major' | 'minor' =
                   rawSev === 'critical' || rawSev === 'minor' ? rawSev : 'major';
@@ -598,8 +598,11 @@ Respond strictly with a JSON object conforming to the required schema. Do NOT in
          return this.evaluateWithClaude(target, options);
       }
 
-      if (this._config.customAdapters && this._config.customAdapters[judge]) {
-         return this.evaluateWithAdapter(this._config.customAdapters[judge], target, judge, options.model || judge);
+      if (this._config.customAdapters) {
+         const custom = Reflect.get(this._config.customAdapters, judge) as AbstractAiAdapter | undefined;
+         if (custom) {
+            return this.evaluateWithAdapter(custom, target, judge, options.model || judge);
+         }
       }
 
       throw new Error(`OkfEntryEvaluator: Unsupported or unconfigured judge "${options.judge}".`);
@@ -649,13 +652,11 @@ Respond strictly with a JSON object conforming to the required schema. Do NOT in
                   openRouterKey: options.providerConfig?.openRouterApiKey,
                });
             }
-            if (this._config.customAdapters && this._config.customAdapters[judgeName]) {
-               return await this.evaluateWithAdapter(
-                  this._config.customAdapters[judgeName],
-                  target,
-                  judgeName,
-                  judgeName
-               );
+            if (this._config.customAdapters) {
+               const custom = Reflect.get(this._config.customAdapters, judgeName) as AbstractAiAdapter | undefined;
+               if (custom) {
+                  return await this.evaluateWithAdapter(custom, target, judgeName, judgeName);
+               }
             }
             return null;
          } catch (err) {
@@ -718,8 +719,8 @@ Respond strictly with a JSON object conforming to the required schema. Do NOT in
       };
 
       for (const key of dimensionKeys) {
-         const sum = reports.reduce((acc, r) => acc + r.dimensions[key], 0);
-         dimensionAverages[key] = Math.round((sum / reports.length) * 10) / 10;
+         const sum = reports.reduce((acc, r) => acc + (Reflect.get(r.dimensions, key) as number), 0);
+         Reflect.set(dimensionAverages, key, Math.round((sum / reports.length) * 10) / 10);
       }
 
       // Track score variance

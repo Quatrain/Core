@@ -43,7 +43,9 @@ export function calculateTokenCost(
    const output = candidates + thinking;
    const total = usage?.totalTokenCount ?? (prompt + output);
 
-   const pricing = GEMINI_MODEL_PRICING[model] ?? DEFAULT_PRICING;
+   const pricing =
+      (Reflect.get(GEMINI_MODEL_PRICING, model) as { inputRate: number; outputRate: number } | undefined) ??
+      DEFAULT_PRICING;
    const rawCost = (prompt * pricing.inputRate + output * pricing.outputRate) / 1_000_000;
    const costUsd = Number(rawCost.toFixed(6));
 

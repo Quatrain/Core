@@ -126,7 +126,7 @@ export async function extractSemanticContent(
       profile
    );
 
-   let rawUsage: RawTokenUsageMetadata | null = null;
+   const usageHolder: { usage: RawTokenUsageMetadata | null } = { usage: null };
    let parsed: Record<string, unknown>;
 
    const canSendInline =
@@ -146,7 +146,7 @@ export async function extractSemanticContent(
          model,
          onUsage: (u: unknown) => {
             if (typeof u === 'object' && u !== null) {
-               rawUsage = u as RawTokenUsageMetadata;
+               usageHolder.usage = u as RawTokenUsageMetadata;
             }
          },
       })) as Record<string, unknown>;
@@ -155,7 +155,7 @@ export async function extractSemanticContent(
          model,
          onUsage: (u: unknown) => {
             if (typeof u === 'object' && u !== null) {
-               rawUsage = u as RawTokenUsageMetadata;
+               usageHolder.usage = u as RawTokenUsageMetadata;
             }
          },
       })) as Record<string, unknown>;
@@ -167,8 +167,8 @@ export async function extractSemanticContent(
    }
 
    let usage: OkfTokenUsage;
-   if (rawUsage !== null) {
-      usage = calculateTokenCost(rawUsage, model);
+   if (usageHolder.usage) {
+      usage = calculateTokenCost(usageHolder.usage, model);
    } else {
       const estPrompt = Math.ceil(prompt.length / 4);
       const estOutput = Math.ceil(JSON.stringify(parsed).length / 4);

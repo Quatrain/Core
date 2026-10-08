@@ -78,16 +78,19 @@ export async function extractPdfPages(buffer: Buffer): Promise<string[]> {
    try {
       await pdfParse(buffer, {
          pagerender: (pageData: { getTextContent: () => Promise<{ items: Array<{ str?: string }> }> }) => {
-            return pageData.getTextContent().then((textContent) => {
-               let pageText = '';
-               for (const item of textContent.items) {
-                  if (item && typeof item.str === 'string') {
-                     pageText += item.str + ' ';
+            return pageData
+               .getTextContent()
+               .then((textContent) => {
+                  let pageText = '';
+                  for (const item of textContent.items) {
+                     if (typeof item?.str === 'string') {
+                        pageText += item.str + ' ';
+                     }
                   }
-               }
-               pagesText.push(pageText);
-               return pageText;
-            });
+                  pagesText.push(pageText);
+                  return pageText;
+               })
+               .catch(() => '');
          },
       });
       return pagesText;

@@ -19,14 +19,14 @@ export function sanitizeOkfFrontmatter(data: Record<string, unknown>): Record<st
          if (val.length === 0 && key !== 'tags' && key !== 'sources') {
             continue;
          }
-         clean[key] = val;
+         Reflect.set(clean, key, val);
       } else if (typeof val === 'object') {
          const cleanedSub = sanitizeOkfFrontmatter(val as Record<string, unknown>);
          if (Object.keys(cleanedSub).length > 0) {
-            clean[key] = cleanedSub;
+            Reflect.set(clean, key, cleanedSub);
          }
       } else {
-         clean[key] = val;
+         Reflect.set(clean, key, val);
       }
    }
 

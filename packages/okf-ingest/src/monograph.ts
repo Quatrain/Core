@@ -135,19 +135,19 @@ export async function extractBookOutline(
 
    const prompt = buildBookOutlinePrompt({ filename, sampleText, languages: targetLanguages }, profile);
 
-   let rawUsage: RawTokenUsageMetadata | undefined = undefined;
+   const usageHolder: { usage: RawTokenUsageMetadata | null } = { usage: null };
    const parsed = (await adapter.generateStructured(prompt, schema, {
       model,
       onUsage: (u: unknown) => {
          if (typeof u === 'object' && u !== null) {
-            rawUsage = u as RawTokenUsageMetadata;
+            usageHolder.usage = u as RawTokenUsageMetadata;
          }
       },
    })) as Record<string, unknown>;
 
    let usage: OkfTokenUsage;
-   if (rawUsage) {
-      usage = calculateTokenCost(rawUsage, model);
+   if (usageHolder.usage) {
+      usage = calculateTokenCost(usageHolder.usage, model);
    } else {
       const estPrompt = Math.ceil(prompt.length / 4);
       const estOutput = Math.ceil(JSON.stringify(parsed).length / 4);
@@ -249,8 +249,7 @@ export function sliceTextByChapters(
    }
 
    const positions: number[] = [];
-   for (let i = 0; i < chapters.length; i++) {
-      const ch = chapters[i];
+   for (const [i, ch] of chapters.entries()) {
       let pos = -1;
 
       if (ch.startMarker && ch.startMarker.length > 8) {
@@ -262,6 +261,7 @@ export function sliceTextByChapters(
       }
 
       if (pos === -1 && ch.title) {
+         // eslint-disable-next-line security/detect-non-literal-regexp
          const regex = new RegExp(`(?:chapitre|chapter|partie|part)?\\s*${ch.index}?\\s*[:.-]?\\s*${ch.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i');
          const m = rawText.match(regex);
          if (m && m.index !== undefined) {
@@ -298,11 +298,11 @@ export function sliceTextByChapters(
    }
 
    const results: Array<{ chapter: BookOutlineChapter; text: string }> = [];
-   for (let i = 0; i < chapters.length; i++) {
-      const start = positions[i];
-      const end = i === chapters.length - 1 ? rawText.length : positions[i + 1];
+   for (const [i, ch] of chapters.entries()) {
+      const start = positions.at(i) ?? 0;
+      const end = i === chapters.length - 1 ? rawText.length : (positions.at(i + 1) ?? rawText.length);
       results.push({
-         chapter: chapters[i],
+         chapter: ch,
          text: rawText.substring(start, end).trim(),
       });
    }
@@ -414,7 +414,7 @@ Extract specifically the concepts, taxonomies, diagrams, and tables relevant to 
          type: 'chapter',
          title: `Chapter ${ch.index}: ${chapterResult.metadata.title || ch.title}`,
          description:
-            chapterResult.metadata.description || ch.summary || `Chapter ${ch.index} of ${outline.title}.`,
+            chapterResult.metadata.description || `Chapter ${ch.index} of ${outline.title}.`,
          tags: Array.from(new Set([...(chapterResult.metadata.tags || []), ...(outline.tags || []), outline.slug])),
          status: 'draft',
          generated: {

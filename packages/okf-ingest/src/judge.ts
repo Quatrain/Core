@@ -1,6 +1,4 @@
 import { AbstractAiAdapter } from '@quatrain/ai';
-import { GeminiAdapter } from '@quatrain/ai-gemini';
-import { OpenAiAdapter } from '@quatrain/ai-openai';
 import { OkfDocument } from './types';
 
 /**
@@ -497,6 +495,7 @@ Respond strictly with a JSON object conforming to the required schema. Do NOT in
       }
 
       const model = options.model || this._config.geminiModel || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+      const { GeminiAdapter } = await import('@quatrain/ai-gemini');
       const adapter = new GeminiAdapter(apiKey);
       return this.evaluateWithAdapter(adapter, target, 'gemini', model);
    }
@@ -516,6 +515,7 @@ Respond strictly with a JSON object conforming to the required schema. Do NOT in
       }
 
       const model = options.model || this._config.openAiModel || 'gpt-4o';
+      const { OpenAiAdapter } = await import('@quatrain/ai-openai');
       const adapter = OpenAiAdapter.forOpenAi(apiKey, model);
       return this.evaluateWithAdapter(adapter, target, 'chatgpt', model);
    }
@@ -532,6 +532,7 @@ Respond strictly with a JSON object conforming to the required schema. Do NOT in
 
       if (openRouterKey) {
          const model = options.model || this._config.anthropicModel || 'anthropic/claude-3.5-sonnet';
+         const { OpenAiAdapter } = await import('@quatrain/ai-openai');
          const adapter = OpenAiAdapter.forOpenRouter(openRouterKey, model);
          return this.evaluateWithAdapter(adapter, target, 'claude', model);
       }

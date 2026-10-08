@@ -29,62 +29,15 @@ export class GeminiStructuredRunner implements AiStructuredRunner {
       this.defaultModel = config.defaultModel || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
    }
 
-   async generateStructured<T = Record<string, unknown>>(
-      prompt: string,
+   private async executeStructured<T>(
+      contents: unknown,
       schema: unknown,
+      promptText: string,
       options?: AiRunnerOptions
    ): Promise<AiRunnerResponse<T>> {
       const model = options?.model || this.defaultModel;
       let rawUsage: RawTokenUsageMetadata | undefined;
 
-      const data = (await this.adapter.generateStructured(prompt, schema, {
-         model,
-         temperature: options?.temperature,
-         systemInstruction: options?.systemInstruction,
-         maxOutputTokens: options?.maxOutputTokens,
-         onUsage: (u: unknown) => {
-            if (typeof u === 'object' && u !== null) {
-               rawUsage = u as RawTokenUsageMetadata;
-            }
-         },
-      })) as T;
-
-      const usage: OkfTokenUsage = rawUsage
-         ? calculateTokenCost(rawUsage, model)
-         : calculateTokenCost(
-              {
-                 promptTokenCount: Math.ceil(prompt.length / 4),
-                 candidatesTokenCount: Math.ceil(JSON.stringify(data).length / 4),
-                 totalTokenCount: Math.ceil((prompt.length + JSON.stringify(data).length) / 4),
-              },
-              model
-           );
-
-      return {
-         data,
-         usage,
-         rawText: JSON.stringify(data),
-      };
-   }
-
-   async generateStructuredMultimodal<T = Record<string, unknown>>(
-      prompt: string,
-      parts: MultimodalPart[],
-      schema: unknown,
-      options?: AiRunnerOptions
-   ): Promise<AiRunnerResponse<T>> {
-      const model = options?.model || this.defaultModel;
-      const contents = [
-         prompt,
-         ...parts.map((p) => ({
-            inlineData: {
-               mimeType: p.mimeType,
-               data: p.data,
-            },
-         })),
-      ];
-
-      let rawUsage: RawTokenUsageMetadata | undefined;
       const data = (await this.adapter.generateStructured(contents, schema, {
          model,
          temperature: options?.temperature,
@@ -97,13 +50,14 @@ export class GeminiStructuredRunner implements AiStructuredRunner {
          },
       })) as T;
 
+      const dataStr = JSON.stringify(data);
       const usage: OkfTokenUsage = rawUsage
          ? calculateTokenCost(rawUsage, model)
          : calculateTokenCost(
               {
-                 promptTokenCount: Math.ceil(prompt.length / 4),
-                 candidatesTokenCount: Math.ceil(JSON.stringify(data).length / 4),
-                 totalTokenCount: Math.ceil((prompt.length + JSON.stringify(data).length) / 4),
+                 promptTokenCount: Math.ceil(promptText.length / 4),
+                 candidatesTokenCount: Math.ceil(dataStr.length / 4),
+                 totalTokenCount: Math.ceil((promptText.length + dataStr.length) / 4),
               },
               model
            );
@@ -111,8 +65,34 @@ export class GeminiStructuredRunner implements AiStructuredRunner {
       return {
          data,
          usage,
-         rawText: JSON.stringify(data),
+         rawText: dataStr,
       };
+   }
+
+   async generateStructured<T = Record<string, unknown>>(
+      prompt: string,
+      schema: unknown,
+      options?: AiRunnerOptions
+   ): Promise<AiRunnerResponse<T>> {
+      return this.executeStructured<T>(prompt, schema, prompt, options);
+   }
+
+   async generateStructuredMultimodal<T = Record<string, unknown>>(
+      prompt: string,
+      parts: MultimodalPart[],
+      schema: unknown,
+      options?: AiRunnerOptions
+   ): Promise<AiRunnerResponse<T>> {
+      const contents = [
+         prompt,
+         ...parts.map((p) => ({
+            inlineData: {
+               mimeType: p.mimeType,
+               data: p.data,
+            },
+         })),
+      ];
+      return this.executeStructured<T>(contents, schema, prompt, options);
    }
 }
 

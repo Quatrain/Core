@@ -1,6 +1,7 @@
 import { AbstractAiAdapter } from '@quatrain/ai';
 import {
    AiStructuredRunner,
+   buildMultilingualSchemaProperties,
    calculateTokenCost,
    DomainTaxonomyProfile,
    GenericDomainProfile,
@@ -8,6 +9,7 @@ import {
    OkfJsonSchema,
    OkfJsonSchemaProperty,
    OkfTokenUsage,
+   OKF_DIAGRAMS_SCHEMA_PROPERTY,
    RawTokenUsageMetadata,
    resolveAiAdapter,
 } from '@quatrain/okf-ingest';
@@ -41,19 +43,7 @@ export const CATALOG_BASE_PROPERTIES: Record<string, OkfJsonSchemaProperty> = {
       type: 'ARRAY',
       items: { type: 'STRING' },
    },
-   diagrams: {
-      type: 'ARRAY',
-      items: {
-         type: 'OBJECT',
-         properties: {
-            title: { type: 'STRING' },
-            type: { type: 'STRING' },
-            content: { type: 'STRING' },
-            explanation: { type: 'STRING' },
-         },
-         required: ['title', 'type', 'content', 'explanation'],
-      },
-   },
+   diagrams: OKF_DIAGRAMS_SCHEMA_PROPERTY,
 };
 
 /**
@@ -64,12 +54,7 @@ export function buildCatalogAiSchema(
    profile?: DomainTaxonomyProfile,
    languages: string[] = ['en']
 ): OkfJsonSchema {
-   const abstractProps: Record<string, OkfJsonSchemaProperty> = Object.fromEntries(
-      languages.map((lang) => [lang, { type: 'STRING' }])
-   );
-   const keywordProps: Record<string, OkfJsonSchemaProperty> = Object.fromEntries(
-      languages.map((lang) => [lang, { type: 'ARRAY', items: { type: 'STRING' } }])
-   );
+   const { abstractProps, keywordProps } = buildMultilingualSchemaProperties(languages);
 
    const properties: Record<string, OkfJsonSchemaProperty> = {
       ...CATALOG_BASE_PROPERTIES,

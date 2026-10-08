@@ -49,7 +49,7 @@ export async function extractPdfText(buffer: Buffer): Promise<PdfExtractionResul
          isScanned,
          pageCount,
       };
-   } catch {
+   } catch (_error) {
       return {
          text: '',
          isScanned: true,
@@ -83,7 +83,7 @@ export async function extractPdfPages(buffer: Buffer): Promise<string[]> {
                .then((textContent) => {
                   let pageText = '';
                   for (const item of textContent.items) {
-                     if (typeof item?.str === 'string') {
+                     if (typeof item.str === 'string') {
                         pageText += item.str + ' ';
                      }
                   }
@@ -94,7 +94,7 @@ export async function extractPdfPages(buffer: Buffer): Promise<string[]> {
          },
       });
       return pagesText;
-   } catch {
+   } catch (_error) {
       return [];
    } finally {
       console.log = originalLog;

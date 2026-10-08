@@ -1,4 +1,7 @@
-import { DomainTaxonomyProfile, LANGUAGE_SYNTHESIS_DESCRIPTIONS } from '@quatrain/okf-ingest';
+import {
+   buildAbstractPromptGuidelines,
+   DomainTaxonomyProfile,
+} from '@quatrain/okf-ingest';
 import { CatalogEntryChunk, CatalogParentBookRef } from '../types';
 
 export interface CatalogEntryPromptParams {
@@ -22,11 +25,7 @@ export function buildCatalogEntryPrompt(
       'You are an expert taxonomist and knowledge engineer specializing in encyclopedic knowledge synthesis and catalog entries according to the Open Knowledge Format (OKF v0.2) specification.';
 
    const targetLanguages = params.languages || profile?.targetLanguages || ['en'];
-
-   const abstractLines = targetLanguages.map(
-      (lang) =>
-         `   - "${lang}": ${(Reflect.get(LANGUAGE_SYNTHESIS_DESCRIPTIONS, lang) as string | undefined) || `Technical synthesis in language "${lang}".`}`
-   );
+   const abstractLines = buildAbstractPromptGuidelines(targetLanguages);
 
    const guidelines: string[] = [
       '1. "title": Clean primary common or vernacular entry name, optionally followed by Latin binomial or notation in parentheses (e.g. "Spearmint (Mentha spicata)").',

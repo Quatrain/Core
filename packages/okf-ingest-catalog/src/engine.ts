@@ -2,6 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import {
    BookOutlineChapter,
+   buildChapterFrontmatter,
    extractSemanticContent,
    GenericDomainProfile,
    OkfDocumentType,
@@ -121,41 +122,30 @@ Chapter ${ch.index}: "${ch.title}".`,
          totalDiagrams += chapterResult.diagramsTranscribed;
          totalTables += chapterResult.tablesTranscribed;
 
-         const chapterMetadata: OkfFrontmatterV2 = {
-            type: 'chapter',
-            title: `Chapter ${ch.index}: ${chapterResult.metadata.title || ch.title}`,
-            description: chapterResult.metadata.description || ch.summary || `Chapter ${ch.index} of ${input.bookTitle}.`,
-            tags: Array.from(new Set([...(chapterResult.metadata.tags || []), bookSlug])),
-            status: 'draft',
-            generated: {
-               by: `quatrain/okf-ingest-catalog (${model})`,
-               at: new Date().toISOString(),
-               tokens: chapterResult.usage,
-            },
+         const chapterMetadata = buildChapterFrontmatter({
+            ch,
+            chapterMetadata: chapterResult.metadata,
+            bookTitle: input.bookTitle,
+            bookSlug,
+            category: input.category,
+            generator: `quatrain/okf-ingest-catalog (${model})`,
+            usage: chapterResult.usage,
             sources: [
                {
                   id: 'parent-book',
-                  resource: options.originalFileUri,
+                  resource: options.originalFileUri || options.filename,
                   title: input.bookTitle,
                   fileHash: options.fileHash,
                },
             ],
             soa,
             revision,
-            category: input.category,
-            language: chapterResult.metadata.language || input.language || 'fr',
-            originalLanguage: chapterResult.metadata.originalLanguage || input.originalLanguage || 'fr',
-            abstracts: chapterResult.metadata.abstracts,
-            keywords: chapterResult.metadata.keywords,
-            thematics: chapterResult.metadata.thematics,
-            soils: chapterResult.metadata.soils,
-            climates: chapterResult.metadata.climates,
-            itineraries: chapterResult.metadata.itineraries,
-            crops: chapterResult.metadata.crops,
             authors: input.authors,
             publisher: input.publisher,
             publicationYear: input.publicationYear,
-         };
+            fallbackLanguage: input.language || 'fr',
+            originalLanguage: input.originalLanguage || 'fr',
+         });
 
          const chapterRelPath = path.join(bookRelativeFolder, `${ch.slug}.md`);
          const absoluteChapterPath = path.join(options.gitLocalPath, chapterRelPath);

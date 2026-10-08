@@ -21,6 +21,7 @@ import {
    OkfJsonSchemaProperty,
    OkfMultilingualContent,
    OkfMultilingualKeywords,
+   OkfSourceEntry,
    OkfTokenUsage,
 } from './types';
 
@@ -261,11 +262,11 @@ export function sliceTextByChapters(
       }
 
       if (pos === -1 && ch.title) {
-         // eslint-disable-next-line security/detect-non-literal-regexp
-         const regex = new RegExp(`(?:chapitre|chapter|partie|part)?\\s*${ch.index}?\\s*[:.-]?\\s*${ch.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i');
-         const m = rawText.match(regex);
-         if (m && m.index !== undefined) {
-            pos = m.index;
+         const lowerText = rawText.toLowerCase();
+         const lowerTitle = ch.title.toLowerCase();
+         const titleIdx = lowerText.indexOf(lowerTitle);
+         if (titleIdx !== -1) {
+            pos = titleIdx;
          }
       }
 
@@ -308,6 +309,62 @@ export function sliceTextByChapters(
    }
 
    return results;
+}
+
+export interface ChapterFrontmatterOptions {
+   ch: { index: number; title: string; summary?: string };
+   chapterMetadata: OkfFrontmatterV2;
+   bookTitle: string;
+   bookSlug: string;
+   tags?: string[];
+   category: string;
+   generator: string;
+   usage: OkfTokenUsage;
+   sources: OkfSourceEntry[];
+   soa?: string;
+   revision?: string;
+   authors?: string[];
+   publisher?: string;
+   publicationYear?: string | number;
+   fallbackLanguage?: string;
+   originalLanguage?: string;
+   thematics?: string[];
+   soils?: string[];
+   climates?: string[];
+   itineraries?: string[];
+   crops?: string[];
+}
+
+export function buildChapterFrontmatter(opts: ChapterFrontmatterOptions): OkfFrontmatterV2 {
+   const lang = opts.chapterMetadata.language || opts.fallbackLanguage || 'en';
+   return {
+      type: 'chapter',
+      title: `Chapter ${opts.ch.index}: ${opts.chapterMetadata.title || opts.ch.title}`,
+      description: opts.chapterMetadata.description || opts.ch.summary || `Chapter ${opts.ch.index} of ${opts.bookTitle}.`,
+      tags: Array.from(new Set([...(opts.chapterMetadata.tags || []), ...(opts.tags || []), opts.bookSlug])),
+      status: 'draft',
+      generated: {
+         by: opts.generator,
+         at: new Date().toISOString(),
+         tokens: opts.usage,
+      },
+      sources: opts.sources,
+      soa: opts.soa,
+      revision: opts.revision,
+      category: opts.category,
+      authors: opts.authors,
+      publisher: opts.publisher,
+      publicationYear: opts.publicationYear,
+      language: lang,
+      originalLanguage: opts.chapterMetadata.originalLanguage || opts.originalLanguage || lang,
+      abstracts: opts.chapterMetadata.abstracts,
+      keywords: opts.chapterMetadata.keywords,
+      thematics: opts.chapterMetadata.thematics || opts.thematics,
+      soils: opts.chapterMetadata.soils || opts.soils,
+      climates: opts.chapterMetadata.climates || opts.climates,
+      itineraries: opts.chapterMetadata.itineraries || opts.itineraries,
+      crops: opts.chapterMetadata.crops || opts.crops,
+   };
 }
 
 /**
@@ -410,22 +467,19 @@ Extract specifically the concepts, taxonomies, diagrams, and tables relevant to 
       totalDiagrams += chapterResult.diagramsTranscribed;
       totalTables += chapterResult.tablesTranscribed;
 
-      const chapterMetadata: OkfFrontmatterV2 = {
-         type: 'chapter',
-         title: `Chapter ${ch.index}: ${chapterResult.metadata.title || ch.title}`,
-         description:
-            chapterResult.metadata.description || `Chapter ${ch.index} of ${outline.title}.`,
-         tags: Array.from(new Set([...(chapterResult.metadata.tags || []), ...(outline.tags || []), outline.slug])),
-         status: 'draft',
-         generated: {
-            by: `quatrain/okf-ingest (${model})`,
-            at: new Date().toISOString(),
-            tokens: chapterResult.usage,
-         },
+      const chapterMetadata: OkfFrontmatterV2 = buildChapterFrontmatter({
+         ch,
+         chapterMetadata: chapterResult.metadata,
+         bookTitle: outline.title,
+         bookSlug: outline.slug,
+         tags: outline.tags,
+         category: outline.category,
+         generator: `quatrain/okf-ingest (${model})`,
+         usage: chapterResult.usage,
          sources: [
             {
                id: 'parent-book',
-               resource: input.originalFileUri,
+               resource: input.originalFileUri || input.filename,
                title: outline.title,
                chapter: `Chapter ${ch.index}: ${ch.title}`,
                fileHash: input.fileHash,
@@ -433,20 +487,17 @@ Extract specifically the concepts, taxonomies, diagrams, and tables relevant to 
          ],
          soa,
          revision,
-         category: outline.category,
          authors: outline.authors,
          publisher: outline.publisher,
          publicationYear: outline.publicationYear,
-         language: chapterResult.metadata.language || outline.language || targetLanguages[0] || 'en',
-         originalLanguage: chapterResult.metadata.originalLanguage || outline.originalLanguage || targetLanguages[0] || 'en',
-         abstracts: chapterResult.metadata.abstracts,
-         keywords: chapterResult.metadata.keywords,
-         thematics: chapterResult.metadata.thematics || outline.thematics,
-         soils: chapterResult.metadata.soils || outline.soils,
-         climates: chapterResult.metadata.climates || outline.climates,
-         itineraries: chapterResult.metadata.itineraries || outline.itineraries,
-         crops: chapterResult.metadata.crops || outline.crops,
-      };
+         fallbackLanguage: outline.language || targetLanguages[0],
+         originalLanguage: outline.originalLanguage || targetLanguages[0],
+         thematics: outline.thematics,
+         soils: outline.soils,
+         climates: outline.climates,
+         itineraries: outline.itineraries,
+         crops: outline.crops,
+      });
 
       const chapterRelativePath = path.join(folderPath, `${ch.slug}.md`);
       const absoluteChapterPath = path.join(input.gitLocalPath, chapterRelativePath);

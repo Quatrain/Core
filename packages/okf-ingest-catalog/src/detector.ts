@@ -82,14 +82,17 @@ export function detectCatalogEntriesRegex(
    const matches: Array<{ title: string; index: number }> = [];
    let match: RegExpExecArray | null;
 
-   // Clone regex to ensure global search
-   const flags = entryHeaderRegex.flags.includes('g') ? entryHeaderRegex.flags : `${entryHeaderRegex.flags}g`;
-   // eslint-disable-next-line security/detect-non-literal-regexp
-   const re = new RegExp(entryHeaderRegex.source, flags);
-
-   while ((match = re.exec(rawText)) !== null) {
+   let currentOffset = 0;
+   while (currentOffset < rawText.length) {
+      entryHeaderRegex.lastIndex = 0;
+      const slice = rawText.slice(currentOffset);
+      const match = entryHeaderRegex.exec(slice);
+      if (!match) {
+         break;
+      }
       const title = match[1] || match[0];
-      matches.push({ title: title.trim(), index: match.index });
+      matches.push({ title: title.trim(), index: currentOffset + match.index });
+      currentOffset += match.index + Math.max(1, match[0].length);
    }
 
    for (const [i, current] of matches.entries()) {

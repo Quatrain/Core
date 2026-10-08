@@ -22,6 +22,16 @@ export const LANGUAGE_SYNTHESIS_DESCRIPTIONS: Record<string, string> = {
 };
 
 /**
+ * Builds localized abstract prompt guidelines for configured languages.
+ */
+export function buildAbstractPromptGuidelines(targetLanguages: string[]): string[] {
+   return targetLanguages.map(
+      (lang) =>
+         `   - "${lang}": ${(Reflect.get(LANGUAGE_SYNTHESIS_DESCRIPTIONS, lang) as string | undefined) || `Technical summary in language "${lang}".`}`
+   );
+}
+
+/**
  * Builds an International English prompt for semantic document extraction,
  * composable with optional domain taxonomy profiles and configurable target languages.
  */
@@ -34,11 +44,7 @@ export function buildDocumentPrompt(
       'You are an expert knowledge engineer specializing in structured knowledge synthesis according to the Open Knowledge Format (OKF v0.2) specification.';
 
    const targetLanguages = params.languages || profile?.targetLanguages || ['en'];
-
-   const abstractLines = targetLanguages.map(
-      (lang) =>
-         `   - "${lang}": ${(Reflect.get(LANGUAGE_SYNTHESIS_DESCRIPTIONS, lang) as string | undefined) || `High-density technical summary in language "${lang}".`}`
-   );
+   const abstractLines = buildAbstractPromptGuidelines(targetLanguages);
 
    const guidelines: string[] = [
       '1. "title": Professional, clean, and explicit title (without file extensions).',

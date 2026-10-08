@@ -53,4 +53,26 @@ describe('OkfDedupCache', () => {
       expect(stats.totalTokens).toBe(2400);
       expect(stats.totalCostUsd).toBe(0.00027);
    });
+
+   it('should sync existing markdown documents from git repository structure', async () => {
+      const gitRepo = path.join(tempDir, 'repo');
+      const catDir = path.join(gitRepo, 'content', 'agro');
+      await fs.mkdir(catDir, { recursive: true });
+
+      const testHash = 'a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90';
+      const ficheContent = `---
+title: Fiche Test
+type: fiche
+fileHash: ${testHash}
+---
+# Content`;
+      await fs.writeFile(path.join(catDir, 'fiche-test.md'), ficheContent, 'utf-8');
+      await fs.writeFile(path.join(catDir, 'index.md'), '# Index', 'utf-8');
+
+      const cache = new OkfDedupCache(cacheFile);
+      const syncedCount = await cache.syncFromGitRepo(gitRepo);
+
+      expect(syncedCount).toBe(1);
+      expect(cache.isKnown(testHash)).toBe(true);
+   });
 });

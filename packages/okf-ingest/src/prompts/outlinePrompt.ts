@@ -1,5 +1,5 @@
 import { DomainTaxonomyProfile } from '../types';
-import { LANGUAGE_SYNTHESIS_DESCRIPTIONS } from './documentPrompt';
+import { buildAbstractPromptGuidelines } from './documentPrompt';
 
 export interface BookOutlinePromptParams {
    filename: string;
@@ -20,11 +20,7 @@ export function buildBookOutlinePrompt(
       'You are an expert knowledge engineer specializing in structured knowledge synthesis and comprehensive book decomposition according to the Open Knowledge Format (OKF v0.2) specification.';
 
    const targetLanguages = params.languages || profile?.targetLanguages || ['en'];
-
-   const abstractLines = targetLanguages.map(
-      (lang) =>
-         `   - "${lang}": ${(Reflect.get(LANGUAGE_SYNTHESIS_DESCRIPTIONS, lang) as string | undefined) || `Technical abstract in language "${lang}".`}`
-   );
+   const abstractLines = buildAbstractPromptGuidelines(targetLanguages);
 
    const guidelines: string[] = [
       '1. "title": Official and complete book or monograph title (without file extensions).',

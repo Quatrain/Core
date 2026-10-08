@@ -15,6 +15,20 @@ import {
    OkfTokenUsage,
 } from './types';
 
+export const OKF_DIAGRAMS_SCHEMA_PROPERTY: OkfJsonSchemaProperty = {
+   type: 'ARRAY',
+   items: {
+      type: 'OBJECT',
+      properties: {
+         title: { type: 'STRING' },
+         type: { type: 'STRING' },
+         content: { type: 'STRING' },
+         explanation: { type: 'STRING' },
+      },
+      required: ['title', 'type', 'content', 'explanation'],
+   },
+};
+
 /**
  * Universal JSON Schema properties for core OKF document metadata.
  */
@@ -37,20 +51,24 @@ export const OKF_BASE_PROPERTIES: Record<string, OkfJsonSchemaProperty> = {
    originalLanguage: { type: 'STRING' },
    license: { type: 'STRING' },
    copyright: { type: 'STRING' },
-   diagrams: {
-      type: 'ARRAY',
-      items: {
-         type: 'OBJECT',
-         properties: {
-            title: { type: 'STRING' },
-            type: { type: 'STRING' },
-            content: { type: 'STRING' },
-            explanation: { type: 'STRING' },
-         },
-         required: ['title', 'type', 'content', 'explanation'],
-      },
-   },
+   diagrams: OKF_DIAGRAMS_SCHEMA_PROPERTY,
 };
+
+/**
+ * Builds schema properties for multilingual abstracts and keywords.
+ */
+export function buildMultilingualSchemaProperties(languages: string[]): {
+   abstractProps: Record<string, OkfJsonSchemaProperty>;
+   keywordProps: Record<string, OkfJsonSchemaProperty>;
+} {
+   const abstractProps: Record<string, OkfJsonSchemaProperty> = Object.fromEntries(
+      languages.map((lang) => [lang, { type: 'STRING' }])
+   );
+   const keywordProps: Record<string, OkfJsonSchemaProperty> = Object.fromEntries(
+      languages.map((lang) => [lang, { type: 'ARRAY', items: { type: 'STRING' } }])
+   );
+   return { abstractProps, keywordProps };
+}
 
 /**
  * Builds a composite OKF JSON Schema by merging universal core properties
@@ -60,12 +78,7 @@ export function buildOkfAiSchema(
    profile?: DomainTaxonomyProfile,
    languages: string[] = ['en']
 ): OkfJsonSchema {
-   const abstractProps: Record<string, OkfJsonSchemaProperty> = Object.fromEntries(
-      languages.map((lang) => [lang, { type: 'STRING' }])
-   );
-   const keywordProps: Record<string, OkfJsonSchemaProperty> = Object.fromEntries(
-      languages.map((lang) => [lang, { type: 'ARRAY', items: { type: 'STRING' } }])
-   );
+   const { abstractProps, keywordProps } = buildMultilingualSchemaProperties(languages);
 
    const properties: Record<string, OkfJsonSchemaProperty> = {
       ...OKF_BASE_PROPERTIES,

@@ -106,4 +106,121 @@ Détails sur les minéraux.`;
          expect(slices[0].text).toBe(text);
       });
    });
+
+   describe('decomposeAndIngestMonograph', () => {
+      it('should handle single document when below split threshold', async () => {
+         const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'okf-mono-single-'));
+         try {
+            const { AbstractAiAdapter } = await import('@quatrain/ai');
+            class MockSingleAdapter extends AbstractAiAdapter {
+               init(): void {}
+               async generateText(): Promise<string> {
+                  return 'mock';
+               }
+               async generateStructured<T>(): Promise<T> {
+                  return {
+                     title: 'Direct Fiche',
+                     type: 'fiche',
+                     description: 'Direct fiche description.',
+                     category: 'agronomy',
+                     tags: ['soil'],
+                  } as T;
+               }
+            }
+
+            const { decomposeAndIngestMonograph } = await import('../monograph');
+            const result = await decomposeAndIngestMonograph(
+               {
+                  rawText: 'Short single doc text below 60000 chars.',
+                  filename: 'single-doc.pdf',
+                  gitLocalPath: tempDir,
+               },
+               undefined,
+               {
+                  adapter: new MockSingleAdapter(),
+                  splitThresholdChars: 100_000,
+                  defaultCategory: 'agronomy',
+               }
+            );
+
+            expect(result.chapterDocs.length).toBe(0);
+            expect(result.allCreatedFiles.length).toBe(1);
+            expect(result.allCreatedFiles[0]).toContain('content');
+         } finally {
+            await fs.rm(tempDir, { recursive: true, force: true });
+         }
+      });
+
+      it('should decompose multi-chapter book and create indexed structure', async () => {
+         const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'okf-mono-multi-'));
+         try {
+            const { AbstractAiAdapter } = await import('@quatrain/ai');
+            class MockMultiAdapter extends AbstractAiAdapter {
+               init(): void {}
+               async generateText(): Promise<string> {
+                  return 'mock';
+               }
+               async generateStructured<T>(prompt: unknown): Promise<T> {
+                  const p = typeof prompt === 'string' ? prompt : JSON.stringify(prompt);
+                  if (p.includes('book') || p.includes('outline') || p.includes('decompose')) {
+                     return {
+                        title: 'Grand Traité des Sols',
+                        slug: 'grand-traite-des-sols',
+                        description: 'Description globale du traité.',
+                        category: 'soil-health',
+                        tags: ['soil', 'pedology'],
+                        language: 'fr',
+                        chapters: [
+                           { index: 1, title: 'Chapitre 1', slug: '01-chapitre-1', startMarker: 'CH1_START' },
+                           { index: 2, title: 'Chapitre 2', slug: '02-chapitre-2', startMarker: 'CH2_START' },
+                        ],
+                     } as T;
+                  }
+                  return {
+                     title: 'Extracted Chapter',
+                     type: 'chapter',
+                     description: 'Extracted chapter description.',
+                     category: 'soil-health',
+                     tags: ['chapter'],
+                     language: 'fr',
+                     originalLanguage: 'fr',
+                  } as T;
+               }
+            }
+
+            const rawText = `HEADER
+CH1_START
+Contenu du premier chapitre sur les sols vivants.
+CH2_START
+Contenu du second chapitre sur la minéralogie.`;
+
+            const { decomposeAndIngestMonograph } = await import('../monograph');
+            const result = await decomposeAndIngestMonograph(
+               {
+                  rawText,
+                  filename: 'traite.pdf',
+                  gitLocalPath: tempDir,
+               },
+               undefined,
+               {
+                  adapter: new MockMultiAdapter(),
+                  splitThresholdChars: 10, // Force split
+                  defaultCategory: 'soil-health',
+               }
+            );
+
+            expect(result.chapterDocs.length).toBe(2);
+            expect(result.allCreatedFiles.length).toBe(3); // 2 chapters + 1 index.md
+            expect(result.masterRelativePath).toBe(path.join('content', 'soil-health', 'grand-traite-des-sols', 'index.md'));
+
+            const indexPath = path.join(tempDir, result.masterRelativePath);
+            const indexContent = await fs.readFile(indexPath, 'utf-8');
+            expect(indexContent).toContain('type: monograph');
+            expect(indexContent).toContain('Grand Traité des Sols');
+            expect(indexContent).toContain('01-chapitre-1.md');
+         } finally {
+            await fs.rm(tempDir, { recursive: true, force: true });
+         }
+      });
+   });
 });

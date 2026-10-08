@@ -1,4 +1,8 @@
 import { describe, expect, it } from '@jest/globals';
+import * as fs from 'node:fs/promises';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { AbstractAiAdapter } from '@quatrain/ai';
 import { parseOkfDocument, serializeOkfDocument } from '@quatrain/okf-ingest';
 import { detectCatalogEntriesRegex, sliceCatalogEntriesByDescriptors, slugify } from '../detector';
 import { OkfCatalogEntryMetadata } from '../types';
@@ -316,6 +320,89 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
          expect(result.metadata.abstracts?.de).toContain('Dichte deutsche Zusammenfassung');
          expect(result.metadata.keywords?.de).toEqual(['mädesüß', 'feuchtgebiete']);
          expect(result.metadata.language).toBe('en');
+      });
+
+      it('should ingest entire catalog monograph with intro chapters, entries, and master index', async () => {
+         const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'okf-catalog-engine-'));
+         try {
+            class MockCatalogEngineAdapter extends AbstractAiAdapter {
+               init(): void {}
+               async generateText(): Promise<string> {
+                  return 'mock';
+               }
+               async generateStructured<T>(prompt: unknown): Promise<T> {
+                  const p = typeof prompt === 'string' ? prompt : JSON.stringify(prompt);
+                  if (p.includes('scientificName') || p.includes('family')) {
+                     return {
+                        title: 'Matricaire camomille',
+                        scientificName: 'Matricaria chamomilla',
+                        family: 'Asteraceae',
+                        description: 'Plante herbacée médicinale.',
+                        language: 'fr',
+                        abstracts: { en: 'Chamomile summary' },
+                        keywords: { en: ['chamomile'] },
+                        tags: ['chamomile', 'asteraceae'],
+                        properties: ['digestive', 'calmative'],
+                     } as T;
+                  }
+                  return {
+                     title: 'Introduction générale',
+                     type: 'chapter',
+                     description: 'Introduction aux principes de la phytothérapie.',
+                     category: 'botany',
+                     language: 'fr',
+                     tags: ['botany', 'phytotherapy'],
+                  } as T;
+               }
+            }
+
+            const { ingestCatalogMonograph } = await import('../engine');
+            const summary = await ingestCatalogMonograph(
+               {
+                  bookTitle: 'Plantes Médicinales et Aromatiques',
+                  description: 'Traité encyclopédique de référence.',
+                  category: 'botany',
+                  authors: ['Dr. A. Schmidt'],
+                  publisher: 'Éditions Phytos',
+                  publicationYear: 2024,
+                  introChapters: [
+                     {
+                        index: 1,
+                        title: 'Introduction générale',
+                        slug: '01-introduction-generale',
+                        text: 'Principes généraux de la botanique médicinale...',
+                        summary: 'Méthodologie générale.',
+                     },
+                  ],
+                  entries: [
+                     {
+                        sequence: 1,
+                        rawTitle: 'Camomille vraie',
+                        slug: '001-camomille-vraie',
+                        text: 'Matricaria chamomilla L. Description complète de la plante...',
+                     },
+                  ],
+               },
+               {
+                  filename: 'plantes.pdf',
+                  gitLocalPath: tempDir,
+                  adapter: new MockCatalogEngineAdapter(),
+               }
+            );
+
+            expect(summary.bookSlug).toBe('plantes-medicinales-et-aromatiques');
+            expect(summary.totalEntries).toBe(1);
+            expect(summary.totalChapters).toBe(1);
+            expect(summary.createdFiles.length).toBe(3); // 1 intro chapter + 1 entry + 1 master index
+
+            const masterPath = path.join(tempDir, summary.masterIndexPath);
+            const masterContent = await fs.readFile(masterPath, 'utf-8');
+            expect(masterContent).toContain('type: monograph');
+            expect(masterContent).toContain('Matricaria chamomilla');
+            expect(masterContent).toContain('01-introduction-generale.md');
+         } finally {
+            await fs.rm(tempDir, { recursive: true, force: true });
+         }
       });
    });
 });

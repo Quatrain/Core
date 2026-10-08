@@ -422,7 +422,7 @@ Respond strictly with a JSON object conforming to the required schema. Do NOT in
       const hallucinations: OkfHallucination[] = [];
       if (Array.isArray(data.hallucinations)) {
          for (const h of data.hallucinations) {
-            if (typeof h === 'object' && h !== null) {
+            if (h) {
                const rawSev = String(h.severity || 'major').toLowerCase();
                const severity: 'critical' | 'major' | 'minor' =
                   rawSev === 'critical' || rawSev === 'minor' ? rawSev : 'major';

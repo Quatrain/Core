@@ -341,7 +341,7 @@ export function buildChapterFrontmatter(opts: ChapterFrontmatterOptions): OkfFro
       type: 'chapter',
       title: `Chapter ${opts.ch.index}: ${opts.chapterMetadata.title || opts.ch.title}`,
       description: opts.chapterMetadata.description || opts.ch.summary || `Chapter ${opts.ch.index} of ${opts.bookTitle}.`,
-      tags: Array.from(new Set([...(opts.chapterMetadata.tags || []), ...(opts.tags || []), opts.bookSlug])),
+      tags: Array.from(new Set([...opts.chapterMetadata.tags, ...(opts.tags || []), opts.bookSlug])),
       status: 'draft',
       generated: {
          by: opts.generator,

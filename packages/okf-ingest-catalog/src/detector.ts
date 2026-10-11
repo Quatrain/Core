@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-non-literal-regexp */
 import { CatalogEntryChunk } from './types';
 
 /**
@@ -80,7 +81,6 @@ export function detectCatalogEntriesRegex(
    const chunks: CatalogEntryChunk[] = [];
 
    const matches: Array<{ title: string; index: number }> = [];
-   let match: RegExpExecArray | null;
 
    let currentOffset = 0;
    while (currentOffset < rawText.length) {

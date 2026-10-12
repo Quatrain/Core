@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/okf-ingest",
-  "version": "1.0.0",
+  "version": "1.0.1-beta.0",
   "description": "Multi-source document ingestion, multimodal extraction, schema/mermaid transcription, token cost tracking, and OKF v0.2 packaging",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

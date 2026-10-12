@@ -115,9 +115,9 @@
     "last_published": "2026-09-24T10:04:36.524Z"
   },
   "@quatrain/ai-gemini": {
-    "version": "1.1.6",
-    "hash": "b9FoJDkRA+BcIrHH2OIiy6Gwp6U=-cb944e9ec485a3679f20da4b2bea9ae6ed16a69b599e48b4960c08a803b6f534",
-    "last_published": "2026-09-24T10:04:38.077Z"
+    "version": "1.1.7-beta.0",
+    "hash": "OnHtE+cw1RJ5PJwdwi+wW//WPYM=-cb944e9ec485a3679f20da4b2bea9ae6ed16a69b599e48b4960c08a803b6f534",
+    "last_published": "2026-10-12T12:58:58.023Z"
   },
   "@quatrain/api": {
     "version": "1.1.8",
@@ -315,9 +315,9 @@
     "last_published": "2026-09-24T10:05:15.474Z"
   },
   "@quatrain/okf": {
-    "version": "1.0.5",
-    "hash": "bHe3yeGhlsxBIbpJeeBDqZqBQAQ=-5279dcb8c36eda4769985e5f249225a0155abaacca2edaa2150708054efcc3d3",
-    "last_published": "2026-07-24T13:15:42.362Z"
+    "version": "1.0.6-beta.0",
+    "hash": "PoMRxQMOXdagYd9dh8sivorisdQ=-5279dcb8c36eda4769985e5f249225a0155abaacca2edaa2150708054efcc3d3",
+    "last_published": "2026-10-12T13:00:42.359Z"
   },
   "@quatrain/state-machine": {
     "version": "1.0.1",
@@ -400,9 +400,9 @@
     "last_published": "2026-09-24T10:04:57.091Z"
   },
   "@quatrain/ai-openai": {
-    "version": "1.1.1",
-    "hash": "9M066JSMdoXvjUaS7U2CSNXeqPc=-20413853d8835297eb401969acab442c5a1bb9ce6726b2cb16430ff81c4a92eb",
-    "last_published": "2026-09-20T09:55:39.258Z"
+    "version": "1.1.1-beta.0",
+    "hash": "na0vyQiqvRMmcAQZYhvJfJwMEGA=-20413853d8835297eb401969acab442c5a1bb9ce6726b2cb16430ff81c4a92eb",
+    "last_published": "2026-10-12T12:59:05.517Z"
   },
   "@quatrain/config": {
     "version": "1.0.2",
@@ -423,5 +423,15 @@
     "version": "1.0.1-beta.0",
     "hash": "cxwEpiJ6rwZ1yXvRtbTFK1s+n6I=-ade1ede77ea183a0a3f3ff65c1d932b2a77d507a3ccace432f99e96988382de6",
     "last_published": "2026-09-29T19:46:25.463Z"
+  },
+  "@quatrain/okf-ingest": {
+    "version": "1.0.1-beta.0",
+    "hash": "YIACDKe7/YaTR5uGbag9b9NGEus=-2b3543bf894510615dfd5abb4994b3c115cdd264ca42d466c1702743cb67bc78",
+    "last_published": "2026-10-12T13:00:49.117Z"
+  },
+  "@quatrain/okf-ingest-catalog": {
+    "version": "1.0.1-beta.0",
+    "hash": "hQXhpyTvfe8YeoWfKiJ6pL6Gcqc=-904dc17f0ea81b0a35a36498dd7c49c21f20272493b1f701f07f9c5338b90835",
+    "last_published": "2026-10-12T13:00:55.646Z"
   }
 }

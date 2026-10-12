@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/okf-ingest-catalog",
-  "version": "1.0.0",
+  "version": "1.0.1-beta.0",
   "description": "Agnostic ingestion and decomposition engine for encyclopedic catalogs, plant floras, dictionaries, pharmacopeias, and ordered entry collections into OKF v0.2 atomic entities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

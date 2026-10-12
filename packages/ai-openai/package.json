@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/ai-openai",
-  "version": "1.1.0",
+  "version": "1.1.1-beta.0",
   "license": "AGPL-3.0-only",
   "description": "AI adapter for OpenAI and OpenAI-compatible models (DeepSeek, Qwen, Mistral, Ollama)",
   "main": "dist/index.js",

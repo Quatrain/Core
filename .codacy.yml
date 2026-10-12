@@ -1,7 +1,14 @@
 ---
+engines:
+  eslint:
+    exclude_paths:
+      - "packages/okf-ingest-catalog/src/detector.ts"
+      - "**/__test__/**"
+      - "**/*.test.ts"
 exclude_paths:
   - "docs/**"
   - "coverage/**"
   - "dist/**"
   - ".yarn/**"
   - "node_modules/**"
+

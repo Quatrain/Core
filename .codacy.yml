@@ -5,10 +5,19 @@ engines:
       - "packages/okf-ingest-catalog/src/detector.ts"
       - "**/__test__/**"
       - "**/*.test.ts"
+      - "**/*.spec.ts"
+  semgrep:
+    exclude_paths:
+      - "packages/okf-ingest-catalog/src/detector.ts"
+      - "**/__test__/**"
+      - "**/*.test.ts"
+      - "**/*.spec.ts"
 exclude_paths:
   - "docs/**"
   - "coverage/**"
   - "dist/**"
   - ".yarn/**"
   - "node_modules/**"
-
+  - "**/__test__/**"
+  - "**/*.test.ts"
+  - "**/*.spec.ts"

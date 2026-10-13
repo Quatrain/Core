@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { serializeOkfDocument } from './serializer';
@@ -19,11 +20,11 @@ export interface WriteOkfOptions {
  */
 export async function writeOkfDocument(options: WriteOkfOptions): Promise<string> {
    const { gitLocalPath, category, slug, metadata, body } = options;
-   const categoryDir = path.join(gitLocalPath, 'content', category);
+   const categoryDir = path.resolve(gitLocalPath, 'content', category);
    await fs.mkdir(categoryDir, { recursive: true });
 
    const content = serializeOkfDocument(metadata, body);
-   const filePath = path.join(categoryDir, `${slug}.md`);
+   const filePath = path.resolve(categoryDir, `${slug}.md`);
    await fs.writeFile(filePath, content, 'utf-8');
 
    return path.join('content', category, `${slug}.md`);

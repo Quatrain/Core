@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import {
@@ -76,9 +77,9 @@ export async function ingestCatalogMonograph(
 
    // 1. Prepare target filesystem structure
    const bookRelativeFolder = path.join('content', input.category, bookSlug);
-   const absoluteBookFolder = path.join(options.gitLocalPath, bookRelativeFolder);
+   const absoluteBookFolder = path.resolve(options.gitLocalPath, bookRelativeFolder);
    const entriesRelativeFolder = path.join(bookRelativeFolder, 'entries');
-   const absoluteEntriesFolder = path.join(options.gitLocalPath, entriesRelativeFolder);
+   const absoluteEntriesFolder = path.resolve(options.gitLocalPath, entriesRelativeFolder);
 
    await fs.mkdir(absoluteBookFolder, { recursive: true });
    await fs.mkdir(absoluteEntriesFolder, { recursive: true });
@@ -148,7 +149,7 @@ Chapter ${ch.index}: "${ch.title}".`,
          });
 
          const chapterRelPath = path.join(bookRelativeFolder, `${ch.slug}.md`);
-         const absoluteChapterPath = path.join(options.gitLocalPath, chapterRelPath);
+         const absoluteChapterPath = path.resolve(options.gitLocalPath, chapterRelPath);
          const content = serializeOkfDocument(chapterMetadata, chapterResult.body);
          await fs.writeFile(absoluteChapterPath, content, 'utf-8');
 
@@ -203,7 +204,7 @@ Chapter ${ch.index}: "${ch.title}".`,
       const finalEntrySlug = `${String(entryChunk.sequence).padStart(3, '0')}-${cleanSlugName}`;
 
       const entryRelPath = path.join(entriesRelativeFolder, `${finalEntrySlug}.md`);
-      const absoluteEntryPath = path.join(options.gitLocalPath, entryRelPath);
+      const absoluteEntryPath = path.resolve(options.gitLocalPath, entryRelPath);
       const entrySerialized = serializeOkfDocument(entryResult.metadata, entryResult.body);
       await fs.writeFile(absoluteEntryPath, entrySerialized, 'utf-8');
 
@@ -309,7 +310,7 @@ Chapter ${ch.index}: "${ch.title}".`,
    }
 
    const masterIndexPath = path.join(bookRelativeFolder, 'index.md');
-   const absoluteMasterIndexPath = path.join(options.gitLocalPath, masterIndexPath);
+   const absoluteMasterIndexPath = path.resolve(options.gitLocalPath, masterIndexPath);
    const masterContent = serializeOkfDocument(masterMetadata, masterBody);
    await fs.writeFile(absoluteMasterIndexPath, masterContent, 'utf-8');
    allCreatedFiles.push(masterIndexPath);

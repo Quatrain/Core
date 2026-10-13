@@ -1,3 +1,4 @@
+import { Log } from '@quatrain/log';
 import pdfParse from 'pdf-parse';
 
 export interface PdfExtractionResult {
@@ -49,7 +50,8 @@ export async function extractPdfText(buffer: Buffer): Promise<PdfExtractionResul
          isScanned,
          pageCount,
       };
-   } catch (_error) {
+   } catch (error) {
+      Log.warn(`[PdfIngest] Failed to parse PDF text layer: ${error instanceof Error ? error.message : String(error)}`);
       return {
          text: '',
          isScanned: true,
@@ -77,24 +79,26 @@ export async function extractPdfPages(buffer: Buffer): Promise<string[]> {
 
    try {
       await pdfParse(buffer, {
-         pagerender: (pageData: { getTextContent: () => Promise<{ items: Array<{ str?: string }> }> }) => {
-            return pageData
-               .getTextContent()
-               .then((textContent) => {
-                  let pageText = '';
-                  for (const item of textContent.items) {
-                     if (typeof item.str === 'string') {
-                        pageText += item.str + ' ';
-                     }
+         pagerender: async (pageData: { getTextContent: () => Promise<{ items: Array<{ str?: string }> }> }) => {
+            try {
+               const textContent = await pageData.getTextContent();
+               let pageText = '';
+               for (const item of textContent.items) {
+                  if (typeof item.str === 'string') {
+                     pageText += item.str + ' ';
                   }
-                  pagesText.push(pageText);
-                  return pageText;
-               })
-               .catch(() => '');
+               }
+               pagesText.push(pageText);
+               return pageText;
+            } catch (err) {
+               Log.warn(`[PdfIngest] Failed to extract page text: ${err instanceof Error ? err.message : String(err)}`);
+               return '';
+            }
          },
       });
       return pagesText;
-   } catch (_error) {
+   } catch (error) {
+      Log.warn(`[PdfIngest] Failed to extract PDF pages: ${error instanceof Error ? error.message : String(error)}`);
       return [];
    } finally {
       console.log = originalLog;

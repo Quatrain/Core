@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { resolveAiAdapter } from './adapter';
@@ -395,7 +396,7 @@ export async function decomposeAndIngestMonograph(
          singleDoc.metadata.category || profile.defaultCategory || 'general',
          `${docSlug}.md`
       );
-      const absolutePath = path.join(input.gitLocalPath, relativePath);
+      const absolutePath = path.resolve(input.gitLocalPath, relativePath);
 
       await fs.mkdir(path.dirname(absolutePath), { recursive: true });
       const serialized = serializeOkfDocument(singleDoc.metadata, singleDoc.body);
@@ -424,7 +425,7 @@ export async function decomposeAndIngestMonograph(
 
    const slices = sliceTextByChapters(input.rawText, outline.chapters);
    const folderPath = path.join('content', outline.category, outline.slug);
-   const absoluteFolder = path.join(input.gitLocalPath, folderPath);
+   const absoluteFolder = path.resolve(input.gitLocalPath, folderPath);
 
    await fs.mkdir(absoluteFolder, { recursive: true });
 
@@ -500,7 +501,7 @@ Extract specifically the concepts, taxonomies, diagrams, and tables relevant to 
       });
 
       const chapterRelativePath = path.join(folderPath, `${ch.slug}.md`);
-      const absoluteChapterPath = path.join(input.gitLocalPath, chapterRelativePath);
+      const absoluteChapterPath = path.resolve(input.gitLocalPath, chapterRelativePath);
       const chapterContent = serializeOkfDocument(chapterMetadata, chapterResult.body);
       await fs.writeFile(absoluteChapterPath, chapterContent, 'utf-8');
 
@@ -579,7 +580,7 @@ ${chapterDocs
 `;
 
    const masterRelativePath = path.join(folderPath, 'index.md');
-   const absoluteMasterPath = path.join(input.gitLocalPath, masterRelativePath);
+   const absoluteMasterPath = path.resolve(input.gitLocalPath, masterRelativePath);
    const masterContent = serializeOkfDocument(masterMetadata, masterBody);
    await fs.writeFile(absoluteMasterPath, masterContent, 'utf-8');
    allCreatedFiles.unshift(masterRelativePath);

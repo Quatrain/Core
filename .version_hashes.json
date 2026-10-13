@@ -425,13 +425,13 @@
     "last_published": "2026-09-29T19:46:25.463Z"
   },
   "@quatrain/okf-ingest": {
-    "version": "1.0.1-beta.0",
-    "hash": "YIACDKe7/YaTR5uGbag9b9NGEus=-2b3543bf894510615dfd5abb4994b3c115cdd264ca42d466c1702743cb67bc78",
-    "last_published": "2026-10-12T13:00:49.117Z"
+    "version": "1.0.1-beta.1",
+    "hash": "yTqQ94X8gRCbhvXU7q0msYFydHY=-2b3543bf894510615dfd5abb4994b3c115cdd264ca42d466c1702743cb67bc78",
+    "last_published": "2026-10-13T12:11:36.334Z"
   },
   "@quatrain/okf-ingest-catalog": {
-    "version": "1.0.1-beta.0",
-    "hash": "hQXhpyTvfe8YeoWfKiJ6pL6Gcqc=-904dc17f0ea81b0a35a36498dd7c49c21f20272493b1f701f07f9c5338b90835",
-    "last_published": "2026-10-12T13:00:55.646Z"
+    "version": "1.0.1-beta.1",
+    "hash": "SmDgXSCGZ92355nhXeWzAX5Eqns=-904dc17f0ea81b0a35a36498dd7c49c21f20272493b1f701f07f9c5338b90835",
+    "last_published": "2026-10-13T12:11:49.139Z"
   }
 }

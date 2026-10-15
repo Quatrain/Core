@@ -1,0 +1,90 @@
+name: Quatrain Core Sovereign CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feat/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+env:
+  DOCKER_HOST: tcp://127.0.0.1:2375
+
+jobs:
+  ci:
+    name: Monorepo Build, Tests & Quality Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable Corepack & Configure Yarn
+        run: |
+          echo "Node.js version: $(node -v)"
+          corepack enable
+          yarn --version
+
+      - name: Install System Prerequisites
+        run: |
+          echo "=== Installing system build tools ==="
+          if ! command -v docker > /dev/null 2>&1; then
+            apt-get update -qq && apt-get install -y -qq python3 make g++ docker.io
+          else
+            apt-get update -qq && apt-get install -y -qq python3 make g++
+          fi
+
+      - name: Start Isolated PostgreSQL Test Instance
+        run: |
+          echo "=== Starting PostgreSQL 15 on DinD ==="
+          docker run -d --name pg-test \
+            -p 5432:5432 \
+            -e POSTGRES_DB=quatrain_test \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=password \
+            postgres:15-alpine
+
+          for i in $(seq 1 15); do
+            docker exec pg-test pg_isready -U postgres >/dev/null 2>&1 && break
+            echo "Waiting for PostgreSQL ($i/15)..."
+            sleep 1
+          done
+          echo "PostgreSQL test instance is ready on localhost:5432"
+
+      - name: Install Monorepo Dependencies
+        run: |
+          echo "=== Installing dependencies ==="
+          YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
+
+      - name: Build Monorepo (Turbo)
+        run: |
+          echo "=== Building all monorepo packages ==="
+          yarn build
+
+      - name: Audit JSDoc Quality Gate
+        run: |
+          echo "=== Checking JSDoc compliance in core packages ==="
+          OUTPUT=$(npx ts-node scripts/audit-jsdoc.ts | grep -E "\[Missing\] packages/(auth|backend|storage|studio|testing|worker)" || true)
+          if [ -n "$OUTPUT" ]; then
+            echo "JSDoc regressions detected in core packages:"
+            echo "$OUTPUT"
+            exit 1
+          fi
+          echo "JSDoc quality gate passed."
+
+      - name: Run Unit Tests
+        run: |
+          echo "=== Executing monorepo unit tests ==="
+          yarn test --testPathIgnorePatterns="firestore" --runInBand
+
+      - name: Teardown PostgreSQL Instance
+        if: always()
+        run: |
+          docker rm -f pg-test >/dev/null 2>&1 || true

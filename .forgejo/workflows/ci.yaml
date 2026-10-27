@@ -42,21 +42,29 @@ jobs:
           fi
 
       - name: Start Isolated PostgreSQL Test Instance
+        # Runs share the DinD daemon: the container name and host port must be unique per run,
+        # otherwise a concurrent run's teardown removes this run's database.
         run: |
           echo "=== Starting PostgreSQL 15 on DinD ==="
-          docker run -d --name pg-test \
-            -p 5432:5432 \
+          PG_CONTAINER="pg-test-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT:-1}"
+          echo "PG_CONTAINER=${PG_CONTAINER}" >> "$GITHUB_ENV"
+          docker run -d --name "$PG_CONTAINER" \
+            -p 127.0.0.1::5432 \
             -e POSTGRES_DB=quatrain_test \
             -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD=password \
             postgres:15-alpine
 
-          for i in $(seq 1 15); do
-            docker exec pg-test pg_isready -U postgres >/dev/null 2>&1 && break
-            echo "Waiting for PostgreSQL ($i/15)..."
+          PG_PORT=$(docker port "$PG_CONTAINER" 5432/tcp | head -n1 | awk -F: '{print $NF}')
+          echo "POSTGRES_PORT=${PG_PORT}" >> "$GITHUB_ENV"
+
+          # pg_isready over TCP: the init phase only listens on the unix socket.
+          for i in $(seq 1 30); do
+            docker exec "$PG_CONTAINER" pg_isready -h 127.0.0.1 -U postgres >/dev/null 2>&1 && break
+            echo "Waiting for PostgreSQL ($i/30)..."
             sleep 1
           done
-          echo "PostgreSQL test instance is ready on localhost:5432"
+          echo "PostgreSQL test instance is ready on localhost:${PG_PORT}"
 
       - name: Install Monorepo Dependencies
         run: |
@@ -87,7 +95,7 @@ jobs:
       - name: Teardown PostgreSQL Instance
         if: always()
         run: |
-          docker rm -f pg-test >/dev/null 2>&1 || true
+          docker rm -f "${PG_CONTAINER:-pg-test-${GITHUB_RUN_ID}}" >/dev/null 2>&1 || true
 
   publish:
     name: Publish Changed Packages to npm

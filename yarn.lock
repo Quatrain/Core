@@ -3989,9 +3989,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/speech-browser@workspace:packages/speech-browser":
+"@quatrain/speech-api@workspace:packages/speech-api":
   version: 0.0.0-use.local
-  resolution: "@quatrain/speech-browser@workspace:packages/speech-browser"
+  resolution: "@quatrain/speech-api@workspace:packages/speech-api"
   dependencies:
     "@quatrain/speech": "workspace:*"
     "@tsconfig/recommended": "npm:^1.0.1"
@@ -4003,9 +4003,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/speech-http@workspace:packages/speech-http":
+"@quatrain/speech-browser@workspace:packages/speech-browser":
   version: 0.0.0-use.local
-  resolution: "@quatrain/speech-http@workspace:packages/speech-http"
+  resolution: "@quatrain/speech-browser@workspace:packages/speech-browser"
   dependencies:
     "@quatrain/speech": "workspace:*"
     "@tsconfig/recommended": "npm:^1.0.1"

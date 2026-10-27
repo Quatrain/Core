@@ -1,4 +1,4 @@
-import { HttpSpeechSynthesizer, isAudioPayload, type AudioLike, type FetchLike } from './HttpSpeechSynthesizer'
+import { ApiSpeechSynthesizer, isAudioPayload, type AudioLike, type FetchLike } from './ApiSpeechSynthesizer'
 
 /** Fake audio element, controlled by the test. */
 interface FakeAudioInterface extends AudioLike {
@@ -66,16 +66,16 @@ describe('isAudioPayload', () => {
    })
 })
 
-describe('HttpSpeechSynthesizer', () => {
+describe('ApiSpeechSynthesizer', () => {
    it('follows the network status', async () => {
-      expect(await new HttpSpeechSynthesizer({ endpoint: '/speak', isOnline: () => false }).isAvailable()).toBe(false)
-      expect(await new HttpSpeechSynthesizer({ endpoint: '/speak', isOnline: () => true }).isAvailable()).toBe(true)
+      expect(await new ApiSpeechSynthesizer({ endpoint: '/speak', isOnline: () => false }).isAvailable()).toBe(false)
+      expect(await new ApiSpeechSynthesizer({ endpoint: '/speak', isOnline: () => true }).isAvailable()).toBe(true)
    })
 
    it('requests the audio at prepare time and plays it with the rate', async () => {
       const { fetchImpl, calls } = jsonFetch(200, { audioBase64: 'AAAA' })
       const { createAudio, elements } = fakeAudio()
-      const synthesizer = new HttpSpeechSynthesizer({ endpoint: '/speak', fetchImpl, createAudio })
+      const synthesizer = new ApiSpeechSynthesizer({ endpoint: '/speak', fetchImpl, createAudio })
       const utterance = synthesizer.prepare('Hello there.', { locale: 'en-US', voice: 'v1', style: 'warm', rate: 1.2 })
       expect(calls).toHaveLength(1)
       expect(calls[0].body).toBe(JSON.stringify({ text: 'Hello there.', locale: 'en-US', voice: 'v1', style: 'warm' }))
@@ -96,7 +96,7 @@ describe('HttpSpeechSynthesizer', () => {
    it('plays binary audio responses through an object URL', async () => {
       const released: string[] = []
       const { createAudio, elements } = fakeAudio()
-      const synthesizer = new HttpSpeechSynthesizer({
+      const synthesizer = new ApiSpeechSynthesizer({
          endpoint: '/speak',
          fetchImpl: async () => new Response(new Uint8Array([1, 2, 3]), { status: 200, headers: { 'Content-Type': 'audio/mpeg' } }),
          createAudio,
@@ -112,22 +112,22 @@ describe('HttpSpeechSynthesizer', () => {
 
    it('uses a custom body builder', async () => {
       const { fetchImpl, calls } = jsonFetch(200, { audioBase64: 'AAAA' })
-      new HttpSpeechSynthesizer({ endpoint: '/speak', fetchImpl, buildBody: (text) => ({ input: text }) }).prepare('Hi.', { locale: 'en-US' })
+      new ApiSpeechSynthesizer({ endpoint: '/speak', fetchImpl, buildBody: (text) => ({ input: text }) }).prepare('Hi.', { locale: 'en-US' })
       expect(calls[0].body).toBe(JSON.stringify({ input: 'Hi.' }))
    })
 
    it('fails on HTTP errors, bad payloads and refused playback', async () => {
       const options = { locale: 'en-US' }
-      expect(await new HttpSpeechSynthesizer({ endpoint: '/speak', fetchImpl: jsonFetch(502, {}).fetchImpl }).prepare('Hi.', options).play()).toBe('failed')
-      expect(await new HttpSpeechSynthesizer({ endpoint: '/speak', fetchImpl: jsonFetch(200, { nope: 1 }).fetchImpl }).prepare('Hi.', options).play()).toBe('failed')
-      const refused = new HttpSpeechSynthesizer({ endpoint: '/speak', fetchImpl: jsonFetch(200, { audioBase64: 'AAAA' }).fetchImpl, createAudio: fakeAudio(true).createAudio })
+      expect(await new ApiSpeechSynthesizer({ endpoint: '/speak', fetchImpl: jsonFetch(502, {}).fetchImpl }).prepare('Hi.', options).play()).toBe('failed')
+      expect(await new ApiSpeechSynthesizer({ endpoint: '/speak', fetchImpl: jsonFetch(200, { nope: 1 }).fetchImpl }).prepare('Hi.', options).play()).toBe('failed')
+      const refused = new ApiSpeechSynthesizer({ endpoint: '/speak', fetchImpl: jsonFetch(200, { audioBase64: 'AAAA' }).fetchImpl, createAudio: fakeAudio(true).createAudio })
       expect(await refused.prepare('Hi.', options).play()).toBe('failed')
    })
 
    it('aborts the download and stops playback on cancel', async () => {
       const signals: (AbortSignal | null | undefined)[] = []
       const { createAudio, elements } = fakeAudio()
-      const synthesizer = new HttpSpeechSynthesizer({
+      const synthesizer = new ApiSpeechSynthesizer({
          endpoint: '/speak',
          fetchImpl: async (_url, init) => {
             signals.push(init.signal)

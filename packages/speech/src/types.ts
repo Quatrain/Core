@@ -35,7 +35,7 @@ export interface PreparedUtteranceInterface {
 
 /** A speech synthesis backend (on-device, native bridge, cloud endpoint...). */
 export interface SpeechSynthesizerInterface {
-   /** Stable identifier, e.g. `browser`, `http`. */
+   /** Stable identifier, e.g. `browser`, `api`. */
    readonly id: string
    /**
     * Tells whether this synthesizer can speak with these options right now (voice for the locale, network...).

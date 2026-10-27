@@ -22,7 +22,7 @@ export interface AudioSourceInterface {
 }
 
 /** Adapter settings. */
-export interface HttpSpeechSynthesizerOptionsInterface {
+export interface ApiSpeechSynthesizerOptionsInterface {
    /** Endpoint synthesizing one text: `POST` JSON, answers audio bytes (`audio/*`) or `{ audioBase64, mimeType? }`. */
    endpoint: string
    /** Builds the JSON body (defaults to `{ text, locale, voice, style }`). */
@@ -71,13 +71,13 @@ function defaultObjectUrl(blob: Blob): AudioSourceInterface {
  * Cloud speech through any HTTP endpoint (the endpoint calls the speech model of its choice).
  * `prepare` starts the request immediately, so the next sentence downloads while the current one plays.
  */
-export class HttpSpeechSynthesizer implements SpeechSynthesizerInterface {
-   readonly id = 'http'
+export class ApiSpeechSynthesizer implements SpeechSynthesizerInterface {
+   readonly id = 'api'
 
    /**
     * @param settings - Endpoint and injectable dependencies.
     */
-   constructor(private readonly settings: HttpSpeechSynthesizerOptionsInterface) {}
+   constructor(private readonly settings: ApiSpeechSynthesizerOptionsInterface) {}
 
    /**
     * @returns `true` when the device is online (the endpoint itself is only checked when speaking).

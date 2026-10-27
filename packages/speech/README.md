@@ -14,17 +14,17 @@ Model-agnostic, local-first speech synthesis for Quatrain applications.
 | Package | Runs in | Backend |
 |---|---|---|
 | `@quatrain/speech-browser` | browser | Web Speech API (on-device, no network) |
-| `@quatrain/speech-http` | browser | any endpoint returning audio (cloud models) |
+| `@quatrain/speech-api` | browser | any endpoint returning audio (cloud models) |
 
 ## HOWTO
 
 ```typescript
 import { SpeechController } from '@quatrain/speech'
 import { BrowserSpeechSynthesizer } from '@quatrain/speech-browser'
-import { HttpSpeechSynthesizer } from '@quatrain/speech-http'
+import { ApiSpeechSynthesizer } from '@quatrain/speech-api'
 
 const local = new BrowserSpeechSynthesizer()
-const cloud = new HttpSpeechSynthesizer({ endpoint: '/api/speak' })
+const cloud = new ApiSpeechSynthesizer({ endpoint: '/api/speak' })
 
 // "fast" mode: device voice first, cloud as fallback
 const speech = new SpeechController([local, cloud])

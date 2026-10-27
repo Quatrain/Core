@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Quatrain/Core.git",
+    "url": "git+https://git.qtrn.io/Quatrain/Core.git",
     "directory": "packages/auth-http-basic"
   }
 }

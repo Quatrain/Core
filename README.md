@@ -6,6 +6,9 @@
 
 > **"Business Logic outlives Infrastructure"**
 
+> [!IMPORTANT]
+> The source of authority is **[git.qtrn.io/Quatrain/Core](https://git.qtrn.io/Quatrain/Core)**: issues, pull requests, wiki and CI live there. `github.com/Quatrain/Core` is a read-only mirror.
+
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Quatrain_Core&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Quatrain_Core)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Quatrain_Core&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Quatrain_Core)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Quatrain_Core&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Quatrain_Core)
@@ -45,7 +48,7 @@ The Design phase is all about modeling your domain and laying the foundations of
 - **`@quatrain/ux`**: Core styling and component logic (Mantine-based) for consistent frontend experiences.
 
 > [!TIP]
-> For complete documentation, modeling details, and quick-start tutorials on these packages, please refer to the **[Core Wiki](https://github.com/Quatrain/Core/wiki)**.
+> For complete documentation, modeling details, and quick-start tutorials on these packages, please refer to the **[Core Wiki](https://git.qtrn.io/Quatrain/Core/wiki)**.
 
 ---
 
@@ -62,7 +65,7 @@ During Development, you connect your business logic to services such as database
 - **Testing**: `@quatrain/testing`
 
 > [!TIP]
-> For full code persistence examples, dependency injection setups, and service integrations, visit the **[Core Wiki](https://github.com/Quatrain/Core/wiki)**.
+> For full code persistence examples, dependency injection setups, and service integrations, visit the **[Core Wiki](https://git.qtrn.io/Quatrain/Core/wiki)**.
 
 ---
 

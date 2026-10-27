@@ -1,0 +1,39 @@
+{
+  "name": "@quatrain/speech",
+  "version": "0.1.0",
+  "license": "AGPL-3.0-only",
+  "description": "Model-agnostic, local-first speech synthesis contract and sentence-by-sentence playback controller",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "src/",
+    "dist/",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quatrain/Core.git",
+    "directory": "packages/speech"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.10.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.1.5"
+  },
+  "scripts": {
+    "test-ci": "jest --runInBand",
+    "build": "tsc",
+    "wbuild": "tsc --watch",
+    "bump-to": "yarn version"
+  },
+  "typedoc": {
+    "entryPoint": "src/index.ts"
+  }
+}

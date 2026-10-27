@@ -28,7 +28,7 @@ All package modifications must align with workspace topological rules and compil
   ```json
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Quatrain/Core.git",
+    "url": "git+https://git.qtrn.io/Quatrain/Core.git",
     "directory": "packages/<package-name>"
   }
 }
@@ -118,16 +118,29 @@ flowchart TD
     releasePR -->|Merge + SemVer Tag| main["main (Production)"]
 ```
 
+### Source of Authority
+`git.qtrn.io/Quatrain/Core` is the source of authority (git remote `sovereign`). `github.com/Quatrain/Core` is a read-only push mirror refreshed on every push: never push, open issues or open pull requests there. The `gh` CLI does not apply; use the Forgejo API with a personal access token (`write:issue`, `write:repository`).
+
 ### Protocol Summary:
 1. **Integration Branch (`develop`):** The default branch for active integration, tests, and preview releases.
 2. **Branching:** Feature and bugfix branches must branch out strictly from `develop`:
    ```bash
-   git checkout develop && git pull origin develop
+   git checkout develop && git pull sovereign develop
    git checkout -b feat/<issue-number>-<short-description>
    ```
-3. **Pull Requests:** Open PRs targeting `--base develop` with explicit metadata:
+3. **Issues & Pull Requests:** Create them on Forgejo; PRs target `develop` and close their issue:
    ```bash
-   gh pr create --base develop --head feat/<branch> --assignee @me --title "..." --body "Closes #<issue-number>"
+   API=https://git.qtrn.io/api/v1/repos/Quatrain/Core
+   AUTH="Authorization: token $FORGEJO_TOKEN"
+   # Issue
+   jq -n --arg t "feat(x): ..." --arg b "..." '{title:$t, body:$b}' \
+     | curl -s -H "$AUTH" -H 'Content-Type: application/json' -X POST "$API/issues" -d @-
+   # Pull request
+   git push -u sovereign feat/<branch>
+   jq -n --arg t "feat(x): ..." --arg b "Closes #<issue-number>" \
+     '{title:$t, body:$b, head:"feat/<branch>", base:"develop"}' \
+     | curl -s -H "$AUTH" -H 'Content-Type: application/json' -X POST "$API/pulls" -d @-
    ```
 4. **Production Releases (`develop` $\to$ `main`):** Formal release PRs merge from `develop` into `main` with annotated SemVer tags.
+5. **npm Publication:** Forgejo Actions (`.forgejo/workflows/ci.yaml`, job `publish`) runs `bin/publish_all.js` after a green CI: pushes to `develop` publish changed packages under the `beta` dist-tag, pushes to `main` publish `latest` and create a `vYYYY.MM.DD` tag. Version bumps are committed back with `[skip ci]`. The repository secret `NPM_TOKEN` must be set.
 

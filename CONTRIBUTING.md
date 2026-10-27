@@ -18,7 +18,7 @@ We chose the AGPL to ensure that improvements made to the framework—even when 
 
 ### Reporting Bugs
 
--  Use the GitHub Issue Tracker.
+-  Use the [issue tracker on git.qtrn.io](https://git.qtrn.io/Quatrain/Core/issues). The GitHub repository is a read-only mirror: issues and pull requests are not accepted there.
 -  Describe the bug, provide steps to reproduce, and include environment details (Node version, OS, etc.).
 
 ### Suggesting Enhancements
@@ -28,12 +28,12 @@ We chose the AGPL to ensure that improvements made to the framework—even when 
 
 ### Pull Requests
 
-1. **Fork the repo** and create your branch from `main`.
+1. **Fork the repo** on [git.qtrn.io](https://git.qtrn.io/Quatrain/Core) and create your branch from `develop` (`feat/<issue>-<description>` or `fix/<issue>-<description>`).
 2. **Install dependencies** using `yarn install`.
 3. **Write your code**. Ensure you follow the existing TypeScript patterns and modular structure.
 4. **Add tests**. We use Jest for testing. Ensure your changes don't break existing functionality by running `yarn test` in the relevant package.
 5. **Update documentation**. If you change an API or add a feature, update the relevant `README.md` within the package.
-6. **Submit the PR**. Provide a clear description of the changes.
+6. **Submit the PR** on git.qtrn.io, targeting `develop`, with a clear description and `Closes #<issue>`.
 
 ## 🛠️ Development Workflow
 

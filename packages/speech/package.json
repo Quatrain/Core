@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/speech",
-  "version": "0.1.1-beta.0",
+  "version": "0.1.1",
   "license": "AGPL-3.0-only",
   "description": "Model-agnostic, local-first speech synthesis contract and sentence-by-sentence playback controller",
   "main": "dist/index.js",

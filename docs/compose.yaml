@@ -2,8 +2,8 @@ version: "3.8"
 
 services:
   docs:
-    # Pull the image directly published by CI on GitHub Container Registry
-    image: ghcr.io/quatrain/core-docs:main
+    # Pull the image published by Forgejo CI to the sovereign registry (linux/arm64 only)
+    image: qtrn.io/quatrain/core-docs:main
     ports:
       # Expose the documentation site on http://localhost:8080
       - "8080:80"

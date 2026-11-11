@@ -80,9 +80,9 @@
     "last_published": "2026-09-24T10:05:50.109Z"
   },
   "@quatrain/storage": {
-    "version": "1.2.15",
-    "hash": "w3GFXaZFWhVI+vJgkW3TqWu9hXQ=-896e79f2ebcb9f11cb5093ef975c1f04fd5576e000ddc86a85f424d0069bf8ef",
-    "last_published": "2026-09-24T10:05:55.840Z"
+    "version": "1.2.16-beta.0",
+    "hash": "m7jVYi/bROue4lrZJJ4zuT9CbTs=-896e79f2ebcb9f11cb5093ef975c1f04fd5576e000ddc86a85f424d0069bf8ef",
+    "last_published": "2026-11-11T14:48:58.299Z"
   },
   "@quatrain/storage-firebase": {
     "version": "1.2.5",
@@ -90,9 +90,9 @@
     "last_published": "2026-09-24T10:05:57.160Z"
   },
   "@quatrain/storage-s3": {
-    "version": "1.2.10",
-    "hash": "gmuFDALrvoYxrjF8gD0b9ny+Prw=-5592b44b2f3073fd46e5b886d275dc4ad3561e0e98a599fc6813c5c169f8cb11",
-    "last_published": "2026-09-24T10:06:02.507Z"
+    "version": "1.2.11-beta.0",
+    "hash": "KrW+VLpOPo17/qzuqJwRg36Kti4=-5592b44b2f3073fd46e5b886d275dc4ad3561e0e98a599fc6813c5c169f8cb11",
+    "last_published": "2026-11-11T14:49:04.954Z"
   },
   "@quatrain/storage-supabase": {
     "version": "1.2.12",

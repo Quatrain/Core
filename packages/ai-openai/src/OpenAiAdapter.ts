@@ -106,6 +106,12 @@ export interface OpenAiAdapterConfig {
     * Additional headers sent with every request (e.g. org ID or custom routing).
     */
    customHeaders?: Record<string, string>
+
+   /**
+    * Default response format strategy for structured generation.
+    * Defaults to { type: 'json_object' } for remote endpoints, and null (omitted) for local endpoints.
+    */
+   defaultResponseFormat?: { type: 'text' | 'json_object' | 'json_schema' } | Record<string, unknown> | null
 }
 
 /**
@@ -144,8 +150,19 @@ export interface OpenAiGenerateOptions {
 
    /**
     * Response format configuration (e.g. { type: 'json_object' }).
+    * Pass null to explicitly omit response_format payload.
     */
-   responseFormat?: { type: 'text' | 'json_object' } | Record<string, unknown>
+   responseFormat?: { type: 'text' | 'json_object' | 'json_schema' } | Record<string, unknown> | null
+
+   /**
+    * Per-call timeout override in milliseconds.
+    */
+   timeoutMs?: number
+
+   /**
+    * Optional usage callback to collect token counts and metrics.
+    */
+   onUsage?: (usage: unknown) => void
 }
 
 /**
@@ -159,6 +176,10 @@ export class OpenAiAdapter extends AbstractAiAdapter {
    protected _defaultTemperature: number
    protected _timeoutMs: number
    protected _customHeaders: Record<string, string>
+   protected _defaultResponseFormat:
+      | { type: 'text' | 'json_object' | 'json_schema' }
+      | Record<string, unknown>
+      | null
    protected _initialized = false
 
    /**
@@ -194,8 +215,16 @@ export class OpenAiAdapter extends AbstractAiAdapter {
       this._baseUrl = rawBaseUrl
       this._defaultModel = (options.defaultModel ?? 'gpt-4o').trim()
       this._defaultTemperature = options.defaultTemperature ?? 0.7
-      this._timeoutMs = options.timeoutMs ?? 60000
+      const isLocal = rawBaseUrl.includes('localhost') || rawBaseUrl.includes('127.0.0.1')
+      this._timeoutMs = options.timeoutMs ?? (isLocal ? 300000 : 60000)
       this._customHeaders = options.customHeaders ?? {}
+
+      this._defaultResponseFormat =
+         options.defaultResponseFormat !== undefined
+            ? options.defaultResponseFormat
+            : isLocal
+              ? null
+              : { type: 'json_object' }
    }
 
    /**
@@ -254,6 +283,25 @@ export class OpenAiAdapter extends AbstractAiAdapter {
          apiKey: 'ollama',
          baseUrl,
          defaultModel,
+         defaultResponseFormat: null,
+      })
+   }
+
+   /**
+    * Preset for local LM Studio instance.
+    *
+    * @param baseUrl - LM Studio endpoint URL (defaults to 'http://localhost:1234/v1').
+    * @param defaultModel - Default model identifier.
+    */
+   static forLmStudio(
+      baseUrl = 'http://localhost:1234/v1',
+      defaultModel = 'default',
+   ): OpenAiAdapter {
+      return new OpenAiAdapter({
+         apiKey: 'lm-studio',
+         baseUrl,
+         defaultModel,
+         defaultResponseFormat: null,
       })
    }
 
@@ -308,11 +356,19 @@ export class OpenAiAdapter extends AbstractAiAdapter {
          payload.response_format = options.responseFormat
       }
 
-      const response = await this._postChatCompletions(payload, options?.headers)
+      const response = await this._postChatCompletions(payload, options?.headers, options?.timeoutMs)
       const data = (await response.json()) as OpenAiChatResponse
 
       if (data.choices.length === 0) {
          return ''
+      }
+
+      if (options?.onUsage && data.usage) {
+         options.onUsage({
+            promptTokenCount: data.usage.prompt_tokens,
+            candidatesTokenCount: data.usage.completion_tokens,
+            totalTokenCount: data.usage.total_tokens,
+         })
       }
 
       const firstChoice = data.choices[0]
@@ -378,19 +434,35 @@ export class OpenAiAdapter extends AbstractAiAdapter {
       const model = options?.model ?? this._defaultModel
       const temperature = options?.temperature ?? 0.2
 
+      const responseFormat =
+         options?.responseFormat !== undefined
+            ? options.responseFormat
+            : this._defaultResponseFormat
+
       const payload: Record<string, unknown> = {
          model,
          messages,
          temperature,
-         response_format: options?.responseFormat ?? { type: 'json_object' },
+      }
+
+      if (responseFormat) {
+         payload.response_format = responseFormat
       }
 
       if (options?.maxTokens !== undefined) {
          payload.max_tokens = options.maxTokens
       }
 
-      const response = await this._postChatCompletions(payload, options?.headers)
+      const response = await this._postChatCompletions(payload, options?.headers, options?.timeoutMs)
       const data = (await response.json()) as OpenAiChatResponse
+
+      if (options?.onUsage && data.usage) {
+         options.onUsage({
+            promptTokenCount: data.usage.prompt_tokens,
+            candidatesTokenCount: data.usage.completion_tokens,
+            totalTokenCount: data.usage.total_tokens,
+         })
+      }
 
       if (data.choices.length === 0) {
          throw new Error('OpenAiAdapter: No choices returned in chat completion response')
@@ -436,7 +508,7 @@ export class OpenAiAdapter extends AbstractAiAdapter {
          payload.max_tokens = options.maxTokens
       }
 
-      const response = await this._postChatCompletions(payload, options?.headers)
+      const response = await this._postChatCompletions(payload, options?.headers, options?.timeoutMs)
 
       if (!response.body) {
          throw new Error('OpenAiAdapter: Stream response body is empty or unavailable')
@@ -476,13 +548,15 @@ export class OpenAiAdapter extends AbstractAiAdapter {
    protected async _postChatCompletions(
       payload: Record<string, unknown>,
       headers?: Record<string, string>,
+      timeoutMs?: number,
    ): Promise<Response> {
       const url = `${this._baseUrl}/chat/completions`
 
+      const timeout = timeoutMs ?? this._timeoutMs
       const controller = new AbortController()
       const timer = setTimeout(() => {
          controller.abort()
-      }, this._timeoutMs)
+      }, timeout)
 
       try {
          const response = await fetch(url, {

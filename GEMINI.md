@@ -23,7 +23,8 @@ If the task requires editing, refactoring, fixing, or extending the packages, mo
 All contributions follow the GitFlow lifecycle defined in [AGENTS.okf](file:///Users/crapougnax/CODE/CRAPOUGNAX/AGENTS.okf/content/workflow/gitflow-protocol.md):
 - Active integration branch: `develop`
 - Branching: `feat/<issue-id>-<description>` or `fix/<issue-id>-<description>` strictly from `develop`
-- Pull Requests: Target `--base develop` via `gh pr create`
+- Source of authority: `git.qtrn.io/Quatrain/Core` (git remote `sovereign`). `github.com/Quatrain/Core` is a read-only push mirror: never open issues or PRs there.
+- Pull Requests: Target `develop` on Forgejo (see [CONTRIBUTING_AGENTS.md](./guidelines/CONTRIBUTING_AGENTS.md) for the API calls)
 
 ---
 

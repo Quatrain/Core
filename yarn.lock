@@ -2870,7 +2870,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@quatrain/ai-gemini@workspace:packages/ai-gemini":
+"@quatrain/ai-gemini@workspace:*, @quatrain/ai-gemini@workspace:packages/ai-gemini":
   version: 0.0.0-use.local
   resolution: "@quatrain/ai-gemini@workspace:packages/ai-gemini"
   dependencies:
@@ -2890,7 +2890,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/ai-openai@workspace:packages/ai-openai":
+"@quatrain/ai-openai@workspace:*, @quatrain/ai-openai@workspace:packages/ai-openai":
   version: 0.0.0-use.local
   resolution: "@quatrain/ai-openai@workspace:packages/ai-openai"
   dependencies:
@@ -3560,6 +3560,41 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/git-forgejo@workspace:packages/git-forgejo":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/git-forgejo@workspace:packages/git-forgejo"
+  dependencies:
+    "@quatrain/core": "workspace:*"
+    "@quatrain/git": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/git-github@workspace:packages/git-github":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/git-github@workspace:packages/git-github"
+  dependencies:
+    "@quatrain/core": "workspace:*"
+    "@quatrain/git": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/git@workspace:*, @quatrain/git@workspace:packages/git":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/git@workspace:packages/git"
+  dependencies:
+    "@quatrain/core": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/http@workspace:*, @quatrain/http@workspace:packages/http":
   version: 0.0.0-use.local
   resolution: "@quatrain/http@workspace:packages/http"
@@ -3746,6 +3781,45 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/okf-ingest-catalog@workspace:packages/okf-ingest-catalog":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/okf-ingest-catalog@workspace:packages/okf-ingest-catalog"
+  dependencies:
+    "@quatrain/ai": "workspace:*"
+    "@quatrain/core": "workspace:*"
+    "@quatrain/log": "workspace:*"
+    "@quatrain/okf-ingest": "workspace:*"
+    "@quatrain/types": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    "@types/pdf-parse": "npm:^1.1.4"
+    pdf-parse: "npm:^1.1.1"
+    typescript: "npm:^5.2.2"
+    yaml: "npm:^2.4.0"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/okf-ingest@workspace:*, @quatrain/okf-ingest@workspace:packages/okf-ingest":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/okf-ingest@workspace:packages/okf-ingest"
+  dependencies:
+    "@quatrain/ai": "workspace:*"
+    "@quatrain/ai-gemini": "workspace:*"
+    "@quatrain/ai-openai": "workspace:*"
+    "@quatrain/core": "workspace:*"
+    "@quatrain/log": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:^22.10.1"
+    "@types/pdf-parse": "npm:^1.1.4"
+    jest: "npm:^29.7.0"
+    pdf-parse: "npm:^1.1.1"
+    ts-jest: "npm:^29.4.6"
+    typescript: "npm:^5.2.2"
+    yaml: "npm:^2.4.0"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/okf@workspace:packages/okf":
   version: 0.0.0-use.local
   resolution: "@quatrain/okf@workspace:packages/okf"
@@ -3912,6 +3986,47 @@ __metadata:
     "@tsconfig/recommended": "npm:^1.0.1"
     "@types/node": "npm:^22.10.1"
     typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/speech-api@workspace:packages/speech-api":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/speech-api@workspace:packages/speech-api"
+  dependencies:
+    "@quatrain/speech": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:^22.10.1"
+    jest: "npm:^29.7.0"
+    ts-jest: "npm:^29.4.6"
+    typescript: "npm:^5.1.5"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/speech-browser@workspace:packages/speech-browser":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/speech-browser@workspace:packages/speech-browser"
+  dependencies:
+    "@quatrain/speech": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:^22.10.1"
+    jest: "npm:^29.7.0"
+    ts-jest: "npm:^29.4.6"
+    typescript: "npm:^5.1.5"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/speech@workspace:*, @quatrain/speech@workspace:packages/speech":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/speech@workspace:packages/speech"
+  dependencies:
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/jest": "npm:^29.5.12"
+    "@types/node": "npm:^22.10.1"
+    jest: "npm:^29.7.0"
+    ts-jest: "npm:^29.4.6"
+    typescript: "npm:^5.1.5"
   languageName: unknown
   linkType: soft
 

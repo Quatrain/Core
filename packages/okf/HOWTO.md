@@ -45,7 +45,7 @@ To save files, instantiate your model and save it:
 ```typescript
 const basin = await Bassin.factory();
 basin.set('name', 'Bassin N°4');
-basin.set('createdBy', 'pascal@sodav.ci'); // Injected in OKF meta block
+basin.set('createdBy', 'user@example.com'); // Injected in OKF meta block
 
 await basin.save(); // Generates /path/to/my/data/okf/bassins/{uid}.json
 ```

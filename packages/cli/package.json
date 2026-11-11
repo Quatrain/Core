@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/cli",
-  "version": "1.1.14",
+  "version": "1.1.15-beta.0",
   "license": "AGPL-3.0-only",
   "description": "Quatrain Core CLI for generating configurations and migrations",
   "main": "dist/index.js",
@@ -18,7 +18,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Quatrain/Core.git",
+    "url": "git+https://git.qtrn.io/Quatrain/Core.git",
     "directory": "packages/cli"
   },
   "author": "Quatrain Développement SAS <developers@quatrain.com>",

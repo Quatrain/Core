@@ -58,14 +58,47 @@ export class GeminiAdapter extends AbstractAiAdapter {
          config: {
             responseMimeType: 'application/json',
             responseSchema: schema,
+            maxOutputTokens: options?.maxOutputTokens || 8192,
+            temperature: options?.temperature,
+            systemInstruction: options?.systemInstruction,
          }
       })
 
-      if (!response.text) {
+      const rawText = response.text || ''
+      if (!rawText) {
          throw new Error('No text returned from Gemini API')
       }
 
-      return JSON.parse(response.text)
+      if (typeof options?.onUsage === 'function' && response.usageMetadata) {
+         options.onUsage(response.usageMetadata)
+      }
+
+      let cleanText = rawText.trim()
+      if (cleanText.startsWith('```json')) {
+         cleanText = cleanText.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      } else if (cleanText.startsWith('```')) {
+         cleanText = cleanText.replace(/^```\s*/, '').replace(/\s*```$/, '')
+      }
+
+      let parsed: any
+      try {
+         parsed = JSON.parse(cleanText)
+      } catch (err) {
+         const finishReason = response.candidates?.[0]?.finishReason
+         throw new Error(
+            `[GeminiAdapter] JSON Parse error (${(err as Error).message}, finishReason: ${finishReason}). Response snippet: ${cleanText.slice(-200)}`
+         )
+      }
+
+      if (options?.includeMetadata) {
+         return {
+            data: parsed,
+            usageMetadata: response.usageMetadata,
+            rawText,
+         }
+      }
+
+      return parsed
    }
 
    /**

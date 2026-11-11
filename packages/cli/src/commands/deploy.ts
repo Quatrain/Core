@@ -138,7 +138,7 @@ function parseMetadataFromYaml(appDir: string, namespaceName: string): AppMetada
 
       // Extract image reference
       let imageRef = ''
-      const imageMatch = depContent.match(/image:\s*(ghcr\.io\/quatrain\/studio-image:[^\s\n]+)/)
+      const imageMatch = depContent.match(/image:\s*((?:qtrn|ghcr)\.io\/quatrain\/studio-image:[^\s\n]+)/)
       if (imageMatch) {
          imageRef = imageMatch[1]
       } else {
@@ -517,7 +517,7 @@ export async function deployCommand() {
                      type: 'input',
                      name: 'imageRef',
                      message: `Référence de l'image (Par défaut: studio-image:${detectLatestStableTag(coreDeployPath)}) :`,
-                     default: `ghcr.io/quatrain/studio-image:${detectLatestStableTag(coreDeployPath)}`
+                     default: `qtrn.io/quatrain/studio-image:${detectLatestStableTag(coreDeployPath)}`
                   },
                   {
                      type: 'input',

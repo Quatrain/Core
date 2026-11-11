@@ -45,3 +45,4 @@ docs/.yarn/
 firestore-debug.log
 firebase-debug.log
 .node-persist/
+docs/CORESEC_STRATEGIC_SPECIFICATION.fr.md

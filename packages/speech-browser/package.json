@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/speech-browser",
-  "version": "0.1.0",
+  "version": "0.1.1-beta.0",
   "license": "AGPL-3.0-only",
   "description": "On-device speech synthesis adapter for @quatrain/speech (Web Speech API)",
   "main": "dist/index.js",

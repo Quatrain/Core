@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/speech-api",
-  "version": "0.1.0",
+  "version": "0.1.1-beta.0",
   "license": "AGPL-3.0-only",
   "description": "Remote speech adapter for @quatrain/speech: plays audio returned by a speech API endpoint, sentence by sentence",
   "main": "dist/index.js",

@@ -1,0 +1,80 @@
+name: Documentation Image
+
+# Builds the documentation site (docs/ContainerFile) and pushes it to the sovereign
+# registry as qtrn.io/quatrain/core-docs:<branch> and :sha-<short>.
+# The image targets linux/arm64 only, the architecture of the qtrn.io nodes and runners.
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'docs/**'
+      - 'scripts/build-docs.ts'
+      - '.forgejo/workflows/docs.yaml'
+  schedule:
+    # Nightly rebuild picks up API reference changes from packages/*.
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+env:
+  DOCKER_HOST: tcp://127.0.0.1:2375
+  IMAGE: qtrn.io/quatrain/core-docs
+
+concurrency:
+  group: core-docs-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Build & Push Documentation Image to qtrn.io
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Debian's docker.io client has no BuildKit frontend for `FROM --platform=$BUILDPLATFORM`:
+      # install the Docker CLI with the buildx plugin from Docker's signed apt repository.
+      - name: Install Docker CLI with buildx
+        run: |
+          distro="$(. /etc/os-release && echo "${ID}")"
+          codename="$(. /etc/os-release && echo "${VERSION_CODENAME}")"
+          install -m 0755 -d /etc/apt/keyrings
+          curl -fsSL "https://download.docker.com/linux/${distro}/gpg" -o /etc/apt/keyrings/docker.asc
+          chmod a+r /etc/apt/keyrings/docker.asc
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${distro} ${codename} stable" \
+            > /etc/apt/sources.list.d/docker.list
+          apt-get update -qq
+          apt-get install -y -qq docker-ce-cli docker-buildx-plugin
+          docker version
+          docker buildx version
+
+      - name: Log in to qtrn.io
+        env:
+          REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+        run: |
+          if [ -z "${REGISTRY_USER}" ] || [ -z "${REGISTRY_TOKEN}" ]; then
+            echo "Secrets REGISTRY_USER and REGISTRY_TOKEN are required (Settings > Actions > Secrets)." >&2
+            exit 1
+          fi
+          echo "${REGISTRY_TOKEN}" | docker login qtrn.io -u "${REGISTRY_USER}" --password-stdin
+
+      - name: Build and push
+        run: |
+          SHORT_SHA="$(git rev-parse --short=7 HEAD)"
+          docker buildx build \
+            --platform linux/arm64 \
+            --file docs/ContainerFile \
+            --label "org.opencontainers.image.source=https://git.qtrn.io/quatrain/core" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --tag "${IMAGE}:${GITHUB_REF_NAME}" \
+            --tag "${IMAGE}:sha-${SHORT_SHA}" \
+            --push \
+            .
+          docker buildx imagetools inspect "${IMAGE}:sha-${SHORT_SHA}"

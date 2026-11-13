@@ -12,6 +12,8 @@ import {
    BackendAction,
    BackendParameters,
    BackendError,
+   UniqueConstraintError,
+   uniquePropertyNames,
    QueryMetaType,
    QueryResultType,
    Filters,
@@ -52,6 +54,9 @@ const operatorsMap: { [x: string]: string } = {
    isNull: 'IS NULL',
    isNotNull: 'IS NOT NULL',
 }
+
+/** SQLSTATE raised when a unique constraint refuses a value. */
+const PG_UNIQUE_VIOLATION = '23505'
 
 /** Shape of the property names accepted where they become SQL identifiers. */
 const SQL_IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/
@@ -205,6 +210,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                  name,
                  type: def.type || (def.constructor && def.constructor.name),
                  constructor: def.constructor,
+                 unique: def.unique === true,
               }))
 
          const seen = new Set<string>()
@@ -234,7 +240,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                columnType = 'VARCHAR(255)'
             }
 
-            query += `,\n    "${propName}" ${columnType}`
+            query += `,\n    "${propName}" ${columnType}${propDef.unique === true ? ' UNIQUE' : ''}`
          })
 
          query += `\n)`
@@ -353,10 +359,33 @@ export class PostgresAdapter extends AbstractBackendAdapter {
 
          return dataObject
       } catch (err) {
+         const conflict = this._uniqueViolation(err, dataObject)
+         if (conflict) {
+            throw conflict
+         }
          console.log(err)
          Backend.error((err as Error).message)
          throw new BackendError((err as Error).message)
       }
+   }
+
+   /**
+    * Recognises the PostgreSQL error raised when a `UNIQUE` column receives a value already taken.
+    *
+    * @param err - The error thrown by the driver.
+    * @param dataObject - The DataObject that was being written.
+    * @returns The matching `UniqueConstraintError`, or `undefined` for any other error.
+    */
+   protected _uniqueViolation(err: unknown, dataObject: DataObjectClass<any>): UniqueConstraintError | undefined {
+      const pgError = err as { code?: string; constraint?: string } | undefined
+      if (!pgError || pgError.code !== PG_UNIQUE_VIOLATION) {
+         return undefined
+      }
+      const collection = (this.getCollection(dataObject) || '').toLowerCase()
+      const property = uniquePropertyNames(dataObject).find(
+         (name) => pgError.constraint === `${collection}_${name.toLowerCase()}_key`
+      )
+      return new UniqueConstraintError(collection, property)
    }
 
    /**
@@ -530,7 +559,11 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          Backend.debug(`[PGA] ${query}`)
          Backend.debug(`[PGA] Values ${JSON.stringify(values)}`)
 
-         await this._query(query, values)
+         try {
+            await this._query(query, values)
+         } catch (err) {
+            throw this._uniqueViolation(err, dataObject) || err
+         }
       } else {
          Backend.warn(`[PGA] No data to update`)
       }
@@ -958,7 +991,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             columnType = 'VARCHAR(255)'
          }
 
-         query += `,\n    "${propName}" ${columnType}`
+         query += `,\n    "${propName}" ${columnType}${propDef.unique === true ? ' UNIQUE' : ''}`
       })
 
       query += `\n)`
@@ -992,7 +1025,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          else if (type === 'ArrayProperty') columnType = 'JSONB'
          else if (type === 'ObjectProperty') columnType = 'VARCHAR(255)'
 
-         upSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" ADD COLUMN "${propName}" ${columnType}\`)`)
+         upSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" ADD COLUMN "${propName}" ${columnType}${propDef.unique === true ? ' UNIQUE' : ''}\`)`)
          downSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" DROP COLUMN "${propName}"\`)`)
       })
 

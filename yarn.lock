@@ -3640,6 +3640,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/identifiers@workspace:packages/identifiers":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/identifiers@workspace:packages/identifiers"
+  dependencies:
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/ingestion-audio@workspace:packages/ingestion-audio":
   version: 0.0.0-use.local
   resolution: "@quatrain/ingestion-audio@workspace:packages/ingestion-audio"

@@ -3219,7 +3219,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/backend-postgres@workspace:packages/backend-postgres":
+"@quatrain/backend-postgres@workspace:*, @quatrain/backend-postgres@workspace:packages/backend-postgres":
   version: 0.0.0-use.local
   resolution: "@quatrain/backend-postgres@workspace:packages/backend-postgres"
   dependencies:
@@ -3640,7 +3640,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/identifiers@workspace:packages/identifiers":
+"@quatrain/identifiers@workspace:*, @quatrain/identifiers@workspace:packages/identifiers":
   version: 0.0.0-use.local
   resolution: "@quatrain/identifiers@workspace:packages/identifiers"
   dependencies:
@@ -4181,6 +4181,21 @@ __metadata:
     ts-jest: "npm:^29.4.6"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.1.5"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/tenancy@workspace:packages/tenancy":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/tenancy@workspace:packages/tenancy"
+  dependencies:
+    "@quatrain/backend": "workspace:*"
+    "@quatrain/backend-postgres": "workspace:*"
+    "@quatrain/backend-sqlite": "workspace:*"
+    "@quatrain/core": "workspace:*"
+    "@quatrain/identifiers": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
   languageName: unknown
   linkType: soft
 

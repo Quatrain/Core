@@ -55,6 +55,9 @@ const operatorsMap: { [x: string]: string } = {
    isNotNull: 'IS NOT NULL',
 }
 
+/** Shape of a custom PostgreSQL setting name: `namespace.name`. */
+const SESSION_SETTING = /^[a-z_][a-z0-9_]*\.[a-z_][a-z0-9_]*$/
+
 /** SQLSTATE raised when a unique constraint refuses a value. */
 const PG_UNIQUE_VIOLATION = '23505'
 
@@ -107,12 +110,58 @@ export class PostgresAdapter extends AbstractBackendAdapter {
       return await this._pool.connect()
    }
 
+   /**
+    * Reads the session settings to apply to the next statement, as returned by the
+    * `config.sessionSettings` function given to the adapter.
+    *
+    * @returns Setting names and values, or `undefined` when there is none.
+    * @throws {BackendError} If a setting name is not of the form `namespace.name`.
+    */
+   protected _sessionSettings(): [string, string][] | undefined {
+      const provider = this._params.config?.sessionSettings
+      if (typeof provider !== 'function') {
+         return undefined
+      }
+      const settings = provider()
+      if (!settings) {
+         return undefined
+      }
+      const entries = Object.entries(settings).map(([name, value]): [string, string] => {
+         if (!SESSION_SETTING.test(name)) {
+            throw new BackendError(`[PGA] Invalid session setting name '${name}'`)
+         }
+         return [name, String(value)]
+      })
+      return entries.length > 0 ? entries : undefined
+   }
+
    protected async _query(sql: string, params: any[] = []) {
+      const settings = this._sessionSettings()
       const connection = await this._connect()
+      let broken = false
       try {
-         return await connection.query(sql, params)
+         if (!settings) {
+            return await connection.query(sql, params)
+         }
+         // The settings live for one transaction only: the pooled connection never keeps them.
+         await connection.query('BEGIN')
+         try {
+            const placeholders = settings.map((_, i) => `set_config($${i * 2 + 1}, $${i * 2 + 2}, true)`)
+            await connection.query(`SELECT ${placeholders.join(', ')}`, settings.flat())
+            const result = await connection.query(sql, params)
+            await connection.query('COMMIT')
+            return result
+         } catch (err) {
+            try {
+               await connection.query('ROLLBACK')
+            } catch {
+               broken = true
+            }
+            throw err
+         }
       } finally {
-         connection.release()
+         // A connection that could not roll back is destroyed instead of going back to the pool.
+         connection.release(broken)
       }
    }
 

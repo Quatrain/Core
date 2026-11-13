@@ -31,6 +31,13 @@ describe('SQLite unique properties', () => {
       await expect(adapter.update(globex)).rejects.toBeInstanceOf(UniqueConstraintError)
    })
 
+   test('reports a record identifier already taken the same way', async () => {
+      await adapter.create(space({ slug: 'first-id' }), 'fixed-id')
+      const duplicate = adapter.create(space({ slug: 'second-id' }), 'fixed-id')
+      await expect(duplicate).rejects.toBeInstanceOf(UniqueConstraintError)
+      await expect(duplicate).rejects.toMatchObject({ collection: 'unique_spaces', property: undefined })
+   })
+
    test('lets missing values repeat', async () => {
       await adapter.create(space({ label: 'no slug 1' }), undefined)
       await expect(adapter.create(space({ label: 'no slug 2' }), undefined)).resolves.toBeDefined()

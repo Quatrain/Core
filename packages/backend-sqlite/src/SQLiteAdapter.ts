@@ -944,9 +944,6 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
       }
       const column = match[1].split('.').pop()
       const collection = (this.getCollection(dataObject) || '').toLowerCase()
-      if (column === 'id') {
-         return undefined
-      }
       const property = uniquePropertyNames(dataObject).find((name) => name === column)
       return new UniqueConstraintError(collection, property)
    }

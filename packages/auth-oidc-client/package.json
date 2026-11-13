@@ -1,0 +1,36 @@
+{
+  "name": "@quatrain/auth-oidc-client",
+  "version": "1.0.0-beta.0",
+  "description": "OpenID Connect relying-party adapter: discovery, authorization code flow with PKCE, ID token verification",
+  "license": "AGPL-3.0-only",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "src/",
+    "dist/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://git.qtrn.io/Quatrain/Core.git",
+    "directory": "packages/auth-oidc-client"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "dependencies": {
+    "@quatrain/auth": "workspace:*",
+    "@quatrain/backend": "workspace:*",
+    "jose": "^5.10.0"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "wbuild": "tsc --watch",
+    "bump-to": "yarn version"
+  }
+}

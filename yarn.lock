@@ -3098,6 +3098,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/auth-oidc-client@workspace:packages/auth-oidc-client":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/auth-oidc-client@workspace:packages/auth-oidc-client"
+  dependencies:
+    "@quatrain/auth": "workspace:*"
+    "@quatrain/backend": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    jose: "npm:^5.10.0"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/auth-oidc@workspace:*, @quatrain/auth-oidc@workspace:packages/auth-oidc":
   version: 0.0.0-use.local
   resolution: "@quatrain/auth-oidc@workspace:packages/auth-oidc"
@@ -9687,7 +9700,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^5.9.6":
+"jose@npm:^5.10.0, jose@npm:^5.9.6":
   version: 5.10.0
   resolution: "jose@npm:5.10.0"
   checksum: 10c0/e20d9fc58d7e402f2e5f04e824b8897d5579aae60e64cb88ebdea1395311c24537bf4892f7de413fab1acf11e922797fb1b42269bc8fc65089a3749265ccb7b0

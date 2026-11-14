@@ -3,6 +3,7 @@ import { Core, ObjectUri } from '@quatrain/core'
 import { DataObjectClass } from './types/DataObjectClass'
 import { BackendError } from './BackendError'
 import { NotFoundError } from './NotFoundError'
+import { UniqueConstraintError, uniquePropertyNames } from './UniqueConstraintError'
 import { QueryResultType } from './Query'
 import { Filter } from './Filter'
 import { Filters } from './Filters'
@@ -107,6 +108,7 @@ export class MockAdapter
 
       return new Promise((resolve, reject) => {
          try {
+            this._assertUnique(dataObject, dataObject.toJSON(), uri)
             MockAdapter.inject({
                ...dataObject.toJSON(),
                uid: uri,
@@ -114,9 +116,36 @@ export class MockAdapter
             })
             resolve(dataObject)
          } catch (err) {
-            reject(new BackendError((err as Error).message))
+            reject(err instanceof UniqueConstraintError ? err : new BackendError((err as Error).message))
          }
       })
+   }
+
+   /**
+    * Refuses a write that would duplicate the value of a property declared `unique`.
+    *
+    * @param dataObject - The DataObject being written.
+    * @param data - The values about to be stored.
+    * @param path - The path of the record being written, ignored in the comparison.
+    * @throws {UniqueConstraintError} If another record of the collection holds one of the values.
+    */
+   protected _assertUnique(dataObject: DataObjectClass<any>, data: any, path: string) {
+      const collection = this.getCollection(dataObject) || ''
+      for (const property of uniquePropertyNames(dataObject)) {
+         const value = data[property]
+         if (value === undefined || value === null) {
+            continue
+         }
+         for (const [otherPath, other] of Object.entries(MockAdapter._fixtures)) {
+            if (
+               otherPath !== path &&
+               otherPath.startsWith(`${collection}/`) &&
+               (other as any)?.[property] === value
+            ) {
+               throw new UniqueConstraintError(collection, property)
+            }
+         }
+      }
    }
 
    /**
@@ -155,6 +184,7 @@ export class MockAdapter
          throw new NotFoundError(`[Mock] No data for ${path}`)
       }
       this.log(`[DAO] Updating ${dataObject.path}`)
+      this._assertUnique(dataObject, { ...data, ...dataObject.toJSON() }, path)
       MockAdapter._fixtures[path] = { ...data, ...dataObject.toJSON() }
       return dataObject
    }

@@ -11,6 +11,8 @@ import {
    BackendAction,
    BackendParameters,
    BackendError,
+   UniqueConstraintError,
+   uniquePropertyNames,
    QueryMetaType,
    QueryResultType,
    Filters,
@@ -155,7 +157,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
                   columnType = 'TEXT' // Store reference ID
                }
 
-               query += `,\n"${propName}" ${columnType}`
+               query += `,\n"${propName}" ${columnType}${propDef.unique === true ? ' UNIQUE' : ''}`
             }
          )
 
@@ -252,6 +254,10 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
 
          return dataObject
       } catch (err) {
+         const conflict = this._uniqueViolation(err, dataObject)
+         if (conflict) {
+            throw conflict
+         }
          console.error(err)
          Backend.error((err as Error).message)
          throw new BackendError((err as Error).message)
@@ -421,8 +427,12 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
       Backend.debug(`[SQLA] ${query}`)
       Backend.debug(`[SQLA] Values ${JSON.stringify(values)}`)
 
-      await db.run(query, values)
-      
+      try {
+         await db.run(query, values)
+      } catch (err) {
+         throw this._uniqueViolation(err, dataObject) || err
+      }
+
       await this.executeMiddlewares(dataObject, BackendAction.UPDATE, 'after')
       return dataObject
    }
@@ -920,6 +930,25 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
    }
 
    /**
+    * Recognises the SQLite error raised when a `UNIQUE` column receives a value already taken.
+    *
+    * @param err - The error thrown by the driver.
+    * @param dataObject - The DataObject that was being written.
+    * @returns The matching `UniqueConstraintError`, or `undefined` for any other error.
+    */
+   protected _uniqueViolation(err: unknown, dataObject: DataObjectClass<any>): UniqueConstraintError | undefined {
+      const message = String((err as Error | undefined)?.message || '')
+      const match = /UNIQUE constraint failed: ([^\s,]+)/.exec(message)
+      if (!match) {
+         return undefined
+      }
+      const column = match[1].split('.').pop()
+      const collection = (this.getCollection(dataObject) || '').toLowerCase()
+      const property = uniquePropertyNames(dataObject).find((name) => name === column)
+      return new UniqueConstraintError(collection, property)
+   }
+
+   /**
     * Generates the SQL up and down statements to create a collection table.
     */
    generateCreateSql(collection: string, properties: any[]): { upSql: string; downSql: string } {
@@ -942,7 +971,7 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
             columnType = 'TEXT'
          }
 
-         query += `,\n    "${propName}" ${columnType}`
+         query += `,\n    "${propName}" ${columnType}${propDef.unique === true ? ' UNIQUE' : ''}`
       })
 
       query += `\n)`
@@ -975,6 +1004,10 @@ export class SQLiteAdapter extends AbstractBackendAdapter {
          }
 
          upSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" ADD COLUMN "${propName}" ${columnType}\`)`)
+         if (propDef.unique === true) {
+            // SQLite cannot add a UNIQUE column to an existing table: a unique index does the same job.
+            upSql.push(`await adapter.rawQuery(\`CREATE UNIQUE INDEX IF NOT EXISTS "${collection.toLowerCase()}_${propName.toLowerCase()}_key" ON "${collection.toLowerCase()}" ("${propName}")\`)`)
+         }
          // SQLite < 3.35 doesn't support DROP COLUMN, so we add a comment but keep the syntax
          downSql.push(`// NOTE: DROP COLUMN requires SQLite >= 3.35\n   // await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" DROP COLUMN "${propName}"\`)`)
       })

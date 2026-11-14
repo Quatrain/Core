@@ -7,6 +7,7 @@ export {
    UnauthorizedError,
    ForbiddenError,
    NotFoundError,
+   ConflictError,
    GoneError,
    ValidationError,
    BackendError,

@@ -4,6 +4,7 @@ export {
    UnauthorizedError,
    ForbiddenError,
    NotFoundError,
+   ConflictError,
    GoneError,
    ValidationError,
 } from '@quatrain/types'

@@ -1,4 +1,4 @@
-name: Quatrain Core Sovereign CI
+name: Quatrain Core CI
 
 on:
   push:

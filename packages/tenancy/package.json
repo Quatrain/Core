@@ -1,0 +1,39 @@
+{
+  "name": "@quatrain/tenancy",
+  "version": "1.0.0-beta.0",
+  "description": "Multi-tenancy primitives: tenant registry, memberships, request resolution, async tenant scope and per-tenant resources",
+  "license": "AGPL-3.0-only",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "src/",
+    "dist/",
+    "README.md",
+    "HOWTO.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://git.qtrn.io/Quatrain/Core.git",
+    "directory": "packages/tenancy"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "dependencies": {
+    "@quatrain/backend": "workspace:*",
+    "@quatrain/core": "workspace:*",
+    "@quatrain/identifiers": "workspace:*"
+  },
+  "devDependencies": {
+    "@quatrain/backend-postgres": "workspace:*",
+    "@quatrain/backend-sqlite": "workspace:*",
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "wbuild": "tsc --watch",
+    "bump-to": "yarn version"
+  }
+}

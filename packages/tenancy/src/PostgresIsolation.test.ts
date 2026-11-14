@@ -1,6 +1,6 @@
-import { Limits, PersistedBaseObject, SortAndLimit, Sorting } from '@quatrain/backend'
+import { Limits, PersistedBaseObject, SortAndLimit, Sorting, User } from '@quatrain/backend'
 import { PostgresAdapter, assertRowSecurityRole, rowIsolationSql } from '@quatrain/backend-postgres'
-import { BaseObjectProperties, StringProperty } from '@quatrain/core'
+import { BaseObjectProperties, Core, StringProperty } from '@quatrain/core'
 import { NotAMemberError, Tenancy, TenancyRepository, currentTenant, findCurrentScope } from './index'
 
 /**
@@ -10,6 +10,10 @@ import { NotAMemberError, Tenancy, TenancyRepository, currentTenant, findCurrent
  *   POSTGRES_HOST=127.0.0.1 POSTGRES_PORT=5432 POSTGRES_DB=quatrain_test POSTGRES_USER=postgres yarn jest packages/tenancy
  */
 const suite = process.env.POSTGRES_HOST ? describe : describe.skip
+
+// Every model refers to users (createdBy…): with the class registered, the adapter creates the
+// complete users table instead of a bare placeholder that would break other tests.
+Core.addClass('User', User)
 
 class Document extends PersistedBaseObject {
    static COLLECTION = 'tenancy_test_documents'

@@ -143,4 +143,5 @@ flowchart TD
    ```
 4. **Production Releases (`develop` $\to$ `main`):** Formal release PRs merge from `develop` into `main` with annotated SemVer tags.
 5. **npm Publication:** Forgejo Actions (`.forgejo/workflows/ci.yaml`, job `publish`) runs `bin/publish_all.js` after a green CI: pushes to `develop` publish changed packages under the `beta` dist-tag, pushes to `main` publish `latest` and create a `vYYYY.MM.DD` tag. Version bumps are committed back with `[skip ci]`. The repository secret `NPM_TOKEN` must be set.
+6. **Release Tags:** Packages are versioned independently, so a release from `main` is tagged per package. After publication, the same job runs `bin/tag_released_packages.js`, which creates one annotated tag `@quatrain/<package>@<version>` for each package whose version changed in the release commit. Beta versions published from `develop` are not tagged, and no tag covers the monorepo as a whole.
 

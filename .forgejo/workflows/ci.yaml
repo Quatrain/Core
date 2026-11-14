@@ -19,6 +19,14 @@ jobs:
   ci:
     name: Monorepo Build, Tests & Quality Audit
     runs-on: ubuntu-latest
+    # Job image with Node.js, Corepack, the build toolchain and the Docker CLI already installed
+    # (recipe: tycho/forge-ci, built by the fork of this forge). Trial on the `develop` tag; pin a
+    # released major afterwards.
+    container:
+      image: qtrn.io/qtrn-io/ci-base:develop
+      credentials:
+        username: ${{ secrets.REGISTRY_USER }}
+        password: ${{ secrets.REGISTRY_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -26,20 +34,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Enable Corepack & Configure Yarn
+      - name: Show the toolchain
         run: |
-          echo "Node.js version: $(node -v)"
-          corepack enable
-          yarn --version
-
-      - name: Install System Prerequisites
-        run: |
-          echo "=== Installing system build tools ==="
-          if ! command -v docker > /dev/null 2>&1; then
-            apt-get update -qq && apt-get install -y -qq python3 make g++ docker.io
-          else
-            apt-get update -qq && apt-get install -y -qq python3 make g++
-          fi
+          echo "ci-base ${CI_BASE_VERSION}, user $(id -un)"
+          echo "Node.js $(node -v), Yarn $(yarn --version)"
+          docker --version
 
       - name: Start Isolated PostgreSQL Test Instance
         # Runs share the DinD daemon: the container name and host port must be unique per run,

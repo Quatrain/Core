@@ -1,4 +1,4 @@
-name: Quatrain Core Sovereign CI
+name: Quatrain Core CI
 
 on:
   push:
@@ -19,6 +19,11 @@ jobs:
   ci:
     name: Monorepo Build, Tests & Quality Audit
     runs-on: ubuntu-latest
+    # Job image with Node.js, Corepack, the build toolchain and the Docker CLI already installed
+    # (recipe: tycho/forge-ci, built by the fork of this forge). Pinned to a major version: fixes
+    # arrive without a change here, a removed tool never does. The image is public.
+    container:
+      image: qtrn.io/qtrn-io/ci-base:1
 
     steps:
       - name: Checkout repository
@@ -26,20 +31,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Enable Corepack & Configure Yarn
+      - name: Show the toolchain
         run: |
-          echo "Node.js version: $(node -v)"
-          corepack enable
-          yarn --version
-
-      - name: Install System Prerequisites
-        run: |
-          echo "=== Installing system build tools ==="
-          if ! command -v docker > /dev/null 2>&1; then
-            apt-get update -qq && apt-get install -y -qq python3 make g++ docker.io
-          else
-            apt-get update -qq && apt-get install -y -qq python3 make g++
-          fi
+          echo "ci-base ${CI_BASE_VERSION}, user $(id -un)"
+          echo "Node.js $(node -v), Yarn $(yarn --version)"
+          docker --version
 
       - name: Start Isolated PostgreSQL Test Instance
         # Runs share the DinD daemon: the container name and host port must be unique per run,
@@ -71,7 +67,15 @@ jobs:
           echo "=== Installing dependencies ==="
           YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
 
+      # Runners are ephemeral: without a remote cache every run rebuilds every package.
+      # The runners of the forge give the address and the credentials of the cache to every
+      # job (TURBO_API, TURBO_TEAM, TURBO_TOKEN, TURBO_REMOTE_CACHE_SIGNATURE_KEY); on a forge
+      # that does not, Turborepo builds as before. Only develop and main write to the cache:
+      # an artifact written by any other ref would be reused by the following builds.
       - name: Build Monorepo (Turbo)
+        env:
+          TURBO_CACHE: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')) && 'local:rw,remote:rw' || 'local:rw,remote:r' }}
+          TURBO_TELEMETRY_DISABLED: '1'
         run: |
           echo "=== Building all monorepo packages ==="
           yarn build
@@ -132,7 +136,11 @@ jobs:
           git config --global user.email "forgejo-actions@git.qtrn.io"
           git pull --rebase origin "${GITHUB_REF_NAME}" --autostash
 
+      # No remote cache here on purpose: what goes to npm is built on this runner.
       - name: Publish changed packages
+        env:
+          TURBO_CACHE: local:rw
+          TURBO_TELEMETRY_DISABLED: '1'
         run: |
           if [ "${GITHUB_REF_NAME}" = "develop" ]; then
             yarn publish:all --tag beta --beta
@@ -154,16 +162,10 @@ jobs:
           git push --no-verify origin "HEAD:${GITHUB_REF_NAME}"
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
-      - name: Create temporal release tag on main
+      # Packages are versioned independently: each released package gets its own tag,
+      # @quatrain/<package>@<version>, on the commit that carries its new version.
+      - name: Tag released packages on main
         if: github.ref == 'refs/heads/main' && steps.bump.outputs.changed == 'true'
         run: |
           git fetch --tags origin
-          DATE_TAG="v$(date -u +'%Y.%m.%d')"
-          TAG="$DATE_TAG"
-          COUNTER=1
-          while git rev-parse "$TAG" >/dev/null 2>&1; do
-            TAG="${DATE_TAG}.${COUNTER}"
-            COUNTER=$((COUNTER + 1))
-          done
-          git tag -a "$TAG" -m "Release $TAG [skip ci]"
-          git push --no-verify origin "$TAG"
+          node bin/tag_released_packages.js --push

@@ -1,8 +1,12 @@
 import { AsyncLocalStorage } from 'node:async_hooks'
-import { BackendError, Filter, Limits, PersistedBaseObject, SortAndLimit, Sorting } from '@quatrain/backend'
-import { BaseObjectProperties, NotFoundError, StringProperty } from '@quatrain/core'
+import { BackendError, Filter, Limits, PersistedBaseObject, SortAndLimit, Sorting, User } from '@quatrain/backend'
+import { BaseObjectProperties, Core, NotFoundError, StringProperty } from '@quatrain/core'
 import { PostgresAdapter } from '../PostgresAdapter'
 import { assertRowSecurityRole, rowIsolationSql } from '../rowIsolation'
+
+// Every model refers to users (createdBy…): with the class registered, the adapter creates the
+// complete users table instead of a bare placeholder that would break other tests.
+Core.addClass('User', User)
 
 class Note extends PersistedBaseObject {
    static COLLECTION = 'isolated_notes'

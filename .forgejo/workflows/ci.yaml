@@ -67,7 +67,19 @@ jobs:
           echo "=== Installing dependencies ==="
           YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
 
+      # Runners are ephemeral: without a remote cache every run rebuilds every package.
+      # The cache is used when the forge provides its settings (variables TURBO_API and
+      # TURBO_TEAM, secrets TURBO_TOKEN and TURBO_REMOTE_CACHE_SIGNATURE_KEY); without them
+      # Turborepo builds as before. Only develop and main write to it: an artifact written by
+      # any other ref would be reused by the following builds.
       - name: Build Monorepo (Turbo)
+        env:
+          TURBO_API: ${{ vars.TURBO_API }}
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
+          TURBO_CACHE: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')) && 'local:rw,remote:rw' || 'local:rw,remote:r' }}
+          TURBO_TELEMETRY_DISABLED: '1'
         run: |
           echo "=== Building all monorepo packages ==="
           yarn build
@@ -128,6 +140,7 @@ jobs:
           git config --global user.email "forgejo-actions@git.qtrn.io"
           git pull --rebase origin "${GITHUB_REF_NAME}" --autostash
 
+      # No remote cache here on purpose: what goes to npm is built on this runner.
       - name: Publish changed packages
         run: |
           if [ "${GITHUB_REF_NAME}" = "develop" ]; then

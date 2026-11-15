@@ -3,6 +3,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { spawnSync } = require('node:child_process');
 const { computePackageHash, getDepsHash } = require('./hashUtils');
+const { nextFreeBetaVersion } = require('./betaVersion');
 
 function runSync(command, args, options = {}) {
     const result = spawnSync(command, args, { ...options, shell: false });
@@ -24,6 +25,25 @@ const isGitHubRunner = Boolean(process.env.GITHUB_ACTIONS)
 
 /** GitHub Packages mirroring is opt-in outside GitHub runners (PUBLISH_GITHUB_PACKAGES=true). */
 const publishToGitHubPackages = isGitHubRunner || process.env.PUBLISH_GITHUB_PACKAGES === 'true';
+/**
+ * Lists the versions of a package on npmjs. A package never published has none; any other
+ * failure stops the release, because publishing blind could skip changed code.
+ */
+function listPublishedVersions(pkgName) {
+    const result = spawnSync('npm', ['view', pkgName, 'versions', '--json', '--registry', 'https://registry.npmjs.org/'], { encoding: 'utf8', shell: false });
+    if (result.error) {
+        throw result.error;
+    }
+    if (result.status !== 0) {
+        if (`${result.stdout}${result.stderr}`.includes('E404')) {
+            return [];
+        }
+        throw new Error(`Cannot list the published versions of ${pkgName}: ${result.stderr.trim()}`);
+    }
+    const versions = JSON.parse(result.stdout);
+    return Array.isArray(versions) ? versions : [versions];
+}
+
 const workspacesDirs = [
     path.join(__dirname, '../packages')
 ];
@@ -174,6 +194,15 @@ async function publishAll() {
                         const parts = base.split('.').map(Number);
                         parts[2] = (parts[2] || 0) + 1;
                         newVersion = `${parts.join('.')}-beta.0`;
+                    }
+
+                    // An earlier run may have published this beta without its version bump
+                    // reaching the repository: take the next free counter instead of skipping.
+                    const published = listPublishedVersions(pkgName);
+                    const freeVersion = nextFreeBetaVersion(newVersion, published);
+                    if (freeVersion !== newVersion) {
+                        console.log(`[VERSION-GUARD] ${pkgName}@${newVersion} already exists on npmjs. Publishing ${freeVersion} instead.`);
+                        newVersion = freeVersion;
                     }
                 } else {
                     // Standard stable release (on main)

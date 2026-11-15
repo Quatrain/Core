@@ -4,6 +4,7 @@ const crypto = require('node:crypto');
 const { spawnSync } = require('node:child_process');
 const { computePackageHash, getDepsHash } = require('./hashUtils');
 const { nextFreeBetaVersion } = require('./betaVersion');
+const { sortByDependencies, isPrerelease } = require('./dependencyOrder');
 
 function runSync(command, args, options = {}) {
     const result = spawnSync(command, args, { ...options, shell: false });
@@ -103,7 +104,11 @@ async function publishAll() {
         // Non-fatal: proceed even if find/delete fails
     }
 
-    const packages = getAllPkgs().map(p => p.name);
+    // Release order: dependencies first, so that each package is packed with the versions
+    // its dependencies receive in this run.
+    const packages = sortByDependencies(
+        getAllPkgs().map(p => ({ name: p.name, manifest: JSON.parse(fs.readFileSync(path.join(p.dir, 'package.json'), 'utf8')) }))
+    ).map(p => p.name);
     const computedHashes = {};
     const previousDataMap = {};
     let anyPackageChanged = false;
@@ -268,6 +273,10 @@ async function publishAll() {
                                      updatedPkgJson[deptype][dep] = `^${otherPkgJson.version}`;
                                 } catch(e) {
                                     console.warn(`[WARNING] Could not resolve workspace version for ${dep}`);
+                                }
+                                // A beta release may depend on betas; a stable release never does.
+                                if (!isBeta && deptype !== 'devDependencies' && isPrerelease(String(updatedPkgJson[deptype][dep]).replace(/^\^/, ''))) {
+                                    throw new Error(`Stable release of ${pkgName} would depend on the prerelease ${dep}@${updatedPkgJson[deptype][dep]}`);
                                 }
                             }
                         }

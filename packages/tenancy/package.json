@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/tenancy",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.3",
   "description": "Multi-tenancy primitives: tenant registry, memberships, request resolution, async tenant scope and per-tenant resources",
   "license": "AGPL-3.0-only",
   "main": "dist/index.js",

@@ -56,8 +56,3 @@ export class AgroecologyTaxonomyProfile implements DomainTaxonomyProfile {
       };
    }
 }
-
-/**
- * @deprecated Use {@link AgroecologyTaxonomyProfile} instead. Kept for backwards compatibility.
- */
-export { AgroecologyTaxonomyProfile as BradAgronomyProfile };

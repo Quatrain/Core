@@ -1,6 +1,6 @@
 {
   "name": "@quatrain/queue-postgres",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.2",
   "description": "PostgreSQL queue adapter: durable tasks claimed with SKIP LOCKED, progress, retries and stale-task recovery",
   "license": "AGPL-3.0-only",
   "main": "dist/index.js",

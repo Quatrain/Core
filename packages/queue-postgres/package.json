@@ -1,0 +1,37 @@
+{
+  "name": "@quatrain/queue-postgres",
+  "version": "1.0.0-beta.0",
+  "description": "PostgreSQL queue adapter: durable tasks claimed with SKIP LOCKED, progress, retries and stale-task recovery",
+  "license": "AGPL-3.0-only",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bun": "src/index.ts",
+  "files": [
+    "LICENSE.md",
+    "src/",
+    "dist/",
+    "sql/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://git.qtrn.io/Quatrain/Core.git",
+    "directory": "packages/queue-postgres"
+  },
+  "author": "Quatrain Développement SAS <developers@quatrain.com>",
+  "dependencies": {
+    "@quatrain/queue": "workspace:*",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/node": "^22.10.1",
+    "@types/pg": "^8.11.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "wbuild": "tsc --watch",
+    "bump-to": "yarn version"
+  }
+}

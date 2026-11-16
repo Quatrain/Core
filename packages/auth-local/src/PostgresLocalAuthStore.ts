@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import { Pool, type PoolConfig } from 'pg'
 import {
    DuplicateIdentityError,
@@ -9,6 +7,7 @@ import {
    type LocalAuthStoreInterface,
    type LocalSessionInterface,
 } from './LocalAuthStoreInterface'
+import { AUTH_LOCAL_SCHEMA_SQL } from './schema'
 
 /**
  * Configuration of the PostgreSQL store.
@@ -26,9 +25,6 @@ export interface PostgresLocalAuthStoreConfigInterface {
     */
    ensureSchema?: boolean
 }
-
-/** DDL of the tables, shipped with the package. */
-const SCHEMA_SQL_PATH = join(__dirname, '..', 'sql', 'auth_local.sql')
 
 /** PostgreSQL error code of a unique constraint violation. */
 const UNIQUE_VIOLATION = '23505'
@@ -99,7 +95,7 @@ export class PostgresLocalAuthStore implements LocalAuthStoreInterface {
 
    /** DDL of the tables, for an application that applies it with its own migrations. */
    static schemaSql(): string {
-      return readFileSync(SCHEMA_SQL_PATH, 'utf8')
+      return AUTH_LOCAL_SCHEMA_SQL
    }
 
    protected _prepare(): Promise<void> {

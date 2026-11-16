@@ -468,5 +468,10 @@
     "version": "1.0.0-beta.1",
     "hash": "bKfKifGuT9y8Z5/Uz5tZKevRnXM=-831e286e7f6dc262173918ae875bb4fc45313633816fb733fd7f587cbdffd2a8",
     "last_published": "2026-11-15T19:59:43.444Z"
+  },
+  "@quatrain/auth-local": {
+    "version": "1.0.0-beta.2",
+    "hash": "dtUY/obveDct4A1lR7a8r/UpWN0=-c251f21d6d99c3a21cece0aee09295c515b2dbc1af030a91d692aa3ffcd46021",
+    "last_published": "2026-11-16T11:25:14.305Z"
   }
 }

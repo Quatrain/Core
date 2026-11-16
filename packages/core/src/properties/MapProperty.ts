@@ -47,4 +47,13 @@ export class MapProperty extends BaseProperty {
    toJSON() {
       return this._value ? JSON.stringify(this._value) : {}
    }
+
+   /**
+    * Serializes the map property for MessagePack encoding as a structured object.
+    *
+    * @returns The internal map object or an empty object.
+    */
+   toMsgPack() {
+      return this._value || {}
+   }
 }

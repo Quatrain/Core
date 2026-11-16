@@ -172,6 +172,24 @@ export class DataObject implements DataObjectType {
                      new ObjectUri(ref, label),
                      false
                   )
+               } else if (
+                  val &&
+                  typeof val === 'object' &&
+                  !val.hasOwnProperty('bucket') &&
+                  'path' in val &&
+                  typeof val.path === 'string' &&
+                  'label' in val &&
+                  typeof val.label === 'string' &&
+                  Object.keys(val).every(
+                     (k) => k === 'path' || k === 'label' || k === 'backend'
+                  )
+               ) {
+                  const { path, label } = val as { path: string; label: string }
+
+                  Reflect.get(this._properties, key).set(
+                     new ObjectUri(path, label),
+                     false
+                  )
                } else {
                   Reflect.get(this._properties, key).set(data[key], false)
                }
@@ -335,6 +353,39 @@ export class DataObject implements DataObjectType {
    }
 
    /**
+    * Serializes the data object for MessagePack encoding using `toMsgPack()` on nested references.
+    *
+    * @param params - Serialization settings (e.g. resolve references, remove nulls).
+    * @returns The MessagePack-ready dictionary representation.
+    */
+   toMsgPack(params: boolean | toJSONParams = false): { [x: string]: any } {
+      let objectsAsReferences: boolean = false,
+         withoutURIData: boolean = false,
+         ignoreUnchanged: boolean = false,
+         ignoreNulls: boolean = false,
+         converters: any = {}
+
+      if (typeof params === 'object') {
+         objectsAsReferences = Boolean(params.objectsAsReferences)
+         withoutURIData = Boolean(params.withoutURIData)
+         ignoreUnchanged = Boolean(params.ignoreUnchanged)
+         ignoreNulls = Boolean(params.ignoreNulls)
+         converters = params.converters
+      }
+
+      return {
+         ...(!withoutURIData &&
+            this.uri && { uid: this.uri.uid, path: this.uri.path }),
+         ...this._dataToMsgPack(
+            objectsAsReferences,
+            ignoreUnchanged,
+            ignoreNulls,
+            converters
+         ),
+      }
+   }
+
+   /**
     * Flattens the object to a standard ObjectUri wrapper reference format.
     * 
     * @returns Reference object format.
@@ -404,23 +455,66 @@ export class DataObject implements DataObjectType {
       return data
    }
 
-   // async read(): Promise<DataObjectClass<any>> {
-   //    throw new Error(
-   //       `This is just a stub, please use DataObject from @quatrain/backend to persist`
-   //    )
-   // }
+   protected _dataToMsgPack(
+      objectsAsReferences = false,
+      ignoreUnchanged = false,
+      ignoreNulls = false,
+      converters?: Record<string, unknown>
+   ) {
+      const actualConverters = converters || {}
+      const data = {}
+      Object.keys(this._properties).forEach((key: string) => {
+         const prop = Reflect.get(this._properties, key)
+         if (ignoreNulls && (prop.val() === null || prop.val() === undefined))
+            return
+         if (ignoreUnchanged && prop.hasChanged === false) return
 
-   // save(): Promise<DataObjectClass<any>> {
-   //    throw new Error(
-   //       `This is just a stub, please use DataObject from @quatrain/backend to persist`
-   //    )
-   // }
+         switch (prop.constructor.name) {
+            case 'CollectionProperty':
+               // ignore
+               break
+            case 'ObjectProperty':
+               const value: BaseObject | ObjectUri | undefined = prop.val()
+               Reflect.set(
+                  data,
+                  key,
+                  value
+                     ? objectsAsReferences && !(value instanceof ObjectUri)
+                        ? value.uri?.toMsgPack()
+                        : value.toMsgPack
+                        ? value.toMsgPack()
+                        : value.toJSON
+                        ? value.toJSON()
+                        : value
+                     : null
+               )
 
-   // async delete(): Promise<DataObjectClass<any>> {
-   //    throw new Error(
-   //       `This is just a stub, please use DataObject from @quatrain/backend to persist`
-   //    )
-   // }
+               break
+
+            case 'BooleanProperty':
+               Reflect.set(data, key, Boolean(prop.val()))
+               break
+
+            case 'ArrayProperty':
+               Reflect.set(data, key, prop.val() || [])
+               break
+
+            case 'DateTimeProperty':
+               Reflect.set(
+                  data,
+                  key,
+                  prop.val(Reflect.get(actualConverters, 'datetime')) ?? null
+               )
+               break
+
+            default:
+               Reflect.set(data, key, prop.val() ?? null)
+               break
+         }
+      })
+
+      return data
+   }
 
    /**
     * Data object must be created from factory in order for async-loaded data to be available

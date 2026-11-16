@@ -161,4 +161,21 @@ export class ObjectProperty extends BaseProperty {
          ? this._value.dataObject.toReference()
          : null
    }
+
+   /**
+    * Serializes the object property into a MessagePack-compatible reference format (`{ path, label }`).
+    *
+    * @returns The `ObjectUri` MessagePack representation, or null if unset.
+    */
+   toMsgPack() {
+      if (this._value instanceof ObjectUri) {
+         return this._value.toMsgPack()
+      }
+
+      return this._value &&
+         (this._value.dataObject || this._value instanceof DataObject)
+         ? this._value.dataObject.uri?.toMsgPack() ??
+              this._value.dataObject.toReference()
+         : null
+   }
 }

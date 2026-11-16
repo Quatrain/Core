@@ -122,6 +122,7 @@ export class PostgresLocalAuthStore implements LocalAuthStoreInterface {
       }
    }
 
+   /** Stores a new account; throws `DuplicateLoginError` when its login is taken. */
    async createAccount(account: LocalAccountInterface): Promise<void> {
       await this._prepare()
       try {
@@ -138,18 +139,21 @@ export class PostgresLocalAuthStore implements LocalAuthStoreInterface {
       }
    }
 
+   /** Returns the account with this identifier, or `null`. */
    async findAccountById(id: string): Promise<LocalAccountInterface | null> {
       await this._prepare()
       const result = await this._pool.query(`select ${ACCOUNT_COLUMNS} from auth_account where id = $1`, [id])
       return result.rows[0] ? toAccount(result.rows[0]) : null
    }
 
+   /** Returns the account with this lower-cased login, or `null`. */
    async findAccountByLogin(login: string): Promise<LocalAccountInterface | null> {
       await this._prepare()
       const result = await this._pool.query(`select ${ACCOUNT_COLUMNS} from auth_account where login = $1`, [login])
       return result.rows[0] ? toAccount(result.rows[0]) : null
    }
 
+   /** Applies the given changes and returns the account, or `null` when it does not exist. */
    async updateAccount(id: string, changes: LocalAccountChanges): Promise<LocalAccountInterface | null> {
       await this._prepare()
       const assignments: string[] = []
@@ -179,11 +183,13 @@ export class PostgresLocalAuthStore implements LocalAuthStoreInterface {
       }
    }
 
+   /** Deletes an account with its identities and its sessions. */
    async deleteAccount(id: string): Promise<void> {
       await this._prepare()
       await this._pool.query('delete from auth_account where id = $1', [id])
    }
 
+   /** Attaches an external identity to an account; throws `DuplicateIdentityError` when it is already attached. */
    async linkIdentity(issuer: string, subject: string, account: string): Promise<void> {
       await this._prepare()
       try {
@@ -196,6 +202,7 @@ export class PostgresLocalAuthStore implements LocalAuthStoreInterface {
       }
    }
 
+   /** Returns the account owning an external identity, or `null`. */
    async findAccountByIdentity(issuer: string, subject: string): Promise<LocalAccountInterface | null> {
       await this._prepare()
       const result = await this._pool.query(
@@ -206,6 +213,7 @@ export class PostgresLocalAuthStore implements LocalAuthStoreInterface {
       return result.rows[0] ? toAccount(result.rows[0]) : null
    }
 
+   /** Stores a new session. */
    async createSession(session: LocalSessionInterface): Promise<void> {
       await this._prepare()
       await this._pool.query(
@@ -215,27 +223,32 @@ export class PostgresLocalAuthStore implements LocalAuthStoreInterface {
       )
    }
 
+   /** Returns the session whose token has this digest, or `null`. */
    async findSessionByTokenHash(tokenHash: string): Promise<LocalSessionInterface | null> {
       await this._prepare()
       const result = await this._pool.query(`select ${SESSION_COLUMNS} from auth_session where token_hash = $1`, [tokenHash])
       return result.rows[0] ? toSession(result.rows[0]) : null
    }
 
+   /** Records the last use of a session. */
    async touchSession(id: string, lastSeenAt: Date): Promise<void> {
       await this._prepare()
       await this._pool.query('update auth_session set last_seen_at = $2 where id = $1', [id, lastSeenAt])
    }
 
+   /** Deletes one session. */
    async deleteSession(id: string): Promise<void> {
       await this._prepare()
       await this._pool.query('delete from auth_session where id = $1', [id])
    }
 
+   /** Deletes every session of an account. */
    async deleteSessionsOfAccount(account: string): Promise<void> {
       await this._prepare()
       await this._pool.query('delete from auth_session where account = $1', [account])
    }
 
+   /** Deletes the sessions past their end date or unused since `idleSince`; returns how many. */
    async deleteExpiredSessions(now: Date, idleSince: Date): Promise<number> {
       await this._prepare()
       const result = await this._pool.query('delete from auth_session where expires_at <= $1 or last_seen_at <= $2', [now, idleSince])

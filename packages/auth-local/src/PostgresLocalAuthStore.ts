@@ -44,10 +44,20 @@ const ACCOUNT_CHANGE_COLUMNS: Record<keyof LocalAccountChanges, string> = {
 
 /**
  * Reads a timestamp column. The driver returns a `Date` unless the application changed its
- * type parsers (they are global to the `pg` module), in which case a string comes back.
+ * type parsers (they are global to the `pg` module), in which case the PostgreSQL text comes
+ * back, e.g. `2026-01-01 10:00:00.123+00`: a short offset that `Date` does not read as is.
  */
 function toDate(value: unknown): Date {
-   const date = value instanceof Date ? value : new Date(value as string)
+   let date: Date
+   if (value instanceof Date) {
+      date = value
+   } else {
+      const text = String(value)
+         .trim()
+         .replace(' ', 'T')
+         .replace(/([+-]\d{2})(\d{2})?$/, (_match, hours: string, minutes?: string) => `${hours}:${minutes ?? '00'}`)
+      date = new Date(text)
+   }
    if (Number.isNaN(date.getTime())) {
       throw new Error('[PostgresLocalAuthStore] Unreadable timestamp returned by the database.')
    }

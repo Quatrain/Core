@@ -220,9 +220,10 @@ contract(
 contract(
    'PostgreSQL with text timestamps',
    async () => {
-      // An application may change the global type parsers of the driver: timestamps and JSON then come back as text.
+      // What @quatrain/backend-postgres does to the global type parsers of the driver: timestamps come
+      // back as `2026-01-01T10:00:00.123+00`. JSON as text covers an application doing the same for it.
       const { types } = require('pg')
-      types.setTypeParser(1184, (value: string) => value)
+      types.setTypeParser(1184, (value: string) => (value ? value.replace(' ', 'T') : value))
       types.setTypeParser(3802, (value: string) => value)
       postgresStore ??= new PostgresLocalAuthStore({ connectionString: URL, ensureSchema: true })
       await (postgresStore as any)._prepare()

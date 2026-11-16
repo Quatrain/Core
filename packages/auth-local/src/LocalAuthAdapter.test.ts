@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { AuthenticationError } from '@quatrain/auth'
 import { LocalAuthAdapter } from './LocalAuthAdapter'
 import { DuplicateIdentityError, type LocalAuthStoreInterface } from './LocalAuthStoreInterface'
@@ -214,6 +216,23 @@ contract(
    URL ? describe : describe.skip
 )
 
+// Runs after the suite above: the parsers it sets are global and stay set.
+contract(
+   'PostgreSQL with text timestamps',
+   async () => {
+      // What @quatrain/backend-postgres does to the global type parsers of the driver: timestamps come
+      // back as `2026-01-01T10:00:00.123+00`. JSON as text covers an application doing the same for it.
+      const { types } = require('pg')
+      types.setTypeParser(1184, (value: string) => (value ? value.replace(' ', 'T') : value))
+      types.setTypeParser(3802, (value: string) => value)
+      postgresStore ??= new PostgresLocalAuthStore({ connectionString: URL, ensureSchema: true })
+      await (postgresStore as any)._prepare()
+      await (postgresStore as any)._pool.query('truncate auth_session, auth_identity, auth_account')
+      return postgresStore
+   },
+   URL ? describe : describe.skip
+)
+
 afterAll(async () => {
    await postgresStore?.close()
 })
@@ -232,5 +251,12 @@ describe('LocalAuthAdapter concurrent first sign-ins', () => {
       const [first, second] = await Promise.all([auth.resolveIdentity(identity), auth.resolveIdentity(identity)])
       expect(first?.id).toBe(second?.id)
       expect((store as any)._accounts.size).toBe(1)
+   })
+})
+
+describe('schema', () => {
+   it('is the DDL file shipped with the package', () => {
+      const file = readFileSync(join(__dirname, '..', 'sql', 'auth_local.sql'), 'utf8')
+      expect(PostgresLocalAuthStore.schemaSql()).toBe(file)
    })
 })

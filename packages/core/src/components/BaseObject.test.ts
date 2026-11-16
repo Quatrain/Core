@@ -57,5 +57,28 @@ describe('BaseObject', () => {
             label: 'Alice',
          })
       })
+
+      it('should omit null values in toMsgPack() while toJSON() keeps them', async () => {
+         const obj = await TestModel.factory({ testProp: 'hello' })
+         const json = obj.dataObject.toJSON()
+         const msgpack = obj.dataObject.toMsgPack()
+         const nullKeys = Object.keys(json).filter((k) => json[k] === null)
+
+         expect(nullKeys.length).toBeGreaterThan(0)
+         nullKeys.forEach((k) => expect(k in msgpack).toBe(false))
+         expect(msgpack.testProp).toBe('hello')
+      })
+
+      it('should accept { path, label } references as input (MessagePack clients)', async () => {
+         const obj = await TestModel.factory({
+            testProp: 'hello',
+            createdBy: { path: 'users/u-123', label: 'Alice' },
+         })
+
+         expect(obj.dataObject.toJSON().createdBy).toEqual({
+            ref: 'users/u-123',
+            label: 'Alice',
+         })
+      })
    })
 })

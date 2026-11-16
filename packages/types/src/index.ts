@@ -46,15 +46,3 @@ export type ReferenceType = {
    /** Target database/adapter backend alias. */
    backend?: string
 }
-
-/**
- * MessagePack reference mapping structure (uses `path` instead of `ref` to avoid C# reserved keyword collisions).
- */
-export type MsgPackReferenceType = {
-   /** The relative path structure of the resource. */
-   path: string
-   /** Descriptive display name/label. */
-   label?: string
-   /** Target database/adapter backend alias. */
-   backend?: string
-}

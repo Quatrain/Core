@@ -162,69 +162,6 @@ export class PersistedDataObject extends CoreDO implements Persisted {
       return data
    }
 
-   protected _dataToMsgPack(
-      objectsAsReferences = false,
-      ignoreUnchanged = false,
-      ignoreNulls = false,
-      converters?: Record<string, unknown>
-   ) {
-      const actualConverters = converters || {}
-      const data = {}
-      Object.keys(this._properties).forEach((key: string) => {
-         const prop = Reflect.get(this._properties, key)
-         if (ignoreNulls && (prop.val() === null || prop.val() === undefined)) {
-            return
-         }
-         if (ignoreUnchanged && prop.hasChanged === false) return
-
-         switch (prop.constructor.name) {
-            case 'CollectionProperty':
-               // ignore
-               break
-            case 'ObjectProperty':
-               const value: any = prop.val()
-               Reflect.set(
-                  data,
-                  key,
-                  value
-                     ? objectsAsReferences &&
-                       typeof value.asReference === 'function'
-                        ? (value as PersistedBaseObject).uri?.toMsgPack()
-                        : value.toMsgPack
-                        ? value.toMsgPack()
-                        : value.toJSON
-                        ? value.toJSON()
-                        : value
-                     : null
-               )
-
-               break
-
-            case 'BooleanProperty':
-               Reflect.set(data, key, Boolean(prop.val()))
-               break
-
-            case 'ArrayProperty':
-               Reflect.set(data, key, prop.val() || [])
-               break
-
-            case 'DateTimeProperty':
-               Reflect.set(
-                  data,
-                  key,
-                  prop.val(Reflect.get(actualConverters, 'datetime')) || null
-               )
-               break
-
-            default:
-               Reflect.set(data, key, prop.val() || null)
-               break
-         }
-      })
-
-      return data
-   }
-
    /**
     * Data object must be created from factory in order for async-loaded data to be available
     * @param className

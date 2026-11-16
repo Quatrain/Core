@@ -325,10 +325,29 @@ export class DataObject implements DataObjectType {
     * @returns The raw serialized dictionary.
     */
    toJSON(params: boolean | toJSONParams = false): { [x: string]: any } {
+      return this._serialize(params, 'json')
+   }
+
+   /**
+    * Serializes the data object for MessagePack encoding.
+    * Same output as `toJSON()` except that null values are omitted and
+    * object references use `path` instead of `ref` (C# reserved keyword).
+    *
+    * @param params - Serialization settings (e.g. resolve references).
+    * @returns The MessagePack-ready dictionary representation.
+    */
+   toMsgPack(params: boolean | toJSONParams = false): { [x: string]: any } {
+      return this._serialize(params, 'msgpack')
+   }
+
+   protected _serialize(
+      params: boolean | toJSONParams,
+      format: 'json' | 'msgpack'
+   ): { [x: string]: any } {
       let objectsAsReferences: boolean = false,
          withoutURIData: boolean = false,
          ignoreUnchanged: boolean = false,
-         ignoreNulls: boolean = false,
+         ignoreNulls: boolean = format === 'msgpack',
          converters: any = {}
 
       if (typeof params === 'object') {
@@ -336,11 +355,11 @@ export class DataObject implements DataObjectType {
          objectsAsReferences = Boolean(params.objectsAsReferences)
          withoutURIData = Boolean(params.withoutURIData)
          ignoreUnchanged = Boolean(params.ignoreUnchanged)
-         ignoreNulls = Boolean(params.ignoreNulls)
+         ignoreNulls = ignoreNulls || Boolean(params.ignoreNulls)
          converters = params.converters
       }
 
-      return {
+      const data: { [x: string]: any } = {
          ...(!withoutURIData &&
             this.uri && { uid: this.uri.uid, path: this.uri.path }),
          ...this._dataToJSON(
@@ -350,39 +369,20 @@ export class DataObject implements DataObjectType {
             converters
          ),
       }
-   }
 
-   /**
-    * Serializes the data object for MessagePack encoding using `toMsgPack()` on nested references.
-    *
-    * @param params - Serialization settings (e.g. resolve references, remove nulls).
-    * @returns The MessagePack-ready dictionary representation.
-    */
-   toMsgPack(params: boolean | toJSONParams = false): { [x: string]: any } {
-      let objectsAsReferences: boolean = false,
-         withoutURIData: boolean = false,
-         ignoreUnchanged: boolean = false,
-         ignoreNulls: boolean = false,
-         converters: any = {}
-
-      if (typeof params === 'object') {
-         objectsAsReferences = Boolean(params.objectsAsReferences)
-         withoutURIData = Boolean(params.withoutURIData)
-         ignoreUnchanged = Boolean(params.ignoreUnchanged)
-         ignoreNulls = Boolean(params.ignoreNulls)
-         converters = params.converters
+      if (format === 'msgpack') {
+         Object.keys(this._properties).forEach((key: string) => {
+            if (
+               key in data &&
+               Reflect.get(this._properties, key).constructor.name ===
+                  'ObjectProperty'
+            ) {
+               data[key] = ObjectUri.toMsgPackReference(data[key])
+            }
+         })
       }
 
-      return {
-         ...(!withoutURIData &&
-            this.uri && { uid: this.uri.uid, path: this.uri.path }),
-         ...this._dataToMsgPack(
-            objectsAsReferences,
-            ignoreUnchanged,
-            ignoreNulls,
-            converters
-         ),
-      }
+      return data
    }
 
    /**
@@ -455,66 +455,23 @@ export class DataObject implements DataObjectType {
       return data
    }
 
-   protected _dataToMsgPack(
-      objectsAsReferences = false,
-      ignoreUnchanged = false,
-      ignoreNulls = false,
-      converters?: Record<string, unknown>
-   ) {
-      const actualConverters = converters || {}
-      const data = {}
-      Object.keys(this._properties).forEach((key: string) => {
-         const prop = Reflect.get(this._properties, key)
-         if (ignoreNulls && (prop.val() === null || prop.val() === undefined))
-            return
-         if (ignoreUnchanged && prop.hasChanged === false) return
+   // async read(): Promise<DataObjectClass<any>> {
+   //    throw new Error(
+   //       `This is just a stub, please use DataObject from @quatrain/backend to persist`
+   //    )
+   // }
 
-         switch (prop.constructor.name) {
-            case 'CollectionProperty':
-               // ignore
-               break
-            case 'ObjectProperty':
-               const value: BaseObject | ObjectUri | undefined = prop.val()
-               Reflect.set(
-                  data,
-                  key,
-                  value
-                     ? objectsAsReferences && !(value instanceof ObjectUri)
-                        ? value.uri?.toMsgPack()
-                        : value.toMsgPack
-                        ? value.toMsgPack()
-                        : value.toJSON
-                        ? value.toJSON()
-                        : value
-                     : null
-               )
+   // save(): Promise<DataObjectClass<any>> {
+   //    throw new Error(
+   //       `This is just a stub, please use DataObject from @quatrain/backend to persist`
+   //    )
+   // }
 
-               break
-
-            case 'BooleanProperty':
-               Reflect.set(data, key, Boolean(prop.val()))
-               break
-
-            case 'ArrayProperty':
-               Reflect.set(data, key, prop.val() || [])
-               break
-
-            case 'DateTimeProperty':
-               Reflect.set(
-                  data,
-                  key,
-                  prop.val(Reflect.get(actualConverters, 'datetime')) ?? null
-               )
-               break
-
-            default:
-               Reflect.set(data, key, prop.val() ?? null)
-               break
-         }
-      })
-
-      return data
-   }
+   // async delete(): Promise<DataObjectClass<any>> {
+   //    throw new Error(
+   //       `This is just a stub, please use DataObject from @quatrain/backend to persist`
+   //    )
+   // }
 
    /**
     * Data object must be created from factory in order for async-loaded data to be available

@@ -213,17 +213,6 @@ export class BaseProperty implements PropertyClassType {
    }
 
    /**
-    * Serializes the property for MessagePack encoding.
-    *
-    * @returns The internal value serialized via `toMsgPack()` if supported, otherwise its raw value.
-    */
-   toMsgPack() {
-      return this._value && typeof this._value.toMsgPack === 'function'
-         ? this._value.toMsgPack()
-         : this.toJSON()
-   }
-
-   /**
     * Creates a deep clone of the current property instance, preserving its prototype chain.
     * 
     * @returns A new independent instance of the property.

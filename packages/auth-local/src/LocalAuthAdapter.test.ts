@@ -216,6 +216,22 @@ contract(
    URL ? describe : describe.skip
 )
 
+// Runs after the suite above: the parsers it sets are global and stay set.
+contract(
+   'PostgreSQL with text timestamps',
+   async () => {
+      // An application may change the global type parsers of the driver: timestamps and JSON then come back as text.
+      const { types } = require('pg')
+      types.setTypeParser(1184, (value: string) => value)
+      types.setTypeParser(3802, (value: string) => value)
+      postgresStore ??= new PostgresLocalAuthStore({ connectionString: URL, ensureSchema: true })
+      await (postgresStore as any)._prepare()
+      await (postgresStore as any)._pool.query('truncate auth_session, auth_identity, auth_account')
+      return postgresStore
+   },
+   URL ? describe : describe.skip
+)
+
 afterAll(async () => {
    await postgresStore?.close()
 })

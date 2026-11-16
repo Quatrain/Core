@@ -42,6 +42,18 @@ const ACCOUNT_CHANGE_COLUMNS: Record<keyof LocalAccountChanges, string> = {
    disabled: 'disabled',
 }
 
+/**
+ * Reads a timestamp column. The driver returns a `Date` unless the application changed its
+ * type parsers (they are global to the `pg` module), in which case a string comes back.
+ */
+function toDate(value: unknown): Date {
+   const date = value instanceof Date ? value : new Date(value as string)
+   if (Number.isNaN(date.getTime())) {
+      throw new Error('[PostgresLocalAuthStore] Unreadable timestamp returned by the database.')
+   }
+   return date
+}
+
 function toAccount(row: any): LocalAccountInterface {
    return {
       id: row.id,
@@ -49,9 +61,9 @@ function toAccount(row: any): LocalAccountInterface {
       email: row.email,
       name: row.name,
       passwordHash: row.password_hash,
-      claims: row.claims ?? {},
+      claims: typeof row.claims === 'string' ? JSON.parse(row.claims) : row.claims ?? {},
       disabled: row.disabled,
-      createdAt: row.created_at,
+      createdAt: toDate(row.created_at),
    }
 }
 
@@ -60,9 +72,9 @@ function toSession(row: any): LocalSessionInterface {
       id: row.id,
       account: row.account,
       tokenHash: row.token_hash,
-      createdAt: row.created_at,
-      lastSeenAt: row.last_seen_at,
-      expiresAt: row.expires_at,
+      createdAt: toDate(row.created_at),
+      lastSeenAt: toDate(row.last_seen_at),
+      expiresAt: toDate(row.expires_at),
    }
 }
 

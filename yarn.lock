@@ -3098,6 +3098,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/auth-local@workspace:packages/auth-local":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/auth-local@workspace:packages/auth-local"
+  dependencies:
+    "@quatrain/auth": "workspace:*"
+    "@quatrain/backend": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    "@types/pg": "npm:^8.11.4"
+    pg: "npm:^8.11.3"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/auth-oidc-client@workspace:packages/auth-oidc-client":
   version: 0.0.0-use.local
   resolution: "@quatrain/auth-oidc-client@workspace:packages/auth-oidc-client"

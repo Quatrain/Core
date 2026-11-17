@@ -156,3 +156,36 @@ await otherTenancy.importTenant(manifest) // keeps the identifier; fails if the 
 
 User identifiers are copied as they are: both instances must share the same identity provider, or
 the memberships must be remapped before the import.
+
+## Keep the secrets of a tenant
+
+A tenant brings credentials of its own. Keep them sealed, and read them where a resource is built.
+
+```ts
+import { HashProperty } from '@quatrain/core'
+import { TenantSecretRepository, TenantSecrets } from '@quatrain/tenancy'
+
+// 32 random bytes, base64 encoded, given by the environment: `openssl rand -base64 32`
+HashProperty.setDefaultKey(process.env.SECRETS_KEY)
+const secrets = new TenantSecrets(new TenantSecretRepository(adapter))
+
+await secrets.set(tenant.id, 'storage.secret', valueTypedByAnAdministrator)
+
+const storage = resources.define('storage', {
+   create: async (tenant) => new S3StorageAdapter({
+      config: { ...tenant.settings.storage, secret: await secrets.get(tenant.id, 'storage.secret') },
+   }),
+})
+```
+
+- Sealing is done by the reversible `HashProperty` of `@quatrain/core`: the same mechanism as any
+  model property holding a credential. A key can also be given to the service:
+  `new TenantSecrets(store, { key })`.
+- `TenantSecretRepository` stores `TenantSecret` records (collection `tenant_secrets`) through a
+  backend adapter; the record only ever holds the sealed text. The port to write another store
+  against is `TenantSecretStoreInterface` (`read`, `write`, `remove`, `names`).
+- Never return a secret through an API: answer with `secrets.names(tenant)` or `secrets.has(…)`.
+- A value copied to another tenant or name, altered, or read under another key raises
+  `SecretUnreadableError`, whose message never carries the value.
+- Losing the key loses the secrets: they must be typed again. Changing the key means reading every
+  secret with the old key and setting it again with the new one.

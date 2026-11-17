@@ -152,3 +152,85 @@ describe('Hash Property Security Policies', () => {
       )
    })
 })
+
+describe('Hash Property keeps values that must be read back (AES-256-GCM)', () => {
+   const { randomBytes } = require('node:crypto')
+   const { HashPropertyUnreadableError } = require('./HashProperty')
+   const key = () => randomBytes(32)
+   const sealing = (config: Record<string, unknown> = {}) =>
+      new HashProperty({ name: 'apikey', algorithm: HashProperty.ALGORITHM_AES256GCM, ...config })
+
+   afterEach(() => HashProperty.setDefaultKey(undefined))
+
+   test('value is sealed, shown sealed, and read back', () => {
+      const prop = sealing({ key: key() })
+      prop.set('key-given-by-the-provider')
+
+      expect(prop.reversible).toBe(true)
+      expect(HashProperty.isSealed(prop.val())).toBe(true)
+      expect(prop.val()).not.toContain('key-given')
+      expect(JSON.stringify(prop)).not.toContain('key-given')
+      expect(prop.reveal()).toBe('key-given-by-the-provider')
+      expect(prop.compare('key-given-by-the-provider')).toBe(true)
+      expect(prop.compare('another-key')).toBe(false)
+   })
+
+   test('the same value is sealed differently each time', () => {
+      const shared = key()
+      expect(sealing({ key: shared }).set('value').val()).not.toBe(sealing({ key: shared }).set('value').val())
+   })
+
+   test('key can be base64 text, a function, or set once for the process', () => {
+      const bytes = key()
+      const sealed = sealing({ key: bytes.toString('base64') }).set('value').val()
+
+      expect(sealing({ key: () => bytes }).set(sealed).reveal()).toBe('value')
+      HashProperty.setDefaultKey(bytes)
+      expect(sealing().set(sealed).reveal()).toBe('value')
+   })
+
+   test('a value already sealed is stored as it is, as when loading an object', () => {
+      const shared = key()
+      const sealed = sealing({ key: shared }).set('value').val()
+      const loaded = sealing({ key: shared })
+      loaded.set(sealed, false)
+
+      expect(loaded.val()).toBe(sealed)
+      expect(loaded.reveal()).toBe('value')
+   })
+
+   test('a value does not read back under another key or for another context', () => {
+      const shared = key()
+      const sealed = sealing({ key: shared, context: 'account-1' }).set('value').val()
+
+      expect(() => sealing({ key: key(), context: 'account-1' }).set(sealed).reveal()).toThrow(HashPropertyUnreadableError)
+      expect(() => sealing({ key: shared, context: 'account-2' }).set(sealed).reveal()).toThrow(HashPropertyUnreadableError)
+      expect(() => new HashProperty({ name: 'other', algorithm: HashProperty.ALGORITHM_AES256GCM, key: shared }).set(sealed).reveal()).toThrow(
+         HashPropertyUnreadableError
+      )
+      expect(sealing({ key: shared, context: () => 'account-1' }).set(sealed).reveal()).toBe('value')
+   })
+
+   test('an altered value is refused and errors never carry a value', () => {
+      const shared = key()
+      const parts = sealing({ key: shared }).set('value').val().split('.')
+      parts[4] = Buffer.from('other').toString('base64url')
+
+      expect(() => sealing({ key: shared }).set(parts.join('.')).reveal()).toThrow(HashPropertyUnreadableError)
+      expect(() => sealing({ key: shared }).set('aes-256-gcm.v1.broken').reveal()).toThrow(HashPropertyUnreadableError)
+   })
+
+   test('a missing or malformed key is refused', () => {
+      expect(() => sealing().set('value')).toThrow(HashPropertyUnreadableError)
+      expect(() => sealing({ key: randomBytes(16) }).set('value')).toThrow(HashPropertyUnreadableError)
+      expect(() => sealing({ key: 'not a key' }).set('value')).toThrow(HashPropertyUnreadableError)
+   })
+
+   test('an empty property reveals nothing and one-way values cannot be read back', () => {
+      expect(sealing({ key: key() }).reveal()).toBeUndefined()
+      const digest = new HashProperty({ name: 'hash', algorithm: HashProperty.ALGORITHM_SHA256 })
+      digest.set('value')
+      expect(digest.reversible).toBe(false)
+      expect(() => digest.reveal()).toThrow('cannot be read back')
+   })
+})

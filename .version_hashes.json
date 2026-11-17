@@ -410,9 +410,9 @@
     "last_published": "2026-09-24T10:05:25.541Z"
   },
   "@quatrain/git": {
-    "version": "1.0.1-beta.0",
-    "hash": "5E8BIbIaiCotBj5DUr4g041mzTs=-6a917febd1de9049581f80a3468a60c9a1db211cb9b768ecdb5bdbc5b9ad408a",
-    "last_published": "2026-09-29T19:46:07.797Z"
+    "version": "1.0.1-beta.1",
+    "hash": "ZUt2cplwZ9XlLbqoc6daNqzM+kg=-6a917febd1de9049581f80a3468a60c9a1db211cb9b768ecdb5bdbc5b9ad408a",
+    "last_published": "2026-11-17T22:20:29.981Z"
   },
   "@quatrain/git-forgejo": {
     "version": "1.0.1-beta.0",

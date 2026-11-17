@@ -9,3 +9,4 @@ export * from "./GitForgeAdapterInterface";
 export * from "./GitHttpClientInterface";
 export * from "./AbstractGitForgeAdapter";
 export * from "./AbstractGitHttpClient";
+export * from "./GitWorkingCopy";

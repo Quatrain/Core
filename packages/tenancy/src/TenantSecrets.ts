@@ -1,5 +1,5 @@
-import { InvalidTenantError } from './errors'
-import type { SecretSealer } from './SecretSealer'
+import { HashProperty, HashPropertyUnreadableError, type HashPropertyKeyType } from '@quatrain/core'
+import { InvalidTenantError, SecretUnreadableError } from './errors'
 import { assertIdentifier } from './validation'
 
 const SECRET_NAME = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/
@@ -51,18 +51,24 @@ export class InMemoryTenantSecretStore implements TenantSecretStoreInterface {
 
 /**
  * Secrets a tenant brings: credentials of its storage, its model provider, its repository…
- * Values are sealed before they reach the store and only opened for the tenant and the name
- * they were sealed for. Listing gives names, never values.
+ * Values are sealed by a reversible `HashProperty` (AES-256-GCM) before they reach the store,
+ * and only read back for the tenant and the name they were sealed for. Listing gives names,
+ * never values.
  */
 export class TenantSecrets {
+   protected readonly key: HashPropertyKeyType | undefined
+
    /**
     * @param store - Where sealed values are kept.
-    * @param sealer - Seals and opens the values.
+    * @param options - `key`: 256-bit sealing key (32 bytes, their base64 encoding, or a function
+    *    returning either); the key set with `HashProperty.setDefaultKey()` when omitted.
     */
    constructor(
       protected readonly store: TenantSecretStoreInterface,
-      protected readonly sealer: SecretSealer
-   ) {}
+      options: { key?: HashPropertyKeyType } = {}
+   ) {
+      this.key = options.key
+   }
 
    /**
     * Sets a secret of a tenant, replacing the previous value.
@@ -77,7 +83,7 @@ export class TenantSecrets {
       if (typeof value !== 'string' || value === '' || value.length > MAX_VALUE_LENGTH) {
          throw new InvalidTenantError(`A secret value is a non-empty string of at most ${MAX_VALUE_LENGTH} characters.`)
       }
-      await this.store.write(tenant, name, this.sealer.seal(value, { tenant, name }))
+      await this.store.write(tenant, name, this.property(tenant, name).set(value).val())
    }
 
    /**
@@ -91,7 +97,20 @@ export class TenantSecrets {
    async get(tenant: string, name: string): Promise<string | undefined> {
       TenantSecrets.assertKey(tenant, name)
       const sealed = await this.store.read(tenant, name)
-      return sealed === undefined ? undefined : this.sealer.open(sealed, { tenant, name })
+      if (sealed === undefined) {
+         return undefined
+      }
+      if (!HashProperty.isSealed(sealed)) {
+         throw new SecretUnreadableError({ tenant, name })
+      }
+      try {
+         return this.property(tenant, name).set(sealed, false).reveal()
+      } catch (error) {
+         if (error instanceof HashPropertyUnreadableError) {
+            throw new SecretUnreadableError({ tenant, name })
+         }
+         throw error
+      }
    }
 
    /**
@@ -126,6 +145,18 @@ export class TenantSecrets {
    async delete(tenant: string, name: string): Promise<boolean> {
       TenantSecrets.assertKey(tenant, name)
       return this.store.remove(tenant, name)
+   }
+
+   /**
+    * Property sealing the values of one secret, bound to its tenant and its name.
+    */
+   protected property(tenant: string, name: string): HashProperty {
+      return new HashProperty({
+         name: 'value',
+         algorithm: HashProperty.ALGORITHM_AES256GCM,
+         key: this.key,
+         context: JSON.stringify([tenant, name]),
+      })
    }
 
    protected static assertKey(tenant: string, name: string): void {

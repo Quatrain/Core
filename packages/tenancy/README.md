@@ -36,8 +36,10 @@ yarn add @quatrain/tenancy
   adapter per tenant, lazily, and rebuilds it when the settings it is built from change. It
   replaces process-wide singletons.
 - **Tenant secrets**: `TenantSecrets` keeps the credentials a tenant brings (storage keys, model
-  key, repository credential) sealed with AES-256-GCM under a key held by the host. A sealed value
-  only opens for the tenant and the name it was sealed for; listing gives names, never values.
+  key, repository credential). Values are sealed by the reversible `HashProperty` of
+  `@quatrain/core` (AES-256-GCM) and only read back for the tenant and the name they were sealed
+  for; listing gives names, never values. `TenantSecretRepository` stores them as `TenantSecret`
+  records through any backend adapter; `InMemoryTenantSecretStore` serves tests.
 - **Registry export / import** of one tenant, to move it to another instance.
 
 ## Uniqueness

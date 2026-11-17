@@ -242,4 +242,21 @@ export class ObjectUri {
       }
       return res
    }
+
+   /**
+    * Outputs a pure object dictionary representation for MessagePack serialization.
+    * Uses `path` instead of `ref` to avoid colliding with the C# reserved keyword `ref`.
+    *
+    * @returns Rendered MessagePack-compatible URI block representation (`{ path, label }`).
+    */
+   toMsgPack() {
+      const res: any = {
+         path: this.path,
+         label: this._label || '',
+      }
+      if (this._backend !== undefined) {
+         res.backend = this._backend
+      }
+      return res
+   }
 }

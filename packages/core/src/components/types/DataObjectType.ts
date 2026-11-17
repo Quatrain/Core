@@ -22,6 +22,7 @@ export interface DataObjectType {
    clone(data?: any): Promise<any>
    toReference(): any
    toJSON(params?: boolean | toJSONParams): any
+   toMsgPack(params?: boolean | toJSONParams): any
    populateFromData(data: { [x: string]: unknown }): this
    asProxy(): any
 }

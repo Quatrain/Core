@@ -6,6 +6,7 @@ export interface PropertyClassType {
    set(value: any, setChanged?: boolean): AbstractPropertyType
    val(transform?: any): any
    toJSON(): any
+   toMsgPack(): any
    clone(): PropertyClassType
    hasChanged?: boolean
 }

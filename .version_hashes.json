@@ -110,14 +110,14 @@
     "last_published": "2026-05-11T13:57:47.849Z"
   },
   "@quatrain/ai": {
-    "version": "1.1.5",
-    "hash": "S6h8JV5Mftl5Ts8o4296DbCfjSg=-b463e9192e9d14f8d13fc16728ee6c26e826730dbacbcef4f31822455935b89b",
-    "last_published": "2026-09-24T10:04:36.524Z"
+    "version": "1.1.6-beta.0",
+    "hash": "H/Vm7WXVA+6OCBO9bDtLLcbfmUA=-b463e9192e9d14f8d13fc16728ee6c26e826730dbacbcef4f31822455935b89b",
+    "last_published": "2026-11-17T16:35:28.824Z"
   },
   "@quatrain/ai-gemini": {
-    "version": "1.1.7-beta.0",
-    "hash": "OnHtE+cw1RJ5PJwdwi+wW//WPYM=-cb944e9ec485a3679f20da4b2bea9ae6ed16a69b599e48b4960c08a803b6f534",
-    "last_published": "2026-10-12T12:58:58.023Z"
+    "version": "1.1.7-beta.1",
+    "hash": "iSej6q967vEXAN1oqeZWV2biFOw=-cb944e9ec485a3679f20da4b2bea9ae6ed16a69b599e48b4960c08a803b6f534",
+    "last_published": "2026-11-17T16:35:45.445Z"
   },
   "@quatrain/api": {
     "version": "1.1.8",
@@ -340,9 +340,9 @@
     "last_published": "2026-07-19T14:47:03.295Z"
   },
   "@quatrain/ingestion-ocr": {
-    "version": "1.0.2",
-    "hash": "kphGpHurLMemRkmEDIyXCGqxyZc=-8a1bce8466b459ad7123d9dc8967a7c2f27dd4130e63865176842ceae6deae02",
-    "last_published": "2026-07-24T13:15:31.690Z"
+    "version": "1.0.3-beta.0",
+    "hash": "zZme3nbOvPJ6ahTmJe8K01nRZyo=-8a1bce8466b459ad7123d9dc8967a7c2f27dd4130e63865176842ceae6deae02",
+    "last_published": "2026-11-17T16:36:58.273Z"
   },
   "@quatrain/ingestion-video": {
     "version": "1.0.1",

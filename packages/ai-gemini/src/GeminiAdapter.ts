@@ -24,7 +24,8 @@ export class GeminiAdapter extends AbstractAiAdapter {
     * Sends a textual prompt to the Gemini API and retrieves the generated text response.
     * 
     * @param prompt - The instruction or query to send to the model.
-    * @param options - Configuration options. Can include a `model` string identifier.
+    * @param options - Configuration options. Can include a `model` string identifier and an
+    *    `onUsage` callback receiving the token usage of the call.
     * @returns The generated response string.
     */
    async generateText(prompt: string, options?: any): Promise<string> {
@@ -35,6 +36,10 @@ export class GeminiAdapter extends AbstractAiAdapter {
          model,
          contents: prompt,
       })
+
+      if (typeof options?.onUsage === 'function' && response.usageMetadata) {
+         options.onUsage(response.usageMetadata)
+      }
 
       return response.text || ''
    }

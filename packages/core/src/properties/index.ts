@@ -3,7 +3,7 @@ import { BaseProperty, BasePropertyType } from './BaseProperty'
 import { ArrayProperty, ArrayPropertyType } from './ArrayProperty'
 import { NumberProperty, NumberPropertyType } from './NumberProperty'
 import { StringProperty, StringPropertyType } from './StringProperty'
-import { HashProperty, HashPropertyType } from './HashProperty'
+import { HashProperty, HashPropertyType, HashPropertyKeyType, HashPropertyUnreadableError } from './HashProperty'
 import { EnumProperty, EnumPropertyType } from './EnumProperty'
 import { BooleanProperty, BooleanPropertyType } from './BooleanProperty'
 import { DateTimeProperty, DateTimePropertyType } from './DateTimeProperty'
@@ -27,6 +27,7 @@ export {
    ObjectProperty,
    StringProperty,
    HashProperty,
+   HashPropertyUnreadableError,
    MapProperty,
    FileProperty,
    CollectionProperty,
@@ -41,6 +42,7 @@ export type {
    ObjectPropertyType,
    StringPropertyType,
    HashPropertyType,
+   HashPropertyKeyType,
    MapPropertyType,
    FilePropertyType,
    CollectionPropertyType,

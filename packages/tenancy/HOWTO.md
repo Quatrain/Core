@@ -156,3 +156,32 @@ await otherTenancy.importTenant(manifest) // keeps the identifier; fails if the 
 
 User identifiers are copied as they are: both instances must share the same identity provider, or
 the memberships must be remapped before the import.
+
+## Keep the secrets of a tenant
+
+A tenant brings credentials of its own. Keep them sealed, and read them where a resource is built.
+
+```ts
+import { SecretSealer, TenantSecrets, type TenantSecretStoreInterface } from '@quatrain/tenancy'
+
+// 32 random bytes, base64 encoded, given by the environment: `openssl rand -base64 32`
+const sealer = new SecretSealer(process.env.TENANT_SECRETS_KEY!)
+const secrets = new TenantSecrets(store, sealer) // store: your TenantSecretStoreInterface
+
+await secrets.set(tenant.id, 'storage.secret', valueTypedByAnAdministrator)
+
+const storage = resources.define('storage', {
+   create: async (tenant) => new S3StorageAdapter({
+      config: { ...tenant.settings.storage, secret: await secrets.get(tenant.id, 'storage.secret') },
+   }),
+})
+```
+
+- The store (`TenantSecretStoreInterface`: `read`, `write`, `remove`, `names`) only receives sealed
+  values. `InMemoryTenantSecretStore` serves tests; write yours over the table or service you use.
+- Never return a secret through an API: answer with `secrets.names(tenant)` or `secrets.has(…)`.
+- A value copied to another tenant or name, altered, or read under another key raises
+  `SecretUnreadableError`, whose message never carries the value.
+- Losing the key loses the secrets: they must be typed again. Changing the key means reading every
+  secret with the old sealer and setting it again with the new one.
+

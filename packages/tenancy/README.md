@@ -35,6 +35,9 @@ yarn add @quatrain/tenancy
 - **Per-tenant resources**: `TenantResources` builds one storage client, repository or model
   adapter per tenant, lazily, and rebuilds it when the settings it is built from change. It
   replaces process-wide singletons.
+- **Tenant secrets**: `TenantSecrets` keeps the credentials a tenant brings (storage keys, model
+  key, repository credential) sealed with AES-256-GCM under a key held by the host. A sealed value
+  only opens for the tenant and the name it was sealed for; listing gives names, never values.
 - **Registry export / import** of one tenant, to move it to another instance.
 
 ## Uniqueness

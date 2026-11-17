@@ -28,3 +28,13 @@ export class TenantConflictError extends TenancyError {}
 
 /** A slug, name, role, actor or manifest is malformed. */
 export class InvalidTenantError extends TenancyError {}
+
+/**
+ * A stored secret does not open: altered, sealed for another tenant or name, or under another
+ * key. The message names the tenant and the secret, never the value.
+ */
+export class SecretUnreadableError extends TenancyError {
+   constructor(context: { tenant: string; name: string }) {
+      super(`The secret "${context.name}" of tenant "${context.tenant}" cannot be opened.`)
+   }
+}

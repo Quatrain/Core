@@ -29,8 +29,10 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@msgpack/msgpack": "^3.1.2",
     "@quatrain/api": "workspace:*",
     "@quatrain/api-server": "workspace:*",
+    "@quatrain/core": "workspace:*",
     "express": "^4.19.2"
   },
   "scripts": {

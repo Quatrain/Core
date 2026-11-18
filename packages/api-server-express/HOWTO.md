@@ -46,3 +46,20 @@ server.start(PORT, () => {
    Api.info(`Server listening on port ${PORT}`);
 });
 ```
+
+## MessagePack content negotiation
+
+Enable MessagePack on an Express app (request bodies and responses):
+
+```ts
+import express from 'express'
+import { msgpackMiddlewares } from '@quatrain/api-server-express'
+
+const app = express()
+app.use(...msgpackMiddlewares(process.env.BODY_PARSER_LIMIT || '50mb'))
+```
+
+- Requests with `Content-Type: application/x-msgpack` (or `application/msgpack`) are decoded into `req.body`.
+- Responses are encoded as MessagePack when the client sends `Accept: application/x-msgpack` or `?format=msgpack`.
+- Payloads are normalized first (`normalizeForMsgpack()`): `toMsgPack()` / `toJSON()` are applied,
+  object references use `path` instead of `ref` (C# reserved keyword), and `null` values are omitted.

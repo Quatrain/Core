@@ -3098,6 +3098,33 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/auth-local@workspace:packages/auth-local":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/auth-local@workspace:packages/auth-local"
+  dependencies:
+    "@quatrain/auth": "workspace:*"
+    "@quatrain/backend": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    "@types/pg": "npm:^8.11.4"
+    pg: "npm:^8.11.3"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/auth-oidc-client@workspace:packages/auth-oidc-client":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/auth-oidc-client@workspace:packages/auth-oidc-client"
+  dependencies:
+    "@quatrain/auth": "workspace:*"
+    "@quatrain/backend": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    jose: "npm:^5.10.0"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/auth-oidc@workspace:*, @quatrain/auth-oidc@workspace:packages/auth-oidc":
   version: 0.0.0-use.local
   resolution: "@quatrain/auth-oidc@workspace:packages/auth-oidc"
@@ -3219,7 +3246,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@quatrain/backend-postgres@workspace:packages/backend-postgres":
+"@quatrain/backend-postgres@workspace:*, @quatrain/backend-postgres@workspace:packages/backend-postgres":
   version: 0.0.0-use.local
   resolution: "@quatrain/backend-postgres@workspace:packages/backend-postgres"
   dependencies:
@@ -3640,6 +3667,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/identifiers@workspace:*, @quatrain/identifiers@workspace:packages/identifiers":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/identifiers@workspace:packages/identifiers"
+  dependencies:
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/ingestion-audio@workspace:packages/ingestion-audio":
   version: 0.0.0-use.local
   resolution: "@quatrain/ingestion-audio@workspace:packages/ingestion-audio"
@@ -3918,6 +3955,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@quatrain/queue-postgres@workspace:packages/queue-postgres":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/queue-postgres@workspace:packages/queue-postgres"
+  dependencies:
+    "@quatrain/queue": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    "@types/pg": "npm:^8.11.4"
+    pg: "npm:^8.11.3"
+    typescript: "npm:^5.2.2"
+  languageName: unknown
+  linkType: soft
+
 "@quatrain/queue-sqlite@workspace:packages/queue-sqlite":
   version: 0.0.0-use.local
   resolution: "@quatrain/queue-sqlite@workspace:packages/queue-sqlite"
@@ -4171,6 +4221,21 @@ __metadata:
     ts-jest: "npm:^29.4.6"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.1.5"
+  languageName: unknown
+  linkType: soft
+
+"@quatrain/tenancy@workspace:packages/tenancy":
+  version: 0.0.0-use.local
+  resolution: "@quatrain/tenancy@workspace:packages/tenancy"
+  dependencies:
+    "@quatrain/backend": "workspace:*"
+    "@quatrain/backend-postgres": "workspace:*"
+    "@quatrain/backend-sqlite": "workspace:*"
+    "@quatrain/core": "workspace:*"
+    "@quatrain/identifiers": "workspace:*"
+    "@tsconfig/recommended": "npm:^1.0.1"
+    "@types/node": "npm:^22.10.1"
+    typescript: "npm:^5.2.2"
   languageName: unknown
   linkType: soft
 
@@ -9662,7 +9727,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^5.9.6":
+"jose@npm:^5.10.0, jose@npm:^5.9.6":
   version: 5.10.0
   resolution: "jose@npm:5.10.0"
   checksum: 10c0/e20d9fc58d7e402f2e5f04e824b8897d5579aae60e64cb88ebdea1395311c24537bf4892f7de413fab1acf11e922797fb1b42269bc8fc65089a3749265ccb7b0

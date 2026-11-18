@@ -61,8 +61,10 @@ console.log(product.toJSON()) // { name: 'My Awesome Product', sku: 'PROD-001', 
 | `ArrayProperty`    | Lists of values             | Tags, related items       |
 | `ObjectProperty`   | References to other objects | Author, parent            |
 | `FileProperty`     | File references             | Documents, images         |
-| `HashProperty`     | Encrypted values            | Passwords                 |
+| `HashProperty`     | Encrypted values            | Passwords, credentials    |
 | `MapProperty`      | Key-value pairs             | Metadata, settings        |
+
+**`HashProperty` (reversible)**: with `algorithm: HashProperty.ALGORITHM_AES256GCM`, keeps a credential the application must use again (key of a service, token). The value is sealed under a 256-bit key (`key` option or `HashProperty.setDefaultKey()`), only the sealed text is stored and shown, `reveal()` reads it back, and `context` binds it to what it belongs to.
 
 ## Object Lifecycle
 

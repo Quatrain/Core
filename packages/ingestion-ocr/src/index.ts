@@ -1,5 +1,5 @@
 import { AbstractIngestionAdapter, IngestionResult } from '@quatrain/ingestion';
-import { Ai } from '@quatrain/ai';
+import { Ai, type AbstractAiAdapter } from '@quatrain/ai';
 import { Core } from '@quatrain/core';
 import pdf from 'pdf-parse';
 
@@ -25,11 +25,21 @@ export const IngestionSchema = {
 };
 
 export class OcrIngestionAdapter extends AbstractIngestionAdapter {
+   /**
+    * Extracts metadata and a Markdown transcription from a text, an image or a PDF.
+    *
+    * @param source - Text or binary content of the document.
+    * @param options - `mimeType`, `isText`, `isImage`, `contextNote`, `model`; `ai` is the model
+    *    adapter to use (the process-wide one by default) and `onUsage` receives the token usage
+    *    of the model call.
+    * @returns The structured content of the document.
+    */
    async process(source: string | Buffer, options: Record<string, any> = {}): Promise<IngestionResult> {
       const buffer = typeof source === 'string' ? Buffer.from(source, 'utf-8') : source;
       const isImage = options.mimeType?.startsWith('image/') || options.isImage;
-      const gemini = Ai.getAdapter();
+      const gemini: AbstractAiAdapter = options.ai || Ai.getAdapter();
       const model = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+      const callOptions = { model, onUsage: options.onUsage };
 
       let rawText = '';
       let isScannedPdf = false;
@@ -92,7 +102,7 @@ ${options.contextNote ? `Crucial User Context Note:\n- ${options.contextNote}\n`
          result = await gemini.generateStructured([
             { text: imagePrompt },
             mediaPart
-         ], IngestionSchema, { model });
+         ], IngestionSchema, callOptions);
       } else if (isScannedPdf) {
          const pdfPrompt = `You are a professional documentation assistant. Below is an uploaded scanned or image-only PDF document. Your task is to perform OCR on its pages, extract its metadata, and transcribe its content.
 
@@ -110,7 +120,7 @@ ${options.contextNote ? `Crucial User Context Note:\n- ${options.contextNote}\n`
          result = await gemini.generateStructured([
             { text: pdfPrompt },
             mediaPart
-         ], IngestionSchema, { model });
+         ], IngestionSchema, callOptions);
       } else {
          const textPrompt = `You are a professional documentation assistant. Below is a raw document text. Your task is to extract its metadata and structure it.
 
@@ -130,7 +140,7 @@ Raw Text:
 ${rawText}
 ---`;
 
-         result = await gemini.generateStructured(textPrompt, IngestionSchema, { model });
+         result = await gemini.generateStructured(textPrompt, IngestionSchema, callOptions);
       }
 
       return result as IngestionResult;

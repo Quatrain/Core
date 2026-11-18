@@ -25,6 +25,9 @@ export class ForbiddenError extends ResourceError {}
 /** Indicates a non-existent database or file resource lookup (e.g., HTTP 404). */
 export class NotFoundError extends ResourceError {}
 
+/** Indicates a write refused because it collides with the current state of a resource (e.g., HTTP 409). */
+export class ConflictError extends ResourceError {}
+
 /** Indicates an originally valid asset that has been purged (e.g., HTTP 410). */
 export class GoneError extends ResourceError {}
 

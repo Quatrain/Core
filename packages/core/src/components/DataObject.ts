@@ -172,6 +172,24 @@ export class DataObject implements DataObjectType {
                      new ObjectUri(ref, label),
                      false
                   )
+               } else if (
+                  val &&
+                  typeof val === 'object' &&
+                  !val.hasOwnProperty('bucket') &&
+                  'path' in val &&
+                  typeof val.path === 'string' &&
+                  'label' in val &&
+                  typeof val.label === 'string' &&
+                  Object.keys(val).every(
+                     (k) => k === 'path' || k === 'label' || k === 'backend'
+                  )
+               ) {
+                  const { path, label } = val as { path: string; label: string }
+
+                  Reflect.get(this._properties, key).set(
+                     new ObjectUri(path, label),
+                     false
+                  )
                } else {
                   Reflect.get(this._properties, key).set(data[key], false)
                }
@@ -307,10 +325,29 @@ export class DataObject implements DataObjectType {
     * @returns The raw serialized dictionary.
     */
    toJSON(params: boolean | toJSONParams = false): { [x: string]: any } {
+      return this._serialize(params, 'json')
+   }
+
+   /**
+    * Serializes the data object for MessagePack encoding.
+    * Same output as `toJSON()` except that null values are omitted and
+    * object references use `path` instead of `ref` (C# reserved keyword).
+    *
+    * @param params - Serialization settings (e.g. resolve references).
+    * @returns The MessagePack-ready dictionary representation.
+    */
+   toMsgPack(params: boolean | toJSONParams = false): { [x: string]: any } {
+      return this._serialize(params, 'msgpack')
+   }
+
+   protected _serialize(
+      params: boolean | toJSONParams,
+      format: 'json' | 'msgpack'
+   ): { [x: string]: any } {
       let objectsAsReferences: boolean = false,
          withoutURIData: boolean = false,
          ignoreUnchanged: boolean = false,
-         ignoreNulls: boolean = false,
+         ignoreNulls: boolean = format === 'msgpack',
          converters: any = {}
 
       if (typeof params === 'object') {
@@ -318,11 +355,11 @@ export class DataObject implements DataObjectType {
          objectsAsReferences = Boolean(params.objectsAsReferences)
          withoutURIData = Boolean(params.withoutURIData)
          ignoreUnchanged = Boolean(params.ignoreUnchanged)
-         ignoreNulls = Boolean(params.ignoreNulls)
+         ignoreNulls = ignoreNulls || Boolean(params.ignoreNulls)
          converters = params.converters
       }
 
-      return {
+      const data: { [x: string]: any } = {
          ...(!withoutURIData &&
             this.uri && { uid: this.uri.uid, path: this.uri.path }),
          ...this._dataToJSON(
@@ -332,6 +369,20 @@ export class DataObject implements DataObjectType {
             converters
          ),
       }
+
+      if (format === 'msgpack') {
+         Object.keys(this._properties).forEach((key: string) => {
+            if (
+               key in data &&
+               Reflect.get(this._properties, key).constructor.name ===
+                  'ObjectProperty'
+            ) {
+               data[key] = ObjectUri.toMsgPackReference(data[key])
+            }
+         })
+      }
+
+      return data
    }
 
    /**

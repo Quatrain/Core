@@ -22,6 +22,7 @@ export interface DataObjectClass<T extends DataObjectClass<any>> {
    clone(data?: any): Promise<T>
    toReference(): any
    toJSON(params?: boolean | toJSONParams): any
+   toMsgPack(params?: boolean | toJSONParams): any
    populateFromData(data: { [x: string]: unknown }): this
    asProxy(): any
 }

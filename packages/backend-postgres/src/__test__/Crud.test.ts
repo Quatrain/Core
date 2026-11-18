@@ -44,6 +44,20 @@ describe('Postgres CRUD operations', () => {
       expect(user2._.name).toBe(user._.name)
    })
 
+   test('update treats the record identifier as data, not SQL', async () => {
+      const before = user._.firstname
+      const forged = await User.factory()
+      forged.dataObject.uri.path = `user/x' OR '1'='1`
+      forged._.firstname = 'Overwritten'
+
+      await backend.update(forged.dataObject)
+
+      const check = await User.factory()
+      check.dataObject.uri.path = user.dataObject.uri.path
+      await backend.read(check.dataObject)
+      expect(check._.firstname).toBe(before)
+   })
+
    test('delete data', async () => {
       expect(user.uid).toBeDefined()
 

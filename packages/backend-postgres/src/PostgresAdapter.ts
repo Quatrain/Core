@@ -12,6 +12,8 @@ import {
    BackendAction,
    BackendParameters,
    BackendError,
+   UniqueConstraintError,
+   uniquePropertyNames,
    QueryMetaType,
    QueryResultType,
    Filters,
@@ -52,6 +54,15 @@ const operatorsMap: { [x: string]: string } = {
    isNull: 'IS NULL',
    isNotNull: 'IS NOT NULL',
 }
+
+/** Shape of a custom PostgreSQL setting name: `namespace.name`. */
+const SESSION_SETTING = /^[a-z_][a-z0-9_]*\.[a-z_][a-z0-9_]*$/
+
+/** SQLSTATE raised when a unique constraint refuses a value. */
+const PG_UNIQUE_VIOLATION = '23505'
+
+/** Shape of the property names accepted where they become SQL identifiers. */
+const SQL_IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/
 
 /**
  * Backend adapter implementation for PostgreSQL databases.
@@ -99,12 +110,58 @@ export class PostgresAdapter extends AbstractBackendAdapter {
       return await this._pool.connect()
    }
 
+   /**
+    * Reads the session settings to apply to the next statement, as returned by the
+    * `config.sessionSettings` function given to the adapter.
+    *
+    * @returns Setting names and values, or `undefined` when there is none.
+    * @throws {BackendError} If a setting name is not of the form `namespace.name`.
+    */
+   protected _sessionSettings(): [string, string][] | undefined {
+      const provider = this._params.config?.sessionSettings
+      if (typeof provider !== 'function') {
+         return undefined
+      }
+      const settings = provider()
+      if (!settings) {
+         return undefined
+      }
+      const entries = Object.entries(settings).map(([name, value]): [string, string] => {
+         if (!SESSION_SETTING.test(name)) {
+            throw new BackendError(`[PGA] Invalid session setting name '${name}'`)
+         }
+         return [name, String(value)]
+      })
+      return entries.length > 0 ? entries : undefined
+   }
+
    protected async _query(sql: string, params: any[] = []) {
+      const settings = this._sessionSettings()
       const connection = await this._connect()
+      let broken = false
       try {
-         return await connection.query(sql, params)
+         if (!settings) {
+            return await connection.query(sql, params)
+         }
+         // The settings live for one transaction only: the pooled connection never keeps them.
+         await connection.query('BEGIN')
+         try {
+            const placeholders = settings.map((_, i) => `set_config($${i * 2 + 1}, $${i * 2 + 2}, true)`)
+            await connection.query(`SELECT ${placeholders.join(', ')}`, settings.flat())
+            const result = await connection.query(sql, params)
+            await connection.query('COMMIT')
+            return result
+         } catch (err) {
+            try {
+               await connection.query('ROLLBACK')
+            } catch {
+               broken = true
+            }
+            throw err
+         }
       } finally {
-         connection.release()
+         // A connection that could not roll back is destroyed instead of going back to the pool.
+         connection.release(broken)
       }
    }
 
@@ -202,6 +259,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                  name,
                  type: def.type || (def.constructor && def.constructor.name),
                  constructor: def.constructor,
+                 unique: def.unique === true,
               }))
 
          const seen = new Set<string>()
@@ -231,7 +289,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                columnType = 'VARCHAR(255)'
             }
 
-            query += `,\n    "${propName}" ${columnType}`
+            query += `,\n    "${propName}" ${columnType}${propDef.unique === true ? ' UNIQUE' : ''}`
          })
 
          query += `\n)`
@@ -350,10 +408,33 @@ export class PostgresAdapter extends AbstractBackendAdapter {
 
          return dataObject
       } catch (err) {
+         const conflict = this._uniqueViolation(err, dataObject)
+         if (conflict) {
+            throw conflict
+         }
          console.log(err)
          Backend.error((err as Error).message)
          throw new BackendError((err as Error).message)
       }
+   }
+
+   /**
+    * Recognises the PostgreSQL error raised when a `UNIQUE` column receives a value already taken.
+    *
+    * @param err - The error thrown by the driver.
+    * @param dataObject - The DataObject that was being written.
+    * @returns The matching `UniqueConstraintError`, or `undefined` for any other error.
+    */
+   protected _uniqueViolation(err: unknown, dataObject: DataObjectClass<any>): UniqueConstraintError | undefined {
+      const pgError = err as { code?: string; constraint?: string } | undefined
+      if (!pgError || pgError.code !== PG_UNIQUE_VIOLATION) {
+         return undefined
+      }
+      const collection = (this.getCollection(dataObject) || '').toLowerCase()
+      const property = uniquePropertyNames(dataObject).find(
+         (name) => pgError.constraint === `${collection}_${name.toLowerCase()}_key`
+      )
+      return new UniqueConstraintError(collection, property)
    }
 
    /**
@@ -421,13 +502,11 @@ export class PostgresAdapter extends AbstractBackendAdapter {
 
       const queryString = `${query
          .join(' ')
-         .replace('*', fields.join(', '))} WHERE coll.id = '${
-         parts[parts.length - 1]
-      }'`
+         .replace('*', fields.join(', '))} WHERE coll.id = $1`
 
       Backend.debug(`[PGA] SQL ${queryString}`)
 
-      const result = await this._query(queryString)
+      const result = await this._query(queryString, [parts[parts.length - 1]])
 
       if (result.rowCount === 0) {
          throw new NotFoundError(`[PGA] No document matches path '${path}'`)
@@ -523,12 +602,17 @@ export class PostgresAdapter extends AbstractBackendAdapter {
       })
 
       if (updates.length > 0) {
-         const query = `UPDATE "${dataObject.uri.collection?.toLowerCase()}" SET ${updates.join(', ')} WHERE id = '${dataObject.uid}'`
+         values.push(dataObject.uid)
+         const query = `UPDATE "${dataObject.uri.collection?.toLowerCase()}" SET ${updates.join(', ')} WHERE id = $${i}`
 
          Backend.debug(`[PGA] ${query}`)
          Backend.debug(`[PGA] Values ${JSON.stringify(values)}`)
 
-         await this._query(query, values)
+         try {
+            await this._query(query, values)
+         } catch (err) {
+            throw this._uniqueViolation(err, dataObject) || err
+         }
       } else {
          Backend.warn(`[PGA] No data to update`)
       }
@@ -653,6 +737,12 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          let hasFilters = false
          const alias = 'coll'
          const query: string[] = []
+         // Values never enter the SQL text: they are bound as parameters.
+         const params: string[] = []
+         const bind = (value: unknown): string => {
+            params.push(String(value))
+            return `$${params.length}`
+         }
          const fields: string[] = [`${alias}.id`]
          const caseMap = {}
 
@@ -687,7 +777,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          })
 
          if (parent) {
-            query.push(`WHERE coll.${dataObject.parentProp}='${parent.uid}'`)
+            query.push(`WHERE coll.${dataObject.parentProp}=${bind(parent.uid)}`)
          }
 
          if (filters instanceof Filters) {
@@ -705,6 +795,11 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                if (filter.prop.indexOf('.') > -1) {
                   // Condition is on a sub-object on the form 'model.property'
                   const parts = filter.prop.toLowerCase().split('.')
+                  if (parts.length !== 2 || !parts.every((part: string) => SQL_IDENTIFIER.test(part))) {
+                     throw new BackendError(
+                        `[PGA] Invalid sub-property filter '${filter.prop}'`
+                     )
+                  }
                   const joinAlias = `${parts[0]}_table`
                   realProp = `${joinAlias}.${parts[1]}`
                   realOperator = operatorsMap[filter.operator]
@@ -718,7 +813,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                      (rp, j) =>
                         (realProp += `${
                            j > 0 ? ' OR ' : ''
-                        }${alias}.${rp.toLowerCase()} ILIKE '${realValue}'`)
+                        }${alias}.${rp.toLowerCase()} ILIKE ${bind(realValue)}`)
                   )
                   realProp += ')'
                   realValue = undefined
@@ -744,7 +839,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                   ) {
                      // we only compara arrays without using operator
                      query.push(
-                        `ARRAY['${realValue.join("','")}'] ${
+                        `ARRAY[${realValue.map(bind).join(',')}] ${
                            operatorsMap[filter.operator]
                         } ${alias}.${realProp}`
                      )
@@ -779,7 +874,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
 
                if (realOperator === operatorsMap['containsAny']) {
                   // Use 'containsAny' for queries in arrays which query structure is weird
-                  query.push(`'${realValue}'=ANY(${alias}.${realProp})`)
+                  query.push(`${bind(realValue)}=ANY(${alias}.${realProp})`)
                } else if (
                   realOperator === operatorsMap['equals'] &&
                   realValue === 'null'
@@ -802,8 +897,8 @@ export class PostgresAdapter extends AbstractBackendAdapter {
                         realValue !== undefined
                            ? `${
                                 Array.isArray(realValue)
-                                   ? this._array2String(realValue)
-                                   : `'${realValue}'`
+                                   ? `(${realValue.map(bind).join(',')})`
+                                   : bind(realValue)
                              }`
                            : ''
                      }`
@@ -819,7 +914,8 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          Backend.debug(`[PGA] SQL ${query.join(' ')}`)
 
          const countSnapshot = await this._query(
-            `${query.join(' ').replace('*', 'COUNT(*) as total')}`
+            `${query.join(' ').replace('*', 'COUNT(*) as total')}`,
+            params
          )
 
          Backend.debug(`[PGA] Counting records ${countSnapshot.rows[0].total}`)
@@ -829,21 +925,36 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             pagination.sortings.forEach((sorting: Sorting, i) => {
                query.push(i == 0 ? `ORDER BY` : ',')
 
+               if (
+                  !SQL_IDENTIFIER.test(String(sorting.prop)) ||
+                  !/^(asc|desc)$/i.test(String(sorting.order))
+               ) {
+                  throw new BackendError(
+                     `[PGA] Invalid sorting '${sorting.prop} ${sorting.order}'`
+                  )
+               }
                query.push(`${alias}.${sorting.prop} ${sorting.order}`)
                if (sorting.prop !== undefined) {
                   sortField.push(`${sorting.prop} ${sorting.order}`)
                }
             })
-            if (pagination?.limits.batch !== -1) {
-               query.push(`LIMIT ${pagination.limits.batch}`)
+            const batch = Number(pagination.limits.batch)
+            const offset = Number(pagination.limits.offset || 0)
+            if (!Number.isInteger(batch) || batch < -1 || !Number.isInteger(offset) || offset < 0) {
+               throw new BackendError(
+                  `[PGA] Invalid limits '${pagination.limits.batch}' / '${pagination.limits.offset}'`
+               )
             }
-            query.push(`OFFSET ${pagination.limits.offset || 0}`)
+            if (batch !== -1) {
+               query.push(`LIMIT ${batch}`)
+            }
+            query.push(`OFFSET ${offset}`)
          }
 
          const literal = `${query.join(' ').replace('*', fields.join(', '))}`
          Backend.debug(`[PGA] Full SQL ${literal}`)
 
-         const result = await this._query(literal)
+         const result = await this._query(literal, params)
 
          const meta: QueryMetaType = {
             count: Number.parseInt(countSnapshot.rows[0].total),
@@ -929,7 +1040,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
             columnType = 'VARCHAR(255)'
          }
 
-         query += `,\n    "${propName}" ${columnType}`
+         query += `,\n    "${propName}" ${columnType}${propDef.unique === true ? ' UNIQUE' : ''}`
       })
 
       query += `\n)`
@@ -963,7 +1074,7 @@ export class PostgresAdapter extends AbstractBackendAdapter {
          else if (type === 'ArrayProperty') columnType = 'JSONB'
          else if (type === 'ObjectProperty') columnType = 'VARCHAR(255)'
 
-         upSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" ADD COLUMN "${propName}" ${columnType}\`)`)
+         upSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" ADD COLUMN "${propName}" ${columnType}${propDef.unique === true ? ' UNIQUE' : ''}\`)`)
          downSql.push(`await adapter.rawQuery(\`ALTER TABLE "${collection.toLowerCase()}" DROP COLUMN "${propName}"\`)`)
       })
 

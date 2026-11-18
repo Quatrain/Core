@@ -17,7 +17,7 @@ import {
    DateTimeProperty,
    DateTimePropertyType,
 } from './properties/DateTimeProperty'
-import { HashProperty, HashPropertyType } from './properties/HashProperty'
+import { HashProperty, HashPropertyType, HashPropertyKeyType, HashPropertyUnreadableError } from './properties/HashProperty'
 import {
    CollectionProperty,
    CollectionPropertyType,
@@ -51,6 +51,7 @@ import {
    UnauthorizedError,
    ForbiddenError,
    NotFoundError,
+   ConflictError,
    GoneError,
    ValidationError,
    BackendError,
@@ -66,6 +67,7 @@ export {
    DateTimeProperty,
    EnumProperty,
    HashProperty,
+   HashPropertyUnreadableError,
    CollectionProperty,
    ArrayProperty,
    ObjectProperty,
@@ -86,6 +88,7 @@ export {
    UnauthorizedError,
    ForbiddenError,
    NotFoundError,
+   ConflictError,
    GoneError,
    ValidationError,
    BackendError,
@@ -98,6 +101,7 @@ export type {
    DateTimePropertyType,
    EnumPropertyType,
    HashPropertyType,
+   HashPropertyKeyType,
    CollectionPropertyType,
    ArrayPropertyType,
    ObjectPropertyType,

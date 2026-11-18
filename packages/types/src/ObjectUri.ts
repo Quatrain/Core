@@ -242,4 +242,29 @@ export class ObjectUri {
       }
       return res
    }
+
+   /**
+    * MessagePack representation: same as `toJSON()` with `path` instead of `ref`
+    * (`ref` is a reserved keyword in C#).
+    *
+    * @returns `{ path, label, backend? }`
+    */
+   toMsgPack() {
+      return ObjectUri.toMsgPackReference(this.toJSON())
+   }
+
+   /**
+    * Converts a JSON reference (`{ ref, ... }`) into its MessagePack form (`{ path, ... }`).
+    * Any other value is returned untouched.
+    *
+    * @param value - Serialized reference, or any value.
+    * @returns The reference with `ref` renamed to `path`.
+    */
+   static toMsgPackReference(value: any): any {
+      if (!value || typeof value !== 'object' || !('ref' in value)) {
+         return value
+      }
+      const { ref, ...rest } = value
+      return { path: ref, ...rest }
+   }
 }

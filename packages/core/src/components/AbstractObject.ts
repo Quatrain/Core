@@ -98,4 +98,13 @@ export abstract class AbstractObject {
    toJSON() {
       return typeof this.uri === 'string' ? this.uri : this.uri?.toJSON()
    }
+
+   /**
+    * Serializes the current object path / identity for MessagePack payloads.
+    *
+    * @returns The MessagePack serialized ObjectUri (`{ path, label }`).
+    */
+   toMsgPack() {
+      return typeof this.uri === 'string' ? this.uri : this.uri?.toMsgPack()
+   }
 }

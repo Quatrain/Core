@@ -18,6 +18,7 @@ export type EventTypes =
  * | `parent` | DataObjectClass | The parent object containing this property. | `undefined` |
  * | `protected` | boolean | If true, the value can only be set once and becomes read-only. | `false` |
  * | `mandatory` | boolean | If true, the property must have a value before saving. | `false` |
+ * | `unique` | boolean | If true, backends able to do so refuse two records holding the same value. | `false` |
  * | `defaultValue` | any | The default value or a function returning the default value. | `undefined` |
  * | `htmlType` | PropertyHTMLType | The suggested HTML input type for rendering in a UI. | `'off'` |
  * | `onChange` | function | Callback triggered whenever the property value is modified. | `undefined` |
@@ -26,6 +27,8 @@ export interface BasePropertyType extends AbstractPropertyType {
    parent?: DataObjectClass<any>
    protected?: boolean
    mandatory?: boolean
+   /** When true, backends able to do so refuse two records holding the same value. */
+   unique?: boolean
    defaultValue?: any
    htmlType?: PropertyHTMLType
    onChange?: (dao: DataObjectClass<any>) => DataObjectClass<any>
@@ -63,6 +66,7 @@ export class BaseProperty implements PropertyClassType {
    protected _name: string
    protected _value: any = undefined
    protected _mandatory: boolean = false
+   protected _unique: boolean = false
    protected _protected: boolean = false
    protected _allows: string[] = []
    protected _htmlType: PropertyHTMLType = 'off'
@@ -78,6 +82,7 @@ export class BaseProperty implements PropertyClassType {
       this._name = config.name
       this._protected = config.protected || false
       this._mandatory = config.mandatory || false
+      this._unique = config.unique === true
       this._defaultValue =
          typeof config.defaultValue === 'function'
             ? config.defaultValue()
@@ -96,6 +101,11 @@ export class BaseProperty implements PropertyClassType {
 
    get mandatory() {
       return this._mandatory
+   }
+
+   /** Whether the backend must keep the value unique within the collection. */
+   get unique() {
+      return this._unique
    }
 
    get protected() {

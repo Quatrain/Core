@@ -2,6 +2,7 @@ import { Backend, BackendAction, BackendParameters, BackendRecordType } from './
 import { AbstractBackendAdapter } from './AbstractBackendAdapter'
 import { MockAdapter } from './MockAdapter'
 import { BackendError } from './BackendError'
+import { UniqueConstraintError, uniquePropertyNames } from './UniqueConstraintError'
 import { BackendInterface } from './types/BackendInterface'
 import { SchemaDelta } from './types/SchemaDelta'
 import { PersistedBaseObject } from './PersistedBaseObject'
@@ -38,6 +39,8 @@ export {
    BaseRepository,
    AbstractBackendAdapter,
    BackendError,
+   UniqueConstraintError,
+   uniquePropertyNames,
    MockAdapter,
    OperatorKeys,
    Query,

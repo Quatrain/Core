@@ -94,7 +94,7 @@ describe('Object Uri', () => {
       const lockedUri = new ObjectUri('collection/uid')
       expect(() => { lockedUri.collection = 'new-collection' }).toThrow('Collection value already set')
 
-      // 5. toReference and toJSON
+      // 5. toReference, toJSON, and toMsgPack
       const refUri = new ObjectUri('@s3:collection/uid', 'my label')
       refUri.path = 'collection/uid'
       expect(refUri.toReference()).toEqual({
@@ -108,6 +108,11 @@ describe('Object Uri', () => {
          label: 'my label',
          backend: '@s3'
       })
+
+      expect(refUri.toMsgPack()).toEqual({
+         path: 'collection/uid',
+         label: 'my label',
+         backend: '@s3'
+      })
    })
 })
-

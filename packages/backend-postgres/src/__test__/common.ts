@@ -1,10 +1,13 @@
-import { Backend } from '@quatrain/backend'
+import { Backend, User } from '@quatrain/backend'
 import { Core } from '@quatrain/core'
 import { Entity } from '@quatrain/testing'
 import { PostgresAdapter } from '../PostgresAdapter'
 export { Entity, createUser, createEntity, createUsers } from '@quatrain/testing'
 
 Core.addClass('Entity', Entity)
+// Every model refers to users (createdBy…): with the class registered, the adapter creates the
+// complete users table whichever test runs first, instead of a bare placeholder.
+Core.addClass('User', User)
 
 export const setup = () => {
    Backend.addBackend(

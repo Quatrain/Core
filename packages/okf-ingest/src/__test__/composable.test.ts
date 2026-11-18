@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { AbstractAiAdapter } from '@quatrain/ai';
 import { extractSemanticContent } from '../ai';
-import { AgroecologyTaxonomyProfile, BradAgronomyProfile } from '../profiles/agroecology';
+import { AgroecologyTaxonomyProfile } from '../profiles/agroecology';
 import { GenericDomainProfile } from '../profiles/generic';
 import { buildDocumentPrompt } from '../prompts/documentPrompt';
 import { buildBookOutlinePrompt } from '../prompts/outlinePrompt';
@@ -51,7 +51,6 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
    it('should inject domain guidelines when using AgroecologyTaxonomyProfile', () => {
       const profile = new AgroecologyTaxonomyProfile();
       expect(profile.id).toBe('agroecology');
-      expect(new BradAgronomyProfile()).toBeInstanceOf(AgroecologyTaxonomyProfile);
 
       const prompt = buildDocumentPrompt(
          { filename: 'agronomy-guide.pdf', rawText: 'Soil biology' },

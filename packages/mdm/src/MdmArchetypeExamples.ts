@@ -121,4 +121,3 @@ export class VirtualKeychain extends AbstractMdmObject {
    }
 }
 
-export { SoilProfile } from './domain/SoilProfile'

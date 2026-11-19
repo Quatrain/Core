@@ -71,10 +71,6 @@ export interface OkfFrontmatterV2 {
    revision?: string;
    category?: string;
    thematics?: string[];
-   soils?: string[];
-   climates?: string[];
-   itineraries?: string[];
-   crops?: string[];
    authors?: string[];
    translators?: string[];
    publisher?: string;
@@ -267,12 +263,10 @@ export interface BookOutline {
    license?: string;
    copyright?: string;
    thematics?: string[];
-   soils?: string[];
-   climates?: string[];
-   itineraries?: string[];
-   crops?: string[];
    tags: string[];
    chapters: BookOutlineChapter[];
+   /** Fields of the taxonomy profile (facets...), as its `extractDomainMetadata` returns them. */
+   [key: string]: unknown;
 }
 
 export interface ChapterExtractionResult {

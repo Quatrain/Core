@@ -31,6 +31,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Refuse client and business-domain words
+        # Core is generic: see bin/check_forbidden_terms.js. The list holds hashes only.
+        run: node bin/check_forbidden_terms.js
+
       - name: Show the toolchain
         run: |
           echo "ci-base ${CI_BASE_VERSION}, user $(id -un)"

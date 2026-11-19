@@ -48,7 +48,7 @@ export interface GitForgeAdapterInterface {
   // Release Operations
   releaseCreate(options: ReleaseCreateOptions): Promise<void>;
 
-  // Git Plumbing & File Operations (Core Code & Modaka sync)
+  // Git Plumbing & File Operations (content synchronisation)
   fetchFileTree(branch?: string): Promise<FileTreeNode[]>;
   downloadBlob(sha: string): Promise<string>;
   pull(branch?: string): Promise<void>;

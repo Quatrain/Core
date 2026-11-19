@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { AbstractAiAdapter } from '@quatrain/ai';
 import { extractSemanticContent } from '../ai';
-import { AgroecologyTaxonomyProfile } from '../profiles/agroecology';
+import { FacetTaxonomyProfile } from '../profiles/facets';
 import { GenericDomainProfile } from '../profiles/generic';
 import { buildDocumentPrompt } from '../prompts/documentPrompt';
 import { buildBookOutlinePrompt } from '../prompts/outlinePrompt';
@@ -48,19 +48,31 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
       expect(prompt).not.toContain('Tu es un ingénieur expert');
    });
 
-   it('should inject domain guidelines when using AgroecologyTaxonomyProfile', () => {
-      const profile = new AgroecologyTaxonomyProfile();
-      expect(profile.id).toBe('agroecology');
+   it('asks the model for the facets an application declares', () => {
+      const profile = new FacetTaxonomyProfile({
+         id: 'catalogue',
+         systemRole: 'You are an expert cataloguer.',
+         thematics: ['guides', 'reference'],
+         facets: [
+            { name: 'region', description: 'Regions the document covers', examples: ['north', 'south'] },
+            { name: 'audience', description: 'Who the document is for', values: ['beginner', 'expert'] },
+         ],
+      });
+      expect(profile.id).toBe('catalogue');
 
-      const prompt = buildDocumentPrompt(
-         { filename: 'agronomy-guide.pdf', rawText: 'Soil biology' },
-         profile
-      );
+      const prompt = buildDocumentPrompt({ filename: 'handbook.pdf', rawText: 'Sample' }, profile);
 
-      expect(prompt).toContain('You are an expert agronomist, soil scientist');
-      expect(prompt).toContain('"soils": Specific soil types');
-      expect(prompt).toContain('"climates": Climate zones');
-      expect(prompt).toContain('"itineraries": Agricultural management practices');
+      expect(prompt).toContain('You are an expert cataloguer.');
+      expect(prompt).toContain('"thematics": Themes of the knowledge base the document belongs to, among: guides, reference.');
+      expect(prompt).toContain('"region": Regions the document covers. (e.g. north, south)');
+      expect(prompt).toContain('"audience": Who the document is for. Choose among: beginner, expert.');
+      expect(Object.keys(profile.schemaProperties)).toEqual(['thematics', 'region', 'audience']);
+   });
+
+   it('refuses a facet name that is not an identifier or is declared twice', () => {
+      expect(() => new FacetTaxonomyProfile({ facets: [{ name: 'a b', description: 'x' }] })).toThrow();
+      expect(() => new FacetTaxonomyProfile({ facets: [{ name: 'a', description: 'x' }, { name: 'a', description: 'y' }] })).toThrow();
+      expect(() => new FacetTaxonomyProfile({ facets: [{ name: 'thematics', description: 'x' }] })).toThrow();
    });
 
    it('should extract generic document metadata using a decoupled custom AbstractAiAdapter without Gemini SDK', async () => {
@@ -91,32 +103,31 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
       expect(result.metadata.type).toBe('specification');
       expect(result.metadata.category).toBe('architecture');
       expect(result.metadata.abstracts?.en).toContain('Dense English abstract');
-      expect(result.metadata.soils).toBeUndefined();
-      expect(result.metadata.climates).toBeUndefined();
+      expect(result.metadata.region).toBeUndefined();
       expect(result.usage.total).toBe(150);
    });
 
    it('should support parameterized target languages (e.g. en and es)', async () => {
       const mockAdapter = new MockAiAdapter({
-         title: 'Plant Health Manual',
+         title: 'Maintenance Manual',
          type: 'guide',
-         description: 'Botanical guide.',
-         category: 'botany',
-         tags: ['plants'],
+         description: 'Equipment maintenance guide.',
+         category: 'maintenance',
+         tags: ['maintenance'],
          language: 'es',
          originalLanguage: 'es',
          abstracts: {
-            en: 'English summary of plant health.',
-            es: 'Resumen en español de salud vegetal.',
+            en: 'English summary of equipment maintenance.',
+            es: 'Resumen en español del mantenimiento.',
          },
          keywords: {
-            en: ['plants', 'health'],
-            es: ['plantas', 'salud'],
+            en: ['maintenance', 'equipment'],
+            es: ['mantenimiento', 'equipo'],
          },
       });
 
       const result = await extractSemanticContent(
-         { rawText: 'Plant biology text in Spanish', filename: 'manual.pdf' },
+         { rawText: 'Maintenance text in Spanish', filename: 'manual.pdf' },
          undefined,
          {
             adapter: mockAdapter,
@@ -127,49 +138,47 @@ describe('Composable Architecture & Decoupled AI Runners', () => {
 
       expect(mockAdapter.lastPrompt).toContain('clear scientific English');
       expect(mockAdapter.lastPrompt).toContain('formal Spanish');
-      expect(result.metadata.abstracts?.en).toBe('English summary of plant health.');
-      expect(result.metadata.abstracts?.es).toBe('Resumen en español de salud vegetal.');
-      expect(result.metadata.keywords?.es).toEqual(['plantas', 'salud']);
+      expect(result.metadata.abstracts?.en).toBe('English summary of equipment maintenance.');
+      expect(result.metadata.abstracts?.es).toBe('Resumen en español del mantenimiento.');
+      expect(result.metadata.keywords?.es).toEqual(['mantenimiento', 'equipo']);
    });
 
-   it('should extract agronomic taxonomies when AgroecologyTaxonomyProfile is supplied', async () => {
+   it('keeps the declared facets of the answer, and only the values of a closed vocabulary', async () => {
       const mockAdapter = new MockAiAdapter({
-         title: 'Gestion des sols calcaires',
+         title: 'Gestion des ateliers',
          type: 'guide',
-         description: 'Guide technique pour sols argilo-calcaires.',
-         category: 'soil-health',
-         tags: ['sol', 'calcaire'],
+         description: 'Guide technique.',
+         category: 'guides',
+         tags: ['atelier'],
          language: 'fr',
          originalLanguage: 'fr',
-         abstracts: {
-            fr: 'Synthèse sur les sols argilo-calcaires.',
-            en: 'Summary on clay-limestone soils.',
-            ar: 'ملخص حول التربة الكلسية.',
-         },
-         keywords: {
-            fr: ['sol', 'calcaire'],
-            en: ['soil', 'limestone'],
-            ar: ['تربة', 'كلسي'],
-         },
-         soils: ['argilo-calcaire'],
-         climates: ['mediterraneen'],
-         itineraries: ['semis-direct'],
-         crops: ['vigne'],
+         abstracts: { fr: 'Synthèse.', en: 'Summary.', ar: 'ملخص.' },
+         keywords: { fr: ['atelier'], en: ['workshop'], ar: ['ورشة'] },
+         thematics: ['guides', 'unknown-theme'],
+         region: ['north', 'north', ''],
+         audience: ['expert', 'everyone'],
+         undeclared: ['dropped'],
+      });
+      const profile = new FacetTaxonomyProfile({
+         thematics: ['guides', 'reference'],
+         targetLanguages: ['fr', 'en', 'ar'],
+         facets: [
+            { name: 'region', description: 'Regions' },
+            { name: 'audience', description: 'Audience', values: ['beginner', 'expert'] },
+         ],
       });
 
       const result = await extractSemanticContent(
-         { rawText: 'Texte agronomique', filename: 'sols.pdf' },
+         { rawText: 'Texte technique', filename: 'atelier.pdf' },
          undefined,
-         { adapter: mockAdapter, taxonomyProfile: new AgroecologyTaxonomyProfile() }
+         { adapter: mockAdapter, taxonomyProfile: profile }
       );
 
-      expect(result.metadata.title).toBe('Gestion des sols calcaires');
-      expect(result.metadata.soils).toEqual(['argilo-calcaire']);
-      expect(result.metadata.climates).toEqual(['mediterraneen']);
-      expect(result.metadata.itineraries).toEqual(['semis-direct']);
-      expect(result.metadata.crops).toEqual(['vigne']);
-      expect(result.metadata.abstracts?.fr).toBeDefined();
-      expect(result.metadata.abstracts?.en).toBeDefined();
+      expect(result.metadata.title).toBe('Gestion des ateliers');
+      expect(result.metadata.thematics).toEqual(['guides']);
+      expect(result.metadata.region).toEqual(['north']);
+      expect(result.metadata.audience).toEqual(['expert']);
+      expect(result.metadata.undeclared).toBeUndefined();
       expect(result.metadata.abstracts?.ar).toBeDefined();
    });
 

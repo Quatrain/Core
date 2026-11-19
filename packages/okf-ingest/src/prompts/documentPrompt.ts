@@ -57,7 +57,7 @@ export function buildDocumentPrompt(
       `7. "keywords": Standardized indexing keywords (4 to 8 per language) for each configured language (${targetLanguages.join(', ')}).`,
       '8. "tags": Lowercase semantic tags capturing the main technical concepts.',
       '9. "license": Standard SPDX license identifier or Open Access status if stated (e.g. "CC-BY-4.0", "CC-BY-SA-4.0", "CC0-1.0", "Open Access", "Proprietary", "All Rights Reserved", or omitted if unknown).',
-      '10. "copyright": Legal copyright notice if explicitly present (e.g. "© 2024 Éditions France Agricole, Paris").',
+      '10. "copyright": Legal copyright notice if explicitly present (e.g. "© 2024 Example Press, Paris").',
    ];
 
    // Add domain-specific prompt guidelines if provided

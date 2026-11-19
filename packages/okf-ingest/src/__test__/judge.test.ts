@@ -45,16 +45,16 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
       it('should compute weighted score strictly according to 30/25/20/15/10 distribution', () => {
          const dimensions: OkfDimensionScores = {
             factualFidelity: 100, // 30
-            taxonomicAccuracy: 80, // 20
-            bioIndicationCompleteness: 90, // 18
+            namingAccuracy: 80, // 20
+            contentCompleteness: 90, // 18
             multilingualQuality: 70, // 10.5
             structureCompliance: 100, // 10
          };
 
          const expected =
             100 * OKF_DIMENSION_WEIGHTS.factualFidelity +
-            80 * OKF_DIMENSION_WEIGHTS.taxonomicAccuracy +
-            90 * OKF_DIMENSION_WEIGHTS.bioIndicationCompleteness +
+            80 * OKF_DIMENSION_WEIGHTS.namingAccuracy +
+            90 * OKF_DIMENSION_WEIGHTS.contentCompleteness +
             70 * OKF_DIMENSION_WEIGHTS.multilingualQuality +
             100 * OKF_DIMENSION_WEIGHTS.structureCompliance;
 
@@ -65,9 +65,9 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
          const criticalH: OkfHallucination = {
             field: 'scientificName',
             severity: 'critical',
-            claimed: 'Foeniculum vulgare',
-            sourceReality: 'Acanthus mollis (title was partially noisy in OCR)',
-            explanation: 'Invented completely unrelated plant species.',
+            claimed: 'FeS2',
+            sourceReality: 'SiO2 (title was partially noisy in OCR)',
+            explanation: 'Invented a completely unrelated mineral.',
          };
 
          // Score would otherwise be 85 (Grade A), but critical hallucination forces FAIL
@@ -76,11 +76,11 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
 
       it('should assign WARN if score is between 50 and 79 or if a major hallucination exists', () => {
          const majorH: OkfHallucination = {
-            field: 'soils',
+            field: 'region',
             severity: 'major',
-            claimed: 'Sol calcaire sec',
-            sourceReality: 'Sol humide lisières méditerranéennes',
-            explanation: 'Inverted water regime indication.',
+            claimed: 'Northern deposits',
+            sourceReality: 'Southern coastal deposits',
+            explanation: 'Inverted location.',
          };
 
          expect(OkfEntryEvaluator.calculateVerdict(85, [majorH])).toBe('WARN');
@@ -91,7 +91,7 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
          const minorH: OkfHallucination = {
             field: 'tags',
             severity: 'minor',
-            claimed: 'plante-rare',
+            claimed: 'rare-mineral',
             sourceReality: 'Not explicitly mentioned',
             explanation: 'Subjective classification tag.',
          };
@@ -126,13 +126,13 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
       it('should evaluate and normalize structured report from mock adapter', async () => {
          const mockPayload = {
             factualFidelity: 92,
-            taxonomicAccuracy: 95,
-            bioIndicationCompleteness: 88,
+            namingAccuracy: 95,
+            contentCompleteness: 88,
             multilingualQuality: 90,
             structureCompliance: 96,
             hallucinations: [],
             omissions: ['Missing secondary biotope details'],
-            strengths: ['Accurate Latin binomial Acanthus mollis', 'Clean OKF frontmatter'],
+            strengths: ['Accurate formula SiO2', 'Clean OKF frontmatter'],
             recommendations: ['Capture moisture index explicitly'],
             summary: 'High quality extraction with rigorous taxonomic fidelity.',
          };
@@ -143,15 +143,15 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
          const report = await evaluator.evaluateWithAdapter(
             adapter,
             {
-               sourceText: 'ACANTHUS MOLLIS Acanthe molle Plante vivace de 30-80 cm...',
+               sourceText: 'QUARTZ Quartz hyalin Minéral de dureté 7...',
                extracted: {
                   metadata: {
                      type: 'catalog-entry',
-                     title: 'Acanthe molle',
-                     scientificName: 'Acanthus mollis',
-                     family: 'Acanthaceae',
+                     title: 'Quartz hyalin',
+                     scientificName: 'SiO2',
+                     family: 'Silicates',
                   },
-                  body: '# Acanthe molle\nPlante vivace...',
+                  body: '# Quartz hyalin\nMinéral de dureté 7...',
                },
             },
             'gemini',
@@ -162,31 +162,31 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
          expect(report.model).toBe('gemini-2.5-flash');
          expect(report.grade).toBe('A+');
          expect(report.verdict).toBe('PASS');
-         expect(report.dimensions.taxonomicAccuracy).toBe(95);
+         expect(report.dimensions.namingAccuracy).toBe(95);
          expect(report.hallucinations.length).toBe(0);
-         expect(report.strengths).toContain('Accurate Latin binomial Acanthus mollis');
+         expect(report.strengths).toContain('Accurate formula SiO2');
       });
 
       it('should penalize and flag hallucinations in report', async () => {
          const mockPayloadWithHallucination = {
             factualFidelity: 20,
-            taxonomicAccuracy: 10,
-            bioIndicationCompleteness: 70,
+            namingAccuracy: 10,
+            contentCompleteness: 70,
             multilingualQuality: 60,
             structureCompliance: 90,
             hallucinations: [
                {
                   field: 'scientificName',
                   severity: 'critical',
-                  claimed: 'Foeniculum vulgare',
-                  sourceReality: 'Source was Acanthus mollis or undetermined margin',
+                  claimed: 'FeS2',
+                  sourceReality: 'Source was SiO2 or undetermined margin',
                   explanation: 'Model hallucinated Giant Fennel from noisy margin artifact.',
                },
             ],
-            omissions: ['Actual botanical family omitted'],
+            omissions: ['Actual mineral class omitted'],
             strengths: ['Well-formed JSON structure'],
             recommendations: ['Set scientificName to Undetermined if title is noisy'],
-            summary: 'Critical hallucination detected: invented plant species.',
+            summary: 'Critical hallucination detected: invented mineral.',
          };
 
          const adapter = new MockJudgeAdapter(mockPayloadWithHallucination);
@@ -195,10 +195,10 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
          const report = await evaluator.evaluateWithAdapter(
             adapter,
             {
-               sourceText: 'ACANTHACÉES Plante vivace de 30-80 cm...',
+               sourceText: 'SILICATES Minéral de dureté 7...',
                extracted: {
                   title: 'Fenouil géant',
-                  scientificName: 'Foeniculum vulgare',
+                  scientificName: 'FeS2',
                },
             },
             'gemini',
@@ -208,7 +208,7 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
          expect(report.verdict).toBe('FAIL');
          expect(report.hallucinations.length).toBe(1);
          expect(report.hallucinations[0].severity).toBe('critical');
-         expect(report.hallucinations[0].claimed).toBe('Foeniculum vulgare');
+         expect(report.hallucinations[0].claimed).toBe('FeS2');
       });
    });
 
@@ -222,8 +222,8 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
             verdict: 'PASS',
             dimensions: {
                factualFidelity: 85,
-               taxonomicAccuracy: 90,
-               bioIndicationCompleteness: 80,
+               namingAccuracy: 90,
+               contentCompleteness: 80,
                multilingualQuality: 85,
                structureCompliance: 90,
             },
@@ -237,7 +237,7 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
                },
             ],
             omissions: ['Omitted flowering period'],
-            strengths: ['Great soil diagnosis'],
+            strengths: ['Great identification keys'],
             recommendations: ['Keep edition empty if unstated'],
             summary: 'Solid extraction.',
             evaluatedAt: new Date().toISOString(),
@@ -251,8 +251,8 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
             verdict: 'PASS',
             dimensions: {
                factualFidelity: 80,
-               taxonomicAccuracy: 90,
-               bioIndicationCompleteness: 85,
+               namingAccuracy: 90,
+               contentCompleteness: 85,
                multilingualQuality: 80,
                structureCompliance: 85,
             },
@@ -280,8 +280,8 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
             verdict: 'PASS',
             dimensions: {
                factualFidelity: 90,
-               taxonomicAccuracy: 95,
-               bioIndicationCompleteness: 80,
+               namingAccuracy: 95,
+               contentCompleteness: 80,
                multilingualQuality: 85,
                structureCompliance: 95,
             },
@@ -326,8 +326,8 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
             verdict: 'PASS',
             dimensions: {
                factualFidelity: 90,
-               taxonomicAccuracy: 90,
-               bioIndicationCompleteness: 90,
+               namingAccuracy: 90,
+               contentCompleteness: 90,
                multilingualQuality: 90,
                structureCompliance: 90,
             },
@@ -347,8 +347,8 @@ describe('OkfEntryEvaluator & LLM-as-a-Judge Core', () => {
             verdict: 'FAIL',
             dimensions: {
                factualFidelity: 30,
-               taxonomicAccuracy: 40,
-               bioIndicationCompleteness: 50,
+               namingAccuracy: 40,
+               contentCompleteness: 50,
                multilingualQuality: 60,
                structureCompliance: 70,
             },

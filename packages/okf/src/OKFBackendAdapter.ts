@@ -24,16 +24,28 @@ import { Storage, AbstractStorageAdapter } from '@quatrain/storage';
 export class OKFBackendAdapter extends AbstractBackendAdapter {
    protected dataDir: string;
    protected storage: AbstractStorageAdapter | null = null;
+   /** Collections kept as JSON records `{ meta, data }` instead of markdown concepts. */
+   protected jsonCollections: string[];
 
    /**
     * Instantiates the OKF storage adapter.
     * 
-    * @param params - Configuration parameters containing database path and optional settings.
+    * @param params - Configuration: `database` (data directory, else the `OKF_DATA_DIR`
+    *    environment variable, else `/data/okf`), `storage` (alias of a storage adapter), and
+    *    `jsonCollections` (collections kept as JSON records, such as logs or measurements,
+    *    with no index built for them).
     */
    constructor(params?: BackendParameters) {
       const actualParams = params || {};
       super(actualParams);
-      this.dataDir = (actualParams.config?.database as string) || process.env.STUDIO_DATA_DIR || '/data/okf';
+      this.dataDir =
+         (actualParams.config?.database as string) ||
+         process.env.OKF_DATA_DIR ||
+         // Former name, still read so existing deployments keep their directory.
+         process.env.STUDIO_DATA_DIR ||
+         '/data/okf';
+      const jsonCollections = actualParams.config?.jsonCollections;
+      this.jsonCollections = Array.isArray(jsonCollections) ? jsonCollections.map(String) : [];
       const storageAlias = actualParams.config?.storage;
       if (storageAlias) {
          this.storage = Storage.getStorage(storageAlias);
@@ -41,10 +53,24 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
    }
 
    /**
-    * Resolves the relative storage path matching the OKF collection and metadata hierarchy.
-    * For telemetry: telemetry/YYYY-MM-DD/{type}/{HHMMSS}-{millis}-{bassinId}.json
-    * For other: {collection}/{uid}.json
-    * 
+    * Tells whether a collection is kept as JSON records rather than markdown concepts.
+    */
+   protected isJsonCollection(collection: string | undefined): boolean {
+      return collection !== undefined && this.jsonCollections.includes(collection);
+   }
+
+   /**
+    * Name of the file holding a record of a collection.
+    */
+   protected recordFileName(collection: string | undefined, uid: string): string {
+      return this.isJsonCollection(collection) ? `${uid}.json` : `${uid}.md`;
+   }
+
+   /**
+    * Resolves the relative storage path of a record: `{collection}/{category or folder}/{uid}.md`
+    * for a concept, `{collection}/{uid}.json` for a JSON collection. A subclass may override it
+    * for another layout, such as records partitioned by date.
+    *
     * @param dao - The data object model being persisted.
     * @param uid - The unique identifier of the record.
     * @returns The relative file path string.
@@ -54,20 +80,9 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
       if (!collection) {
          throw new BackendError("[OKF] Cannot resolve path without collection name");
       }
-      
-      if (collection === 'telemetry') {
-         const createdAt = dao.val('createdAt') || new Date().toISOString();
-         const dateObj = new Date(createdAt);
-         const yyyymmdd = dateObj.toISOString().split('T')[0];
-         const timePart = dateObj.toISOString().split('T')[1].replace(/Z/g, '');
-         const parts = timePart.split('.');
-         const hms = parts[0];
-         const ms = parts[1];
-         const hhmmsstrim = hms.replace(/:/g, '');
-         const millis = ms ? ms.substring(0, 3) : '000';
-         const type = dao.val('type') || 'o2';
-         const bassinId = dao.val('bassin') || 'unknown';
-         return path.join('telemetry', yyyymmdd, type, `${hhmmsstrim}-${millis}-${bassinId}.json`);
+
+      if (this.isJsonCollection(collection)) {
+         return path.join(collection, this.recordFileName(collection, uid));
       }
 
       let subfolder = '';
@@ -131,11 +146,11 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
       const collection = this.getCollection(dao);
       const json = dao.toJSON();
 
-      if (collection === 'telemetry') {
+      if (this.isJsonCollection(collection)) {
          const payload = {
             meta: {
                version: '1.0',
-               created_by: dao.val('createdBy') || 'operator@sodav.ci',
+               created_by: dao.val('createdBy') || undefined,
                created_at: dao.val('createdAt') || new Date().toISOString()
             },
             data: json
@@ -213,7 +228,7 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
                meta = {
                   version: '1.0',
                   created_at: timestamp || undefined,
-                  created_by: parsed.createdBy || parsed.created_by || 'operator@sodav.ci'
+                  created_by: parsed.createdBy || parsed.created_by || undefined
                };
             }
 
@@ -295,7 +310,7 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
 
        // Clean up old file if the path has changed (e.g. category changed)
        const collection = this.getCollection(dao);
-       const suffix = collection === 'telemetry' ? `${uid}.json` : `${uid}.md`;
+       const suffix = this.recordFileName(collection, uid);
        const oldRelative = collection ? await this.findFileRecursively(collection, suffix) : null;
        if (oldRelative && oldRelative !== relativePath) {
           if (this.storage) {
@@ -448,7 +463,7 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
        const fullPath = path.join(this.dataDir, relativePath);
 
        const collection = this.getCollection(dao);
-       const suffix = collection === 'telemetry' ? `${uid}.json` : `${uid}.md`;
+       const suffix = this.recordFileName(collection, uid);
 
        if (this.storage) {
           let content: string;
@@ -515,7 +530,7 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
 
        // Clean up old file if the path has changed (e.g. category changed)
        const collection = this.getCollection(dao);
-       const suffix = collection === 'telemetry' ? `${uid}.json` : `${uid}.md`;
+       const suffix = this.recordFileName(collection, uid);
        const oldRelative = collection ? await this.findFileRecursively(collection, suffix) : null;
        if (oldRelative && oldRelative !== relativePath) {
           if (this.storage) {
@@ -565,7 +580,7 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
        const fullPath = path.join(this.dataDir, relativePath);
 
        const collection = this.getCollection(dao);
-       const suffix = collection === 'telemetry' ? `${uid}.json` : `${uid}.md`;
+       const suffix = this.recordFileName(collection, uid);
 
        if (this.storage) {
           let deleted = false;
@@ -804,8 +819,10 @@ export class OKFBackendAdapter extends AbstractBackendAdapter {
     generateDeltaSql() { return { upSql: [], downSql: [] }; }
 
     public async rebuildIndices(collection: string): Promise<void> {
-       // Don't build indices for telemetry
-       if (collection === 'telemetry') return;
+       // JSON records are not concepts: no index for them
+       if (this.isJsonCollection(collection)) {
+          return;
+       }
 
        const baseColPath = path.join(this.dataDir, collection);
 

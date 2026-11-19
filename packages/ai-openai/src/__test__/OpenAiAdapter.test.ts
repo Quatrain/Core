@@ -97,7 +97,7 @@ describe('OpenAiAdapter', () => {
                   index: 0,
                   message: {
                      role: 'assistant',
-                     content: 'Hello, crop health looks optimal!',
+                     content: 'Hello, all systems look nominal!',
                   },
                   finish_reason: 'stop',
                },
@@ -109,10 +109,10 @@ describe('OpenAiAdapter', () => {
 
          const adapter = new OpenAiAdapter('test-api-key')
          const result = await adapter.generateText('Assess vineyard health', {
-            systemPrompt: 'You are an agronomy AI assistant.',
+            systemPrompt: 'You are a helpful AI assistant.',
          })
 
-         expect(result).toBe('Hello, crop health looks optimal!')
+         expect(result).toBe('Hello, all systems look nominal!')
          expect(mockFetch).toHaveBeenCalledTimes(1)
 
          const calledUrl = mockFetch.mock.calls[0][0] as string
@@ -131,7 +131,7 @@ describe('OpenAiAdapter', () => {
          expect(sentBody.model).toBe('gpt-4o')
          expect(sentBody.messages).toHaveLength(2)
          expect(sentBody.messages[0].role).toBe('system')
-         expect(sentBody.messages[0].content).toBe('You are an agronomy AI assistant.')
+         expect(sentBody.messages[0].content).toBe('You are a helpful AI assistant.')
          expect(sentBody.messages[1].role).toBe('user')
          expect(sentBody.messages[1].content).toBe('Assess vineyard health')
       })
@@ -258,7 +258,7 @@ describe('OpenAiAdapter', () => {
          let capturedUsage: unknown = null
 
          const result = await adapter.generateStructured<{ title: string }>(
-            'Extract plant',
+            'Extract title',
             { type: 'object' },
             {
                onUsage: (u) => {

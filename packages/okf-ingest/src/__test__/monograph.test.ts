@@ -9,8 +9,8 @@ import { sliceTextByChapters, slugify } from '../monograph';
 describe('Monograph Decomposition Engine', () => {
    describe('slugify', () => {
       it('should produce clean lowercase slugs without diacritics or special characters', () => {
-         expect(slugify('Pédologie : Sol, Végétation & Environnement !')).toBe(
-            'pedologie-sol-vegetation-environnement'
+         expect(slugify('Génie civil : Béton, Acier & Matériaux !')).toBe(
+            'genie-civil-beton-acier-materiaux'
          );
          expect(slugify('01 - Introduction générale')).toBe('01-introduction-generale');
       });
@@ -22,37 +22,37 @@ describe('Monograph Decomposition Engine', () => {
 PREFACE
 TABLE DES MATIERES
 
-PREMIERE PARTIE : LES SOLS VIVANTS
-Voici le texte du premier chapitre qui parle de la microbiologie des sols vivants.
+PREMIERE PARTIE : LES FONDATIONS
+Voici le texte du premier chapitre qui parle des principes des fondations.
 Fin du chapitre un.
 
-DEUXIEME PARTIE : LES COUVERTS VEGETAUX
-Voici le texte du second chapitre qui détaille les espèces de couverts végétaux.
+DEUXIEME PARTIE : LES CHARPENTES
+Voici le texte du second chapitre qui détaille les types de charpentes.
 Fin du livre.`;
 
          const chapters: BookOutlineChapter[] = [
             {
                index: 1,
-               title: 'Les Sols Vivants',
-               slug: '01-les-sols-vivants',
-               startMarker: 'PREMIERE PARTIE : LES SOLS VIVANTS',
+               title: 'Les Fondations',
+               slug: '01-les-fondations',
+               startMarker: 'PREMIERE PARTIE : LES FONDATIONS',
             },
             {
                index: 2,
-               title: 'Les Couverts Végétaux',
-               slug: '02-les-couverts-vegetaux',
-               startMarker: 'DEUXIEME PARTIE : LES COUVERTS VEGETAUX',
+               title: 'Les Charpentes',
+               slug: '02-les-charpentes',
+               startMarker: 'DEUXIEME PARTIE : LES CHARPENTES',
             },
          ];
 
          const slices = sliceTextByChapters(sampleText, chapters);
          expect(slices.length).toBe(2);
-         expect(slices[0].chapter.title).toBe('Les Sols Vivants');
-         expect(slices[0].text).toContain('microbiologie des sols vivants');
-         expect(slices[0].text).not.toContain('espèces de couverts végétaux');
+         expect(slices[0].chapter.title).toBe('Les Fondations');
+         expect(slices[0].text).toContain('principes des fondations');
+         expect(slices[0].text).not.toContain('types de charpentes');
 
-         expect(slices[1].chapter.title).toBe('Les Couverts Végétaux');
-         expect(slices[1].text).toContain('espèces de couverts végétaux');
+         expect(slices[1].chapter.title).toBe('Les Charpentes');
+         expect(slices[1].text).toContain('types de charpentes');
       });
 
       it('should slice text by chapter titles if markers are absent', () => {
@@ -122,8 +122,8 @@ Détails sur les minéraux.`;
                      title: 'Direct Fiche',
                      type: 'fiche',
                      description: 'Direct fiche description.',
-                     category: 'agronomy',
-                     tags: ['soil'],
+                     category: 'engineering',
+                     tags: ['structures'],
                   } as T;
                }
             }
@@ -139,7 +139,7 @@ Détails sur les minéraux.`;
                {
                   adapter: new MockSingleAdapter(),
                   splitThresholdChars: 100_000,
-                  defaultCategory: 'agronomy',
+                  defaultCategory: 'engineering',
                }
             );
 
@@ -164,11 +164,11 @@ Détails sur les minéraux.`;
                   const p = typeof prompt === 'string' ? prompt : JSON.stringify(prompt);
                   if (p.includes('book') || p.includes('outline') || p.includes('decompose')) {
                      return {
-                        title: 'Grand Traité des Sols',
-                        slug: 'grand-traite-des-sols',
+                        title: 'Grand Traité des Structures',
+                        slug: 'grand-traite-des-structures',
                         description: 'Description globale du traité.',
-                        category: 'soil-health',
-                        tags: ['soil', 'pedology'],
+                        category: 'structures',
+                        tags: ['structures', 'engineering'],
                         language: 'fr',
                         chapters: [
                            { index: 1, title: 'Chapitre 1', slug: '01-chapitre-1', startMarker: 'CH1_START' },
@@ -180,7 +180,7 @@ Détails sur les minéraux.`;
                      title: 'Extracted Chapter',
                      type: 'chapter',
                      description: 'Extracted chapter description.',
-                     category: 'soil-health',
+                     category: 'structures',
                      tags: ['chapter'],
                      language: 'fr',
                      originalLanguage: 'fr',
@@ -190,7 +190,7 @@ Détails sur les minéraux.`;
 
             const rawText = `HEADER
 CH1_START
-Contenu du premier chapitre sur les sols vivants.
+Contenu du premier chapitre sur les fondations.
 CH2_START
 Contenu du second chapitre sur la minéralogie.`;
 
@@ -205,18 +205,18 @@ Contenu du second chapitre sur la minéralogie.`;
                {
                   adapter: new MockMultiAdapter(),
                   splitThresholdChars: 10, // Force split
-                  defaultCategory: 'soil-health',
+                  defaultCategory: 'structures',
                }
             );
 
             expect(result.chapterDocs.length).toBe(2);
             expect(result.allCreatedFiles.length).toBe(3); // 2 chapters + 1 index.md
-            expect(result.masterRelativePath).toBe(path.join('content', 'soil-health', 'grand-traite-des-sols', 'index.md'));
+            expect(result.masterRelativePath).toBe(path.join('content', 'structures', 'grand-traite-des-structures', 'index.md'));
 
             const indexPath = path.join(tempDir, result.masterRelativePath);
             const indexContent = await fs.readFile(indexPath, 'utf-8');
             expect(indexContent).toContain('type: monograph');
-            expect(indexContent).toContain('Grand Traité des Sols');
+            expect(indexContent).toContain('Grand Traité des Structures');
             expect(indexContent).toContain('01-chapitre-1.md');
          } finally {
             await fs.rm(tempDir, { recursive: true, force: true });

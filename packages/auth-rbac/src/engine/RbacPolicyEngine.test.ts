@@ -145,8 +145,8 @@ describe('RbacPolicyEngine', () => {
 
   describe('Payload Sanitization (sanitizeRead & sanitizeWrite)', () => {
     const rawDocument = {
-      title: 'Diagnostic des Sols',
-      soa: 'bradtech/world-agronomy',
+      title: 'Guide de diagnostic',
+      soa: 'acme/knowledge-base',
       revision: 'rev-1.0.0',
       description: 'Analyse terrain',
       internalReviewerNotes: 'Confidential peer review remarks',
@@ -157,8 +157,8 @@ describe('RbacPolicyEngine', () => {
       const readerUser: RbacUserContext = { id: 'u1', roles: ['reader'] }
       const readResult = engine.sanitizeRead(readerUser, 'okf-document', rawDocument)
 
-      expect(readResult.title).toBe('Diagnostic des Sols')
-      expect(readResult.soa).toBe('bradtech/world-agronomy')
+      expect(readResult.title).toBe('Guide de diagnostic')
+      expect(readResult.soa).toBe('acme/knowledge-base')
       expect((readResult as any).internalReviewerNotes).toBeUndefined()
       expect((readResult as any).telemetryWeights).toBeUndefined()
     })
@@ -186,14 +186,14 @@ describe('RbacPolicyEngine', () => {
       const adminUser: RbacUserContext = { id: 'u3', roles: ['admin'] }
       const adminInput = {
         title: 'Admin Override Title',
-        soa: 'bradtech/official-authority',
+        soa: 'acme/official-authority',
         revision: 'rev-2.0.0',
         internalReviewerNotes: 'Approved by Dr. Dupont'
       }
 
       const writeResult = engine.sanitizeWrite(adminUser, 'okf-document', adminInput)
       expect(writeResult.title).toBe('Admin Override Title')
-      expect(writeResult.soa).toBe('bradtech/official-authority')
+      expect(writeResult.soa).toBe('acme/official-authority')
       expect(writeResult.revision).toBe('rev-2.0.0')
       expect((writeResult as any).internalReviewerNotes).toBe('Approved by Dr. Dupont')
     })

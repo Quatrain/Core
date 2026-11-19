@@ -2,7 +2,7 @@
 
 Cette étude définit l'architecture conceptuelle du socle **Master Data Management (MDM)** pour l'écosystème Quatrain (`@quatrain/mdm-*`), réutilisable dans **CoreApps**.
 
-Cette version intègre la **Modélisation Multi-Axes des Capacités Matérielles (Capabilities Matrix)** permettant de définir avec une grande souplesse les déclinaisons d'équipements embarqués (PCB Brad) combinant plusieurs axes de communication (LoRaWAN terre/satellite, GSM, hybride), d'alimentation et de connectivité capteurs.
+Cette version intègre la **Modélisation Multi-Axes des Capacités Matérielles (Capabilities Matrix)** permettant de définir avec une grande souplesse les déclinaisons d'équipements embarqués (exemple de carte électronique) combinant plusieurs axes de communication (LoRaWAN terre/satellite, GSM, hybride), d'alimentation et de connectivité capteurs.
 
 ---
 
@@ -19,13 +19,13 @@ graph TD
 
 ---
 
-## 2. Modélisation Multi-Axes des Capacités Matérielles (PCB Brad)
+## 2. Modélisation Multi-Axes des Capacités Matérielles (exemple de carte électronique)
 
-Pour les cartes électroniques (PCB) et équipements conçus par Brad, les spécifications ne se limitent pas à un type de communication unique, mais à une **matrice combinatoire d'axes de capacités**.
+Pour les cartes électroniques (PCB) et équipements conçus par un fabricant, les spécifications ne se limitent pas à un type de communication unique, mais à une **matrice combinatoire d'axes de capacités**.
 
 ```mermaid
 graph LR
-    PCB["PCB Carte Mère Brad (ProductVariant)"] --> Axis_Comm["Axe Communication / Radio"]
+    PCB["PCB Carte Mère Acme (ProductVariant)"] --> Axis_Comm["Axe Communication / Radio"]
     PCB --> Axis_Power["Axe Alimentation Électrique"]
     PCB --> Axis_Sensors["Axe Connectivité Capteurs (Bus / IO)"]
     
@@ -62,20 +62,20 @@ Support simultané ou optionnel de plusieurs piles radio sur le même PCB :
 
 ---
 
-## 3. Exemple OKF Enrichi : Sonde Sol / PCB Multi-Axes
+## 3. Exemple OKF Enrichi : Capteur environnemental / PCB Multi-Axes
 
-Document OKF représentant une Sonde Sol Brad dotée d'un PCB hybride LoRaWAN Terrestre + Satellite + GSM :
+Document OKF représentant un capteur environnemental Acme doté d'un PCB hybride LoRaWAN Terrestre + Satellite + GSM :
 
 ```markdown
 ---
 type: mdm_variant
-title: "PCB Carte Mère Sonde Sol V2 - Hybrid LoRaWAN / GSM / Satellite"
-description: "Carte électronique Brad intégrant les communications LoRaWAN (868MHz + Satellite LR-FHSS) et secours GSM LTE-M"
-tags: ["hardware", "pcb", "lorawan", "satellite", "gsm", "brad"]
+title: "PCB Carte Mère Capteur V2 - Hybrid LoRaWAN / GSM / Satellite"
+description: "Carte électronique Acme intégrant les communications LoRaWAN (868MHz + Satellite LR-FHSS) et secours GSM LTE-M"
+tags: ["hardware", "pcb", "lorawan", "satellite", "gsm", "acme"]
 timestamp: "2026-07-26T22:00:00Z"
 collection: "mdm.product_variants"
 id: "dev_pcb_probe_v2_hybrid"
-sku: "BRAD-PHY-PCB-HYBRID-01"
+sku: "ACME-PHY-PCB-HYBRID-01"
 nature: "physical"
 archetypeId: "device.pcb_motherboard"
 lifecycleState: "production"
@@ -105,14 +105,14 @@ traitsData:
       analogChannels: 4
 ---
 
-# PCB Carte Mère Sonde Sol V2 - Hybrid LoRaWAN / GSM / Satellite
+# PCB Carte Mère Capteur V2 - Hybrid LoRaWAN / GSM / Satellite
 
 ## Spécifications Électroniques & Radios
-Ce PCB constitue le cœur d'acquisition de la gamme de sondes Brad. Il dispose d'un modem multi-radio permettant une couverture réseau universelle (terrestre, satellite et cellulaire).
+Ce PCB constitue le cœur d'acquisition de la gamme de capteurs Acme. Il dispose d'un modem multi-radio permettant une couverture réseau universelle (terrestre, satellite et cellulaire).
 
 ## Diagnostic & Directives pour Agents IA
 - **Bascule de réseau** : En cas d'échec de raccordement (Join) LoRaWAN terrestre après 3 tentatives, le firmware bascule automatiquement sur le protocole Satellite LR-FHSS.
-- **Vérification de la SIM** : L'eSIM embarquée utilise l'APN `brad.iot.telecom`.
+- **Vérification de la SIM** : L'eSIM embarquée utilise l'APN `iot.example.net`.
 ```
 
 ---

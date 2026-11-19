@@ -1,6 +1,6 @@
 # HOWTO: Using @quatrain/okf-ingest-catalog
 
-> Practical guide for decomposing structured encyclopedic catalogs, floras, pharmacopeias, dictionaries, and abécédaires into sequentially numbered OKF v0.2 atomic entities with full lineage tracking.
+> Practical guide for decomposing structured encyclopedic catalogs, dictionaries, glossaries and abécédaires into sequentially numbered OKF v0.2 atomic entities with full lineage tracking.
 
 ---
 
@@ -9,7 +9,7 @@
 Unlike free-form technical reports or monographs with narrative chapters, an **encyclopedic catalog** contains:
 
 1.  **Methodological / Foundational Chapters**: Introductory context (e.g. classification methodology, terminology, diagnostic keys).
-2.  **Sequential Entry Collection**: Dozens or hundreds of distinct atomic entries (e.g. botanical species, chemical compounds, technical terms).
+2.  **Sequential Entry Collection**: Dozens or hundreds of distinct atomic entries (e.g. minerals, chemical compounds, technical terms).
 3.  **Lineage Contract**: Each atomic record maintains strict traceability back to its source publication (`parentBook: { title, slug, resource, fileHash }`) and its global sequence number (`sequence: 1, 2, ... N`).
 4.  **Master Index**: A root `index.md` listing introductory chapters and a structured markdown table referencing every atomic entry file.
 
@@ -21,12 +21,12 @@ Unlike free-form technical reports or monographs with narrative chapters, an **e
 PDF / Catalog Document
     │
     ├─► Extract Introductory Methodology Chapters (e.g. p. 1-20)
-    │     └─► 01-taxonomy-and-methodology.md
+    │     └─► 01-classification-and-methodology.md
     │
     ├─► Slicing / Detection of Catalog Chunks (e.g. p. 21-300)
     │     │
-    │     ├─► Chunk 1: Salvia officinalis (p. 21)
-    │     ├─► Chunk 2: Thymus vulgaris (p. 22)
+    │     ├─► Chunk 1: Quartz (p. 21)
+    │     ├─► Chunk 2: Calcite (p. 22)
     │     └─► ... Chunk N
     │
     ├─► Atomic AI Enrichment (@quatrain/ai adapter)
@@ -36,7 +36,7 @@ PDF / Catalog Document
     │     └─► Diagrams & Markdown Tables
     │
     ├─► Write Ordered Atomic Fiches
-    │     └─► entries/001-salvia-officinalis.md, entries/002-thymus-vulgaris.md
+    │     └─► entries/001-quartz.md, entries/002-calcite.md
     │
     └─► Generate Master Monograph Index
           └─► index.md (Table of Contents + Catalog Table)
@@ -57,16 +57,16 @@ import { sliceCatalogEntriesByDescriptors } from '@quatrain/okf-ingest-catalog';
 
 const descriptors = [
    {
-      title: 'Common Sage',
-      scientificName: 'Salvia officinalis',
-      family: 'Lamiaceae',
-      startMarker: 'SALVIA OFFICINALIS',
+      title: 'Quartz',
+      scientificName: 'SiO2',
+      family: 'Silicates',
+      startMarker: 'QUARTZ',
    },
    {
-      title: 'Common Thyme',
-      scientificName: 'Thymus vulgaris',
-      family: 'Lamiaceae',
-      startMarker: 'THYMUS VULGARIS',
+      title: 'Calcite',
+      scientificName: 'CaCO3',
+      family: 'Carbonates',
+      startMarker: 'CALCITE',
    },
 ];
 
@@ -109,18 +109,18 @@ Ai.setAdapter(adapter);
 // 2. Execute Ingestion
 const summary = await ingestCatalogMonograph(
    {
-      bookTitle: "Encyclopedia of Botanical Flora",
-      description: "Comprehensive field guide and reference catalog of botanical species and diagnostic keys.",
-      category: "botany",
-      authors: ["Flora Research Institute"],
+      bookTitle: "Catalogue of Minerals",
+      description: "Reference catalog of minerals and their identification keys.",
+      category: "mineralogy",
+      authors: ["Mineral Research Institute"],
       publisher: "Academic Press",
       publicationYear: 2024,
       edition: "First Edition",
       introChapters: [
          {
             index: 1,
-            title: "Taxonomic Classification & Morphological Keys",
-            slug: "01-taxonomy-and-methodology",
+            title: "Classification & Identification Keys",
+            slug: "01-classification-and-methodology",
             text: ch1RawText,
          },
       ],
@@ -128,9 +128,9 @@ const summary = await ingestCatalogMonograph(
    },
    {
       gitLocalPath: "/path/to/my-knowledge-repo",
-      originalFileUri: "originals/botanical-flora.pdf",
+      originalFileUri: "originals/minerals.pdf",
       fileHash: "sha256-hash-of-pdf",
-      filename: "botanical-flora.pdf",
+      filename: "minerals.pdf",
       taxonomyProfile: new GenericDomainProfile(), // or custom DomainTaxonomyProfile
       targetLanguages: ["en", "fr"], // Configurable multilingual target languages
       entryType: "catalog-entry",
@@ -152,12 +152,12 @@ console.log(`Total tokens: ${summary.usage.total} ($${summary.usage.costUsd} USD
 The engine generates a clean, browseable OKF v0.2 directory hierarchy:
 
 ```text
-content/botany/encyclopedia-of-botanical-flora/
+content/mineralogy/catalogue-of-minerals/
 ├── index.md                        # Master monograph index with metadata & TOC
-├── 01-taxonomy-and-methodology.md  # Chapter 1 (methodology)
+├── 01-classification-and-methodology.md  # Chapter 1 (methodology)
 └── entries/                        # Sequentially numbered atomic records
-    ├── 001-salvia-officinalis.md   # Entry 1
-    ├── 002-thymus-vulgaris.md      # Entry 2
+    ├── 001-quartz.md   # Entry 1
+    ├── 002-calcite.md      # Entry 2
     └── ...
 ```
 
@@ -171,12 +171,12 @@ Every entry generated adheres strictly to the OKF v0.2 lineage and taxonomy sche
 ---
 # --- Open Knowledge Format v0.2 ---
 type: catalog-entry
-title: Common Sage (Salvia officinalis)
-description: Salvia officinalis is a perennial subshrub belonging to the Lamiaceae family.
+title: Quartz (SiO2)
+description: Quartz is a silicate mineral of the tectosilicate class.
 tags:
-  - salvia
-  - lamiaceae
-  - medicinal-flora
+  - quartz
+  - silicates
+  - minerals
 status: draft
 generated:
   by: quatrain/okf-ingest-catalog (gemini-2.5-flash)
@@ -188,51 +188,51 @@ generated:
     costUsd: 0.000806
 sources:
   - id: parent-book
-    resource: originals/botanical-flora.pdf
-    title: Encyclopedia of Botanical Flora
+    resource: originals/minerals.pdf
+    title: Catalogue of Minerals
     fileHash: a1b2c3d4e5f6...
 soa: authority-namespace/knowledge-repo
-category: botany
+category: mineralogy
 language: en
 originalLanguage: en
 abstracts:
-  en: Salvia officinalis is a woody perennial subshrub characterized by grayish aromatic leaves...
-  fr: Salvia officinalis est un sous-arbrisseau vivace caractérisé par des feuilles grisâtres aromatiques...
+  en: Quartz forms hexagonal prismatic crystals with a vitreous lustre...
+  fr: Le quartz forme des cristaux prismatiques hexagonaux à l'éclat vitreux...
 keywords:
-  en: [Salvia officinalis, Lamiaceae, perennial subshrub, aromatic]
-  fr: [Salvia officinalis, Lamiacées, sous-arbrisseau vivace, aromatique]
+  en: [quartz, silicates, tectosilicate, vitreous lustre]
+  fr: [quartz, silicates, tectosilicate, éclat vitreux]
 sequence: 1
 pageRange: "21"
-scientificName: Salvia officinalis
-family: Lamiaceae
+scientificName: SiO2
+family: Silicates
 diagnosticKeys:
-  - well-drained calcareous substrate
+  - hardness 7 on the Mohs scale
 properties:
-  - antiseptic
-  - antioxidant
+  - piezoelectric
+  - optical instruments
 parentBook:
-  title: Encyclopedia of Botanical Flora
-  slug: encyclopedia-of-botanical-flora
-  resource: originals/botanical-flora.pdf
+  title: Catalogue of Minerals
+  slug: catalogue-of-minerals
+  resource: originals/minerals.pdf
   fileHash: a1b2c3d4e5f6...
-  authors: [Flora Research Institute]
+  authors: [Mineral Research Institute]
   publisher: Academic Press
   publicationYear: "2024"
   edition: First Edition
 ---
 
-# Common Sage (Salvia officinalis)
+# Quartz (SiO2)
 
-**Taxonomy / Classification:** *Salvia officinalis* | **Family / Group:** Lamiaceae
+**Taxonomy / Classification:** *SiO2* | **Family / Group:** Silicates
 
-> Extracted from: [Encyclopedia of Botanical Flora](../index.md) (pages 21)
+> Extracted from: [Catalogue of Minerals](../index.md) (pages 21)
 
 ## 🔬 Key Diagnostic Criteria & Indicators
-- **well-drained calcareous substrate**
+- **hardness 7 on the Mohs scale**
 
-## 🌿 Properties & Applications
-- antiseptic
-- antioxidant
+## ⚙️ Properties & Applications
+- piezoelectric
+- optical instruments
 
 ## 📖 Detailed Entry Description & Source Text
 [Source text of entry...]

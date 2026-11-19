@@ -16,11 +16,11 @@ class OKFTestObject extends PersistedBaseObject {
    ];
 }
 
-class OKFTelemetryObject extends PersistedBaseObject {
-   static COLLECTION = 'telemetry';
+class OKFEventObject extends PersistedBaseObject {
+   static COLLECTION = 'events';
    static PROPS_DEFINITION = [
       { name: 'type', type: StringProperty.TYPE },
-      { name: 'bassin', type: StringProperty.TYPE },
+      { name: 'source', type: StringProperty.TYPE },
       { name: 'createdAt', type: DateTimeProperty.TYPE },
       { name: 'createdBy', type: StringProperty.TYPE }
    ];
@@ -33,7 +33,7 @@ describe('OKFBackendAdapter', () => {
    beforeAll(async () => {
       await fs.mkdir(testDir, { recursive: true });
       adapter = new OKFBackendAdapter({
-         config: { database: testDir }
+         config: { database: testDir, jsonCollections: ['events'] }
       });
       Backend.addBackend(adapter, 'okf_test', true);
    });
@@ -48,23 +48,51 @@ describe('OKFBackendAdapter', () => {
       expect(relativePath).toBe(path.join('test_collection', '123-abc.md'));
    });
 
-   test('should format relative OKF filepath correctly for telemetry', async () => {
-      const dateString = '2026-07-12T14:30:45.120Z';
-      const obj = await OKFTelemetryObject.factory();
-      obj.set('type', 'ph');
-      obj.set('bassin', 'bac-04');
-      obj.set('createdAt', dateString);
+   test('keeps a JSON collection as { meta, data } records with no invented author', async () => {
+      const obj = await OKFEventObject.factory();
+      obj.set('type', 'reading');
+      obj.set('source', 'sensor-04');
+      obj.set('createdAt', '2026-07-12T14:30:45.120Z');
+      expect(adapter.getOKFPath(obj.dataObject, 'some-uid')).toBe(path.join('events', 'some-uid.json'));
 
-      const relativePath = adapter.getOKFPath(obj.dataObject, 'some-uid');
-      // Should result in telemetry/2026-07-12/ph/143045-120-bac-04.json
-      expect(relativePath).toBe(path.join('telemetry', '2026-07-12', 'ph', '143045-120-bac-04.json'));
+      await obj.save();
+      const uid = obj.dataObject.uri.uid;
+      const raw = JSON.parse(await fs.readFile(path.join(testDir, 'events', `${uid}.json`), 'utf-8'));
+      expect(raw.meta.created_by).toBeUndefined();
+      expect(raw.data.source).toBe('sensor-04');
+
+      const loaded = await OKFEventObject.fromBackend<OKFEventObject>(uid);
+      expect(loaded.val('source')).toBe('sensor-04');
+   });
+
+   test('lets a subclass choose another layout for a JSON collection', () => {
+      class DatedAdapter extends OKFBackendAdapter {
+         public getOKFPath(dao: any, uid: string): string {
+            if (this.isJsonCollection(this.getCollection(dao))) {
+               const day = String(dao.val('createdAt')).slice(0, 10);
+               return path.join('events', day, `${uid}.json`);
+            }
+            return super.getOKFPath(dao, uid);
+         }
+      }
+      const dated = new DatedAdapter({ config: { database: testDir, jsonCollections: ['events'] } });
+      return OKFEventObject.factory().then((obj) => {
+         obj.set('createdAt', '2026-07-12T14:30:45.120Z');
+         expect(dated.getOKFPath(obj.dataObject, 'u1')).toBe(path.join('events', '2026-07-12', 'u1.json'));
+      });
+   });
+
+   test('does not treat a collection named like a former special case as JSON unless configured', async () => {
+      const plain = new OKFBackendAdapter({ config: { database: testDir } });
+      const obj = await OKFEventObject.factory();
+      expect(plain.getOKFPath(obj.dataObject, 'u2')).toBe(path.join('events', 'u2.md'));
    });
 
    test('should perform CRUD operations', async () => {
       // 1. Create
       const obj = await OKFTestObject.factory();
-      obj.set('name', 'Poisson Tilapia');
-      obj.set('createdBy', 'pascal@sodav.ci');
+      obj.set('name', 'First note');
+      obj.set('createdBy', 'ada@example.org');
       await obj.save();
       expect(obj.dataObject.uri.uid).toBeDefined();
 
@@ -78,24 +106,24 @@ describe('OKFBackendAdapter', () => {
       expect(raw.startsWith('---')).toBe(true);
       const parts = raw.split('---');
       const parsed = parseYaml(parts[1].trim()) as any;
-      expect(parsed.createdBy).toBe('pascal@sodav.ci');
-      expect(parsed.name).toBe('Poisson Tilapia');
+      expect(parsed.createdBy).toBe('ada@example.org');
+      expect(parsed.name).toBe('First note');
 
       // 2. Read
       const loaded = await OKFTestObject.fromBackend<OKFTestObject>(savedUid);
-      expect(loaded.val('name')).toBe('Poisson Tilapia');
+      expect(loaded.val('name')).toBe('First note');
 
       // 3. Update
-      loaded.set('name', 'Tilapia Rouge');
+      loaded.set('name', 'First note, revised');
       await loaded.save();
 
       const loaded2 = await OKFTestObject.fromBackend<OKFTestObject>(savedUid);
-      expect(loaded2.val('name')).toBe('Tilapia Rouge');
+      expect(loaded2.val('name')).toBe('First note, revised');
 
       // 4. Find
       const results = await OKFTestObject.repository().query(OKFTestObject.query());
       expect(results.items.length).toBe(1);
-      expect(results.items[0].val('name')).toBe('Tilapia Rouge');
+      expect(results.items[0].val('name')).toBe('First note, revised');
 
       // 5. Delete
       await loaded2.delete();
@@ -107,14 +135,14 @@ describe('OKFBackendAdapter', () => {
       // Create Note B first
       const noteB = await OKFTestObject.factory();
       noteB.set('name', 'Note B');
-      noteB.set('createdBy', 'pascal@sodav.ci');
+      noteB.set('createdBy', 'ada@example.org');
       await noteB.save();
       const uidB = noteB.dataObject.uri.uid;
 
       // Create Note A pointing to Note B using WikiLink and Markdown link
       const noteA = await OKFTestObject.factory();
       noteA.set('name', 'Note A');
-      noteA.set('createdBy', 'pascal@sodav.ci');
+      noteA.set('createdBy', 'ada@example.org');
       // Set the body/markdown field
       noteA.dataObject.set('body', `Ceci est un lien vers [[${uidB}]] et un autre [Lien](note-c.md)`);
       await noteA.save();

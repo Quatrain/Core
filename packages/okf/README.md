@@ -6,15 +6,21 @@ Open Knowledge Format (OKF) flat file storage adapter for the Quatrain Core fram
 
 The `@quatrain/okf` package provides a file-based persistence adapter (`OKFBackendAdapter`) that serializes Quatrain `PersistedBaseObject` entities into a structured flat file filesystem directory conforming to the OKF format.
 
-This adapter is specifically designed to facilitate local-first, offline-first architectures by excluding relational databases and utilizing structured directory trees containing lightweight JSON files.
+This adapter is designed for local-first, offline-first architectures: no relational database,
+a directory tree of markdown concepts (YAML frontmatter and body), and optionally JSON records.
 
 ## Features
 
 - **Decoupled Architecture:** Pure filesystem storage format independent of underlying Git versioning or synchronization layers.
-- **Operator Auditing:** Automatically stores the operator's email in the document's metadata block (`meta.created_by`) for full change traceability.
-- **Hierarchical Layouts:**
-  - Telemetry: Saved as `telemetry/YYYY-MM-DD/{type}/{HHMMSS}-{millis}-{bassinId}.json`
-  - Other: Saved as `{collection}/{uid}.json`
+- **Author recorded:** the `createdBy` of an entity is written with it; nothing is invented when it is absent.
+- **Layouts:**
+  - Concepts: `{collection}/{category or folder}/{uid}.md`, with `index.md` files rebuilt per directory
+  - JSON collections (`config.jsonCollections`, for logs or measurements): `{collection}/{uid}.json` holding `{ meta, data }`, with no index; override `getOKFPath()` in a subclass for another layout, such as one directory per day
+- **Data directory:** `config.database`, else the `OKF_DATA_DIR` environment variable (formerly `STUDIO_DATA_DIR`, still read), else `/data/okf`.
+
+```typescript
+const adapter = new OKFBackendAdapter({ config: { database: '/data/okf', jsonCollections: ['events'] } })
+```
 
 ## OKF v0.2 documents
 

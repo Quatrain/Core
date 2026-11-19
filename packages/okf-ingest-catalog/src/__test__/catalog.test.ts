@@ -10,46 +10,46 @@ import { OkfCatalogEntryMetadata } from '../types';
 describe('OKF Ingest Catalog Package', () => {
    describe('slugify', () => {
       it('should create URL and directory friendly slugs without diacritics', () => {
-         expect(slugify('Chardon des champs (Cirsium arvense)')).toBe('chardon-des-champs-cirsium-arvense');
-         expect(slugify('01 - Érable de Montpellier')).toBe('01-erable-de-montpellier');
+         expect(slugify('Quartz rose (Silice cristalline)')).toBe('quartz-rose-silice-cristalline');
+         expect(slugify('01 - Épidote de Montréal')).toBe('01-epidote-de-montreal');
       });
    });
 
    describe('sliceCatalogEntriesByDescriptors', () => {
       it('should slice text into ordered sequential chunks with parent metadata', () => {
-         const rawBookText = `ENCYCLOPEDIE DES PLANTES
+         const rawBookText = `CATALOGUE DES MINÉRAUX
 Page de garde...
 
-ACHILLÉE MILLEFEUILLE
-Achillea millefolium - Asteraceae
-Cette plante indique des sols équilibrés et vivants...
+QUARTZ HYALIN
+SiO2 - Silicates
+Ce minéral forme des cristaux prismatiques transparents...
 
-CHARDON DES CHAMPS
-Cirsium arvense - Asteraceae
-Cette plante indique un blocage du phosphore et une compaction...
+CALCITE SPATHIQUE
+CaCO3 - Carbonates
+Ce minéral réagit à l'acide et présente un clivage parfait...
 
-PISSENLIT
-Taraxacum officinale - Asteraceae
-Cette plante indique un excès d'azote et un compactage...`;
+PYRITE
+FeS2 - Sulfures
+Ce minéral présente un éclat métallique doré...`;
 
          const descriptors = [
             {
-               title: 'Achillée millefeuille',
-               scientificName: 'Achillea millefolium',
-               family: 'Asteraceae',
-               startMarker: 'ACHILLÉE MILLEFEUILLE',
+               title: 'Quartz hyalin',
+               scientificName: 'SiO2',
+               family: 'Silicates',
+               startMarker: 'QUARTZ HYALIN',
             },
             {
-               title: 'Chardon des champs',
-               scientificName: 'Cirsium arvense',
-               family: 'Asteraceae',
-               startMarker: 'CHARDON DES CHAMPS',
+               title: 'Calcite spathique',
+               scientificName: 'CaCO3',
+               family: 'Carbonates',
+               startMarker: 'CALCITE SPATHIQUE',
             },
             {
-               title: 'Pissenlit',
-               scientificName: 'Taraxacum officinale',
-               family: 'Asteraceae',
-               startMarker: 'PISSENLIT',
+               title: 'Pyrite',
+               scientificName: 'FeS2',
+               family: 'Sulfures',
+               startMarker: 'PYRITE',
             },
          ];
 
@@ -57,95 +57,95 @@ Cette plante indique un excès d'azote et un compactage...`;
 
          expect(chunks.length).toBe(3);
          expect(chunks[0].sequence).toBe(1);
-         expect(chunks[0].rawTitle).toBe('Achillée millefeuille');
-         expect(chunks[0].slug).toBe('001-achillee-millefeuille');
-         expect(chunks[0].text).toContain('sols équilibrés et vivants');
-         expect(chunks[0].text).not.toContain('CHARDON DES CHAMPS');
+         expect(chunks[0].rawTitle).toBe('Quartz hyalin');
+         expect(chunks[0].slug).toBe('001-quartz-hyalin');
+         expect(chunks[0].text).toContain('cristaux prismatiques transparents');
+         expect(chunks[0].text).not.toContain('CALCITE SPATHIQUE');
 
          expect(chunks[1].sequence).toBe(2);
-         expect(chunks[1].rawTitle).toBe('Chardon des champs');
-         expect(chunks[1].slug).toBe('002-chardon-des-champs');
-         expect(chunks[1].text).toContain('blocage du phosphore');
+         expect(chunks[1].rawTitle).toBe('Calcite spathique');
+         expect(chunks[1].slug).toBe('002-calcite-spathique');
+         expect(chunks[1].text).toContain('clivage parfait');
 
          expect(chunks[2].sequence).toBe(3);
-         expect(chunks[2].rawTitle).toBe('Pissenlit');
-         expect(chunks[2].slug).toBe('003-pissenlit');
-         expect(chunks[2].text).toContain("excès d'azote");
+         expect(chunks[2].rawTitle).toBe('Pyrite');
+         expect(chunks[2].slug).toBe('003-pyrite');
+         expect(chunks[2].text).toContain('éclat métallique');
       });
    });
 
    describe('detectCatalogEntriesRegex', () => {
       it('should detect entries by regex header and respect minimum length', () => {
-         const sampleText = `--- FICHE 1 : Allium ursinum ---
-Texte de l'ail des ours sur plusieurs lignes détaillant son écologie...
-Au moins 100 caractères de contenu botanique riche pour passer le filtre.
+         const sampleText = `--- FICHE 1 : Galena ---
+Texte sur la galène sur plusieurs lignes détaillant sa cristallographie...
+Au moins 100 caractères de contenu descriptif riche pour passer le filtre.
 
---- FICHE 2 : Urtica dioica ---
-Texte de la grande ortie sur plusieurs lignes avec des descriptions...
-Au moins 100 caractères de contenu agronomique pour satisfaire la longueur minimale.`;
+--- FICHE 2 : Fluorite ---
+Texte sur la fluorine sur plusieurs lignes avec des descriptions...
+Au moins 100 caractères de contenu technique pour satisfaire la longueur minimale.`;
 
          const regex = /^---\s*FICHE\s*\d+\s*:\s*(.+?)\s*---$/gm;
          const chunks = detectCatalogEntriesRegex(sampleText, regex, { minLength: 50 });
 
          expect(chunks.length).toBe(2);
          expect(chunks[0].sequence).toBe(1);
-         expect(chunks[0].rawTitle).toBe('Allium ursinum');
-         expect(chunks[0].slug).toBe('001-allium-ursinum');
+         expect(chunks[0].rawTitle).toBe('Galena');
+         expect(chunks[0].slug).toBe('001-galena');
          expect(chunks[1].sequence).toBe(2);
-         expect(chunks[1].rawTitle).toBe('Urtica dioica');
-         expect(chunks[1].slug).toBe('002-urtica-dioica');
+         expect(chunks[1].rawTitle).toBe('Fluorite');
+         expect(chunks[1].slug).toBe('002-fluorite');
       });
    });
 
    describe('OKF Catalog Entry Serialization', () => {
       it('should serialize and deserialize an entry with sequence and lineage contract faithfully', () => {
          const metadata: OkfCatalogEntryMetadata = {
-            type: 'plant-profile',
-            title: 'Chardon des champs (Cirsium arvense)',
-            description: 'Plante bio-indicatrice des sols compactés et des blocages de phosphore.',
-            tags: ['bio-indication', 'adventice', 'ducerf-vol-3'],
+            type: 'mineral-profile',
+            title: 'Calcite spathique (CaCO3)',
+            description: 'Carbonate de calcium au clivage rhomboédrique parfait.',
+            tags: ['carbonates', 'clivage', 'catalogue-vol-3'],
             status: 'draft',
             sequence: 42,
             pageRange: '128-130',
-            scientificName: 'Cirsium arvense',
-            family: 'Asteraceae',
-            diagnosticKeys: ['blocage phosphore', 'anaérobiose', 'tassement'],
+            scientificName: 'CaCO3',
+            family: 'Carbonates',
+            diagnosticKeys: ['effervescence à l\'acide', 'clivage parfait', 'dureté 3'],
             parentBook: {
-               title: "L'encyclopédie des plantes bio-indicatrices - Volume 3",
-               slug: 'encyclopedie-des-plantes-bio-indicatrices-vol-3',
-               resource: 'originals/agronomie-livres/ducerf-vol3.pdf',
+               title: "L'encyclopédie des minéraux - Volume 3",
+               slug: 'encyclopedie-des-mineraux-vol-3',
+               resource: 'originals/catalogues/mineraux-vol3.pdf',
                fileHash: 'abcdef1234567890',
             },
             language: 'fr',
             originalLanguage: 'fr',
             abstracts: {
-               fr: 'Indicateur de compactage et de blocage du phosphore.',
-               en: 'Indicator of soil compaction and phosphorus lockup.',
-               ar: 'مؤشر على انضغاط التربة وتثبيت الفوسفور.',
+               fr: 'Minéral carbonaté effervescent à clivage parfait.',
+               en: 'Effervescent carbonate mineral with perfect cleavage.',
+               ar: 'معدن كربوني فوار ذو انفصام تام.',
             },
             keywords: {
-               fr: ['chardon', 'bio-indication'],
-               en: ['creeping thistle', 'bio-indicator'],
-               ar: ['شوك الحقول', 'مؤشر حيوي'],
+               fr: ['calcite', 'carbonate'],
+               en: ['calcite', 'carbonate'],
+               ar: ['كالسيت', 'كربونات'],
             },
          };
 
-         const body = `# Chardon des champs (Cirsium arvense)\n\nContenu détaillé...`;
+         const body = `# Calcite spathique (CaCO3)\n\nContenu détaillé...`;
          const serialized = serializeOkfDocument(metadata, body);
 
-         expect(serialized).toContain('type: plant-profile');
+         expect(serialized).toContain('type: mineral-profile');
          expect(serialized).toContain('sequence: 42');
-         expect(serialized).toContain("title: L'encyclopédie des plantes bio-indicatrices - Volume 3");
-         expect(serialized).toContain('scientificName: Cirsium arvense');
-         expect(serialized).toContain('fr: Indicateur de compactage');
-         expect(serialized).toContain('en: Indicator of soil compaction');
-         expect(serialized).toContain('ar: مؤشر على انضغاط التربة');
+         expect(serialized).toContain("title: L'encyclopédie des minéraux - Volume 3");
+         expect(serialized).toContain('scientificName: CaCO3');
+         expect(serialized).toContain('fr: Minéral carbonaté effervescent');
+         expect(serialized).toContain('en: Effervescent carbonate mineral');
+         expect(serialized).toContain('ar: معدن كربوني فوار');
 
          const parsed = parseOkfDocument(serialized);
          const parsedMeta = parsed.metadata as unknown as OkfCatalogEntryMetadata;
          expect(parsedMeta.sequence).toBe(42);
-         expect(parsedMeta.scientificName).toBe('Cirsium arvense');
-         expect(parsedMeta.parentBook.slug).toBe('encyclopedie-des-plantes-bio-indicatrices-vol-3');
+         expect(parsedMeta.scientificName).toBe('CaCO3');
+         expect(parsedMeta.parentBook.slug).toBe('encyclopedie-des-mineraux-vol-3');
          expect(parsed.body).toContain('Contenu détaillé...');
       });
    });
@@ -156,24 +156,24 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
          const prompt = buildCatalogEntryPrompt({
             chunk: {
                sequence: 1,
-               rawTitle: 'Acanthe',
-               slug: '001-acanthe',
+               rawTitle: 'Quartz',
+               slug: '001-quartz',
                pageRange: '50-51',
-               text: 'Acanthus mollis, famille des Acanthacées...',
+               text: 'Quartz, famille des silicates...',
             },
             parentBook: {
-               title: 'Encyclopédie des plantes',
-               slug: 'encyclopedie-des-plantes',
+               title: 'Encyclopédie des minéraux',
+               slug: 'encyclopedie-des-mineraux',
                resource: 'test.pdf',
                fileHash: '123456',
             },
          });
 
-         expect(prompt).toContain('You are an expert taxonomist and knowledge engineer specializing in encyclopedic knowledge synthesis');
+         expect(prompt).toContain('You are an expert cataloguer and knowledge engineer specializing in encyclopedic knowledge synthesis');
          expect(prompt).toContain('1. "title": Clean primary common or vernacular entry name');
-         expect(prompt).toContain('2. "scientificName": Canonical Latin binomial');
+         expect(prompt).toContain('2. "scientificName": Canonical scientific name');
          expect(prompt).toContain('4. "description": Exactly ONE concise sentence');
-         expect(prompt).not.toContain('Tu es un ingénieur agronome');
+         expect(prompt).not.toContain('Tu es un ingénieur');
       });
 
       it('should extract catalog entry using a decoupled AbstractAiAdapter and assign standard catalog-entry type', async () => {
@@ -199,24 +199,24 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
                   }
                }
                return {
-                  title: 'Acanthe à feuilles molles (Acanthus mollis)',
-                  scientificName: 'Acanthus mollis',
-                  family: 'Acanthaceae',
-                  description: 'Plante vivace méditerranéenne aux grandes feuilles lobées.',
+                  title: 'Quartz hyalin (SiO2)',
+                  scientificName: 'SiO2',
+                  family: 'Silicates',
+                  description: 'Silice cristalline aux prismes hexagonaux.',
                   language: 'fr',
                   originalLanguage: 'fr',
                   abstracts: {
-                     en: 'Perennial Mediterranean plant with large lobed leaves.',
-                     fr: 'Plante vivace méditerranéenne aux grandes feuilles lobées.',
-                     ar: 'نبات معمر متوسطي بأوراق مفصصة كبيرة.',
+                     en: 'Crystalline silica with hexagonal prisms.',
+                     fr: 'Silice cristalline aux prismes hexagonaux.',
+                     ar: 'سيليكا متبلورة بمناشير سداسية.',
                   },
                   keywords: {
-                     en: ['bear breeches', 'mediterranean'],
-                     fr: ['acanthe', 'méditerranée'],
-                     ar: ['شوك الجمل', 'متوسطي'],
+                     en: ['quartz', 'silica'],
+                     fr: ['quartz', 'silice'],
+                     ar: ['كوارتز', 'سيليكا'],
                   },
-                  tags: ['botany', 'mediterranean'],
-                  properties: ['ornamental', 'medicinal'],
+                  tags: ['mineralogy', 'silicates'],
+                  properties: ['piezoelectric', 'optical'],
                };
             }
          }
@@ -226,16 +226,16 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
          const result = await extractCatalogEntryContent(
             {
                sequence: 1,
-               rawTitle: 'Acanthe',
-               slug: '001-acanthe',
+               rawTitle: 'Quartz',
+               slug: '001-quartz',
                pageRange: '50-51',
-               text: 'Acanthe à feuilles molles...',
+               text: 'Quartz hyalin...',
             },
             {
                adapter: mockAdapter,
                parentBook: {
-                  title: 'Encyclopédie des plantes',
-                  slug: 'encyclopedie-des-plantes',
+                  title: 'Encyclopédie des minéraux',
+                  slug: 'encyclopedie-des-mineraux',
                   resource: 'test.pdf',
                   fileHash: '123456',
                },
@@ -243,11 +243,11 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
          );
 
          expect(result.metadata.type).toBe('catalog-entry');
-         expect(result.metadata.scientificName).toBe('Acanthus mollis');
-         expect(result.metadata.family).toBe('Acanthaceae');
+         expect(result.metadata.scientificName).toBe('SiO2');
+         expect(result.metadata.family).toBe('Silicates');
          expect(result.metadata.sequence).toBe(1);
          expect(result.usage.total).toBe(120);
-         expect(result.body).toContain('**Taxonomy / Classification:** *Acanthus mollis* | **Family / Group:** Acanthaceae');
+         expect(result.body).toContain('**Taxonomy / Classification:** *SiO2* | **Family / Group:** Silicates');
       });
 
       it('should support parameterized target languages for catalog entry extraction', async () => {
@@ -273,22 +273,22 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
                   }
                }
                return {
-                  title: 'Meadowsweet (Filipendula ulmaria)',
-                  scientificName: 'Filipendula ulmaria',
-                  family: 'Rosaceae',
-                  description: 'Perennial herb in wet soils.',
+                  title: 'Fluorite (CaF2)',
+                  scientificName: 'CaF2',
+                  family: 'Halides',
+                  description: 'Halide mineral with cubic crystals.',
                   language: 'en',
                   originalLanguage: 'en',
                   abstracts: {
-                     en: 'High density English summary of Meadowsweet.',
-                     de: 'Dichte deutsche Zusammenfassung von Mädesüß.',
+                     en: 'High density English summary of fluorite.',
+                     de: 'Dichte deutsche Zusammenfassung von Fluorit.',
                   },
                   keywords: {
-                     en: ['meadowsweet', 'wetlands'],
-                     de: ['mädesüß', 'feuchtgebiete'],
+                     en: ['fluorite', 'halides'],
+                     de: ['fluorit', 'halogenide'],
                   },
-                  tags: ['herb', 'wetlands'],
-                  properties: ['salicylic acid precursor', 'anti-inflammatory'],
+                  tags: ['halides', 'fluorescence'],
+                  properties: ['fluorescent', 'flux in metallurgy'],
                };
             }
          }
@@ -298,19 +298,19 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
          const result = await extractCatalogEntryContent(
             {
                sequence: 2,
-               rawTitle: 'Reine des prés',
-               slug: '002-reine-des-pres',
+               rawTitle: 'Fluorine',
+               slug: '002-fluorine',
                pageRange: '100-102',
-               text: 'Filipendula ulmaria dans les prairies humides...',
+               text: 'La fluorine en cristaux cubiques...',
             },
             {
                adapter: mockAdapter,
                targetLanguages: ['en', 'de'],
                parentBook: {
-                  title: 'European Medicinal Flora',
-                  slug: 'european-medicinal-flora',
-                  resource: 'flora.pdf',
-                  fileHash: 'flora123',
+                  title: 'European Minerals',
+                  slug: 'european-minerals',
+                  resource: 'minerals.pdf',
+                  fileHash: 'minerals123',
                },
             }
          );
@@ -318,7 +318,7 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
          expect(mockAdapter.lastPrompt).toContain('en, de');
          expect(result.metadata.abstracts?.en).toContain('High density English summary');
          expect(result.metadata.abstracts?.de).toContain('Dichte deutsche Zusammenfassung');
-         expect(result.metadata.keywords?.de).toEqual(['mädesüß', 'feuchtgebiete']);
+         expect(result.metadata.keywords?.de).toEqual(['fluorit', 'halogenide']);
          expect(result.metadata.language).toBe('en');
       });
 
@@ -334,24 +334,24 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
                   const p = typeof prompt === 'string' ? prompt : JSON.stringify(prompt);
                   if (p.includes('scientificName') || p.includes('family')) {
                      return {
-                        title: 'Matricaire camomille',
-                        scientificName: 'Matricaria chamomilla',
-                        family: 'Asteraceae',
-                        description: 'Plante herbacée médicinale.',
+                        title: 'Galène',
+                        scientificName: 'PbS',
+                        family: 'Sulfures',
+                        description: 'Sulfure de plomb.',
                         language: 'fr',
-                        abstracts: { en: 'Chamomile summary' },
-                        keywords: { en: ['chamomile'] },
-                        tags: ['chamomile', 'asteraceae'],
-                        properties: ['digestive', 'calmative'],
+                        abstracts: { en: 'Galena summary' },
+                        keywords: { en: ['galena'] },
+                        tags: ['galena', 'sulfides'],
+                        properties: ['lead ore', 'semiconductor'],
                      } as T;
                   }
                   return {
                      title: 'Introduction générale',
                      type: 'chapter',
-                     description: 'Introduction aux principes de la phytothérapie.',
-                     category: 'botany',
+                     description: 'Introduction aux principes de la minéralogie.',
+                     category: 'mineralogy',
                      language: 'fr',
-                     tags: ['botany', 'phytotherapy'],
+                     tags: ['mineralogy', 'classification'],
                   } as T;
                }
             }
@@ -359,38 +359,38 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
             const { ingestCatalogMonograph } = await import('../engine');
             const summary = await ingestCatalogMonograph(
                {
-                  bookTitle: 'Plantes Médicinales et Aromatiques',
+                  bookTitle: 'Minéraux et Gemmes',
                   description: 'Traité encyclopédique de référence.',
-                  category: 'botany',
+                  category: 'mineralogy',
                   authors: ['Dr. A. Schmidt'],
-                  publisher: 'Éditions Phytos',
+                  publisher: 'Example Press',
                   publicationYear: 2024,
                   introChapters: [
                      {
                         index: 1,
                         title: 'Introduction générale',
                         slug: '01-introduction-generale',
-                        text: 'Principes généraux de la botanique médicinale...',
+                        text: 'Principes généraux de la minéralogie...',
                         summary: 'Méthodologie générale.',
                      },
                   ],
                   entries: [
                      {
                         sequence: 1,
-                        rawTitle: 'Camomille vraie',
-                        slug: '001-camomille-vraie',
-                        text: 'Matricaria chamomilla L. Description complète de la plante...',
+                        rawTitle: 'Galène',
+                        slug: '001-galene',
+                        text: 'PbS. Description complète du minéral...',
                      },
                   ],
                },
                {
-                  filename: 'plantes.pdf',
+                  filename: 'mineraux.pdf',
                   gitLocalPath: tempDir,
                   adapter: new MockCatalogEngineAdapter(),
                }
             );
 
-            expect(summary.bookSlug).toBe('plantes-medicinales-et-aromatiques');
+            expect(summary.bookSlug).toBe('mineraux-et-gemmes');
             expect(summary.totalEntries).toBe(1);
             expect(summary.totalChapters).toBe(1);
             expect(summary.createdFiles.length).toBe(3); // 1 intro chapter + 1 entry + 1 master index
@@ -398,7 +398,7 @@ Au moins 100 caractères de contenu agronomique pour satisfaire la longueur mini
             const masterPath = path.join(tempDir, summary.masterIndexPath);
             const masterContent = await fs.readFile(masterPath, 'utf-8');
             expect(masterContent).toContain('type: monograph');
-            expect(masterContent).toContain('Matricaria chamomilla');
+            expect(masterContent).toContain('PbS');
             expect(masterContent).toContain('01-introduction-generale.md');
          } finally {
             await fs.rm(tempDir, { recursive: true, force: true });

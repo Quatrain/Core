@@ -1,2 +1,2 @@
 export * from './generic';
-export * from './agroecology';
+export * from './facets';

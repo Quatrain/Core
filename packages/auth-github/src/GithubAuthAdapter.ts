@@ -73,7 +73,7 @@ export class GithubAuthAdapter extends AbstractOAuthAdapter {
          body: JSON.stringify({
             name,
             private: options.private !== false,
-            description: options.description || 'Dépôt créé automatiquement par Modaka',
+            description: options.description || 'Repository created automatically',
             auto_init: options.autoInit !== false
          })
       })

@@ -16,19 +16,19 @@ import {
 
 const V02 = `---
 type: Guide
-title: Cover crops
+title: Onboarding
 generated: { by: process:ingest, at: 2026-06-20T22:53:05Z }
 verified: { by: human:ada, at: 2026-06-25T09:00:00Z }
 sources:
   - id: manual
     resource: originals/manual.pdf
     title: Manual
-crops: [wheat, barley]
+regions: [north, south]
 ---
 
-# Cover crops
+# Onboarding
 
-Sown after harvest.[^manual]
+Read before the first day.[^manual]
 
 [^manual]: Manual
 `
@@ -40,8 +40,8 @@ describe('OKF documents', () => {
       expect(document.frontmatter.verified).toEqual([
          { by: 'human:ada', at: '2026-06-25T09:00:00Z' },
       ])
-      expect(document.frontmatter.crops).toEqual(['wheat', 'barley'])
-      expect(document.body.startsWith('\n# Cover crops')).toBe(true)
+      expect(document.frontmatter.regions).toEqual(['north', 'south'])
+      expect(document.body.startsWith('\n# Onboarding')).toBe(true)
    })
 
    it('refuses a text without frontmatter, with broken YAML, or whose frontmatter is not a mapping', () => {
@@ -83,14 +83,14 @@ describe('OKF documents', () => {
       const text = serializeOkfDocument({
          frontmatter: {
             type: 'Note',
-            title: 'Soil: a primer',
+            title: 'Design: a primer',
             code: '0123',
             flag: 'yes',
          },
          body: '',
       })
       const back = parseOkfDocument(text).frontmatter
-      expect(back.title).toBe('Soil: a primer')
+      expect(back.title).toBe('Design: a primer')
       expect(back.code).toBe('0123')
       expect(back.flag).toBe('yes')
    })
@@ -328,11 +328,11 @@ describe('OKF index files', () => {
             heading: 'Guides',
             entries: [
                {
-                  title: 'Cover [crops]',
-                  href: 'cover crops.md',
-                  description: 'Sown\nafter harvest.',
+                  title: 'First [steps]',
+                  href: 'first steps.md',
+                  description: 'Read\nbefore the first day.',
                },
-               { title: 'Soils', href: 'soils/' },
+               { title: 'Teams', href: 'teams/' },
             ],
          },
          { heading: 'Empty', entries: [] },
@@ -340,7 +340,7 @@ describe('OKF index files', () => {
       expect(
          renderOkfIndex(sections, { okfVersion: true, preamble: '# Knowledge' })
       ).toBe(
-         '---\nokf_version: "0.2"\n---\n\n# Knowledge\n\n# Guides\n\n* [Cover \\[crops\\]](cover%20crops.md) - Sown after harvest.\n* [Soils](soils/)\n'
+         '---\nokf_version: "0.2"\n---\n\n# Knowledge\n\n# Guides\n\n* [First \\[steps\\]](first%20steps.md) - Read before the first day.\n* [Teams](teams/)\n'
       )
       expect(renderOkfIndex(sections).startsWith('# Guides\n')).toBe(true)
    })

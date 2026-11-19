@@ -39,31 +39,31 @@ import type {
 
 ---
 
-## 3. Real-World Case Study 1: Modaka (Second Brain Copilot)
+## 3. Example 1: A Local-First Notes App
 
-**Modaka** is a local-first personal knowledge copilot. It exports its composition using `AppCompositionInterface<PWAContentInterface>`.
+A local-first notes app exports its composition using `AppCompositionInterface<PWAContentInterface>`.
 
 ### A. Composition Specification
 
 ```typescript
-// modaka/src/composition.ts
+// notes-app/src/composition.ts
 import type { AppCompositionInterface, PWAContentInterface } from '@quatrain/types';
 
-export const modakaComposition: AppCompositionInterface<PWAContentInterface> = {
+export const notesComposition: AppCompositionInterface<PWAContentInterface> = {
    content: {
       type: 'pwa',
-      name: 'modaka',
+      name: 'notes-app',
       version: '1.0.0',
       distPath: './dist',
       manifest: {
-         name: 'Modaka Second Brain',
-         short_name: 'Modaka',
+         name: 'Notes',
+         short_name: 'Notes',
          theme_color: '#090d16',
          background_color: '#090d16'
       }
    },
    adapters: {
-      // Pivot class Ai holding Gemini text generation and Whisper audio transcription
+      // Pivot class Ai holding text generation and audio transcription
       ai: {
          default: { package: '@quatrain/ai-gemini', adapter: 'GeminiAdapter' },
          transcription: { package: '@quatrain/ai-whisper', adapter: 'WhisperAdapter' }
@@ -76,60 +76,57 @@ export const modakaComposition: AppCompositionInterface<PWAContentInterface> = {
       auth: { package: '@quatrain/auth-github', adapter: 'GitHubAuthAdapter' }
    },
    config: {
-      okfRoot: './second-brain-data/content',
+      okfRoot: './data/content',
       defaultCategory: 'inbox'
    }
 };
 ```
 
-### B. Deployment Modalities for Modaka
+### B. Deployment Modalities
 
 1. **Local Desktop / PWA Mode**: Bootstrapped via `AppBootloader.bootstrap()` with local disk storage and SQLite.
-2. **Mobile App Mode (`modaka-app`)**: Embedded inside an Expo React Native `WebView` shell. The mobile shell injects a native bridge adapter (`expo-sqlite`, `expo-audio`) into the composition context without changing Modaka's UI or domain code.
+2. **Mobile App Mode**: Embedded inside an Expo React Native `WebView` shell. The mobile shell injects a native bridge adapter (`expo-sqlite`, `expo-audio`) into the composition context without changing the UI or domain code.
 
 ---
 
-## 4. Real-World Case Study 2: Hey Brad (Agronomic AI Companion)
+## 4. Example 2: A Multi-Tenant Cloud Assistant
 
-**Hey Brad** is a verticalized domain application built for the agricultural sector. It extends the knowledge engine by injecting agricultural system prompts, domain-specific schemas, and agricultural UI styling while connecting to cloud multi-tenant adapters.
+The same engine, deployed as a multi-tenant cloud service with its own prompts, schemas and styling.
 
 ### A. Composition Specification
 
 ```typescript
-// hey-brad/src/composition.ts
+// cloud-assistant/src/composition.ts
 import type { AppCompositionInterface, PWAContentInterface } from '@quatrain/types';
 
-export const heyBradComposition: AppCompositionInterface<PWAContentInterface> = {
+export const assistantComposition: AppCompositionInterface<PWAContentInterface> = {
    content: {
       type: 'pwa',
-      name: 'hey-brad',
+      name: 'cloud-assistant',
       version: '1.0.0',
       distPath: './dist',
       theme: {
-         primaryColor: '#2e7d32', // Agronomic green
-         accentColor: '#81c784'
+         primaryColor: '#1565c0',
+         accentColor: '#64b5f6'
       },
       manifest: {
-         name: 'Hey Brad — Agricultural AI Companion',
-         short_name: 'HeyBrad'
+         name: 'Cloud Assistant',
+         short_name: 'Assistant'
       }
    },
    adapters: {
-      // Multi-tenant Cloud AI configuration
       ai: {
          default: { package: '@quatrain/ai-gemini', adapter: 'GeminiAdapter' }
       },
       // Cloud PostgreSQL backend for tenant data
       backend: { package: '@quatrain/backend-postgres', adapter: 'PostgreSQLAdapter' },
-      // Managed S3 bucket storage for farm documents and images
+      // Managed S3 bucket storage for documents and images
       storage: { package: '@quatrain/storage-s3', adapter: 'S3StorageAdapter' },
-      // Supabase / OIDC authentication for agricultural enterprise tenants
+      // Supabase / OIDC authentication for enterprise tenants
       auth: { package: '@quatrain/auth-supabase', adapter: 'SupabaseAuthAdapter' }
    },
    config: {
-      domain: 'agronomy',
-      systemPromptPath: './prompts/agronomic-rules.yaml',
-      supportedCrops: ['wheat', 'corn', 'vineyard', 'fruit-trees']
+      systemPromptPath: './prompts/rules.yaml'
    }
 };
 ```
@@ -142,11 +139,11 @@ To bootstrap any composition at runtime, pass the configuration to `AppBootloade
 
 ```typescript
 import { AppBootloader } from '@quatrain/app';
-import { modakaComposition } from './composition';
+import { notesComposition } from './composition';
 
 async function main() {
    // Bootstraps all declared adapters into Quatrain Core singletons
-   await AppBootloader.bootstrapFromComposition(modakaComposition);
+   await AppBootloader.bootstrapFromComposition(notesComposition);
    console.log('Application environment initialized successfully.');
 }
 
@@ -159,4 +156,4 @@ main();
 
 - **Isomorphic Types**: Shared contracts reside in `@quatrain/types`, ensuring zero bundle weight overhead on client builds.
 - **Multi-Adapter Support**: Pivot classes (`Ai`, `Storage`, etc.) can host multiple named adapters for specialized sub-tasks.
-- **Total Decoupling**: Products (`modaka`, `hey-brad`) remain pure PWA/Web deliverables; infrastructure modalities (Mobile, SaaS, Standalone) are simply contexts of adapters glued to the deliverable payload.
+- **Total Decoupling**: Products remain pure PWA/Web deliverables; infrastructure modalities (Mobile, SaaS, Standalone) are simply contexts of adapters glued to the deliverable payload.

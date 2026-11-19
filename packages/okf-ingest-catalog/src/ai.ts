@@ -291,16 +291,8 @@ export async function extractCatalogEntryContent(
       body += `\n`;
    }
 
-   if (domainMeta.soils && Array.isArray(domainMeta.soils) && domainMeta.soils.length > 0) {
-      body += `## 🌱 Soil & Habitat Characteristics\n\n`;
-      for (const s of domainMeta.soils) {
-         body += `- ${s}\n`;
-      }
-      body += `\n`;
-   }
-
    if (properties && properties.length > 0) {
-      body += `## 🌿 Properties & Applications\n\n`;
+      body += `## ⚙️ Properties & Applications\n\n`;
       for (const p of properties) {
          body += `- ${p}\n`;
       }

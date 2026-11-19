@@ -27,7 +27,7 @@ describe('OkfDedupCache', () => {
       cache.register('hash123', {
          filename: 'test.pdf',
          ingestedAt: '2026-10-03T22:00:00.000Z',
-         category: 'viticulture',
+         category: 'guides',
          tokens: {
             prompt: 2000,
             candidates: 400,
@@ -56,7 +56,7 @@ describe('OkfDedupCache', () => {
 
    it('should sync existing markdown documents from git repository structure', async () => {
       const gitRepo = path.join(tempDir, 'repo');
-      const catDir = path.join(gitRepo, 'content', 'agro');
+      const catDir = path.join(gitRepo, 'content', 'guides');
       await fs.mkdir(catDir, { recursive: true });
 
       const testHash = 'a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90';

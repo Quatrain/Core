@@ -329,7 +329,7 @@ export class ForgejoAdapter extends AbstractGitForgeAdapter {
     }
   }
 
-  // --- File Sync & Modaka Support ---
+  // --- File Sync ---
   public async fetchFileTree(branch?: string): Promise<FileTreeNode[]> {
     return this.httpClient.fetchFileTree(branch);
   }

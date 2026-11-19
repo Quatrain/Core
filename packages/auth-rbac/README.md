@@ -50,7 +50,7 @@ import { RbacPolicyEngine } from '@quatrain/auth-rbac'
 const engine = new RbacPolicyEngine([
   {
     id: 'curator',
-    name: 'Agronomy Curator',
+    name: 'Knowledge Curator',
     routes: [
       { pattern: '/api/curate', methods: ['GET', 'POST'], access: 'allow' },
       { pattern: '/**', methods: ['*'], access: 'deny' }
@@ -78,7 +78,7 @@ engine.getFieldAccess(user, 'okf-document', 'internalReviewerNotes') // 'hidden'
 
 // 3. Payload sanitization
 const cleanPayload = engine.sanitizeWrite(user, 'okf-document', {
-  title: 'Soil Guide',
+  title: 'Field Guide',
   soa: 'malicious/soa', // Stripped automatically
   internalReviewerNotes: 'Secret' // Stripped automatically
 })

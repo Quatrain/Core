@@ -330,10 +330,17 @@ export interface ChapterFrontmatterOptions {
    fallbackLanguage?: string;
    originalLanguage?: string;
    thematics?: string[];
-   soils?: string[];
-   climates?: string[];
-   itineraries?: string[];
-   crops?: string[];
+   /** Fields of the taxonomy profile, those of the chapter over those of the book. */
+   domainMetadata?: Record<string, unknown>;
+}
+
+/**
+ * Fields a taxonomy profile extracts from a record (an outline, a chapter), without
+ * the empty ones.
+ */
+function domainFields(profile: DomainTaxonomyProfile, source: Record<string, unknown>): Record<string, unknown> {
+   const fields = profile.extractDomainMetadata ? profile.extractDomainMetadata(source) : {};
+   return Object.fromEntries(Object.entries(fields).filter(([, value]) => value !== undefined));
 }
 
 export function buildChapterFrontmatter(opts: ChapterFrontmatterOptions): OkfFrontmatterV2 {
@@ -361,10 +368,7 @@ export function buildChapterFrontmatter(opts: ChapterFrontmatterOptions): OkfFro
       abstracts: opts.chapterMetadata.abstracts,
       keywords: opts.chapterMetadata.keywords,
       thematics: opts.chapterMetadata.thematics || opts.thematics,
-      soils: opts.chapterMetadata.soils || opts.soils,
-      climates: opts.chapterMetadata.climates || opts.climates,
-      itineraries: opts.chapterMetadata.itineraries || opts.itineraries,
-      crops: opts.chapterMetadata.crops || opts.crops,
+      ...opts.domainMetadata,
    };
 }
 
@@ -494,10 +498,7 @@ Extract specifically the concepts, taxonomies, diagrams, and tables relevant to 
          fallbackLanguage: outline.language || targetLanguages[0],
          originalLanguage: outline.originalLanguage || targetLanguages[0],
          thematics: outline.thematics,
-         soils: outline.soils,
-         climates: outline.climates,
-         itineraries: outline.itineraries,
-         crops: outline.crops,
+         domainMetadata: { ...domainFields(profile, outline), ...domainFields(profile, chapterResult.metadata) },
       });
 
       const chapterRelativePath = path.join(folderPath, `${ch.slug}.md`);
@@ -550,10 +551,7 @@ Extract specifically the concepts, taxonomies, diagrams, and tables relevant to 
       revision,
       category: outline.category,
       thematics: outline.thematics,
-      soils: outline.soils,
-      climates: outline.climates,
-      itineraries: outline.itineraries,
-      crops: outline.crops,
+      ...domainFields(profile, outline),
       authors: outline.authors,
       publisher: outline.publisher,
       publicationYear: outline.publicationYear,

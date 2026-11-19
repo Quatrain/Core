@@ -7,10 +7,10 @@ import { OkfDocument } from './types';
 export interface OkfDimensionScores {
    /** Factual truthfulness to source, heavy penalty for made-up claims (Weight: 30%) */
    factualFidelity: number;
-   /** Scientific/botanical naming, taxonomic family, binomial precision, or honest 'Undetermined' (Weight: 25%) */
-   taxonomicAccuracy: number;
-   /** Soil indicators, agro-ecological diagnostic criteria, complete extraction (Weight: 20%) */
-   bioIndicationCompleteness: number;
+   /** Exact names, identifiers and terms of the domain, or an honest 'Undetermined' (Weight: 25%) */
+   namingAccuracy: number;
+   /** Every key point, criterion and property of the source captured (Weight: 20%) */
+   contentCompleteness: number;
    /** Translation fidelity of abstracts, keywords, multilingual alignment (Weight: 15%) */
    multilingualQuality: number;
    /** OKF v0.2 frontmatter contract, schema fields, markdown formatting hygiene (Weight: 10%) */
@@ -21,7 +21,7 @@ export interface OkfDimensionScores {
  * Specific factual hallucination or ground-truth divergence identified by a judge.
  */
 export interface OkfHallucination {
-   /** Target field or section where hallucination occurred (e.g. 'title', 'scientificName', 'soils') */
+   /** Target field or section where hallucination occurred (e.g. 'title', 'authors', a facet name) */
    field: string;
    /** Severity level of the hallucination */
    severity: 'critical' | 'major' | 'minor';
@@ -103,7 +103,7 @@ export interface OkfEvaluationTarget {
    sourceText: string;
    /** Generated/extracted OKF document, JSON payload, or formatted Markdown */
    extracted: OkfDocument | Record<string, unknown> | string;
-   /** Optional domain description or guidelines (e.g. botanical, agronomic, legal) */
+   /** Optional domain description or guidelines (e.g. medical, legal, engineering) */
    domainContext?: string;
    /** Optional expected fields that should have been extracted */
    expectedFields?: string[];
@@ -140,8 +140,8 @@ export interface CompositeJudgeOptions {
  */
 export const OKF_DIMENSION_WEIGHTS: Record<keyof OkfDimensionScores, number> = {
    factualFidelity: 0.30,
-   taxonomicAccuracy: 0.25,
-   bioIndicationCompleteness: 0.20,
+   namingAccuracy: 0.25,
+   contentCompleteness: 0.20,
    multilingualQuality: 0.15,
    structureCompliance: 0.10,
 };
@@ -156,13 +156,13 @@ export const OKF_JUDGE_JSON_SCHEMA = {
          type: 'NUMBER',
          description: 'Score 0-100 on factual truthfulness to source. Heavy penalty for fabricated claims.',
       },
-      taxonomicAccuracy: {
+      namingAccuracy: {
          type: 'NUMBER',
-         description: 'Score 0-100 on scientific naming, taxonomic precision, or honest "Undetermined".',
+         description: 'Score 0-100 on exact names, identifiers and domain terms, or honest "Undetermined".',
       },
-      bioIndicationCompleteness: {
+      contentCompleteness: {
          type: 'NUMBER',
-         description: 'Score 0-100 on extracting all soil indicators, ecological criteria, diagnostics.',
+         description: 'Score 0-100 on capturing every key point, criterion and property of the source.',
       },
       multilingualQuality: {
          type: 'NUMBER',
@@ -205,8 +205,8 @@ export const OKF_JUDGE_JSON_SCHEMA = {
    },
    required: [
       'factualFidelity',
-      'taxonomicAccuracy',
-      'bioIndicationCompleteness',
+      'namingAccuracy',
+      'contentCompleteness',
       'multilingualQuality',
       'structureCompliance',
       'hallucinations',
@@ -222,8 +222,8 @@ export const OKF_JUDGE_JSON_SCHEMA = {
  */
 interface RawJudgePayload {
    factualFidelity?: number;
-   taxonomicAccuracy?: number;
-   bioIndicationCompleteness?: number;
+   namingAccuracy?: number;
+   contentCompleteness?: number;
    multilingualQuality?: number;
    structureCompliance?: number;
    hallucinations?: Array<{
@@ -289,8 +289,8 @@ export class OkfEntryEvaluator {
    static calculateWeightedScore(dimensions: OkfDimensionScores): number {
       const raw =
          dimensions.factualFidelity * OKF_DIMENSION_WEIGHTS.factualFidelity +
-         dimensions.taxonomicAccuracy * OKF_DIMENSION_WEIGHTS.taxonomicAccuracy +
-         dimensions.bioIndicationCompleteness * OKF_DIMENSION_WEIGHTS.bioIndicationCompleteness +
+         dimensions.namingAccuracy * OKF_DIMENSION_WEIGHTS.namingAccuracy +
+         dimensions.contentCompleteness * OKF_DIMENSION_WEIGHTS.contentCompleteness +
          dimensions.multilingualQuality * OKF_DIMENSION_WEIGHTS.multilingualQuality +
          dimensions.structureCompliance * OKF_DIMENSION_WEIGHTS.structureCompliance;
 
@@ -365,12 +365,12 @@ ${domainSection}${expectedFieldsSection}## CRITICAL AUDITING INSTRUCTIONS:
    - Look for HALLUCINATIONS: Did the model invent facts, properties, or dates not supported by the source?
    - Any invented fact must be reported in the 'hallucinations' array with exact citations and severity ('critical', 'major', or 'minor').
 
-2. TAXONOMIC & DOMAIN ACCURACY (Weight 25%):
-   - Are botanical/scientific names, binomials, taxonomic families, and vernacular names exact?
-   - HONESTY CONTRACT: If the source text lacks a legible title or plant name (e.g. obscured in margins), an honest model sets 'Undetermined' or notes ambiguity. An unfaithful model invents a plausible-sounding name. Reward honesty! Heavily penalize plausible-sounding fabrications.
+2. NAMING & DOMAIN ACCURACY (Weight 25%):
+   - Are names, identifiers, technical terms and classifications exactly as in the source?
+   - HONESTY CONTRACT: If the source text lacks a legible title or name (e.g. obscured in margins), an honest model sets 'Undetermined' or notes ambiguity. An unfaithful model invents a plausible-sounding name. Reward honesty! Heavily penalize plausible-sounding fabrications.
 
-3. BIO-INDICATION & CONTENT COMPLETENESS (Weight 20%):
-   - Did the extraction capture all soil indicators, ecological criteria, diagnostic keys, and agronomic properties present in the source?
+3. CONTENT COMPLETENESS (Weight 20%):
+   - Did the extraction capture every key point, criterion, diagnostic key and property present in the source?
    - Report missing key points in the 'omissions' array.
 
 4. MULTILINGUAL QUALITY (Weight 15%):
@@ -411,8 +411,8 @@ Respond strictly with a JSON object conforming to the required schema. Do NOT in
 
       const dimensions: OkfDimensionScores = {
          factualFidelity: clamp(data.factualFidelity),
-         taxonomicAccuracy: clamp(data.taxonomicAccuracy),
-         bioIndicationCompleteness: clamp(data.bioIndicationCompleteness),
+         namingAccuracy: clamp(data.namingAccuracy),
+         contentCompleteness: clamp(data.contentCompleteness),
          multilingualQuality: clamp(data.multilingualQuality),
          structureCompliance: clamp(data.structureCompliance),
       };
@@ -703,16 +703,16 @@ Respond strictly with a JSON object conforming to the required schema. Do NOT in
       // Compute dimension averages
       const dimensionKeys: Array<keyof OkfDimensionScores> = [
          'factualFidelity',
-         'taxonomicAccuracy',
-         'bioIndicationCompleteness',
+         'namingAccuracy',
+         'contentCompleteness',
          'multilingualQuality',
          'structureCompliance',
       ];
 
       const dimensionAverages: OkfDimensionScores = {
          factualFidelity: 0,
-         taxonomicAccuracy: 0,
-         bioIndicationCompleteness: 0,
+         namingAccuracy: 0,
+         contentCompleteness: 0,
          multilingualQuality: 0,
          structureCompliance: 0,
       };

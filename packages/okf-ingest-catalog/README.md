@@ -1,6 +1,6 @@
 # @quatrain/okf-ingest-catalog
 
-Agnostic ingestion and decomposition engine for encyclopedic catalogs, plant floras, dictionaries, pharmacopeias, and ordered entry collections into Open Knowledge Format (OKF v0.2) atomic entities.
+Agnostic ingestion and decomposition engine for encyclopedic catalogs, dictionaries, glossaries and ordered entry collections into Open Knowledge Format (OKF v0.2) atomic entities.
 
 ## Features
 

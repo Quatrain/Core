@@ -37,7 +37,7 @@ const localModel = new OpenAiAdapter({
 
 // Generate plain text
 const answer = await deepseek.generateText(
-  'Explain regenerative viticulture.',
+  'Explain the CAP theorem.',
 )
 
 // Generate structured data

@@ -76,7 +76,7 @@ export interface RouteRule {
  * Field-level security rules for a specific entity schema.
  */
 export interface EntityFieldRules {
-  /** Target entity or schema name (e.g. "okf-document", "user", "farm-profile") */
+  /** Target entity or schema name (e.g. "okf-document", "user", "customer-profile") */
   entity?: string
   /** Default mode applied when a property is not explicitly defined in `fields` */
   defaultMode?: FieldAccessMode
@@ -136,7 +136,7 @@ export interface RbacUserContext {
   subjectType?: SubjectType
   /** Optional fine-grained permission claims */
   permissions?: string[]
-  /** Dynamic context attributes (e.g. tenantId, farmId, ipAddress) */
+  /** Dynamic context attributes (e.g. tenantId, siteId, ipAddress) */
   attributes?: Record<string, any>
 }
 

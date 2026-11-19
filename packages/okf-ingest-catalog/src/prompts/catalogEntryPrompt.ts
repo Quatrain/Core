@@ -22,22 +22,22 @@ export function buildCatalogEntryPrompt(
 
    const systemRole =
       profile?.systemRole ||
-      'You are an expert taxonomist and knowledge engineer specializing in encyclopedic knowledge synthesis and catalog entries according to the Open Knowledge Format (OKF v0.2) specification.';
+      'You are an expert cataloguer and knowledge engineer specializing in encyclopedic knowledge synthesis and catalog entries according to the Open Knowledge Format (OKF v0.2) specification.';
 
    const targetLanguages = params.languages || profile?.targetLanguages || ['en'];
    const abstractLines = buildAbstractPromptGuidelines(targetLanguages);
 
    const guidelines: string[] = [
-      '1. "title": Clean primary common or vernacular entry name, optionally followed by Latin binomial or notation in parentheses (e.g. "Spearmint (Mentha spicata)").',
-      '2. "scientificName": Canonical Latin binomial, universal taxonomic designation, or official scientific nomenclature.',
-      '3. "family": Taxonomic family, botanical/zoological group, or chemical/functional family classification.',
+      '1. "title": Clean primary common or vernacular entry name, optionally followed by its canonical notation in parentheses (e.g. "Rose quartz (SiO2)").',
+      '2. "scientificName": Canonical scientific name, universal designation or official nomenclature.',
+      '3. "family": Family, group or class the entry belongs to in its classification.',
       '4. "description": Exactly ONE concise sentence describing the subject, its primary classification, and distinguishing functional characteristics.',
       '5. "language" & "originalLanguage": ISO 639-1 two-letter language code (typically "en" or "fr").',
       `6. "abstracts": Dense, high-value technical synthesis (2 to 3 sentences) describing diagnostic traits and functional properties in the following languages (${targetLanguages.join(', ')}):`,
       ...abstractLines,
       `7. "keywords": Standardized indexing keywords (4 to 8 per language) for each configured language (${targetLanguages.join(', ')}).`,
       '8. "tags": Lowercase semantic tags capturing domain taxonomy and parent publication references.',
-      '9. "properties": Functional properties, agricultural traits, pharmacological effects, or technical applications.',
+      '9. "properties": Functional properties, effects or technical applications.',
    ];
 
    if (profile?.promptGuidelines && profile.promptGuidelines.length > 0) {
@@ -45,7 +45,7 @@ export function buildCatalogEntryPrompt(
    }
 
    guidelines.push(
-      '10. "diagrams": Transcribe all charts, comparison matrices, or morphological tables into clean Markdown tables or Mermaid diagrams.'
+      '10. "diagrams": Transcribe all charts, comparison matrices, or descriptive tables into clean Markdown tables or Mermaid diagrams.'
    );
 
    return `${systemRole}

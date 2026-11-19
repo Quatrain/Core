@@ -55,12 +55,12 @@ Auth.addProvider(githubAdapter, 'github')
 
 // Inside your API setup, specify the target app scheme
 server.addEndpoint(githubAdapter.getEndpointHandler(), '/api/auth/github', {
-   appScheme: 'modaka' // Will redirect to modaka://auth/github/callback?token=...
+   appScheme: 'myapp' // Will redirect to myapp://auth/github/callback?token=...
 })
 ```
 
 Alternatively, you can pass the app scheme dynamically in the login/callback query string:
-`GET /api/auth/github/callback?code=CODE&app_scheme=modaka`
+`GET /api/auth/github/callback?code=CODE&app_scheme=myapp`
 
 ---
 

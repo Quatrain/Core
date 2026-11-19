@@ -42,6 +42,19 @@ const { clean, changes, lastCommit, ahead } = await copy.status()
 | `status()` | Branche, modifications en attente, dernier commit, commits pas encore envoyés |
 | `commit(message, paths?, author?)` | Valide les chemins donnés, ou toutes les modifications. Renvoie `false` s'il n'y a rien à valider |
 | `push()` | Envoie la branche |
+| `discard()` | Abandonne les commits non envoyés, les modifications en cours et les fichiers non suivis (les fichiers ignorés sont conservés) et revient à la branche distante, ou à une branche vide si le distant n'en a pas. Sans distant, abandonne seulement les modifications en cours. N'écrit jamais sur le distant |
+
+Quand le distant refuse un envoi parce que quelqu'un a poussé avant, on abandonne le commit
+local et on rejoue la modification sur l'état à jour :
+
+```typescript
+try {
+   await copy.push()
+} catch (error) {
+   await copy.discard() // retour au distant, qui vient d'être récupéré
+   // … réécrire la modification sous copy.path, committer, envoyer …
+}
+```
 
 Ce qu'elle garantit :
 

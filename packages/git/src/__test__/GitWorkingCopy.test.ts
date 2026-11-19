@@ -132,6 +132,70 @@ describe("GitWorkingCopy", () => {
     expect((await second.status()).lastCommit?.subject).toBe("feat: b");
   });
 
+  it("discards a refused commit and applies the change again on the state of the remote", async () => {
+    seedRemote({ "README.md": "seed\n", ".gitignore": "cache/\n" });
+    const first = workingCopy("first");
+    const second = workingCopy("second");
+    await first.prepare();
+    await second.prepare();
+    fs.writeFileSync(path.join(first.path, "a.md"), "a\n");
+    await first.commit("feat: a");
+    await first.push();
+
+    fs.writeFileSync(path.join(second.path, "b.md"), "b\n");
+    fs.writeFileSync(path.join(second.path, "README.md"), "changed\n");
+    await second.commit("feat: b", ["b.md"]);
+    fs.writeFileSync(path.join(second.path, "stray.md"), "stray\n");
+    fs.mkdirSync(path.join(second.path, "cache"));
+    fs.writeFileSync(path.join(second.path, "cache", "kept.bin"), "kept\n");
+    await expect(second.push()).rejects.toBeInstanceOf(GitCommandError);
+
+    await second.discard();
+    let status = await second.status();
+    expect(status).toMatchObject({ clean: true, changes: [], ahead: 0 });
+    expect(status.lastCommit?.subject).toBe("feat: a");
+    expect(fs.existsSync(path.join(second.path, "b.md"))).toBe(false);
+    expect(fs.existsSync(path.join(second.path, "stray.md"))).toBe(false);
+    expect(fs.readFileSync(path.join(second.path, "README.md"), "utf8")).toBe("seed\n");
+    expect(fs.existsSync(path.join(second.path, "cache", "kept.bin"))).toBe(true);
+
+    fs.writeFileSync(path.join(second.path, "b.md"), "b\n");
+    await second.commit("feat: b", ["b.md"]);
+    await second.push();
+    status = await second.status();
+    expect(status.ahead).toBe(0);
+    expect(git(remote, "log", "--pretty=format:%s", "main").split("\n")).toEqual(["feat: b", "feat: a", "seed"]);
+  });
+
+  it("discards back to an empty branch when the remote has none yet", async () => {
+    const copy = workingCopy("copy");
+    await copy.prepare();
+    fs.writeFileSync(path.join(copy.path, "index.md"), "# Home\n");
+    await copy.commit("feat: first document");
+    fs.writeFileSync(path.join(copy.path, "draft.md"), "draft\n");
+
+    await copy.discard();
+    expect(await copy.status()).toEqual({ branch: "main", clean: true, changes: [] });
+    expect(fs.readdirSync(copy.path)).toEqual([".git"]);
+    expect(git(remote, "branch", "--list")).toBe("");
+  });
+
+  it("discards only the changes not committed when there is no remote", async () => {
+    const copy = new GitWorkingCopy({ path: path.join(root, "local"), author: AUTHOR });
+    await copy.prepare();
+    fs.writeFileSync(path.join(copy.path, "a.md"), "a\n");
+    await copy.commit("feat: a");
+    fs.writeFileSync(path.join(copy.path, "a.md"), "changed\n");
+    fs.writeFileSync(path.join(copy.path, "b.md"), "b\n");
+
+    await copy.discard();
+    const status = await copy.status();
+    expect(status.clean).toBe(true);
+    expect(status.lastCommit?.subject).toBe("feat: a");
+    expect(fs.readFileSync(path.join(copy.path, "a.md"), "utf8")).toBe("a\n");
+    expect(fs.existsSync(path.join(copy.path, "b.md"))).toBe(false);
+  });
+
   it("refuses to commit a path outside the working copy or inside its git directory", async () => {
     const copy = workingCopy("copy");
     await copy.prepare();

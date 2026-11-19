@@ -42,6 +42,19 @@ const { clean, changes, lastCommit, ahead } = await copy.status()
 | `status()` | Branch, pending changes, last commit, commits not pushed yet |
 | `commit(message, paths?, author?)` | Commits the paths, or every change. Returns `false` when there is nothing to commit |
 | `push()` | Pushes the branch |
+| `discard()` | Drops commits not pushed, pending changes and untracked files (ignored files are kept), back to the remote branch, or to an empty branch when the remote has none. Without a remote, drops pending changes only. Never writes to the remote |
+
+When the remote refuses a push because someone pushed first, drop the local commit and apply
+the change again on the fresh state:
+
+```typescript
+try {
+   await copy.push()
+} catch (error) {
+   await copy.discard() // back to the remote, which was just fetched
+   // … write the change again under copy.path, commit, push …
+}
+```
 
 What it guarantees:
 

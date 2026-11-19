@@ -410,9 +410,9 @@
     "last_published": "2026-09-24T10:05:25.541Z"
   },
   "@quatrain/git": {
-    "version": "1.0.2",
-    "hash": "ZUt2cplwZ9XlLbqoc6daNqzM+kg=-6a917febd1de9049581f80a3468a60c9a1db211cb9b768ecdb5bdbc5b9ad408a",
-    "last_published": "2026-11-18T11:06:10.605Z"
+    "version": "1.0.3-beta.0",
+    "hash": "UmoUq3/u33tczohk3DN7iFcz+F4=-6a917febd1de9049581f80a3468a60c9a1db211cb9b768ecdb5bdbc5b9ad408a",
+    "last_published": "2026-11-19T10:24:21.329Z"
   },
   "@quatrain/git-forgejo": {
     "version": "1.0.2-beta.0",
@@ -425,9 +425,9 @@
     "last_published": "2026-11-19T09:24:29.723Z"
   },
   "@quatrain/okf-ingest": {
-    "version": "1.0.2",
-    "hash": "vmgRI+SIoz4yPwHNedMqEuHr6Y4=-2b3543bf894510615dfd5abb4994b3c115cdd264ca42d466c1702743cb67bc78",
-    "last_published": "2026-11-18T11:07:34.077Z"
+    "version": "1.0.3-beta.0",
+    "hash": "rXjiHPrsePL/E/dokSpIRuLDpg0=-2b3543bf894510615dfd5abb4994b3c115cdd264ca42d466c1702743cb67bc78",
+    "last_published": "2026-11-19T10:25:45.359Z"
   },
   "@quatrain/okf-ingest-catalog": {
     "version": "1.0.2-beta.0",

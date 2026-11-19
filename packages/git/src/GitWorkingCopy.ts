@@ -246,6 +246,37 @@ export class GitWorkingCopy {
   }
 
   /**
+   * Drops the local work and comes back to the state of the remote: commits not pushed,
+   * staged and unstaged changes and untracked files are discarded; ignored files are kept.
+   * Against a remote that has no such branch yet, the working copy comes back to an empty
+   * branch. Without a remote, only the changes not committed are dropped. The remote is never
+   * written to. Use it when a push is refused because the remote moved: discard, then apply
+   * the change again on the fresh state.
+   *
+   * @throws GitCommandError when the remote cannot be reached or refuses the token.
+   */
+  discard(): Promise<void> {
+    return this.exclusive(async () => {
+      let target: string | undefined;
+      if (this.remote !== undefined) {
+        target = (await this.fetch()) ? `refs/remotes/origin/${this.branch}` : undefined;
+      } else if (await this.hasCommit()) {
+        target = "HEAD";
+      }
+      if (target === undefined) {
+        await this.git("Emptying the branch", ["symbolic-ref", "HEAD", `refs/heads/${this.branch}`]);
+        if (await this.hasCommit()) {
+          await this.git("Emptying the branch", ["update-ref", "-d", `refs/heads/${this.branch}`]);
+        }
+        await this.git("Emptying the branch", ["read-tree", "--empty"]);
+      } else {
+        await this.git("Resetting the working copy", ["checkout", "--quiet", "--force", "-B", this.branch, target]);
+      }
+      await this.git("Removing the untracked files", ["clean", "--quiet", "--force", "-d"]);
+    });
+  }
+
+  /**
    * Runs the operations of this working copy one after the other.
    */
   protected exclusive<T>(operation: () => Promise<T>): Promise<T> {
@@ -254,20 +285,31 @@ export class GitWorkingCopy {
     return result;
   }
 
-  protected async fastForward(): Promise<void> {
-    const hadCommit = await this.hasCommit();
+  /**
+   * Fetches the branch from the remote.
+   *
+   * @returns `false` when the remote has no such branch yet (an empty repository).
+   */
+  protected async fetch(): Promise<boolean> {
     try {
       await this.git(
         "Fetching from the remote",
         ["fetch", "--quiet", "--no-tags", "origin", `+refs/heads/${this.branch}:refs/remotes/origin/${this.branch}`],
         true
       );
+      return true;
     } catch (error) {
-      // A remote without this branch yet (an empty repository) is not a failure.
       if (error instanceof GitCommandError && /couldn't find remote ref|could not find remote ref/i.test(error.message)) {
-        return;
+        return false;
       }
       throw error;
+    }
+  }
+
+  protected async fastForward(): Promise<void> {
+    const hadCommit = await this.hasCommit();
+    if (!(await this.fetch())) {
+      return;
     }
     if (!hadCommit) {
       await this.git("Checking out the branch", ["checkout", "--quiet", "--force", "-B", this.branch, `refs/remotes/origin/${this.branch}`]);

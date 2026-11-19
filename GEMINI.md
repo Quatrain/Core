@@ -20,7 +20,7 @@ If the task requires editing, refactoring, fixing, or extending the packages, mo
 👉 [CONTRIBUTING_AGENTS.md (Monorepo Contributing Guidelines)](./guidelines/CONTRIBUTING_AGENTS.md)
 
 ### 3. GitFlow Lifecycle & Pull Requests
-All contributions follow the GitFlow lifecycle defined in [AGENTS.okf](file:///Users/crapougnax/CODE/CRAPOUGNAX/AGENTS.okf/content/workflow/gitflow-protocol.md):
+All contributions follow the GitFlow lifecycle defined in [AGENTS.okf](https://git.qtrn.io/crapougnax/AGENTS.okf/src/branch/main/content/workflow/gitflow-protocol.md):
 - Active integration branch: `develop`
 - Branching: `feat/<issue-id>-<description>` or `fix/<issue-id>-<description>` strictly from `develop`
 - Source of authority: `git.qtrn.io/Quatrain/Core` (git remote `sovereign`). `github.com/Quatrain/Core` is a read-only push mirror: never open issues or PRs there.
@@ -31,8 +31,7 @@ All contributions follow the GitFlow lifecycle defined in [AGENTS.okf](file:///U
 ## 👤 Personal Rules & Custom Settings
 
 In addition to the framework-level guidelines, you MUST adhere to the user's personal coding preferences, custom shortcuts, and general development rules published in:
-👉 [AGENTS.okf Knowledge Base](file:///Users/crapougnax/CODE/CRAPOUGNAX/AGENTS.okf/content/index.md) | [GitHub Repository](https://github.com/crapougnax/AGENTS.okf)
-👉 [Gist: Personal Gemini Rules & Instructions](https://gist.github.com/crapougnax/47971b85aa73dd702f4372a89858111c)
+👉 [AGENTS.okf Knowledge Base](https://git.qtrn.io/crapougnax/AGENTS.okf/src/branch/main/content/index.md) | [GitHub Repository](https://github.com/crapougnax/AGENTS.okf)
 
 
 ---

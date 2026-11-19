@@ -171,8 +171,8 @@ describe('@quatrain/mdm Pivot Class, Adapter Specification & Vendor Read/Write T
       expect(keychain.specifications.vaultUri).toBe('aws:kms:us-east-1:123456789:key/prod-01')
 
       const dev = HardwareDevice.fromObject({
-         name: 'Soil Moisture Sensor Node',
-         sku: 'BRAD-PROBE-01',
+         name: 'Environmental Sensor Node',
+         sku: 'ACME-PROBE-01',
          archetypeId: 'hardware.device',
          nature: MdmNature.PHYSICAL
       })

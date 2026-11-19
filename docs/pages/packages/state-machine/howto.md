@@ -11,31 +11,31 @@ Workflow state machines are event-driven and linear. You declare transitions and
 ```typescript
 import { WorkflowStateMachine } from '@quatrain/state-machine';
 
-type States = 'empty' | 'filling' | 'stocked';
-type Events = 'FILL' | 'STOCK';
+type States = 'draft' | 'paid' | 'shipped';
+type Events = 'PAY' | 'SHIP';
 interface Context {
-   oxygenLevel: number;
+   itemsInStock: number;
 }
 
-const context: Context = { oxygenLevel: 4.5 };
-const fsm = new WorkflowStateMachine<States, Events, Context>('empty', context);
+const context: Context = { itemsInStock: 3 };
+const fsm = new WorkflowStateMachine<States, Events, Context>('draft', context);
 
 // 1. Declare transitions
 fsm
-   .addTransition('empty', 'FILL', 'filling')
+   .addTransition('draft', 'PAY', 'paid')
    .addTransition(
-      'filling', 
-      'STOCK', 
-      'stocked',
+      'paid', 
+      'SHIP', 
+      'shipped',
       // Guard (anonymous function check)
-      (ctx) => ctx.oxygenLevel >= 4.0,
+      (ctx) => ctx.itemsInStock > 0,
       // Action callback
-      () => console.log('Bassin has been stocked!')
+      () => console.log('Order has been shipped!')
    );
 
 // 2. Perform transitions
-const success = await fsm.transition('FILL'); // true
-console.log(fsm.getState()); // 'filling'
+const success = await fsm.transition('PAY'); // true
+console.log(fsm.getState()); // 'paid'
 ```
 
 ---
@@ -48,16 +48,16 @@ Conformance machines analyze context attributes continuously to assign status le
 import { ConformanceStateMachine } from '@quatrain/state-machine';
 
 interface Metrics {
-   ph: number;
+   latencyMs: number;
 }
 
-const metrics: Metrics = { ph: 7.2 };
+const metrics: Metrics = { latencyMs: 120 };
 const sm = new ConformanceStateMachine<Metrics>('conforming', metrics);
 
 // Declare priority rules (KO check runs first, then degraded, defaulting to conforming)
 sm
-   .addRule('ko', (ctx) => ctx.ph < 5.5)
-   .addRule('degraded', (ctx) => ctx.ph < 6.5 || ctx.ph > 8.5)
+   .addRule('ko', (ctx) => ctx.latencyMs > 2000)
+   .addRule('degraded', (ctx) => ctx.latencyMs > 500)
    .addRule('conforming', () => true);
 
 // Run evaluation
@@ -65,7 +65,7 @@ sm.evaluate();
 console.log(sm.getState()); // 'conforming'
 
 // Update metric values and re-evaluate
-sm.updateContext({ ph: 5.2 });
+sm.updateContext({ latencyMs: 2500 });
 sm.evaluate();
 console.log(sm.getState()); // 'ko'
 ```

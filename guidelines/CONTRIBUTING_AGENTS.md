@@ -106,7 +106,7 @@ To satisfy modern static code analyzers like SonarQube, always enforce the follo
 
 ## 6. GitFlow & Contribution Lifecycle (AGENTS.okf Standard)
 
-All contributions to the Quatrain Core monorepo follow the GitFlow lifecycle defined in [AGENTS.okf](file:///Users/crapougnax/CODE/CRAPOUGNAX/AGENTS.okf/content/workflow/gitflow-protocol.md):
+All contributions to the Quatrain Core monorepo follow the GitFlow lifecycle defined in [AGENTS.okf](https://git.qtrn.io/crapougnax/AGENTS.okf/src/branch/main/content/workflow/gitflow-protocol.md):
 
 ```mermaid
 flowchart TD

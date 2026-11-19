@@ -40,10 +40,10 @@ describe('QmdSearchEngineAdapter Package', () => {
       });
 
       await adapter.indexDocument({
-         id: 'doc-agri-guide',
-         title: 'AgTech Soil Sensor Guide',
-         content: 'IoT sensors measure soil moisture and temperature in smart farming.',
-         category: 'agriculture'
+         id: 'doc-sensor-guide',
+         title: 'IoT Sensor Guide',
+         content: 'IoT sensors measure humidity and temperature in smart buildings.',
+         category: 'iot'
       });
 
       // Query 1: Search for Markdown
@@ -53,9 +53,9 @@ describe('QmdSearchEngineAdapter Package', () => {
       expect(results1[0].score).toBeGreaterThan(0);
 
       // Query 2: Search with category scope
-      const results2 = await adapter.search('sensors', { category: 'agriculture' });
+      const results2 = await adapter.search('sensors', { category: 'iot' });
       expect(results2.length).toBe(1);
-      expect(results2[0].id).toBe('doc-agri-guide');
+      expect(results2[0].id).toBe('doc-sensor-guide');
 
       // Query 3: Search outside category
       const results3 = await adapter.search('sensors', { category: 'technology' });

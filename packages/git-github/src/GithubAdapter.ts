@@ -380,7 +380,7 @@ export class GithubAdapter extends AbstractGitForgeAdapter {
     if (!res.ok) throw new Error(`Failed to create release: HTTP ${res.status}`);
   }
 
-  // --- File Sync & Modaka Support ---
+  // --- File Sync ---
   public async fetchFileTree(branch?: string): Promise<FileTreeNode[]> {
     return this.httpClient.fetchFileTree(branch);
   }

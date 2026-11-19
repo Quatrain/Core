@@ -12,7 +12,7 @@
 
 1.  **Model Decoupled**: All LLM calls delegate strictly to `@quatrain/ai` via `AbstractAiAdapter` (such as `GeminiAdapter`).
 2.  **Configurable Multilingual Targets**: Generates high-density abstracts and keywords in any list of target languages (`targetLanguages: ['en', 'fr', 'ar']`).
-3.  **Composable Domain Profiles**: System personas, taxonomy fields (soils, climates, ITKs, categories), and prompt guidelines are pluggable via `DomainTaxonomyProfile`.
+3.  **Composable Domain Profiles**: System personas, taxonomy fields (facets declared by the application, categories), and prompt guidelines are pluggable via `DomainTaxonomyProfile`.
 4.  **Traceable Lineage & Accounting**: Tracks exact token counts, thinking tokens, USD costs, and parent document lineage (`sources`, `fileHash`, `generated`).
 
 ---
@@ -59,7 +59,7 @@ const rawText = await fs.readFile('path/to/document.txt', 'utf-8');
 
 const result = await extractSemanticContent(
    {
-      filename: 'soil-health-guide.pdf',
+      filename: 'maintenance-guide.pdf',
       rawText,
       isScanned: false,
    },
@@ -77,7 +77,7 @@ console.log(`Tokens used: ${result.usage.total} ($${result.usage.costUsd} USD)`)
 
 // Serialize to compliant OKF v0.2 Markdown
 const markdown = serializeOkfDocument(result.metadata, result.body);
-await fs.writeFile('output/soil-health-guide.md', markdown, 'utf-8');
+await fs.writeFile('output/maintenance-guide.md', markdown, 'utf-8');
 ```
 
 ---
@@ -100,8 +100,8 @@ console.log(result.metadata.abstracts);
 
 console.log(result.metadata.keywords);
 // {
-//   en: ["soil", "organic matter", "compaction"],
-//   es: ["suelo", "materia orgánica", "compactación"]
+//   en: ["maintenance", "reliability", "inspection"],
+//   es: ["mantenimiento", "fiabilidad", "inspección"]
 // }
 ```
 
@@ -126,38 +126,58 @@ const result = await extractSemanticContent(input, undefined, {
 });
 ```
 
-### Creating a Custom Domain Profile
+### Declaring the Facets of a Knowledge Base (`FacetTaxonomyProfile`)
+
+The package knows no domain: an application declares its classification axes, and the
+profile asks the model for them, requires them in the schema and keeps only the declared
+keys. A facet with `values` has a closed vocabulary: any other value is dropped.
+
+```typescript
+import { FacetTaxonomyProfile } from '@quatrain/okf-ingest';
+
+const profile = new FacetTaxonomyProfile({
+   systemRole: 'You are an expert cataloguer of technical documentation.',
+   targetLanguages: ['en', 'fr'],
+   thematics: ['guides', 'reference', 'procedures'], // themes of the knowledge base
+   facets: [
+      { name: 'region', description: 'Regions the document applies to', examples: ['north', 'south'] },
+      { name: 'audience', description: 'Who the document is for', values: ['beginner', 'expert'] },
+   ],
+});
+
+const result = await extractSemanticContent(input, undefined, { taxonomyProfile: profile });
+// result.metadata.region, result.metadata.audience, result.metadata.thematics
+```
+
+### Writing a Custom Domain Profile
+
+For more than facets (own sections in the body, nested fields), implement
+`DomainTaxonomyProfile`:
 
 ```typescript
 import { DomainTaxonomyProfile } from '@quatrain/okf-ingest';
 
-export class PharmacopeiaProfile implements DomainTaxonomyProfile {
-   id = 'pharmacopeia';
-   name = 'Pharmacopeia & Phytotherapy';
-   systemRole = 'You are an expert ethnobotanist and pharmacologist specializing in medicinal plants.';
+export class StandardsProfile implements DomainTaxonomyProfile {
+   id = 'standards';
+   name = 'Technical standards';
+   systemRole = 'You are an expert in technical standards and compliance.';
    targetLanguages = ['en', 'fr'];
-   defaultCategory = 'pharmacopeia';
+   defaultCategory = 'standards';
 
    promptGuidelines = [
-      '"activePrinciples": Chemical constituents and active molecules.',
-      '"therapeuticIndications": Validated medicinal applications and indications.',
+      '"requirements": Normative requirements stated by the document.',
+      '"references": Other standards the document cites.',
    ];
 
    schemaProperties = {
-      activePrinciples: {
-         type: 'ARRAY',
-         items: { type: 'STRING' },
-      },
-      therapeuticIndications: {
-         type: 'ARRAY',
-         items: { type: 'STRING' },
-      },
+      requirements: { type: 'ARRAY', items: { type: 'STRING' } },
+      references: { type: 'ARRAY', items: { type: 'STRING' } },
    };
 
    extractDomainMetadata(raw: Record<string, unknown>) {
       return {
-         activePrinciples: Array.isArray(raw.activePrinciples) ? raw.activePrinciples : [],
-         therapeuticIndications: Array.isArray(raw.therapeuticIndications) ? raw.therapeuticIndications : [],
+         requirements: Array.isArray(raw.requirements) ? raw.requirements : undefined,
+         references: Array.isArray(raw.references) ? raw.references : undefined,
       };
    }
 }
@@ -214,7 +234,7 @@ if (cache.isAlreadyIngested('sha256-hash-here')) {
    // ... run extraction ...
    cache.registerEntry('sha256-hash-here', {
       filename: 'report.pdf',
-      category: 'soil-health',
+      category: 'guides',
       tokens: result.usage,
    });
    await cache.save();

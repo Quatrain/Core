@@ -40,7 +40,7 @@ function discoverCoreDeployPath(): string {
       path.resolve(cwd, '../CoreDeploy'),
       path.resolve(cwd, '../../CoreDeploy'),
       path.resolve(cwd, 'CoreDeploy'),
-      '/Users/crapougnax/CODE/QUATRAIN/CoreDeploy'
+      ...(process.env.CORE_DEPLOY_PATH ? [path.resolve(process.env.CORE_DEPLOY_PATH)] : [])
    ]
 
    for (const candidate of siblingCandidates) {

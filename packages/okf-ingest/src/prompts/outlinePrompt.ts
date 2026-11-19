@@ -25,7 +25,7 @@ export function buildBookOutlinePrompt(
    const guidelines: string[] = [
       '1. "title": Official and complete book or monograph title (without file extensions).',
       '2. "description": Exactly ONE concise sentence summarizing the scope and subject matter of the book in its original language.',
-      '3. "category": Lowercase slugified category folder path (e.g. soil-health, methodology, reference, agronomy-books).',
+      '3. "category": Lowercase slugified category folder path (e.g. methodology, reference, guides, handbooks).',
       '4. "language": ISO 639-1 code of the primary book language (e.g. "en", "fr", "es", "de", "ar").',
       '5. "originalLanguage": ISO 639-1 code of original publication.',
       `6. "abstracts": Global dense technical abstract (2 to 3 sentences) in the following languages (${targetLanguages.join(', ')}):`,
@@ -35,7 +35,7 @@ export function buildBookOutlinePrompt(
       '9. "publisher": Publishing house or institution if identifiable.',
       '10. "publicationYear": Year of publication if identifiable.',
       '11. "license": Standard SPDX license identifier or Open Access status if stated (e.g. "CC-BY-4.0", "CC-BY-SA-4.0", "CC0-1.0", "Open Access", "Proprietary", "All Rights Reserved", or omitted if unknown).',
-      '12. "copyright": Formal legal copyright statement if present (e.g. "© 2024 Éditions France Agricole, Paris").',
+      '12. "copyright": Formal legal copyright statement if present (e.g. "© 2024 Example Press, Paris").',
    ];
 
    if (profile?.promptGuidelines && profile.promptGuidelines.length > 0) {

@@ -16,7 +16,7 @@ export interface WriteOkfOptions {
  * Writes a fully-formed OKF v0.2 Markdown document into the category directory of the repository.
  *
  * @param options - Writing parameters including root, category, slug, metadata, and body.
- * @returns Relative path to the written file (e.g., content/agriculture/mon-guide.md).
+ * @returns Relative path to the written file (e.g., content/guides/my-guide.md).
  */
 export async function writeOkfDocument(options: WriteOkfOptions): Promise<string> {
    const { gitLocalPath, category, slug, metadata, body } = options;

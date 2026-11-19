@@ -36,13 +36,13 @@ export interface OkfCatalogEntryMetadata extends OkfFrontmatterV2 {
    scientificName?: string;
    /** Vernacular, common or alternative trade names */
    vernacularNames?: string[];
-   /** Botanical, zoological or chemical family */
+   /** Family, group or class the entry belongs to */
    family?: string;
-   /** Botanical or chemical synonyms */
+   /** Synonyms and alternative designations */
    synonyms?: string[];
-   /** Detailed bio-indication, soil diagnostic keys or active mechanisms */
+   /** Diagnostic keys, identifying criteria or mechanisms */
    diagnosticKeys?: string[];
-   /** Categorized pharmacological, agronomic or functional properties */
+   /** Functional properties and applications */
    properties?: string[];
    /** Traceable parent book metadata */
    parentBook: CatalogParentBookRef;

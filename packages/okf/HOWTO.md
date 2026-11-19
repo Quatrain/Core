@@ -32,8 +32,8 @@ Define models inheriting from `PersistedBaseObject`:
 import { PersistedBaseObject } from '@quatrain/backend';
 import { StringProperty } from '@quatrain/core';
 
-class Bassin extends PersistedBaseObject {
-   static COLLECTION = 'bassins';
+class Note extends PersistedBaseObject {
+   static COLLECTION = 'notes';
    static PROPS_DEFINITION = [
       { name: 'name', type: StringProperty.TYPE }
    ];
@@ -43,11 +43,11 @@ class Bassin extends PersistedBaseObject {
 To save files, instantiate your model and save it:
 
 ```typescript
-const basin = await Bassin.factory();
-basin.set('name', 'Bassin N°4');
-basin.set('createdBy', 'user@example.com'); // Injected in OKF meta block
+const note = await Note.factory();
+note.set('name', 'Note 4');
+note.set('createdBy', 'user@example.com'); // Written with the record
 
-await basin.save(); // Generates /path/to/my/data/okf/bassins/{uid}.json
+await note.save(); // Generates /path/to/my/data/okf/notes/{uid}.md
 ```
 
 ---
@@ -57,8 +57,8 @@ await basin.save(); // Generates /path/to/my/data/okf/bassins/{uid}.json
 Use the repository interface to search the flat-file structure:
 
 ```typescript
-const query = Bassin.query().filter('name', 'eq', 'Bassin N°4');
-const results = await Bassin.repository().query(query);
+const query = Note.query().filter('name', 'eq', 'Note 4');
+const results = await Note.repository().query(query);
 
 results.items.forEach((item) => {
    console.log(item.val('name'));

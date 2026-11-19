@@ -315,9 +315,9 @@
     "last_published": "2026-09-24T10:05:15.474Z"
   },
   "@quatrain/okf": {
-    "version": "1.0.6",
-    "hash": "PoMRxQMOXdagYd9dh8sivorisdQ=-5279dcb8c36eda4769985e5f249225a0155abaacca2edaa2150708054efcc3d3",
-    "last_published": "2026-11-11T15:38:39.137Z"
+    "version": "1.0.7-beta.0",
+    "hash": "Wbj0xb2aBEJeEdU5EKCmzGeS3DI=-5279dcb8c36eda4769985e5f249225a0155abaacca2edaa2150708054efcc3d3",
+    "last_published": "2026-11-19T08:17:08.841Z"
   },
   "@quatrain/state-machine": {
     "version": "1.0.1",
@@ -410,9 +410,9 @@
     "last_published": "2026-09-24T10:05:25.541Z"
   },
   "@quatrain/git": {
-    "version": "1.0.2-beta.0",
-    "hash": "ZUt2cplwZ9XlLbqoc6daNqzM+kg=-6a917febd1de9049581f80a3468a60c9a1db211cb9b768ecdb5bdbc5b9ad408a",
-    "last_published": "2026-11-18T10:51:18.462Z"
+    "version": "1.0.2-beta.1",
+    "hash": "o2X4g1/w7ijbA99uJaSKKJPPpbs=-6a917febd1de9049581f80a3468a60c9a1db211cb9b768ecdb5bdbc5b9ad408a",
+    "last_published": "2026-11-19T08:16:32.445Z"
   },
   "@quatrain/git-forgejo": {
     "version": "1.0.1",

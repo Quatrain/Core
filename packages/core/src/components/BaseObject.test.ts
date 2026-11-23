@@ -58,6 +58,25 @@ describe('BaseObject', () => {
          })
       })
 
+      it('should keep ref in toMsgPack() when refAsPath is turned off', async () => {
+         const obj = await TestModel.factory({
+            name: 'Sample Item',
+            testProp: 'hello',
+            createdBy: new ObjectUri('users/u-123', 'Alice'),
+         })
+         obj.uri.path = 'test_collection/item-1'
+         obj.uri.label = 'Sample Item'
+
+         expect(obj.toMsgPack({ refAsPath: false })).toEqual({
+            ref: 'test_collection/item-1',
+            label: 'Sample Item',
+         })
+         expect(obj.dataObject.toMsgPack({ refAsPath: false }).createdBy).toEqual({
+            ref: 'users/u-123',
+            label: 'Alice',
+         })
+      })
+
       it('should omit null values in toMsgPack() while toJSON() keeps them', async () => {
          const obj = await TestModel.factory({ testProp: 'hello' })
          const json = obj.dataObject.toJSON()

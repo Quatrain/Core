@@ -1,3 +1,4 @@
+import { MsgPackOptions } from '@quatrain/types'
 import { DataObjectClass } from './types/DataObjectClass'
 import { DataObjectProperties } from '../properties'
 
@@ -102,9 +103,10 @@ export abstract class AbstractObject {
    /**
     * Serializes the current object path / identity for MessagePack payloads.
     *
+    * @param options - Set `refAsPath` to `false` to keep `ref` instead of `path`.
     * @returns The MessagePack serialized ObjectUri (`{ path, label }`).
     */
-   toMsgPack() {
-      return typeof this.uri === 'string' ? this.uri : this.uri?.toMsgPack()
+   toMsgPack(options: MsgPackOptions = {}) {
+      return typeof this.uri === 'string' ? this.uri : this.uri?.toMsgPack(options)
    }
 }

@@ -7,6 +7,8 @@ export type toJSONParams = {
    ignoreUnchanged?: boolean
    // Ignore property which value is null
    ignoreNulls?: boolean
+   // MessagePack only: emit `ref` keys as `path` (default true)
+   refAsPath?: boolean
    // map of property values converters
    converters?: { [propType: string]: Function }
 }

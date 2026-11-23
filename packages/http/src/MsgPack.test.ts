@@ -82,7 +82,7 @@ describe('MessagePack content negotiation', () => {
          const { res } = mockResponse()
          const next = jest.fn()
 
-         msgPackContentNegotiation(req, res, next)
+         msgPackContentNegotiation()(req, res, next)
 
          expect(req.body).toEqual({ name: 'hello' })
          expect(next).toHaveBeenCalled()
@@ -95,7 +95,7 @@ describe('MessagePack content negotiation', () => {
          })
          const { res } = mockResponse()
 
-         msgPackContentNegotiation(req, res, () => {})
+         msgPackContentNegotiation()(req, res, () => {})
 
          expect(req.body).toEqual({})
       })
@@ -108,7 +108,7 @@ describe('MessagePack content negotiation', () => {
          const { res, state } = mockResponse()
          const next = jest.fn()
 
-         msgPackContentNegotiation(req, res, next)
+         msgPackContentNegotiation()(req, res, next)
 
          expect(state.status).toBe(400)
          expect(next).not.toHaveBeenCalled()
@@ -119,7 +119,7 @@ describe('MessagePack content negotiation', () => {
             const req = mockRequest({ headers: { accept: MSGPACK_CONTENT_TYPE } })
             const { res, state } = mockResponse()
 
-            msgPackContentNegotiation(req, res, () => {})
+            msgPackContentNegotiation()(req, res, () => {})
             res[method]({
                items: [{ uid: 'v1', company: { ref: 'companies/c1', label: 'Acme' }, empty: null }],
             })
@@ -136,7 +136,7 @@ describe('MessagePack content negotiation', () => {
          const { res, state } = mockResponse()
          const binary = Buffer.from([1, 2, 3])
 
-         msgPackContentNegotiation(req, res, () => {})
+         msgPackContentNegotiation()(req, res, () => {})
 
          res.send('plain text')
          expect(state.sent).toBe('plain text')
@@ -154,7 +154,7 @@ describe('MessagePack content negotiation', () => {
             },
          }
 
-         msgPackContentNegotiation(req, res, () => {})
+         msgPackContentNegotiation()(req, res, () => {})
          res.json(failing)
 
          expect(state.status).toBe(500)
@@ -162,12 +162,22 @@ describe('MessagePack content negotiation', () => {
          expect(state.sent).toEqual({ error: 'Failed to serialize MessagePack response: boom' })
       })
 
+      it('keeps ref keys when refAsPath is turned off', () => {
+         const req = mockRequest({ headers: { accept: MSGPACK_CONTENT_TYPE } })
+         const { res, state } = mockResponse()
+
+         msgPackContentNegotiation({ refAsPath: false })(req, res, () => {})
+         res.json({ company: { ref: 'companies/c1', label: 'Acme' }, empty: null })
+
+         expect(decode(state.sent as Buffer)).toEqual({ company: { ref: 'companies/c1', label: 'Acme' } })
+      })
+
       it('leaves JSON responses untouched when MessagePack is not requested', () => {
          const req = mockRequest({ headers: { accept: 'application/json' } })
          const { res, state } = mockResponse()
          const payload = { company: { ref: 'companies/c1', label: 'Acme' } }
 
-         msgPackContentNegotiation(req, res, () => {})
+         msgPackContentNegotiation()(req, res, () => {})
          res.json(payload)
 
          expect(state.sent).toBe(payload)

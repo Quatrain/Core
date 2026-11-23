@@ -245,12 +245,15 @@ export class ObjectUri {
 
    /**
     * MessagePack representation: same as `toJSON()` with `path` instead of `ref`
-    * (`ref` is a reserved keyword in C#).
+    * (`ref` is a reserved keyword in several client languages).
     *
-    * @returns `{ path, label, backend? }`
+    * @param options - Set `refAsPath` to `false` to keep `ref`.
+    * @returns `{ path, label, backend? }`, or `{ ref, label, backend? }` when `refAsPath` is `false`.
     */
-   toMsgPack() {
-      return ObjectUri.toMsgPackReference(this.toJSON())
+   toMsgPack(options: { refAsPath?: boolean } = {}) {
+      return options.refAsPath === false
+         ? this.toJSON()
+         : ObjectUri.toMsgPackReference(this.toJSON())
    }
 
    /**

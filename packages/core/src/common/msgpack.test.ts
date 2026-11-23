@@ -114,6 +114,55 @@ describe('normalizeForMsgPack()', () => {
       })
    })
 
+   describe('refAsPath option', () => {
+      const options = { refAsPath: false }
+
+      it('keeps ref keys at every depth when turned off', () => {
+         const payload = {
+            company: { ref: 'companies/c1', label: 'Acme' },
+            items: [{ shares: [{ ref: 'users/u1' }] }],
+            viaJson: { toJSON: () => ({ ref: 'sites/s1' }) },
+         }
+
+         expect(normalizeForMsgPack(payload, options)).toEqual({
+            company: { ref: 'companies/c1', label: 'Acme' },
+            items: [{ shares: [{ ref: 'users/u1' }] }],
+            viaJson: { ref: 'sites/s1' },
+         })
+      })
+
+      it('hands the option to toMsgPack(), so live references keep ref too', () => {
+         const company = new ObjectUri('companies/c1', 'Acme')
+         const received: unknown[] = []
+         const custom = {
+            toMsgPack: (given: unknown) => {
+               received.push(given)
+               return { ok: true }
+            },
+         }
+
+         expect(normalizeForMsgPack({ company, custom }, options)).toEqual({
+            company: { ref: 'companies/c1', label: 'Acme' },
+            custom: { ok: true },
+         })
+         expect(received).toEqual([options])
+      })
+
+      it('still omits null values when turned off', () => {
+         expect(normalizeForMsgPack({ ref: 'users/u1', label: null }, options)).toEqual({
+            ref: 'users/u1',
+         })
+      })
+
+      it('renames ref when the option is omitted or explicitly on', () => {
+         expect(normalizeForMsgPack({ ref: 'users/u1' })).toEqual({ path: 'users/u1' })
+         expect(normalizeForMsgPack({ ref: 'users/u1' }, {})).toEqual({ path: 'users/u1' })
+         expect(normalizeForMsgPack({ ref: 'users/u1' }, { refAsPath: true })).toEqual({
+            path: 'users/u1',
+         })
+      })
+   })
+
    describe('omitted values', () => {
       it('omits null, undefined, function and symbol values in objects and lists', () => {
          expect(

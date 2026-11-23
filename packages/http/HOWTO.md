@@ -37,14 +37,14 @@ if (credentials) {
 
 ## 3. MessagePack Content Negotiation
 
-`msgPackContentNegotiation` is a framework-agnostic middleware (Express, Connect...):
+`msgPackContentNegotiation()` creates a framework-agnostic middleware (Express, Connect...):
 
 ```typescript
 import express from 'express';
 import { MSGPACK_CONTENT_TYPES, msgPackContentNegotiation } from '@quatrain/http';
 
 const app = express();
-app.use(express.raw({ type: MSGPACK_CONTENT_TYPES, limit: '50mb' }), msgPackContentNegotiation);
+app.use(express.raw({ type: MSGPACK_CONTENT_TYPES, limit: '50mb' }), msgPackContentNegotiation());
 ```
 
 - Requests with `Content-Type: application/x-msgpack` (or `application/msgpack`) are decoded into
@@ -57,3 +57,6 @@ This package only negotiates the format and encodes. The MessagePack wire contra
 `toMsgPack()` / `toJSON()` are called, every `ref` key is emitted as `path` at any depth (`ref` is a
 reserved keyword in several client languages) and `null` values are omitted. Handlers therefore
 need no MessagePack-specific code.
+
+The `ref` to `path` rule is on by default. Turn it off per application with
+`msgPackContentNegotiation({ refAsPath: false })`, for instance from an environment variable.

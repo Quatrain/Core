@@ -9,5 +9,5 @@ export {
    isMsgPackRequested,
    msgPackContentNegotiation,
 } from './MsgPack'
-export type { MsgPackRequest, MsgPackResponse } from './MsgPack'
+export type { MsgPackMiddleware, MsgPackRequest, MsgPackResponse } from './MsgPack'
 export type * from './types'

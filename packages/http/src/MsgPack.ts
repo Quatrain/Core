@@ -1,5 +1,5 @@
 import { decode, encode } from '@msgpack/msgpack'
-import { normalizeForMsgPack } from '@quatrain/core'
+import { MsgPackOptions, normalizeForMsgPack } from '@quatrain/core'
 import { HttpHeader } from './HttpHeader'
 import { HttpStatus } from './HttpStatus'
 
@@ -71,28 +71,43 @@ export const isMsgPackRequested = (req: MsgPackRequest): boolean => {
  * is owned by `@quatrain/core`, this HTTP layer only negotiates and encodes.
  *
  * @param value - Value to encode.
+ * @param options - Wire representation options, handed to `normalizeForMsgPack()`.
  * @returns Binary MessagePack payload.
  */
-export const encodeMsgPack = (value: unknown): Buffer => {
-   const encoded = encode(normalizeForMsgPack(value))
+export const encodeMsgPack = (value: unknown, options: MsgPackOptions = {}): Buffer => {
+   const encoded = encode(normalizeForMsgPack(value, options))
    return Buffer.from(encoded.buffer, encoded.byteOffset, encoded.byteLength)
 }
 
+/** Framework-agnostic middleware signature. */
+export type MsgPackMiddleware = (
+   req: MsgPackRequest,
+   res: MsgPackResponse,
+   next: () => void
+) => void
+
 /**
- * Bidirectional MessagePack content negotiation, as a framework-agnostic middleware:
+ * Creates a bidirectional MessagePack content negotiation middleware, framework-agnostic:
  * 1. Decodes MessagePack request bodies into `req.body`. The body must have been read as a raw
  *    `Buffer` beforehand (e.g. `express.raw({ type: MSGPACK_CONTENT_TYPES })`).
  * 2. Encodes `res.json()` / `res.send()` payloads as MessagePack when the client asks for it.
  *    Strings and buffers passed to `res.send()` are sent untouched.
  *
- * @param req - Incoming request.
- * @param res - Outgoing response.
- * @param next - Callback handing over to the next middleware.
+ * @param options - Wire representation options applied to every response
+ *    (e.g. `{ refAsPath: false }` to keep `ref` keys).
+ * @returns The middleware to register.
  */
-export const msgPackContentNegotiation = (
+export const msgPackContentNegotiation = (options: MsgPackOptions = {}): MsgPackMiddleware => {
+   return (req: MsgPackRequest, res: MsgPackResponse, next: () => void): void => {
+      negotiate(req, res, next, options)
+   }
+}
+
+const negotiate = (
    req: MsgPackRequest,
    res: MsgPackResponse,
-   next: () => void
+   next: () => void,
+   options: MsgPackOptions
 ): void => {
    const contentType = firstValue(req.headers?.['content-type'])
    const isMsgPackBody = typeof contentType === 'string' && includesMsgPackContentType(contentType)
@@ -115,7 +130,7 @@ export const msgPackContentNegotiation = (
       const sendMsgPack = (data: unknown): unknown => {
          let buffer: Buffer
          try {
-            buffer = encodeMsgPack(data)
+            buffer = encodeMsgPack(data, options)
          } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Serialization error'
             res.status(HttpStatus.INTERNAL_SERVER_ERROR)

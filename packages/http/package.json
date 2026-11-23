@@ -17,6 +17,10 @@
   "scripts": {
     "build": "tsc"
   },
+  "dependencies": {
+    "@msgpack/msgpack": "^3.1.2",
+    "@quatrain/core": "workspace:*"
+  },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
     "@types/node": "^22.10.1",

@@ -114,5 +114,11 @@ describe('Object Uri', () => {
          label: 'my label',
          backend: '@s3'
       })
+
+      expect(refUri.toMsgPack({ refAsPath: false })).toEqual({
+         ref: 'collection/uid',
+         label: 'my label',
+         backend: '@s3'
+      })
    })
 })

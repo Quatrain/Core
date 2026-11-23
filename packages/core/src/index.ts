@@ -42,6 +42,8 @@ import { BaseObjectClass } from './components/types/BaseObjectClass'
 import { Persisted } from './components/types/Persisted'
 import { Meta } from './components/types/Payload'
 
+import { normalizeForMsgPack } from './common/msgpack'
+
 // Import types, interfaces, and exceptions from the leaf package
 import {
    ObjectUri,
@@ -77,6 +79,7 @@ export {
    MapProperty,
    FileProperty,
    ObjectUri,
+   normalizeForMsgPack,
    DataObject,
    AbstractObject,
    BaseObject,

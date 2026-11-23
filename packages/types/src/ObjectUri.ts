@@ -245,23 +245,31 @@ export class ObjectUri {
 
    /**
     * MessagePack representation: same as `toJSON()` with `path` instead of `ref`
-    * (`ref` is a reserved keyword in C#).
+    * (`ref` is a reserved keyword in several client languages).
     *
-    * @returns `{ path, label, backend? }`
+    * @param options - Set `refAsPath` to `false` to keep `ref`.
+    * @returns `{ path, label, backend? }`, or `{ ref, label, backend? }` when `refAsPath` is `false`.
     */
-   toMsgPack() {
-      return ObjectUri.toMsgPackReference(this.toJSON())
+   toMsgPack(options: { refAsPath?: boolean } = {}) {
+      return options.refAsPath === false
+         ? this.toJSON()
+         : ObjectUri.toMsgPackReference(this.toJSON())
    }
 
    /**
     * Converts a JSON reference (`{ ref, ... }`) into its MessagePack form (`{ path, ... }`).
-    * Any other value is returned untouched.
+    * The rule applies to any dictionary carrying a `ref` key, whatever its other keys.
+    * Any other value is returned untouched, as is a dictionary that already carries a `path` key:
+    * renaming `ref` would overwrite it.
     *
     * @param value - Serialized reference, or any value.
     * @returns The reference with `ref` renamed to `path`.
     */
    static toMsgPackReference(value: any): any {
-      if (!value || typeof value !== 'object' || !('ref' in value)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) {
+         return value
+      }
+      if (!('ref' in value) || 'path' in value) {
          return value
       }
       const { ref, ...rest } = value

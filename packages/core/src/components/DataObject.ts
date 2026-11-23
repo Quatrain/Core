@@ -331,9 +331,10 @@ export class DataObject implements DataObjectType {
    /**
     * Serializes the data object for MessagePack encoding.
     * Same output as `toJSON()` except that null values are omitted and
-    * object references use `path` instead of `ref` (C# reserved keyword).
+    * object references use `path` instead of `ref` (reserved keyword in several
+    * client languages), unless `params.refAsPath` is `false`.
     *
-    * @param params - Serialization settings (e.g. resolve references).
+    * @param params - Serialization settings (e.g. resolve references, `refAsPath`).
     * @returns The MessagePack-ready dictionary representation.
     */
    toMsgPack(params: boolean | toJSONParams = false): { [x: string]: any } {
@@ -348,6 +349,7 @@ export class DataObject implements DataObjectType {
          withoutURIData: boolean = false,
          ignoreUnchanged: boolean = false,
          ignoreNulls: boolean = format === 'msgpack',
+         refAsPath: boolean = true,
          converters: any = {}
 
       if (typeof params === 'object') {
@@ -356,6 +358,7 @@ export class DataObject implements DataObjectType {
          withoutURIData = Boolean(params.withoutURIData)
          ignoreUnchanged = Boolean(params.ignoreUnchanged)
          ignoreNulls = ignoreNulls || Boolean(params.ignoreNulls)
+         refAsPath = params.refAsPath !== false
          converters = params.converters
       }
 
@@ -370,7 +373,7 @@ export class DataObject implements DataObjectType {
          ),
       }
 
-      if (format === 'msgpack') {
+      if (format === 'msgpack' && refAsPath) {
          Object.keys(this._properties).forEach((key: string) => {
             if (
                key in data &&

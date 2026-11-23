@@ -36,6 +36,14 @@ export interface BaseObjectType {
 }
 
 /**
+ * Options of the MessagePack wire representation.
+ */
+export type MsgPackOptions = {
+   /** Emit `ref` keys as `path` (default `true`). Set to `false` to keep `ref`. */
+   refAsPath?: boolean
+}
+
+/**
  * Standard reference mapping structure.
  */
 export type ReferenceType = {

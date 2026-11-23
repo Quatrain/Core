@@ -40,9 +40,9 @@
     "last_published": "2026-09-24T10:05:18.234Z"
   },
   "@quatrain/core": {
-    "version": "1.2.22-beta.0",
+    "version": "1.2.22",
     "hash": "u9oM5Eh24IDgEn2OmQ+N8firWzc=-2bfd99d899b33e4ed27f8c16af561e0632f4750d893e11ccfe4c2c0674bc3866",
-    "last_published": "2026-11-23T15:02:50.563Z"
+    "last_published": "2026-11-23T15:17:52.325Z"
   },
   "@quatrain/log": {
     "version": "1.2.6",
@@ -265,9 +265,9 @@
     "last_published": "2026-05-21T20:56:26.583Z"
   },
   "@quatrain/types": {
-    "version": "1.2.20-beta.0",
+    "version": "1.2.20",
     "hash": "jwheT0f+40qvsT4ZSQqVLqNlErE=-397b2919bedc6bb556bb9624d9f46a64a011ea2fd14bfceabc55721922e3648d",
-    "last_published": "2026-11-23T15:02:45.630Z"
+    "last_published": "2026-11-23T15:17:48.256Z"
   },
   "@quatrain/api-server-astro": {
     "version": "1.1.16",
@@ -280,9 +280,9 @@
     "last_published": "2026-09-17T07:18:31.336Z"
   },
   "@quatrain/http": {
-    "version": "1.0.6-beta.0",
+    "version": "1.0.6",
     "hash": "8Z7qw+xkZ/YZ7GY2LO3rVvzAiDQ=-1923e2f094c41a42a4cacd0d0d94f38f199b4aeab7ccea97bde28d68c2a0af9b",
-    "last_published": "2026-11-23T15:03:07.364Z"
+    "last_published": "2026-11-23T15:18:03.933Z"
   },
   "@quatrain/i18n-es": {
     "version": "1.0.7",
